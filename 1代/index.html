@@ -1,0 +1,767 @@
+<link rel="stylesheet" href="style.css">
+<div class="app-container">
+    <div class="hero">
+        <h1>🎧 本地音乐海 </h1>
+        <p>歌曲按目录分类</p>
+    </div>
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-item"><span>🎵</span> <span id="totalCount">0</span> 首本地曲库</div>
+        <div class="stat-item"><span>🔍</span> <span id="resultCount">0</span> 筛选结果</div>
+    </div>
+    <div class="dashboard">
+        <div class="music-library">
+            <div class="search-area">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="在当前目录下搜索歌曲..." autocomplete="off">
+                    <button class="clear-search" id="clearSearchBtn" aria-label="清空">✖</button>
+                </div>
+            </div>
+            <div class="directory-area">
+                <div class="directory-list" id="directoryList"></div>
+            </div>
+            <div class="import-area">
+                <div class="import-buttons">
+                    <label class="btn-sm" style="display:inline-block; cursor:pointer;">📂 添加歌曲文件
+                        <input type="file" id="fileInput" multiple accept="audio/mpeg,audio/mp3,audio/wav,audio/flac,audio/aac,audio/ogg" style="display: none;">
+                    </label>
+                    <button class="btn-sm" id="importFolderBtn">📁 导入文件夹</button>
+                    <button class="btn-sm" id="clearAllBtn">🗑️ 清空全部</button>
+                </div>
+                <span id="saveStatus" style="font-size:0.7rem; color:#92400e;">✨ 支持MP3/FLAC/WAV/AAC · 真正去重</span>
+            </div>
+            <div class="list-header">
+                <span>🎶 歌曲列表 (点击即播 · 悬停操作)</span>
+                <span style="font-size:0.7rem;">🔊 拖拽文件添加</span>
+            </div>
+            <div class="song-list-container" id="songListContainer">
+                <div style="padding: 40px; text-align: center; color: #94a3b8;">✨ 导入歌曲后选择目录进行管理</div>
+            </div>
+        </div>
+        <div class="player-panel">
+            <div class="now-playing-card">
+                <div class="album-art" id="albumArt">🎼</div>
+                <div class="track-title" id="nowTitle">未选择歌曲</div>
+                <div class="track-artist" id="nowArtist">—</div>
+                <audio id="audioPlayer" controls preload="auto" style="width:100%"></audio>
+                <div class="control-buttons">
+                    <button class="ctrl-btn" id="prevBtn" title="上一首">⏮</button>
+                    <button class="ctrl-btn primary" id="playPauseBtn" title="播放/暂停">▶</button>
+                    <button class="ctrl-btn" id="nextBtn" title="下一首">⏭</button>
+                </div>
+                <div class="mode-selector">
+                    <div class="mode-badge" data-mode="list">📃 顺序</div>
+                    <div class="mode-badge" data-mode="random">🎲 随机</div>
+                    <div class="mode-badge" data-mode="loop">🔁 单曲循环</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="global-dir-popup" id="globalDirPopup"></div>
+
+<script>
+    // ---------- IndexedDB 封装 ----------
+    const DB_NAME = 'MusicOceanDB';
+    const DB_VERSION = 2;
+    const SONGS_STORE = 'songs';
+    const DIRS_STORE = 'directories';
+    let indexedDBAvailable = true;
+
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(SONGS_STORE)) {
+                    db.createObjectStore(SONGS_STORE, { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains(DIRS_STORE)) {
+                    db.createObjectStore(DIRS_STORE, { keyPath: 'id' });
+                }
+            };
+            request.onsuccess = (event) => resolve(event.target.result);
+            request.onerror = (event) => reject(event.target.error);
+        });
+    }
+
+    // ★ 修改签名生成：只用文件名+大小
+    function generateFileSignature(file) {
+        return `${file.name}_${file.size}`;
+    }
+
+    // 歌曲存储
+    async function saveSongToDB(song) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(SONGS_STORE, 'readwrite');
+            const store = tx.objectStore(SONGS_STORE);
+            const request = store.put({
+                id: song.id,
+                signature: song.signature,  // 已包含在 song 对象中
+                name: song.name,
+                artist: song.artist,
+                originalFileName: song.originalFileName,
+                directoryId: song.directoryId,
+                file: song.file
+            });
+            request.onsuccess = () => resolve();
+            request.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async function loadAllSongsFromDB() {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(SONGS_STORE, 'readonly');
+            const store = tx.objectStore(SONGS_STORE);
+            const request = store.getAll();
+            request.onsuccess = (event) => {
+                const items = event.target.result;
+                const songs = items.map(item => {
+                    let fileObj = item.file;
+                    if (!fileObj && item.fileData) {
+                        fileObj = new Blob([item.fileData], { type: item.mimeType });
+                    }
+                    const url = URL.createObjectURL(fileObj);
+                    
+                    // ★ 为旧数据生成签名（如果没有）
+                    let signature = item.signature;
+                    if (!signature && item.originalFileName && fileObj) {
+                        signature = `${item.originalFileName}_${fileObj.size}`;
+                    }
+                    
+                    return {
+                        id: item.id,
+                        signature: signature || '',
+                        name: item.name,
+                        artist: item.artist,
+                        originalFileName: item.originalFileName,
+                        directoryId: item.directoryId || 'default',
+                        src: url,
+                        file: fileObj
+                    };
+                });
+                resolve(songs);
+            };
+            request.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    // 其余数据库操作保持不变
+    async function updateSongDirectoryInDB(songId, newDirId) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(SONGS_STORE, 'readwrite');
+            const store = tx.objectStore(SONGS_STORE);
+            const getReq = store.get(songId);
+            getReq.onsuccess = () => {
+                const data = getReq.result;
+                if (!data) return resolve();
+                data.directoryId = newDirId;
+                const putReq = store.put(data);
+                putReq.onsuccess = () => resolve();
+                putReq.onerror = (e) => reject(e.target.error);
+            };
+            getReq.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async function clearAllSongsFromDB() {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(SONGS_STORE, 'readwrite');
+            tx.objectStore(SONGS_STORE).clear();
+            tx.oncomplete = () => resolve();
+            tx.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async function deleteSongFromDB(songId) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(SONGS_STORE, 'readwrite');
+            const store = tx.objectStore(SONGS_STORE);
+            const request = store.delete(songId);
+            request.onsuccess = () => resolve();
+            request.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async function saveDirectoriesToDB(dirs) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(DIRS_STORE, 'readwrite');
+            const store = tx.objectStore(DIRS_STORE);
+            store.clear();
+            dirs.forEach(dir => store.put(dir));
+            tx.oncomplete = () => resolve();
+            tx.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async function loadDirectoriesFromDB() {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(DIRS_STORE, 'readonly');
+            const request = tx.objectStore(DIRS_STORE).getAll();
+            request.onsuccess = (e) => resolve(e.target.result || []);
+            request.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    // ---------- 全局状态 ----------
+    let musicLibrary = [];
+    let directories = [];
+    let currentDirId = 'all';
+    let currentPlayIndex = -1;
+    let playMode = 'list';
+    let searchKeyword = '';
+    let activePopupSongId = null;
+
+    // DOM 元素
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const songContainer = document.getElementById('songListContainer');
+    const directoryList = document.getElementById('directoryList');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const nowTitleSpan = document.getElementById('nowTitle');
+    const nowArtistSpan = document.getElementById('nowArtist');
+    const totalCountSpan = document.getElementById('totalCount');
+    const resultCountSpan = document.getElementById('resultCount');
+    const fileInput = document.getElementById('fileInput');
+    const importFolderBtn = document.getElementById('importFolderBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const albumArtDiv = document.getElementById('albumArt');
+    const saveStatusSpan = document.getElementById('saveStatus');
+    const globalDirPopup = document.getElementById('globalDirPopup');
+
+    function getArtistFromFilename(filename) {
+        let name = filename.replace(/\.(mp3|flac|wav|aac|ogg)$/i, '');
+        if (name.includes(' - ')) {
+            let parts = name.split(' - ');
+            if (parts.length >= 2) return { artist: parts[0], title: parts.slice(1).join(' - ') };
+        }
+        return { artist: '本地珍藏', title: name };
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function getFilteredSongs() {
+        let filtered = [...musicLibrary];
+        if (currentDirId !== 'all') {
+            filtered = filtered.filter(s => s.directoryId === currentDirId);
+        }
+        if (searchKeyword.trim() !== '') {
+            const kw = searchKeyword.trim().toLowerCase();
+            filtered = filtered.filter(song =>
+                song.name.toLowerCase().includes(kw) ||
+                song.artist.toLowerCase().includes(kw)
+            );
+        }
+        return filtered;
+    }
+
+    function getDirSongCount(dirId) {
+        return musicLibrary.filter(s => s.directoryId === dirId).length;
+    }
+
+    async function deleteDirectory(dirId) {
+        if (dirId === 'default') {
+            alert('不能删除“未分类”目录');
+            return;
+        }
+        const dir = directories.find(d => d.id === dirId);
+        if (!dir) return;
+        if (!confirm(`确定要删除目录“${dir.name}”吗？\n目录下的歌曲将自动移入“未分类”。`)) return;
+
+        const affectedSongs = musicLibrary.filter(s => s.directoryId === dirId);
+        for (let song of affectedSongs) {
+            song.directoryId = 'default';
+            if (indexedDBAvailable) {
+                try { await updateSongDirectoryInDB(song.id, 'default'); } catch (e) {}
+            }
+        }
+
+        directories = directories.filter(d => d.id !== dirId);
+        if (currentDirId === dirId) {
+            currentDirId = 'all';
+            searchInput.value = '';
+            searchKeyword = '';
+        }
+
+        if (indexedDBAvailable) {
+            await saveDirectoriesToDB(directories);
+        }
+
+        renderDirectories();
+        renderSongList();
+        updateStats();
+        saveStatusSpan.textContent = '✅ 目录已删除';
+    }
+
+    async function deleteSingleSong(songId) {
+        if (!confirm('确定要从曲库中永久删除这首歌曲吗？')) return;
+
+        const index = musicLibrary.findIndex(s => s.id == songId);
+        if (index === -1) return;
+        
+        // 【关键修复】获取内存中真正的 ID（保留类型）
+        const actualSongId = musicLibrary[index].id;
+        musicLibrary.splice(index, 1);
+
+        if (indexedDBAvailable) {
+            // 【关键修复】使用 actualSongId 确保类型匹配
+            try { await deleteSongFromDB(actualSongId); } catch (e) { console.error(e); }
+        }
+
+        if (currentPlayIndex === index) {
+            audioPlayer.src = '';
+            nowTitleSpan.innerText = '未选择歌曲';
+            nowArtistSpan.innerText = '—';
+            albumArtDiv.innerHTML = '🎼';
+            playPauseBtn.innerHTML = '▶';
+            currentPlayIndex = -1;
+        } else if (currentPlayIndex > index) {
+            currentPlayIndex--;
+        }
+
+        renderDirectories();
+        renderSongList();
+        updateStats();
+        savePlayerState();
+        saveStatusSpan.textContent = '✅ 歌曲已删除';
+    }
+
+    function renderDirectories() {
+        let html = `<div class="dir-tag ${currentDirId === 'all' ? 'active-dir' : ''}" data-dir="all">📁 全部<span class="dir-count">${musicLibrary.length}</span></div>`;
+        directories.forEach(dir => {
+            const count = getDirSongCount(dir.id);
+            html += `
+                <div class="dir-tag ${currentDirId === dir.id ? 'active-dir' : ''}" data-dir="${dir.id}">
+                    📂 ${escapeHtml(dir.name)}<span class="dir-count">${count}</span>
+                    ${dir.id !== 'default' ? `<span class="dir-delete-btn" data-delete-dir="${dir.id}" title="删除目录">✖</span>` : ''}
+                </div>`;
+        });
+        html += `<button class="dir-add-btn" id="addDirBtn" title="新建目录">+</button>`;
+        directoryList.innerHTML = html;
+
+        document.querySelectorAll('.dir-tag').forEach(tag => {
+            tag.addEventListener('click', (e) => {
+                if (e.target.classList.contains('dir-delete-btn')) return; 
+                currentDirId = tag.dataset.dir;
+                searchInput.value = '';
+                searchKeyword = '';
+                renderDirectories();
+                renderSongList();
+                updateStats();
+            });
+        });
+
+        document.querySelectorAll('.dir-delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteDirectory(btn.dataset.deleteDir);
+            });
+        });
+
+        document.getElementById('addDirBtn').addEventListener('click', () => {
+            const dirName = prompt('请输入新目录名称：');
+            if (!dirName || dirName.trim() === '') return;
+            const trimmed = dirName.trim();
+            if (directories.some(d => d.name === trimmed)) {
+                alert('目录名已存在');
+                return;
+            }
+            const newDir = {
+                id: 'dir_' + Date.now(),
+                name: trimmed
+            };
+            directories.push(newDir);
+            saveDirectoriesToDB(directories);
+            renderDirectories();
+        });
+    }
+
+    function renderSongList() {
+        const filtered = getFilteredSongs();
+        resultCountSpan.innerText = filtered.length;
+
+        if (filtered.length === 0) {
+            songContainer.innerHTML = `<div style="padding: 40px; text-align: center; color: #94a3b8;">🎧 该目录下暂无歌曲</div>`;
+            return;
+        }
+
+        let html = '';
+        filtered.forEach((song) => {
+            const originalIndex = musicLibrary.findIndex(s => s.id === song.id);
+            const isActive = (currentPlayIndex === originalIndex);
+            const dirName = currentDirId === 'all' ? (directories.find(d => d.id === song.directoryId)?.name || '未分类') : '';
+            html += `
+                <div class="song-item ${isActive ? 'active' : ''}" data-index="${originalIndex}" data-song-id="${song.id}">
+                    <div class="song-info">
+                        <div class="song-title">${escapeHtml(song.name)}</div>
+                        <div class="song-artist">${escapeHtml(song.artist)} ${dirName ? '· ' + dirName : ''}</div>
+                    </div>
+                    <div class="song-actions">
+                        <button class="action-btn move-btn" data-song-id="${song.id}" title="移动到...">📂</button>
+                        <button class="action-btn delete-btn" data-song-id="${song.id}" title="删除歌曲">🗑️</button>
+                    </div>
+                    <div class="play-icon-badge">▶</div>
+                </div>
+            `;
+        });
+        songContainer.innerHTML = html;
+
+        document.querySelectorAll('.song-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.action-btn')) return;
+                const idx = parseInt(item.dataset.index);
+                if (!isNaN(idx)) {
+                    currentPlayIndex = idx;
+                    playSongByIndex(currentPlayIndex);
+                    renderSongList();
+                }
+            });
+        });
+
+        document.querySelectorAll('.move-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const songId = btn.dataset.songId;
+                activePopupSongId = songId;
+
+                globalDirPopup.innerHTML = directories.map(dir => 
+                    `<div class="dir-popup-item" data-dir="${dir.id}">📂 ${escapeHtml(dir.name)}</div>`
+                ).join('');
+
+                globalDirPopup.querySelectorAll('.dir-popup-item').forEach(item => {
+                    item.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        moveSongToDirectory(activePopupSongId, item.dataset.dir);
+                        globalDirPopup.classList.remove('show');
+                    });
+                });
+
+                const rect = btn.getBoundingClientRect();
+                globalDirPopup.classList.add('show');
+                const popupRect = globalDirPopup.getBoundingClientRect();
+                let top = rect.bottom + window.scrollY + 5;
+                let left = rect.right + window.scrollX - popupRect.width;
+                if (rect.bottom + popupRect.height + 20 > window.innerHeight) {
+                    top = rect.top + window.scrollY - popupRect.height - 5;
+                }
+                globalDirPopup.style.top = top + 'px';
+                globalDirPopup.style.left = left + 'px';
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const songId = btn.dataset.songId;
+                deleteSingleSong(songId);
+            });
+        });
+    }
+
+    async function moveSongToDirectory(songId, newDirId) {
+        const song = musicLibrary.find(s => s.id == songId);
+        if (!song) return;
+        song.directoryId = newDirId;
+        if (indexedDBAvailable) {
+            // 【关键修复】使用 song.id 传入数据库，确保数据类型匹配
+            try { await updateSongDirectoryInDB(song.id, newDirId); } catch (e) { console.error(e); }
+        }
+        renderDirectories();
+        renderSongList();
+        updateStats();
+        saveStatusSpan.textContent = '✅ 已移动歌曲';
+    }
+
+    function playSongByIndex(index) {
+        if (musicLibrary.length === 0) return;
+        if (index < 0) index = 0;
+        if (index >= musicLibrary.length) index = musicLibrary.length - 1;
+        const song = musicLibrary[index];
+        if (!song || !song.src) return;
+        audioPlayer.src = song.src;
+        nowTitleSpan.innerText = song.name;
+        nowArtistSpan.innerText = song.artist;
+        albumArtDiv.innerHTML = '🎵';
+        audioPlayer.play().catch(e => console.log('自动播放受限', e));
+        currentPlayIndex = index;
+        playPauseBtn.innerHTML = '⏸';
+        renderSongList();
+        savePlayerState();
+    }
+
+    function nextSong() {
+        const filtered = getFilteredSongs();
+        if (filtered.length === 0) return;
+        const currentSongId = musicLibrary[currentPlayIndex]?.id;
+        const currentFilteredIndex = filtered.findIndex(s => s.id === currentSongId);
+        let nextFilteredIdx;
+        if (playMode === 'random') {
+            nextFilteredIdx = Math.floor(Math.random() * filtered.length);
+        } else if (playMode === 'loop') {
+            nextFilteredIdx = currentFilteredIndex >= 0 ? currentFilteredIndex : 0;
+        } else {
+            nextFilteredIdx = (currentFilteredIndex + 1) % filtered.length;
+        }
+        const nextSong = filtered[nextFilteredIdx];
+        if (nextSong) {
+            currentPlayIndex = musicLibrary.findIndex(s => s.id === nextSong.id);
+            playSongByIndex(currentPlayIndex);
+        }
+    }
+
+    function prevSong() {
+        const filtered = getFilteredSongs();
+        if (filtered.length === 0) return;
+        const currentSongId = musicLibrary[currentPlayIndex]?.id;
+        const currentFilteredIndex = filtered.findIndex(s => s.id === currentSongId);
+        let prevFilteredIdx = (currentFilteredIndex - 1 + filtered.length) % filtered.length;
+        const prevSong = filtered[prevFilteredIdx];
+        if (prevSong) {
+            currentPlayIndex = musicLibrary.findIndex(s => s.id === prevSong.id);
+            playSongByIndex(currentPlayIndex);
+        }
+    }
+
+    audioPlayer.addEventListener('ended', () => {
+        if (playMode === 'loop') {
+            if (currentPlayIndex >= 0) playSongByIndex(currentPlayIndex);
+        } else {
+            nextSong();
+        }
+    });
+
+    function setMode(mode) {
+        playMode = mode;
+        document.querySelectorAll('.mode-badge').forEach(badge => {
+            if (badge.dataset.mode === mode) badge.classList.add('active-mode');
+            else badge.classList.remove('active-mode');
+        });
+        savePlayerState();
+    }
+
+    // ★ 导入时带完整去重
+    async function addSongsFromFiles(files) {
+        const validFiles = Array.from(files).filter(f => f.type.includes('audio'));
+        if (validFiles.length === 0) return;
+
+        let skippedCount = 0;
+        if (indexedDBAvailable) saveStatusSpan.textContent = '⏳ 正在保存...';
+        else saveStatusSpan.textContent = '📌 临时模式';
+
+        const savePromises = [];
+        const targetDir = (currentDirId !== 'all') ? currentDirId : 'default';
+
+        for (let file of validFiles) {
+            const signature = generateFileSignature(file);
+            // 检测当前曲库是否已有相同签名
+            const exists = musicLibrary.some(s => s.signature === signature);
+            if (exists) {
+                skippedCount++;
+                continue;
+            }
+
+            const url = URL.createObjectURL(file);
+            const { artist, title } = getArtistFromFilename(file.name);
+            const newSong = {
+                // 【关键修复】这里强制转为字符串 String(...)，从根本上防止ID类型不匹配
+                id: String(Date.now() + Math.random() + file.size),
+                signature: signature,
+                name: title,
+                artist: artist,
+                src: url,
+                file: file,
+                originalFileName: file.name,
+                directoryId: targetDir
+            };
+            musicLibrary.push(newSong);
+            if (indexedDBAvailable) savePromises.push(saveSongToDB(newSong));
+        }
+
+        if (indexedDBAvailable && savePromises.length) {
+            try {
+                await Promise.all(savePromises);
+                if (skippedCount > 0) {
+                    saveStatusSpan.textContent = `✅ 保存成功，已跳过 ${skippedCount} 首重复`;
+                } else {
+                    saveStatusSpan.textContent = '✅ 保存成功';
+                }
+            } catch (e) {
+                saveStatusSpan.textContent = '⚠️ 保存失败';
+            }
+        } else if (!indexedDBAvailable) {
+            saveStatusSpan.textContent = '📌 临时模式';
+        }
+
+        if (musicLibrary.length > 0 && currentPlayIndex === -1) {
+            currentPlayIndex = 0;
+            playSongByIndex(currentPlayIndex);
+        }
+        renderDirectories();
+        renderSongList();
+        updateStats();
+        savePlayerState();
+    }
+
+    function updateStats() {
+        const filtered = getFilteredSongs();
+        totalCountSpan.innerText = musicLibrary.length;
+        resultCountSpan.innerText = filtered.length;
+    }
+
+    function onSearchChange() {
+        searchKeyword = searchInput.value;
+        renderSongList();
+        updateStats();
+    }
+
+    function savePlayerState() {
+        localStorage.setItem('play_mode', playMode);
+        localStorage.setItem('last_index', currentPlayIndex);
+    }
+
+    function loadPlayerState() {
+        const savedMode = localStorage.getItem('play_mode');
+        if (savedMode) setMode(savedMode);
+    }
+
+    function setFallbackMode() {
+        indexedDBAvailable = false;
+        saveStatusSpan.textContent = '⚠️ 数据库不可用，数据仅本次有效';
+    }
+
+    async function initLibrary() {
+        if (!window.indexedDB) {
+            setFallbackMode();
+            renderDirectories();
+            renderSongList();
+            updateStats();
+            loadPlayerState();
+            return;
+        }
+
+        try {
+            const dirs = await loadDirectoriesFromDB();
+            if (dirs.length === 0) {
+                directories = [{ id: 'default', name: '未分类' }];
+                await saveDirectoriesToDB(directories);
+            } else {
+                directories = dirs;
+            }
+
+            const songs = await loadAllSongsFromDB();
+            musicLibrary = songs;
+            if (musicLibrary.length > 0) {
+                const lastIndex = parseInt(localStorage.getItem('last_index') || '0');
+                currentPlayIndex = lastIndex < musicLibrary.length ? lastIndex : 0;
+                playSongByIndex(currentPlayIndex);
+                audioPlayer.pause();
+                playPauseBtn.innerHTML = '▶';
+            }
+            renderDirectories();
+            renderSongList();
+            updateStats();
+            loadPlayerState();
+            saveStatusSpan.textContent = '💾 数据已加载';
+        } catch (error) {
+            console.warn(error);
+            setFallbackMode();
+            renderDirectories();
+            renderSongList();
+            updateStats();
+            loadPlayerState();
+        }
+    }
+
+    document.addEventListener('click', () => {
+        if (globalDirPopup) globalDirPopup.classList.remove('show');
+    });
+    songContainer.addEventListener('scroll', () => {
+        if (globalDirPopup) globalDirPopup.classList.remove('show');
+    });
+
+    clearAllBtn.addEventListener('click', async () => {
+        if (confirm('确定清空所有歌曲和目录？此操作不可恢复！')) {
+            if (indexedDBAvailable) {
+                try {
+                    await clearAllSongsFromDB();
+                    directories = [{ id: 'default', name: '未分类' }];
+                    await saveDirectoriesToDB(directories);
+                } catch (e) { console.error(e); }
+            }
+            musicLibrary = [];
+            currentPlayIndex = -1;
+            currentDirId = 'all';
+            searchInput.value = '';
+            searchKeyword = '';
+            audioPlayer.src = '';
+            nowTitleSpan.innerText = '未选择歌曲';
+            nowArtistSpan.innerText = '—';
+            albumArtDiv.innerHTML = '🎼';
+            playPauseBtn.innerHTML = '▶';
+            renderDirectories();
+            renderSongList();
+            updateStats();
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) addSongsFromFiles(Array.from(e.target.files));
+        fileInput.value = '';
+    });
+    importFolderBtn.addEventListener('click', () => {
+        const folderInput = document.createElement('input');
+        folderInput.type = 'file';
+        folderInput.setAttribute('webkitdirectory', '');
+        folderInput.multiple = true;
+        folderInput.addEventListener('change', (e) => {
+            if (e.target.files) addSongsFromFiles(Array.from(e.target.files));
+        });
+        folderInput.click();
+    });
+
+    searchInput.addEventListener('input', onSearchChange);
+    clearSearchBtn.addEventListener('click', () => { searchInput.value = ''; onSearchChange(); });
+
+    playPauseBtn.addEventListener('click', () => {
+        if (audioPlayer.paused) {
+            audioPlayer.play();
+            playPauseBtn.innerHTML = '⏸';
+        } else {
+            audioPlayer.pause();
+            playPauseBtn.innerHTML = '▶';
+        }
+    });
+    audioPlayer.addEventListener('play', () => playPauseBtn.innerHTML = '⏸');
+    audioPlayer.addEventListener('pause', () => playPauseBtn.innerHTML = '▶');
+    nextBtn.addEventListener('click', nextSong);
+    prevBtn.addEventListener('click', prevSong);
+    document.querySelectorAll('.mode-badge').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.dataset.mode));
+    });
+
+    document.body.addEventListener('dragover', e => e.preventDefault());
+    document.body.addEventListener('drop', e => {
+        e.preventDefault();
+        if (e.dataTransfer.files.length) addSongsFromFiles(Array.from(e.dataTransfer.files));
+    });
+
+    window.addEventListener('load', initLibrary);
+</script>
