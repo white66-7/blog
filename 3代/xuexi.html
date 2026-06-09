@@ -898,6 +898,22 @@
             renderDirs();
         }
         });
+        //播放模式应用
+        const btnShuffle = document.getElementById('btnShuffle');
+        const btnLoop = document.getElementById('btnLoop');
+        function applyMode()
+        {
+            isShuffle = false;
+            isLoop = false;
+            if(mode === 'random'){
+                isShuffle = true;
+            }
+            else if(mode === 'loop'){
+                isLoop = true;
+            }
+            btnShuffle.classList.toggle('on', isShuffle);
+            btnLoop.classList.toggle('on', isLoop);
+        }
         function renderList()
         {
             const f = filtered();
@@ -971,6 +987,43 @@
         renderList();
         saveState();
     }
+    function updateStat()
+    {
+        documeent.getElementById('ListStat').textContent = `${filtered().length} 首曲目`;
+    }
+    //存储和重现函数
+    function saveState()
+    {
+        localStorage.setItem('cyber_mode', mode);
+        localStorage.setItem('cyber_idx', curIdx);
+        localStorage.setItem('cyber_vol', audio.volume);
+    }
+    function restorState()
+    {
+        const mode_past = localStorage.getItem('cyber_mode');
+        if(mode_past) 
+        {  
+            mode = mode_past;
+            applyMode(mode);
+        }
+        const idx = parseInt(localStorage.getItem('cyber_idx'));
+        if(!isNaN(idx) && idx >= 0 && idx < library.length)
+        {
+            const s = library[idx];
+            document.getElementById('mainTitle').textContent = esc(s.name);
+            document.getElementById('mainArtist').textContent = esc(s.artist);
+            document.getElementById('nowTitle').textContent = esc(s.name);
+            document.getElementById('nowArtist').textContent = esc(s.artist);
+            curIdx = idx;
+            renderList();
+        }
+        const vol = parseFloat(localStorage.getItem('cyber_vol'));
+        {
+            audio.volume = parseFloat(v);
+            const vfill = document.getElementById('vfill');
+            if (vfill) vfill.style.width = (audio.volume * 100) + '%';
+        }
+    }
 
 
     //init 函数主进程
@@ -992,9 +1045,25 @@
         }
         catch(e)
         {
-            console.warn('IndexdB 错误');
+            console.warn('IndexdB 错误',e);
+            isdbok = false;
+            dirs = [{id: 'default',name: '未分类'}];
+            renderDirs();
+            renderList();
         }
+        if (curIdx < 0) {
+        document.getElementById('mainTitle').textContent = 'NO SIGNAL';
+        document.getElementById('mainArtist').textContent = 'System Idle';
+        document.getElementById('cover').src = defaultCover;
+        }
+        const vfill = document.getElementById('vfill');
+        if (vfill) vfill.style.width = (audio.volume * 100) + '%';
+
     }
+    window.addEventListener('load', init);
+    window.addEventListener('beforeunload', () => {
+    saveState();
+    });
 
     </script>
 
