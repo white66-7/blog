@@ -805,6 +805,7 @@
         </div>
     </div>
     <div class="pop" id="popMune"></div>
+    <script src="https://unpkg.com/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
     <script>
         //基础变量
         var library = [],dirs = [];
@@ -1077,8 +1078,8 @@
 
         document.getElementById('mainTitle').textContent = esc(song.name);
         document.getElementById('mainArtist').textContent = esc(song.artist);
-        document.getElementById('nowTitle').textContent = esc(song.name);
-        document.getElementById('nowArtist').textContent = esc(song.artist);
+        document.getElementById('now-title').textContent = esc(song.name);
+        document.getElementById('now-artist').textContent = esc(song.artist);
 
         curIdx = i;
 
@@ -1129,8 +1130,8 @@
             const s = library[idx];
             document.getElementById('mainTitle').textContent = esc(s.name);
             document.getElementById('mainArtist').textContent = esc(s.artist);
-            document.getElementById('nowTitle').textContent = esc(s.name);
-            document.getElementById('nowArtist').textContent = esc(s.artist);
+            document.getElementById('now-title').textContent = esc(s.name);
+            document.getElementById('now-artist').textContent = esc(s.artist);
             curIdx = idx;
             renderList();
         }
@@ -1225,7 +1226,7 @@
             const song = library.find(s => s.id === songId);
             if(song)
         {
-            song.directoryId = item.dataset.to;
+            song.directoryId = item.dataset.id;
             await updateSongDir(song.id, item.dataset.id);
         }
         pop.classList.remove('show');
@@ -1301,6 +1302,57 @@
             const ps = f[pidx];
             if (ps) playByIndex(library.findIndex(x => x.id === ps.id));
         }
+    //导入与删除操作
+    function addSongs(files){
+        const vaild = Array.from(files).filter(f => f.type.includes('audio') ||  /\.(mp3|aac|flac|wav|ogg)$/i.test(f.name));
+        if(!vaild.length) return;
+        var skip = 0;
+        const target = curDir === 'all' ? 'default' : curDir;
+        for(const file of vaild)
+        {
+            // 处理每个有效的音频文件
+            const s = sig(file);
+            if(library.some(x => x.signature === s)){skip++; continue;}
+
+            const {artist,title} = parseName(file.name);
+
+            const song = {
+                id: String(Date.now() + Math.random()),
+                signature: s,
+                name: title,
+                artist,
+                file,
+                originalFileName: file.name,
+                directoryId: target
+            };
+            library.push(song);
+            if(idbok) savesong(song);
+        }
+        if(library.length > 0 && curIdx === -1)
+        {
+            document.getElementById('mainTitle').textContent = esc(library[0].name);
+            document.getElementById('mainArtist').textContent = esc(library[0].artist);
+            document.getElementById('now-title').textContent = esc(library[0].name);
+            document.getElementById('now-artist').textContent = esc(library[0].artist);
+        }
+        renderDirs();
+        renderList();
+        updateStat();
+    }
+    function delsingle(id){
+        if(!confirm('确定要删除这条神经信号吗？')) return;
+        const idx = library.findIndex(s => s.id === id);
+        if(idx === -1) return;
+        const was = curIdx === idx;
+
+        library.splice(idx,1);
+        if(idbok) delSong(id);
+
+        if(was)
+    {
+
+    }
+    }
     //init 函数主进程
     async function init() {
         if(!window.indexedDB) idbok = false;
