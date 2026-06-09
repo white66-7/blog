@@ -682,6 +682,7 @@
         var curIdx = -1;
         var currentAudioUrl = null,currentCoverUrl = null;
         //状态变量
+        var idbok = true;
         var mode = 'list';
         var isShuffle = false, isLoop = false;
         //DOM元素
@@ -871,33 +872,6 @@
             html += `<button class="add-dir" id="addDir">+</button>`;
             document.getElementById('dirBar').innerHTML = html;
         }
-        document.getElementById('dirBar').addEventListener('click',e=>{
-            const del = e.target.closest('.del');
-            const iron = e.target.closest('.dir-chip');
-            const adddirs = e.target.closest('#addDir');
-            if(del)
-        {
-            delDir(del.dataset.del);
-        }
-        else if(iron)
-        {
-            curDir = iron.dataset.d;
-            kw = '';
-            document.getElementById('searchInp').value = '';
-            renderDirs();
-            renderList();
-            updateStat();
-        }
-        else if(adddirs)
-        {
-            const n = prompt('新目录名称');
-            if (!n || !n.trim()) return;
-            if(dirs.some(d => d.name === n.trim())) return alert('该目录已存在');
-            dirs.push({id: 'dir_' + Date.now(), name: n.trim() });
-            saveDirs(dirs);
-            renderDirs();
-        }
-        });
         //播放模式应用
         const btnShuffle = document.getElementById('btnShuffle');
         const btnLoop = document.getElementById('btnLoop');
@@ -914,6 +888,7 @@
             btnShuffle.classList.toggle('on', isShuffle);
             btnLoop.classList.toggle('on', isLoop);
         }
+        //列表渲染函数
         function renderList()
         {
             const f = filtered();
@@ -989,7 +964,7 @@
     }
     function updateStat()
     {
-        documeent.getElementById('ListStat').textContent = `${filtered().length} 首曲目`;
+        document.getElementById('listStat').textContent = `${filtered().length} 首曲目`;
     }
     //存储和重现函数
     function saveState()
@@ -998,7 +973,7 @@
         localStorage.setItem('cyber_idx', curIdx);
         localStorage.setItem('cyber_vol', audio.volume);
     }
-    function restorState()
+    function restoreState()
     {
         const mode_past = localStorage.getItem('cyber_mode');
         if(mode_past) 
@@ -1019,34 +994,129 @@
         }
         const vol = parseFloat(localStorage.getItem('cyber_vol'));
         {
-            audio.volume = parseFloat(v);
+            audio.volume = parseFloat(vol);
             const vfill = document.getElementById('vfill');
             if (vfill) vfill.style.width = (audio.volume * 100) + '%';
         }
     }
 
+    //ui交互事件绑定
+        document.getElementById('dirBar').addEventListener('click',e=>{
+        const del = e.target.closest('.del');
+        const iron = e.target.closest('.dir-chip');
+        const adddirs = e.target.closest('#addDir');
+        if(del)
+        {
+            delDir(del.dataset.del);
+        }
+        else if(iron)
+        {
+            curDir = iron.dataset.d;
+            kw = '';
+            document.getElementById('searchInp').value = '';
+            renderDirs();
+            renderList();
+            updateStat();
+        }
+        else if(adddirs)
+        {
+            const n = prompt('新目录名称');
+            if (!n || !n.trim()) return;
+            if(dirs.some(d => d.name === n.trim())) return alert('该目录已存在');
+            dirs.push({id: 'dir_' + Date.now(), name: n.trim() });
+            saveDirs(dirs);
+            renderDirs();
+        }
+        });
+        //audio事件绑定
+        audio.addEventListener('play', updatePlayBtn);
+        audio.addEventListener('pause', updatePlayBtn);
+        function updatePlayBtn()
+        {
+            const btn = document.getElementById('btnPlay');
+            if(audio.paused)
+            {
+                btn.textContent = '▶';
+                document.getElementById('cover').classList.remove('spin');
+                document.getElementById('nowCard').classList.remove('paused');
+            }
+            else{
+                btn.textContent = '⏸';
+                document.getElementById('cover').classList.add('spin');
+                document.getElementById('nowCard').classList.add('paused');
+            }
+        }
+        //前后首操作button事件绑定
+        document.getElementById('btnPlay').addEventListener('click', togglePlay);
+        document.getElementById('btnNext').addEventListener('click', next);
+        document.getElementById('btnPrev').addEventListener('click', prev);
+        function togglePlay()
+        {
+            if(!audio.src)
+        {
+            if(library.length)
+            {
+                playByIndex(0);
+            }
+            return;
+        }
+            if(audio.paused){
+                audio.play();
+            }
+            else{
+                audio.pause();
+            }
+        }
+    
+        function next()
+        {
+            const f = filtered();
+            if(!f.length) return;
+            const cid = library[curIdx]?.id;
+            if (cidx === -1) cidx = 0;
+            var nidx;
+            if(isShuffle){
+                nidx = Math.floor(Math.random() * f.length);
+            }
+            else if(isLoop)
+            {
+                nidx = cidx;
+            }
+            else{
+                nidx = cidx + 1;
+                if(nidx >= f.length) nidx = 0;
+            }
+            const ns = f[nidx];
+            if (ns) playByIndex(library.findIndex(x => x.id === ns.id));
+        }
+        function prev(){
+            const f = filtered();
+            if(!f.length) return;
+            const cid = library[curIdx]?.id;
+            let cidx = f.findIndex(x => x.id === cid);
+            if (cidx === -1) cidx = 1;
 
+            const pidx = (cidx - 1 + f.length) % f.length;
+            const ps = f[pidx];
+            if (ps) playByIndex(library.findIndex(x => x.id === ps.id));
+        }
     //init 函数主进程
     async function init() {
-        if(!window.indexedDB) iDbok = false;
+        if(!window.indexedDB) idbok = false;
         try{
-        if(loadDirs.length)
-    {
-        dirs = loadDirs;
-    }else{
-        dirs = [{id: 'default',name: '未分类'}];
-        await saveDirs(dirs);
-    }
-        library = await loadSongs();
-        renderDirs();
-        renderList();
-        updateStat();
-        restorState();
+            library = await loadSongs();
+            const ds = await loadDirs();
+            dirs = ds.length ? ds : [{ id: 'default', name: '未分类' }];
+            if (!ds.length) await saveDirs(dirs);
+            renderDirs();
+            renderList();
+            updateStat();
+            restoreState();
         }
         catch(e)
         {
             console.warn('IndexdB 错误',e);
-            isdbok = false;
+            idbok = false;
             dirs = [{id: 'default',name: '未分类'}];
             renderDirs();
             renderList();
