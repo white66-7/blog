@@ -56,7 +56,7 @@ body {
 }
 </style>
 <script setup lang="ts">
-// import Sidebar from './components/Sidebar.vue'
-// import Mainplayer from './components/Mainplayer.vue'
-// import Popnumenu from './components/Popnumenu.vue'
+import Sidebar from './components/Sidebar.vue'
+import Mainplayer from './components/Mainplayer.vue'
+import Popnumenu from './components/Popnumenu.vue'
 </script>
