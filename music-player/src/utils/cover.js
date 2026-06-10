@@ -1,0 +1,21 @@
+function extractCover(file) {
+    return new Promise((resolve) => {
+        if (typeof jsmediatags === 'undefined') {
+            resolve(null);
+            return;
+        }
+        jsmediatags.read(file, {
+            onSuccess: (tag) => {
+                if (tag.tags && tag.tags.picture) {
+                    const pic = tag.tags.picture;
+                    const blob = new Blob([new Uint8Array(pic.data)], { type: pic.format });
+                    resolve(URL.createObjectURL(blob));
+                } else {
+                    resolve(null);
+                }
+            },
+            onError: () => resolve(null)
+        })
+    }
+    );
+}
