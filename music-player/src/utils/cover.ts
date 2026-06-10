@@ -1,11 +1,12 @@
-function extractCover(file) {
+declare const jsmediatags: any;
+export function extractCover(file: File): Promise<string |null>{
     return new Promise((resolve) => {
         if (typeof jsmediatags === 'undefined') {
             resolve(null);
             return;
         }
         jsmediatags.read(file, {
-            onSuccess: (tag) => {
+            onSuccess: (tag: any) => {
                 if (tag.tags && tag.tags.picture) {
                     const pic = tag.tags.picture;
                     const blob = new Blob([new Uint8Array(pic.data)], { type: pic.format });
