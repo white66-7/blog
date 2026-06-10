@@ -82,11 +82,6 @@ import { fmt } from '@/utils/format';
  const audio = useAudioStore()
  const library = useLibraryStore()
 
- const title = computed(() =>{
-    const idx = useAudioStore.curIdx
-    return idx >= 0 ? useLibraryStore.library[idx]?.name : '等待数据接入'
- })
-
  
 
 </script>

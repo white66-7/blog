@@ -19,7 +19,7 @@ export interface AudioState{
 }
 
 
-export const useAudio = defineStore('audio',() =>
+export const useAudioStore = defineStore('audio',() =>
 {
     const libraryStore = useLibraryStore()
 

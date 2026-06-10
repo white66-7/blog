@@ -59,4 +59,11 @@ body {
 import Sidebar from './components/Sidebar.vue'
 import Mainplayer from './components/Mainplayer.vue'
 import Popnumenu from './components/Popnumenu.vue'
+
+import { useLibraryStore } from './stores/libraryStore'
+
+const libraryStore = useLibraryStore()
+onMounted(() => {
+  libraryStore.loadDate()   
+})
 </script>
