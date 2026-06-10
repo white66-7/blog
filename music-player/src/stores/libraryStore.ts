@@ -55,6 +55,43 @@ export const useLibraryStore = defineStore('library', () => {
     return list
   })
 
+  const countDir = (dirId: string): number =>{
+        return (library.value.filter((s: Song) => s.directoryId === dirId)).length;
+  }
+
+
+  //library增添方法
+  async function addSongs(files:File[] | FileList,targetDirid: string) {
+    const valid = Array.from(files).filter(f => f.type.includes('audio') || /\.(mp3|flac|wav|aac|ogg)$/i.test(f.name))
+    for(const file of valid){
+      const sign = `${file.name}_${file.size}`
+      if(library.value.some(s => s.signature === sign)) continue;
+      const {artist,title} = parseName(file.name)
+      const song: Song= {
+        id: String(Date.now() + Math.random()),
+        signature: sign,
+        name: title,
+        artist:artist,
+        file,
+        originalFileName: file.name,
+        directoryId: targetDirid
+      }
+      library.value.push(song)
+      await saveSong
+    }
+  }
+
+  async function removeSong(id:string) {
+    const idx = library.value.findIndex(s => s.id === id)
+    if(idx != -1)
+    {
+      library.value.splice(idx,1)
+      await delSong(id)
+    }
+    return idx
+  }
+  async
+
 
   return { library, dirs, curDir, kw, filteredList }
 })
