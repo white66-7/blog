@@ -1,5 +1,5 @@
 <template>
-<div class="now-card" @click="replayCurrent">
+<!-- <div class="now-card" @click="replayCurrent">
     <div class="viz" :class="{paused: audioStore.paused}">
         <i></i><i></i><i></i><i></i>
     </div>
@@ -8,7 +8,7 @@
         <div class="now-artist">{{ artist }}</div>
     </div>
     <div class="now-time">{{ nowtime }}</div>
-</div>
+</div> -->
 </template>
 
 <style>
@@ -73,14 +73,14 @@
 </style>
 
 <script setup lang="ts">
-import {computed} from 'vue'
-import {useAudioStore} from '@/stores/audioStore'
-import { useLibraryStore } from '@/stores/libraryStore';
-import { fmt } from '@/utils/format';
+// import {computed} from 'vue'
+// import {useAudioStore} from '@/stores/audioStore'
+// import { useLibraryStore } from '@/stores/libraryStore';
+// import { fmt } from '@/utils/format';
 
 
- const audio = useAudioStore()
- const library = useLibraryStore()
+//  const audio = useAudioStore()
+//  const library = useLibraryStore()
 
  
 

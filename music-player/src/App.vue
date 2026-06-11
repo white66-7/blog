@@ -59,7 +59,7 @@ body {
 import Sidebar from './components/Sidebar.vue'
 import Mainplayer from './components/Mainplayer.vue'
 import Popnumenu from './components/Popnumenu.vue'
-
+import { onMounted } from 'vue' 
 import { useLibraryStore } from './stores/libraryStore'
 
 const libraryStore = useLibraryStore()

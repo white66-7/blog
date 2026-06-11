@@ -105,10 +105,12 @@
 </style>
 
 <script setup lang="ts">
-import NowPlayingCard from "@/components/NowPlayingCard.vue";
-import SearchBar from "@/components/SearchBar.vue";
-import DirBar from "@/components/DirBar.vue";
-import ImportArea from "@/components/ImportArea.vue";
-import {useLibraryStore} from "@/stores/libraryStore";
+import { onMounted } from 'vue' 
+import NowPlayingCard from "@/components/NowPlayingCard.vue"
+import SearchBar from "@/components/SearchBar.vue"
+import DirBar from "@/components/DirBar.vue"
+import ImportArea from "@/components/ImportArea.vue"
+import {useLibraryStore} from "@/stores/libraryStore"
+
 const libraryStore = useLibraryStore();
 </script>
