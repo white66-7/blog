@@ -1,6 +1,6 @@
 <template>
-<!-- <div class="now-card" @click="replayCurrent">
-    <div class="viz" :class="{paused: audioStore.paused}">
+<div class="now-card" :class="{ paused: audio.paused }" @click="audio.replayCurrent()">
+    <div class="viz" :class="{paused: audio.paused}">
         <i></i><i></i><i></i><i></i>
     </div>
     <div class="now-mate">
@@ -8,7 +8,7 @@
         <div class="now-artist">{{ artist }}</div>
     </div>
     <div class="now-time">{{ nowtime }}</div>
-</div> -->
+</div>
 </template>
 
 <style>
@@ -73,15 +73,16 @@
 </style>
 
 <script setup lang="ts">
-// import {computed} from 'vue'
-// import {useAudioStore} from '@/stores/audioStore'
-// import { useLibraryStore } from '@/stores/libraryStore';
-// import { fmt } from '@/utils/format';
+import {computed} from 'vue'
+import {useAudioStore} from '@/stores/audioStore'
+import { useLibraryStore } from '@/stores/libraryStore';
+import { fmt } from '@/utils/format';
 
+ const audio = useAudioStore()
 
-//  const audio = useAudioStore()
-//  const library = useLibraryStore()
-
+const title = computed(()=> audio.currentSong?.name ?? '等待数据接入...')
+const artist = computed(() => audio.currentSong?.artist ?? '--')
+const nowtime = computed(() => `${fmt(audio.currentTime)} / ${fmt(audio.duration)}`)
  
 
 </script>
