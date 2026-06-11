@@ -87,6 +87,12 @@ libraryStore.addDir(name.trim())
   opacity: 1;
 }
 
+.file-logo {
+  height: 25px;
+  width: auto;
+  display: block;
+}
+
 .dir-chip .del:hover {
   background: rgba(255, 0, 255, .15);
   color: var(--neon-pink);

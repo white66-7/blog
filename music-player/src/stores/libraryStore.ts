@@ -61,8 +61,9 @@ export const useLibraryStore = defineStore('library', () => {
 
 
   //library增添方法
-  async function addSongs(files:File[] | FileList,targetDirid: string) {
+  async function addSongs(files:File[] | FileList) {
     const valid = Array.from(files).filter(f => f.type.includes('audio') || /\.(mp3|flac|wav|aac|ogg)$/i.test(f.name))
+    const target = curDir.value === 'all' ? 'default' : curDir.value
     for(const file of valid){
       const sign = `${file.name}_${file.size}`
       if(library.value.some(s => s.signature === sign)) continue;
@@ -74,7 +75,7 @@ export const useLibraryStore = defineStore('library', () => {
         artist:artist,
         file,
         originalFileName: file.name,
-        directoryId: targetDirid
+        directoryId: target
       }
       library.value.push(song)
       await saveSong(song)
