@@ -7,21 +7,25 @@ function switchDir(dirId: string) {
   libraryStore.kw = ''
 }
 
+
 async function onDeleteDir(dirId: string) {
-  if(dirId === 'default') return
-  await libraryStore.removeDir(dirId)
+  if (dirId === 'default') return
+  try {
+    await libraryStore.removeDir(dirId)
+  } catch (e) {
+    console.error(e)
+    alert('删除失败，请重试')
+  }
 }
 
-function onAddDir()
-{
+function onAddDir() {
   const name = prompt('新神经连接名称')
-  if(!name || !name.trim()) return
-  if(!libraryStore.dirs.some(d => d.name === name.trim()))
-{
-  alert('该神经连接已存在')
-  return
-}
-libraryStore.addDir(name.trim())
+  if (!name || !name.trim()) return
+  if (libraryStore.dirs.some(d => d.name === name.trim())) {
+    alert('该神经连接已存在')
+    return
+  }
+  libraryStore.addDir(name.trim())
 }
 </script>
 
@@ -33,14 +37,11 @@ libraryStore.addDir(name.trim())
     </div>
     <div v-for="d in libraryStore.dirs" :key="d.id" class="dir-chip" :class="{ on: libraryStore.curDir === d.id }"
       @click="switchDir(d.id)">
-    <img src="@/assets/file.png" alt="" class="file-logo" />
-  {{ d.name }} <span style="opacity: 0.7">{{ libraryStore.countDir(d.id) }}</span>
-  <span v-if = "d.id != 'default'"
-  class="del"
-  @click.stop="onDeleteDir(d.id)">
-  >✖</span>
-  </div>
-  <button class="add-dir" @click = "onAddDir"></button>
+      <img src="@/assets/file.png" alt="" class="file-logo" />
+      {{ d.name }} <span style="opacity: 0.7">{{ libraryStore.countDir(d.id) }}</span>
+      <span v-if="d.id != 'default'" class="del" @click.stop="onDeleteDir(d.id)">✖</span>
+    </div>
+    <button class="add-dir" @click="onAddDir">+</button>
   </div>
 </template>
 
@@ -96,5 +97,21 @@ libraryStore.addDir(name.trim())
 .dir-chip .del:hover {
   background: rgba(255, 0, 255, .15);
   color: var(--neon-pink);
+}
+
+.add-dir {
+  background: none;
+  border: 1px dashed rgba(0, 243, 255, .25);
+  color: var(--neon-cyan);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: .9rem;
+  line-height: 1;
+}
+
+.add-dir:hover {
+  border-style: solid;
 }
 </style>

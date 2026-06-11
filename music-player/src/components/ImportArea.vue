@@ -1,12 +1,13 @@
 <template>
   <div class="drop-area" :class="{ dragover }" @dragover.prevent="dragover = true" @dragleave="dragover = false"
-    @drop.prevent='onDrop'></div>
+    @drop.prevent='onDrop'>
   <div>
     <img src="@/assets/file.png" alt="" class="file-logo" /> 拖拽音频文件至此
   </div>
   <div class="import-btns">
     <button class="import-btn" @click="selectFiles">添加单曲</button>
     <button class="import-btn" @click="selectDir">添加文件夹</button>
+  </div>
   </div>
   <input ref="fileInput" type="file" multiple accept="audio/*" style="display: none" @change="onFileChange">
   <input ref="dirInput" type="file" multiple webkitdirectory style="display: none;" @change="onDirChange">

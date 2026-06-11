@@ -1,6 +1,6 @@
 <template>
   <div class="search-wrap">
-    <span class="search-ico"></span>
+    <span class="search-ico">⌕</span>
     <input id="searchInp" type="text" placeholder="搜索曲目或作者..." :value="libraryStore.kw" @input="onInput" />
     <button v-if="libraryStore.kw" id="clearSearch" @click="clearSearch">✕</button>
   </div>

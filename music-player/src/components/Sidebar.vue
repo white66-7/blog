@@ -5,7 +5,7 @@
                 <img src="@/assets/图标3.png" alt="logo" class="brand-logo">
                 <span class="glitch-text" data-text="音乐都市">音乐都市</span>
             </div>
-            <div class="badge">在线</div>
+            <div class="badge">● 在线</div>
         </div>
         <NowPlayingCard />
         <SearchBar />

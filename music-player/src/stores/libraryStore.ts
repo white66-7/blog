@@ -23,7 +23,7 @@ interface FilteredSong extends Song {
 }
 export const useLibraryStore = defineStore('library', () => {
   const library = ref<Song[]>([])
-  const dirs = ref<Dir[]>([{ id: 'defalut', name: '未分类' }])
+  const dirs = ref<Dir[]>([{ id: 'default', name: '未分类' }])
   const curDir = ref<string>('all')
   const kw = ref<string>('')
   const filteredList = computed<FilteredSong[]>(() => {
@@ -102,20 +102,20 @@ export const useLibraryStore = defineStore('library', () => {
 
   async function addDir(name:string) {
     const id = 'dir_' + Date.now();
-    dirs.value.push({id,name})
-    await saveDirs(dirs.value)
+    dirs.value.push({ id, name })
+    await saveDirs(JSON.parse(JSON.stringify(dirs.value)))
     return id
   }
 
   async function removeDir(dirId:string)
   {
-    if(dirId === 'defulat'){
+    if(dirId !== 'default'){
       for(const song of library.value.filter(s => s.directoryId === dirId)){
         song.directoryId = 'default'
         await updateSongDir(song.id,'default')
       }
       dirs.value = dirs.value.filter(d => d.id !== dirId)
-      await saveDirs(dirs.value)
+      await saveDirs(JSON.parse(JSON.stringify(dirs.value)))
       if(curDir.value === dirId) {curDir.value = 'all'}
     }
   }
@@ -128,7 +128,7 @@ export const useLibraryStore = defineStore('library', () => {
     }
     else{
       dirs.value = [{id: 'default',name: '未分类'}]
-      await saveDirs(dirs.value)
+      await saveDirs(JSON.parse(JSON.stringify(dirs.value)))
     }
   }
 
