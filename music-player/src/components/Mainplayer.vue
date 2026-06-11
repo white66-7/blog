@@ -15,7 +15,6 @@
     <div class="info">
       <div class="h">{{ audioStore.currentSong?.name || 'NO SIGNAL' }}</div>
       <div class="sub">
-        <i>⬡</i>
         <span>{{ audioStore.currentSong?.artist || 'System Idle' }}</span>
       </div>
     </div>
