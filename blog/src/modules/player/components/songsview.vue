@@ -57,7 +57,7 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
           v-model="libraryStore.kw" 
           class="search-input" 
           required 
-          placeholder="搜索信号..."
+          placeholder=""
         >
         <div class="search-icon">
           <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
@@ -264,6 +264,7 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
   margin: 0 0 12px 0;
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
