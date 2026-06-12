@@ -1,7 +1,8 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import Bloghome from '@/views/bloghome.vue'
 import musicPlayer from '@/views/music-player.vue'
-
+import SongsView from '@/modules/player/components/songsview.vue'
+import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
 const routes = [{
     path:'/',
     name:'blog',
@@ -9,8 +10,12 @@ const routes = [{
 },
 {
     path: '/player',
-    name: 'player',
-    component: musicPlayer
+    component: musicPlayer,
+    children:[
+        {path: 'songs', component: SongsView},
+        {path: 'playlists', component: PlaylistsView},
+        { path: '', redirect: '/player/playlists' } 
+    ]
 }]
 
 const router = createRouter({

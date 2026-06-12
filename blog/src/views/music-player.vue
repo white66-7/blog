@@ -43,7 +43,6 @@ body {
 import { ref, onMounted } from 'vue'
 import Sidebar from '@/modules/player/components/Sidebar.vue'
 import Mainplayer from '@/modules/player/components/Mainplayer.vue'
-import Popnumenu from '@/modules/player/components/Popnumenu.vue'
 import { useLibraryStore } from '@/modules/player/stores/libraryStore.ts'
 import { useAudioStore } from '@/modules/player/stores/audioStore.ts'
 

@@ -16,6 +16,7 @@ export interface Song {
 export interface Dir {
   id: string
   name: string
+  cover?: string
 }
 interface FilteredSong extends Song {
   _globalIdx: number
@@ -23,7 +24,7 @@ interface FilteredSong extends Song {
 }
 export const useLibraryStore = defineStore('library', () => {
   const library = ref<Song[]>([])
-  const dirs = ref<Dir[]>([{ id: 'default', name: '未分类' }])
+  const dirs = ref<Dir[]>([])
   const curDir = ref<string>('all')
   const kw = ref<string>('')
   const filteredList = computed<FilteredSong[]>(() => {
@@ -48,7 +49,7 @@ export const useLibraryStore = defineStore('library', () => {
     if (curDir.value === 'all') {
       list.forEach(s => {
         const d = dirs.value.find(dir => dir.id === s.directoryId)
-        s._dirName = d ? d.name : '未分类'
+        s._dirName = d ? d.name : ''
       })
     }
 
@@ -100,9 +101,9 @@ export const useLibraryStore = defineStore('library', () => {
     }
   }
 
-  async function addDir(name:string) {
+  async function addDir(name: string, cover?: string) {
     const id = 'dir_' + Date.now();
-    dirs.value.push({ id, name })
+    dirs.value.push({ id, name, cover})
     await saveDirs(JSON.parse(JSON.stringify(dirs.value)))
     return id
   }
@@ -121,13 +122,13 @@ export const useLibraryStore = defineStore('library', () => {
   }
 
 
-  async function loadDate(): Promise<void> {
+async function loadDate(): Promise<void> {
     const loadedDirs = await loadDirs()
     if(loadedDirs.length){
-      dirs.value = loadedDirs;
+      dirs.value = loadedDirs.filter(d => d.id !== 'default');
     }
     else{
-      dirs.value = [{id: 'default',name: '未分类'}]
+      dirs.value = [] 
       await saveDirs(JSON.parse(JSON.stringify(dirs.value)))
     }
   }
