@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <div class="sys-line">// SYNTHWAVE</div>
+    <div class="sys-line">SYNTHWAVE</div>
 
     <div class="disc-box">
       <img
@@ -264,7 +264,10 @@ function onSetVolume(e: MouseEvent) {
   transition: .2s;
   font-family: inherit;
 }
-
+.cbtn.on {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0, 243, 255, .5);
+}
 .container {
   --color: white;
   --size: 45px;
