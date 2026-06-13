@@ -76,7 +76,7 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
       <div class="playlist-banner">
         <div class="banner-cover">
           <!-- 如果有封面则显示，没有则显示默认渐变色块 -->
-          <img v-if="curDirInfo.cover || audioStore.currentCoverUrl" :src="curDirInfo.cover || audioStore.currentCoverUrl || ''" />
+          <img v-if="curDirInfo.cover" :src="curDirInfo.cover" />
           <div v-else class="default-cover">🎵</div>
         </div>
         <div class="banner-info">
