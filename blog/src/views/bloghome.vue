@@ -71,7 +71,7 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 const albumImages = [
-  { url: img1, description: `劳动节回了一趟家,在田地给奶奶抓拍了张照片
+  { url: img1, description: `劳动节回了一趟老家,在田地给奶奶抓拍了张照片
     奶奶当时笑得很开心` },
   { url: img2, description: `当时刚刚中考完特地换了张头像,之后就再也没换过
    挑了好久因为当时觉得头像是一件很重要的事情
@@ -85,7 +85,7 @@ const albumImages = [
   { url: img7, description: `这一排都是我高中的同学，老实说几乎全做过同桌
     可惜大学几乎再也没有交流了`},
   { url: img8, description: `高二当时真心觉得自己可以考上这种层次
-    后来心气全散了，完全没有提升的想法了，得过且过，安于现状` },
+    后来心气全散了，完全没有提升的想法了，得过且过，安于现状，但老实说并不后悔` },
 ]
 </script>
 
