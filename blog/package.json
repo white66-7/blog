@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "jquery": "^4.0.0",
     "jsmediatags": "^3.9.7",
     "pinia": "^3.0.4",
     "router": "^2.2.0",
@@ -23,6 +24,7 @@
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
     "npm-run-all2": "^8.0.4",
+    "sass-embedded": "^1.100.0",
     "typescript": "~6.0.0",
     "vite": "^8.0.8",
     "vite-plugin-vue-devtools": "^8.1.1",
