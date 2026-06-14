@@ -1,6 +1,6 @@
 <template>
   <div class="contact-page">
-    <img src="@/assets/wechat.png" alt="微信二维码" class="qr-img" />
+    <img src="@/assets/wechat.png" loading="lazy" alt="微信二维码" class="qr-img" />
   </div>
 </template>
 
