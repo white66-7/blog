@@ -1,6 +1,6 @@
 <template>
   <div class="contact-page">
-    <img src="@/assets/qq.png" loading="lazy" alt="QQ二维码" class="qr-img" />
+    <img src="@/assets/qq.webp" loading="lazy" alt="QQ二维码" class="qr-img" />
   </div>
 </template>
 
