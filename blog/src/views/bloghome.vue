@@ -67,11 +67,15 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 const albumImages = [
-  { url: img1, description: `劳动节回了一趟家,在田地给奶奶拍了张照片，奶奶笑得很开心` },
+  { url: img1, description: `劳动节回了一趟家,在田地给奶奶抓拍了张照片
+    奶奶当时笑得很开心` },
   { url: img2, description: `当时刚刚中考完特地换了张头像,之后就再也没换过
-   挑了好久因为当时觉得头像是一件很重要的事情,最后冥冥之中选了这张的特写` },
-  { url: img3, description: '第一次研学在外面住，和朋友玩到一点，高中为数不多觉得还挺开心的事情' },
-  { url: img4, description: '刚高考完拍的照片，天气真好啊，内心os却是终于脱离苦海了' },
+   挑了好久因为当时觉得头像是一件很重要的事情
+   最后冥冥之中选了这张的特写` },
+  { url: img3, description: `第一次研学在外面住，和朋友玩到一点
+    高中为数不多觉得还挺开心的事情`},
+  { url: img4, description: `刚高考完拍的照片，天气真好看啊
+    内心os却是终于脱离苦海了` },
 ]
 </script>
 
@@ -91,6 +95,7 @@ const albumImages = [
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: default;
 }
 
 /* 固定背景图（全屏） */
