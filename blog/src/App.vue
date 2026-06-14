@@ -24,12 +24,26 @@ body {
   font-family: var(--font-mono);
   min-height: 100vh;
 }
+
 #app {
   width: 100%;
 }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.25); border-radius: 3px; }
+/* 强制所有元素默认箭头，仅链接/按钮保留手型 */
+body, html, #app, .app-flex, .hero-section,
+.hero-section * {
+  cursor: default !important;
+}
+
+/* 允许真正的交互元素显示手型 */
+.hero-section a,
+.hero-section button,
+.hero-section [role="button"],
+.hero-section input[type="submit"] {
+  cursor: pointer !important;
+}
 </style>
 
 <script setup lang="ts">
