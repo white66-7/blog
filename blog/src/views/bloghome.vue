@@ -22,11 +22,16 @@
     </div>
 
     <!-- 第二屏：博客内容区（白色背景，接住波浪） -->
-    <div class="main-body">
+    <div class="main-body" ref="mainBody">
       <section class="content"><!-- 其他组件 --></section>
-      <div class="cards-wrapper" ref="cardsWrapper">
-        <information class="info-card" />
-        <player class="sticky-card" />
+      <<div class="floating-panels">
+        <div class="cards-wrapper">
+          <information class="info-card" />
+          <player class="sticky-card" />
+        </div>
+        <div class="album-wrapper">
+          <ImageSlider :images="albumImages" />
+        </div>
       </div>
     </div>
   </div>
@@ -37,14 +42,19 @@ import Information from '@/modules/bloghome/components/information.vue';
 import player from '@/modules/bloghome/components/music.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
-
+import ImageSlider from '@/modules/bloghome/components/image.vue'
+import img1 from '@/assets/home.webp'
+import img2 from '@/assets/think.webp'
+import img3 from '@/assets/play.webp'
+import img4 from '@/assets/view.webp'
 const cardsWrapper = ref<HTMLElement | null>(null)
+const mainBody = ref<HTMLElement | null>(null)
 
 const handleScroll = () => {
-  if (!cardsWrapper.value) return
-  const rect = cardsWrapper.value.getBoundingClientRect()
+  if (!mainBody.value) return
+  const rect = mainBody.value.getBoundingClientRect()
   if (rect.top < window.innerHeight) {
-    cardsWrapper.value.classList.add('visible')
+    mainBody.value.classList.add('visible')
   }
 }
 
@@ -56,6 +66,13 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
+const albumImages = [
+  { url: img1, description: `劳动节回了一趟家,在田地给奶奶拍了张照片，奶奶笑得很开心` },
+  { url: img2, description: `当时刚刚中考完特地换了张头像,之后就再也没换过
+   挑了好久因为当时觉得头像是一件很重要的事情,最后冥冥之中选了这张的特写` },
+  { url: img3, description: '第一次研学在外面住，和朋友玩到一点，高中为数不多觉得还挺开心的事情' },
+  { url: img4, description: '刚高考完拍的照片，天气真好啊，内心os却是终于脱离苦海了' },
+]
 </script>
 
 <style>
@@ -114,27 +131,48 @@ onUnmounted(() => {
   display: flex;
   position: relative;
   min-height: 100vh;
-  background-color: #fff;     /* 白色背景，和波浪底部无缝衔接 */
-  z-index: 3;                 /* 确保在遮罩上面 */
+  background-color: #fff;   
+  z-index: 3;                 
+}
+.main-body.visible .cards-wrapper,
+.main-body.visible .album-wrapper {
+  opacity: 1;
+}
+.floating-panels {
+  position: absolute;
+  top: 45%;                        /* 控制整体垂直位置 */
+  left: 360px;
+  right: 360px;
+  transform: translateY(-50%);     /* 垂直居中 */
+  display: flex;
+  justify-content: space-between;  /* 左右分布 */
+  align-items: flex-start;         /* ✅ 顶部对齐 */
+  z-index: 10;
+  gap: 20px;
 }
 
-/* ========= 右侧卡片容器 ========= */
+/* ========= 左侧侧卡片容器 ========= */
 .cards-wrapper {
-  position: absolute;
-  right: 1000px;              /* 根据你的设计可自行调整 */
-  top: 45%;
-  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  z-index: 10;
+  width: 300px;
   opacity: 0;
   transition: opacity 0.6s ease;
-  width: 300px;
 }
 
-.cards-wrapper.visible {
+/* 右侧相册容器 */
+.album-wrapper {
+  width: 600px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  margin-top: -16px;
+}
+
+/* 渐显控制 */
+.main-body.visible .cards-wrapper,
+.main-body.visible .album-wrapper {
   opacity: 1;
 }
 
@@ -143,10 +181,7 @@ onUnmounted(() => {
   padding-right: 340px;
 }
 
-.sticky-card {
-  width: 100%;
-}
-
+.sticky-card,
 .info-card {
   width: 100%;
 }
@@ -157,7 +192,7 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   width: 100%;
-  z-index: 5;               /* 盖在遮罩上方，但低于卡片 */
+  z-index: 5;
   overflow: hidden;
   line-height: 0;
 }
@@ -170,44 +205,36 @@ onUnmounted(() => {
   max-height: 150px;
 }
 
-/* 波浪动画 */
 .parallax > use {
   animation: move-forever 25s cubic-bezier(.55, .5, .45, .5) infinite;
 }
-.parallax > use:nth-child(1) {
-  animation-delay: -2s;
-  animation-duration: 7s;
-}
-.parallax > use:nth-child(2) {
-  animation-delay: -3s;
-  animation-duration: 10s;
-}
-.parallax > use:nth-child(3) {
-  animation-delay: -4s;
-  animation-duration: 13s;
-}
-.parallax > use:nth-child(4) {
-  animation-delay: -5s;
-  animation-duration: 20s;
-}
+.parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
+.parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
+.parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
+.parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
 
 @keyframes move-forever {
-  0% {
-    transform: translate3d(-90px, 0, 0);
-  }
-  100% {
-    transform: translate3d(85px, 0, 0);
-  }
+  0% { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
 }
 
-/* ========= 移动端微调 ========= */
+/* ========= 移动端 ========= */
 @media (max-width: 768px) {
+  .floating-panels {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 30px;
+  }
+  .cards-wrapper, .album-wrapper {
+    width: 100% !important;
+    opacity: 1;
+  }
   .waves {
     height: 40px;
     min-height: 40px;
-  }
-  .cards-wrapper {
-    right: 20px;   /* 小屏幕时别太远 */
   }
 }
 </style>
