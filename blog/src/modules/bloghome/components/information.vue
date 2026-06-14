@@ -5,6 +5,7 @@
       <img
         class="avatar"
         src="@/assets/me.jpg"
+        loading="lazy"
         alt="头像"
       />
     </div>

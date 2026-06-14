@@ -63,7 +63,7 @@ onUnmounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url('@/assets/木叶创立.png');
+  background-image: url('@/assets/木叶创立.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
