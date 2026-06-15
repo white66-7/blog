@@ -2,7 +2,10 @@
   <div class="app-flex">
     <!-- 第一屏：大标题 + 背景图 -->
     <div class="hero-section">
+
       <TextEffect />
+<div class="arrow bounce">
+</div>
       <div class="wave-container"> <svg class="waves" xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none"
           shape-rendering="auto">
@@ -36,7 +39,23 @@
        <WeatherCard address="武汉" class="weather-card-comp" />
     </div>
     <div class="articles-section">
-      <ArticleShow :articles="articles" />
+      <ArticleShow :articles="paginatedArticles" />
+        <div class="pagination" v-if="totalPages > 1">
+    <button :disabled="currentPage <= 1" @click="goToPage(currentPage - 1)">
+      上一页
+    </button>
+    <span
+      v-for="page in totalPages"
+      :key="page"
+      :class="{ active: page === currentPage }"
+      @click="goToPage(page)"
+    >
+      {{ page }}
+    </span>
+    <button :disabled="currentPage >= totalPages" @click="goToPage(currentPage + 1)">
+      下一页
+    </button>
+  </div>
     </div>
   </div>
       </div>
@@ -48,10 +67,13 @@
 import Information from '@/modules/bloghome/components/information.vue';
 import player from '@/modules/bloghome/components/music.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted,computed } from 'vue'
 import ImageSlider from '@/modules/bloghome/components/image.vue'
 import ArticleShow from '@/modules/bloghome/components/article_show.vue'
 import WeatherCard from '@/modules/bloghome/components/weatherCard.vue'
+import { articles as articleData } from '@/date/articles'
+
+
 import img1 from '@/assets/home.webp'
 import img2 from '@/assets/think.webp'
 import img3 from '@/assets/play.webp'
@@ -62,6 +84,7 @@ import img7 from '@/assets/classmates.webp'
 import img8 from '@/assets/school.webp'
 const cardsWrapper = ref<HTMLElement | null>(null)
 const mainBody = ref<HTMLElement | null>(null)
+const articles = ref(articleData)
 const handleScroll = () => {
   if (!mainBody.value) return
   const rect = mainBody.value.getBoundingClientRect()
@@ -78,52 +101,22 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
-const articles = ref([
-  {
-    id: 1,
-    title: '无',
-    type: '无',
-    date: '2026-06-15',
-    readTime: '无',
-    excerpt: '无',
-    tags: ['', ''],
-    cover: '',
-    layout: 'horizontal'    // 新增：横向卡片
-  },
-  {
-    id: 2,
-    title: '无',
-    type: '无',
-    date: '2026-06-15',
-    readTime: '无',
-    excerpt: '无',
-    tags: ['', ''],
-    cover: '',
-    layout: 'vertical'      // 纵向卡片
-  },
-  {
-    id: 3,
-    title: '无',
-    type: '无',
-    date: '2026-06-15',
-    readTime: '无',
-    excerpt: '无',
-    tags: ['', ''],
-    cover: '',
-    layout: 'reverse-horizontal'  // 反向横向
-  },
-  {
-    id: 4,
-    title: '无',
-    type: '无',
-    date: '2026-06-15',
-    readTime: '无',
-    excerpt: '无',
-    tags: ['', ''],
-    cover: '',
-    layout: 'horizontal'    // 新增：横向卡片
-  },
-])
+const currentPage = ref(1)
+const pageSize = ref(6) // 每页 6 篇
+
+const totalPages = computed(() => Math.ceil(articles.value.length / pageSize.value))
+
+const paginatedArticles = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return articles.value.slice(start, start + pageSize.value)
+})
+
+function goToPage(page: number) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
 const albumImages = [
   {
     url: img1, description: `劳动节回了一趟老家,在田地给奶奶抓拍了张照片
@@ -247,6 +240,9 @@ const albumImages = [
 .left-column {
   width: 320px;
   flex-shrink: 0;
+  display: flex;          
+  flex-direction: column;  
+  gap: 20px;            
 }
 /* 移动端调整 */
 @media (max-width: 768px) {
@@ -338,6 +334,32 @@ const albumImages = [
   .waves {
     height: 40px;
     min-height: 40px;
+  }
+}
+ /* ========= 滚动箭头 ========= */
+.arrow.bounce {
+  position: absolute;
+  bottom: 90px;         /* 放在波浪上方 */
+  left: 50%;
+  margin-left: -20px;
+  width: 40px;
+  height: 40px;
+  background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0yOTMuNzUxLDQ1NS44NjhjLTIwLjE4MSwyMC4xNzktNTMuMTY1LDE5LjkxMy03My42NzMtMC41OTVsMCwwYy0yMC41MDgtMjAuNTA4LTIwLjc3My01My40OTMtMC41OTQtNzMuNjcyICBsMTg5Ljk5OS0xOTBjMjAuMTc4LTIwLjE3OCw1My4xNjQtMTkuOTEzLDczLjY3MiwwLjU5NWwwLDBjMjAuNTA4LDIwLjUwOSwyMC43NzIsNTMuNDkyLDAuNTk1LDczLjY3MUwyOTMuNzUxLDQ1NS44Njh6Ii8+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjIwLjI0OSw0NTUuODY4YzIwLjE4LDIwLjE3OSw1My4xNjQsMTkuOTEzLDczLjY3Mi0wLjU5NWwwLDBjMjAuNTA5LTIwLjUwOCwyMC43NzQtNTMuNDkzLDAuNTk2LTczLjY3MiAgbC0xOTAtMTkwYy0yMC4xNzgtMjAuMTc4LTUzLjE2NC0xOS45MTMtNzMuNjcxLDAuNTk1bDAsMGMtMjAuNTA4LDIwLjUwOS0yMC43NzIsNTMuNDkyLTAuNTk1LDczLjY3MUwyMjAuMjQ5LDQ1NS44Njh6Ii8+DQo8L3N2Zz4=);
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: 10;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-30px);
+  }
+  60% {
+    transform: translateY(-15px);
   }
 }
 </style>

@@ -5,6 +5,7 @@ import SongsView from '@/modules/player/components/songsview.vue'
 import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
 import QQContact from '@/modules/bloghome/views/qq.vue'
 import WechatContact from '@/modules/bloghome/views/wechat.vue'
+const ArticleDetail = () => import('@/modules/bloghome/components/ArticleDetail.vue')
 const routes = [{
     path: '/',
     name: 'blog',
@@ -28,7 +29,13 @@ const routes = [{
         { path: 'playlists', component: PlaylistsView },
         { path: '', redirect: '/player/playlists' }
     ]
-}]
+},
+{
+    path: '/article/:id',    
+    name: 'ArticleDetail',
+    component: ArticleDetail
+ },
+]
 
 const router = createRouter({
     history: createWebHistory(), routes

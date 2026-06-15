@@ -18,11 +18,11 @@ const router = useRouter()
 const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
+
 </script>
 
 <template>
   <div class="articles-section">
-    <!-- 已删除标题行 -->
     <div class="articles-grid">
       <div
         v-for="article in props.articles"

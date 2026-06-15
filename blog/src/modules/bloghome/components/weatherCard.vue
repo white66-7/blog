@@ -499,4 +499,5 @@ onUnmounted(() => {
   color: #aaa;
   margin-top: 2px;
 }
+
 </style>
