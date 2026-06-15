@@ -18,16 +18,20 @@ export const articles: Article[] = [
     title: '对网页设计回调设计的理解 ',
     type: '无',
     date: '2026-06-15',
-    readTime: '无',
-    excerpt: '无',
+    readTime: '5 minutes',
+    excerpt: '第一接触网页设计，被网页处理多线程的方法惊艳到了',
     tags: ['vue3', '前端'],
-    cover: '',
+    cover: '/covers/vue.webp',
     layout: 'horizontal',
-    content:` # 对网页设计回调设计的理解<br>老实说非常难受啊
+    content:`
+# 对网页设计回调设计的理解  
+老实说非常难受啊
     
-    #什么意思
+
+# 什么意思
     
-    达瓦达瓦`,
+
+达瓦达瓦`,
   },
   {
     id: 2,

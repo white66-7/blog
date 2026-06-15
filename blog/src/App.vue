@@ -17,7 +17,9 @@
   --text-dim: #6b6b8a;
   --font-mono: 'Courier New', Courier, 'SF Mono', Monaco, monospace;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none;
+ scroll-snap-type: y proximity;
+  scroll-behavior: smooth;  }
 body {
   background: var(--bg-dark);
   color: var(--text-main);

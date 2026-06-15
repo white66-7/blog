@@ -12,12 +12,12 @@
           <defs>
             <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
           </defs>
-          <g class="parallax">
-            <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7)" />
-            <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
-            <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
-            <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
-          </g>
+<g class="parallax">
+  <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,252,250,0.9)" />
+  <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,248,245,0.7)" />
+  <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,242,240,0.5)" />
+  <use xlink:href="#gentle-wave" x="48" y="7" fill="#fdf0f0" />
+</g>
         </svg></div>
     </div>
 
@@ -119,26 +119,16 @@ function goToPage(page: number) {
 
 const albumImages = [
   {
-    url: img1, description: `劳动节回了一趟老家,在田地给奶奶抓拍了张照片
-    奶奶当时笑得很开心` },
-  {
     url: img2, description: `当时刚刚中考完特地换了张头像,之后就再也没换过
    挑了好久因为当时觉得头像是一件很重要的事情
    最后冥冥之中选了这张的特写` },
   {
-    url: img3, description: `第一次研学在外面住，和朋友玩到一点
-    高中为数不多觉得还挺开心的事情`},
-  { url: img4, description: `为数不多拍出来自己都觉得蛮好看的照片` },
-  { url: img5, description: `老实说我是宿舍最宅的，每天都呆在宿舍，每次室友回来第一句话都是咋又你一个人在宿舍` },
+    url: img3, description: `第一次研学在外面住，一直爽玩到一两点
+    第二天全睡死过去了`},
   {
-    url: img6, description: `大学里的第一次团建，关系都还不错
-    希望大二的室友也能相处的来` },
-  {
-    url: img7, description: `这一排都是我高中的同学，老实说几乎全做过同桌
-    可惜大学几乎再也没有交流了`},
-  {
-    url: img8, description: `高二当时真心觉得自己可以考上这种层次
-    后来心气全散了，完全没有提升的想法了，得过且过，安于现状，但老实说并不后悔` },
+    url: img7, description: `一排我高中的同学，几乎全做过同桌，都是好人啊
+    可惜似乎以后不会再有交集了`},
+  { url: img4, description: `给朋友拍的照片` },
 ]
 </script>
 
@@ -160,6 +150,7 @@ const albumImages = [
   align-items: center;
   justify-content: center;
   cursor: default;
+  scroll-snap-align: start;
 }
 
 /* 固定背景图（全屏） */
@@ -198,7 +189,8 @@ const albumImages = [
 .main-body {
   display: block;
   padding: 80px 5% 60px 270px;
-  background: #fff;
+  background: #fdf0f0;
+  scroll-snap-align: start;
 }
 
 .two-columns {
