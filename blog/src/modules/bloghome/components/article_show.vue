@@ -191,12 +191,11 @@ const goToArticle = (id: number) => {
 .tag:active {
   transform: translateY(-1px);
 }
-/* 移动端适配 */
 @media (max-width: 900px) {
   .articles-grid {
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
-    gap: 20px;
+    gap: 16px;
   }
   .card {
     grid-row: auto !important;
@@ -210,7 +209,7 @@ const goToArticle = (id: number) => {
   }
   .card .card__content {
     width: 100% !important;
-    padding: 16px;
+    padding: 12px;
   }
 }
 </style>

@@ -236,22 +236,6 @@ const albumImages = [
   flex-direction: column;  
   gap: 20px;            
 }
-/* 移动端调整 */
-@media (max-width: 768px) {
-  .album-container {
-    width: 100%;
-  }
-}
-
-@media (max-width: 900px) {
-  .two-columns {
-    flex-direction: column;
-  }
-  .articles-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 
 /* ========= 波浪样式 ========= */
 .wave-container {
@@ -305,29 +289,6 @@ const albumImages = [
     transform: translate3d(85px, 0, 0);
   }
 }
-
-/* ========= 移动端 ========= */
-@media (max-width: 768px) {
-  .floating-panels {
-    position: static;
-    transform: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    gap: 30px;
-  }
-
-  .cards-wrapper,
-  .album-wrapper {
-    width: 100% !important;
-    opacity: 1;
-  }
-
-  .waves {
-    height: 40px;
-    min-height: 40px;
-  }
-}
  /* ========= 滚动箭头 ========= */
 .arrow.bounce {
   position: absolute;
@@ -352,6 +313,93 @@ const albumImages = [
   }
   60% {
     transform: translateY(-15px);
+  }
+}
+/* ========== 移动端适配 ========== */
+@media (max-width: 900px) {
+  .main-body {
+    padding: 40px 5% 40px 5%;   /* 去掉左边大间距，四周均匀留白 */
+  }
+
+  .two-columns {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .left-column {
+    width: 100%;                 /* 全宽 */
+    flex-direction: column;      /* 堆叠 Information 和 Player */
+  }
+
+  .right-column {
+    width: 100%;
+  }
+
+  .top-row {
+    flex-direction: column;      /* 相册和天气上下排列 */
+    gap: 16px;
+  }
+
+  .album-container {
+    width: 100%;
+  }
+
+  .weather-card-comp {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .articles-section {
+    width: 100%;
+  }
+
+  /* 文章网格已在全局改为 1 列，这里可微调 */
+  .articles-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 16px;
+  }
+
+  /* 卡片在移动端强制垂直布局 */
+  .card {
+    grid-row: auto !important;
+    grid-column: auto !important;
+    flex-direction: column !important;
+  }
+  .card .card__img {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+  }
+  .card .card__content {
+    width: 100% !important;
+    padding: 12px;
+  }
+
+  /* 调整字体，防止过大 */
+  .hero-section {
+    height: 100vh; /* 保持全屏 */
+  }
+  .arrow.bounce {
+    bottom: 70px;
+  }
+}
+
+/* 更小屏幕（如手机竖屏）微调 */
+@media (max-width: 480px) {
+  .main-body {
+    padding: 20px 4% 40px 4%;
+  }
+
+  .article-title {
+    font-size: 1.8em;
+  }
+
+  .back-btn {
+    top: 10px;
+    left: 10px;
+    padding: 8px 16px;
+    font-size: 13px;
   }
 }
 </style>
