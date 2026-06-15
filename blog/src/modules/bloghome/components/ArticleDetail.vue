@@ -31,7 +31,7 @@ import MarkdownIt from 'markdown-it'
 import { articles } from '@/date/articles'
 import type { Article } from '@/date/articles'
 
-const md = new MarkdownIt()
+const md = new MarkdownIt({ html: true })
 const route = useRoute()
 const article = ref<Article | null>(null)
 const renderedContent = computed(() => article.value ? md.render(article.value.content) : '')
@@ -43,13 +43,14 @@ const progressRef = ref<HTMLElement | null>(null)
 let dots: HTMLElement[] = []
 let cleanupScroll: () => void
 
+// 生成圆点
 function createDots() {
   if (!contentRef.value || !timelineRef.value) return
-  const h1s = contentRef.value.querySelectorAll('h1')
+  const headings = contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2')
   dots.forEach(d => d.remove())
   dots = []
 
-  h1s.forEach((h1) => {
+  headings.forEach((heading) => {
     const dot = document.createElement('div')
     dot.className = 'dot'
     dot.dataset.targetIndex = String(dots.length)
@@ -61,11 +62,11 @@ function createDots() {
 
 function updateDotPositions() {
   if (!contentRef.value) return
-  const h1s = Array.from(contentRef.value.querySelectorAll('h1'))
+  const headings = Array.from(contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2'))
   dots.forEach((dot, i) => {
-    const h1 = h1s[i]
-    if (h1) {
-      const rect = h1.getBoundingClientRect()
+    const heading = headings[i]
+    if (heading) {
+      const rect = heading.getBoundingClientRect()
       const top = rect.top + window.scrollY
       dot.style.top = `${top}px`
     }
@@ -74,13 +75,13 @@ function updateDotPositions() {
 
 function handleScroll() {
   if (!contentRef.value || !progressRef.value) return
-  const h1s = contentRef.value.querySelectorAll('h1')
+  const headings = contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2')
   const viewportHeight = window.innerHeight
   const midline = viewportHeight / 2
   let activeIndex = -1
 
-  h1s.forEach((h1, index) => {
-    const rect = h1.getBoundingClientRect()
+  headings.forEach((heading, index) => {
+    const rect = heading.getBoundingClientRect()
     if (rect.top <= midline) {
       activeIndex = index
     }
@@ -90,6 +91,7 @@ function handleScroll() {
     dot.classList.toggle('active', i === activeIndex)
   })
 
+  // 进度条高度计算不变（不需要修改）
   const contentEl = contentRef.value!
   const articleTop = contentEl.getBoundingClientRect().top + window.scrollY
   const articleHeight = contentEl.offsetHeight
@@ -98,7 +100,6 @@ function handleScroll() {
   progress = Math.max(0, Math.min(1, progress))
   progressRef.value.style.height = `${progress * 100}%`
 }
-
 function handleResize() {
   updateDotPositions()
   handleScroll()
@@ -140,7 +141,12 @@ onUnmounted(() => {
   z-index: 10;
   transition: border-color 0.3s, transform 0.3s;
 }
-
+.markdown-body img {
+  display: block;
+  margin: 1.5em auto;     /* 上下留白，左右自动居中 */
+  max-width: 100%;        /* 不超出容器宽度 */
+  border-radius: 8px;     /* 可选：轻微圆角 */
+}
 .timeline .dot.active {
   border-color: #2c3e50;
   animation: pulse 0.25s ease;
@@ -156,7 +162,7 @@ onUnmounted(() => {
 <style scoped>
 .article-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #fdf0f0;
   position: relative;
   z-index: 10;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
@@ -193,7 +199,7 @@ onUnmounted(() => {
 }
 
 main {
-  display: flex;
+  display: block;
   position: relative;
 }
 
@@ -228,15 +234,14 @@ main {
 }
 
 .content {
-  margin-left: 150px;
+  margin: 0 auto;          
   padding: 80px 60px;
-  max-width: 800px;
+  max-width: 800px;       
   width: 100%;
   background: white;
   min-height: 100vh;
   box-shadow: -5px 0 20px rgba(0,0,0,0.02);
 }
-
 .article-title {
   font-size: 2.5em;
   margin-bottom: 0.2em;
@@ -254,15 +259,16 @@ main {
 .markdown-body {
   line-height: 1.8;
   font-size: 16px;
+  color: #000;
 }
 
 .markdown-body :deep(h1) {
-  margin: 2em 0 0.8em;
+  margin: 2em 0 0.5em;
   font-size: 2em;
 }
 
 .markdown-body :deep(p) {
-  margin-bottom: 1.2em;
+  margin-bottom: 0.6em;
 }
 
 .markdown-body :deep(pre) {
