@@ -3,9 +3,9 @@ const props = defineProps<{
   articles: Array<{
     id: number
     title: string
-    type: string
+    type: string          // 保留字段，只是不展示
     date: string
-    readTime: string
+    readTime: string      // 保留字段，只是不展示
     excerpt: string
     tags: string[]
     cover: string
@@ -18,7 +18,6 @@ const router = useRouter()
 const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
-
 </script>
 
 <template>
@@ -32,9 +31,9 @@ const goToArticle = (id: number) => {
       >
         <img :src="article.cover" class="card__img" />
         <div class="card__content">
-          <div class="card__type">{{ article.type }}</div>
+          <!-- 已移除 type 展示 -->
           <div class="card__title">{{ article.title }}</div>
-          <div class="card__date">{{ article.date }} · {{ article.readTime }}</div>
+          <div class="card__date">{{ article.date }}</div>
           <div class="card__excerpt">{{ article.excerpt }}</div>
           <div class="card__tags">
             <span v-for="tag in article.tags" :key="tag" class="tag">
@@ -50,13 +49,10 @@ const goToArticle = (id: number) => {
 <style scoped>
 .articles-section {
   margin-top: 20px;
-}
-/* 如果不再需要 section-title 的样式，可以保留或删除，此处保留备用 */
-.section-title {
-  display: none; /* 隐藏而非删除，以防其他依赖 */
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
+  font-weight: 700; /* 或 bold */
 }
 
-/* ========= 网格布局（仿参考） ========= */
 .articles-grid {
   display: grid;
   grid-auto-flow: row dense;
@@ -66,7 +62,6 @@ const goToArticle = (id: number) => {
   justify-content: start;
 }
 
-/* 卡片基础样式 */
 .card {
   display: flex;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -129,30 +124,28 @@ const goToArticle = (id: number) => {
   padding: 12px;
 }
 
-/* 卡片内容区域 */
+/* ====== 卡片内容区域 ====== */
 .card__content {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-.card__type {
-  font-variant: small-caps;
-  letter-spacing: 1px;
-  font-size: 12px;
-  color: #ff6b6b;
-  margin-bottom: 4px;
-}
+
+/* 标题样式（改为黑色） */
 .card__title {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 6px;
   line-height: 1.3;
+  color: #1a1a1a;        /* 新增：深黑色 */
 }
+
 .card__date {
   font-size: 12px;
   color: #999;
   margin-bottom: 8px;
 }
+
 .card__excerpt {
   font-size: 13px;
   color: #555;
@@ -163,24 +156,42 @@ const goToArticle = (id: number) => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
 .card__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: auto;
 }
+
+/* ====== 新标签样式 ====== */
 .tag {
-  background: #f0f0f0;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
+  background: #fff;
+  color: #000;
+  padding: 4px 14px;
+  border-radius: 45px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'SimHei', 'Microsoft YaHei', sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #555;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease 0s;
+  cursor: default;
 }
 
-/* 移动端适配：宽度不足时改为普通流式布局 */
+.tag:hover {
+  background-color: #23c483;
+  color: #fff;
+  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+  transform: translateY(-7px);
+}
+
+.tag:active {
+  transform: translateY(-1px);
+}
+/* 移动端适配 */
 @media (max-width: 900px) {
   .articles-grid {
     grid-template-columns: 1fr;

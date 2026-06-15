@@ -1,25 +1,19 @@
 <template>
   <div class="article-page" v-if="article">
-    <!-- 顶部返回按钮（固定） -->
     <button class="back-btn" @click="$router.back()">← 返回</button>
 
     <main>
-      <!-- 左侧固定进度线 -->
       <aside class="timeline" ref="timelineRef">
         <div class="line-bg"></div>
         <div class="line-progress" ref="progressRef"></div>
-        <!-- 动态生成的圆点会插入这里 -->
       </aside>
 
-      <!-- 右侧文章区域 -->
       <article class="content" ref="contentRef">
         <h1 class="article-title">{{ article.title }}</h1>
         <div class="meta">
           <span>{{ article.date }}</span>
-          <span>· {{ article.readTime }}</span>
-          <span>· {{ article.type }}</span>
         </div>
-        <img v-if="article.cover" :src="article.cover" class="cover" />
+
         <div class="markdown-body" v-html="renderedContent"></div>
         <div class="tags">
           <span v-for="tag in article.tags" :key="tag" class="tag">{{ tag }}</span>
@@ -34,7 +28,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import MarkdownIt from 'markdown-it'
-import { articles } from '@/date/articles' // 路径请改为你的实际位置
+import { articles } from '@/date/articles'
 import type { Article } from '@/date/articles'
 
 const md = new MarkdownIt()
@@ -42,28 +36,23 @@ const route = useRoute()
 const article = ref<Article | null>(null)
 const renderedContent = computed(() => article.value ? md.render(article.value.content) : '')
 
-// DOM 引用
 const timelineRef = ref<HTMLElement | null>(null)
 const contentRef = ref<HTMLElement | null>(null)
 const progressRef = ref<HTMLElement | null>(null)
 
-// 动态圆点数组（DOM 元素）
 let dots: HTMLElement[] = []
 let cleanupScroll: () => void
 
-// 生成圆点
 function createDots() {
   if (!contentRef.value || !timelineRef.value) return
   const h1s = contentRef.value.querySelectorAll('h1')
-  // 清除旧点
   dots.forEach(d => d.remove())
   dots = []
 
   h1s.forEach((h1) => {
     const dot = document.createElement('div')
     dot.className = 'dot'
-    // 使用 data 属性存储对应的标题元素，避免 any
-    dot.dataset.targetIndex = String(dots.length) // 或者存储标题文本
+    dot.dataset.targetIndex = String(dots.length)
     timelineRef.value!.appendChild(dot)
     dots.push(dot)
   })
@@ -72,10 +61,10 @@ function createDots() {
 
 function updateDotPositions() {
   if (!contentRef.value) return
-  const h1s = Array.from(contentRef.value.querySelectorAll('h1')) // 转为数组，方便使用 forEach
+  const h1s = Array.from(contentRef.value.querySelectorAll('h1'))
   dots.forEach((dot, i) => {
-    const h1 = h1s[i] // 由于 dots 和 h1s 一一对应，我们直接取
-    if (h1) { // 防御性检查
+    const h1 = h1s[i]
+    if (h1) {
       const rect = h1.getBoundingClientRect()
       const top = rect.top + window.scrollY
       dot.style.top = `${top}px`
@@ -83,7 +72,6 @@ function updateDotPositions() {
   })
 }
 
-// 滚动处理
 function handleScroll() {
   if (!contentRef.value || !progressRef.value) return
   const h1s = contentRef.value.querySelectorAll('h1')
@@ -98,22 +86,19 @@ function handleScroll() {
     }
   })
 
-  // 更新圆点激活状态
   dots.forEach((dot, i) => {
     dot.classList.toggle('active', i === activeIndex)
   })
 
-  // 更新进度条高度
   const contentEl = contentRef.value!
   const articleTop = contentEl.getBoundingClientRect().top + window.scrollY
   const articleHeight = contentEl.offsetHeight
   const scrollY = window.scrollY
-  let progress = (scrollY - articleTop + 200) / (articleHeight - viewportHeight) // 加200提前开始
+  let progress = (scrollY - articleTop + 200) / (articleHeight - viewportHeight)
   progress = Math.max(0, Math.min(1, progress))
   progressRef.value.style.height = `${progress * 100}%`
 }
 
-// 窗口大小改变时重新计算圆点位置
 function handleResize() {
   updateDotPositions()
   handleScroll()
@@ -127,7 +112,6 @@ onMounted(async () => {
   createDots()
   handleScroll()
 
-  // 绑定事件
   const throttledScroll = () => requestAnimationFrame(handleScroll)
   window.addEventListener('scroll', throttledScroll, { passive: true })
   window.addEventListener('resize', handleResize)
@@ -144,7 +128,6 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* 非 scoped 样式：因为圆点是动态生成的，无法使用 scoped */
 .timeline .dot {
   position: absolute;
   left: 50%;
@@ -176,6 +159,8 @@ onUnmounted(() => {
   background: #f5f5f5;
   position: relative;
   z-index: 10;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
+  font-weight: 700; /* 或 bold */
 }
 
 .back-btn {
@@ -185,16 +170,26 @@ onUnmounted(() => {
   background: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 45px;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   z-index: 20;
   font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  transition: all 0.3s ease 0s;
+  outline: none;
 }
 
 .back-btn:hover {
-  transform: translateX(-3px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  background-color: #23c483;
+  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+  color: #fff;
+  transform: translateY(-7px);
+}
+
+.back-btn:active {
+  transform: translateY(-1px);
 }
 
 main {
@@ -202,7 +197,6 @@ main {
   position: relative;
 }
 
-/* ---------- 左侧进度线 ---------- */
 .timeline {
   position: fixed;
   left: 70px;
@@ -233,7 +227,6 @@ main {
   transition: height 0.1s linear;
 }
 
-/* ---------- 右侧文章 ---------- */
 .content {
   margin-left: 150px;
   padding: 80px 60px;
@@ -247,6 +240,7 @@ main {
 .article-title {
   font-size: 2.5em;
   margin-bottom: 0.2em;
+  color: #1a1a1a;
 }
 
 .meta {
@@ -257,18 +251,11 @@ main {
   gap: 12px;
 }
 
-.cover {
-  width: 100%;
-  border-radius: 12px;
-  margin-bottom: 2em;
-}
-
 .markdown-body {
   line-height: 1.8;
   font-size: 16px;
 }
 
-/* 确保 h1 有足够间距，方便观察点 */
 .markdown-body :deep(h1) {
   margin: 2em 0 0.8em;
   font-size: 2em;
@@ -299,12 +286,31 @@ main {
   gap: 8px;
   flex-wrap: wrap;
 }
+
 .tag {
-  background: #f0f0f0;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #555;
+  background: #fff;
+  color: #000;
+  padding: 4px 14px;
+  border-radius: 45px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease 0s;
+  cursor: default;
+}
+
+.tag:hover {
+  background-color: #23c483;
+  color: #fff;
+  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+  transform: translateY(-7px);
+}
+
+.tag:active {
+  transform: translateY(-1px);
 }
 
 .not-found {
