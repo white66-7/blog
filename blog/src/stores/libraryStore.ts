@@ -3,14 +3,17 @@ import { ref, computed,reactive} from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import { loadSongs, saveSong, saveDirSong, loadDirSongs, delDirSong, delDirSongsByDir, loadDirs, saveDirs, delSong } from '@/modules/player/utils/db'
 import { parseName } from '@/modules/player/utils/format'
+import { songs as presetSongs } from '@/config/song'
 
 export interface Song {
   id: string
-  signature: string
   name: string
   artist: string
-  originalFileName: string
-  file: File
+  signature?: string 
+  originalFileName?: string 
+  file?: File 
+  src?: string 
+  isPreset?: boolean
 }
 export interface Dir {
   id: string
@@ -99,7 +102,7 @@ export const useLibraryStore = defineStore('library', () => {
         originalFileName: file.name,
       }
       library.value.push(song)
-      await saveSong(song)
+      await saveSong(song as any)
       if (curDir.value !== 'all') {
         const ds: DirSong = { dirId: curDir.value, songId: song.id }
         dirSongs.value.push(ds)
@@ -119,49 +122,66 @@ export const useLibraryStore = defineStore('library', () => {
     return Object.values(playCounts).reduce((sum, c) => sum + c, 0)
   }
 async function removeSong(id: string) {
-    const idx = library.value.findIndex(s => s.id === id)
-    if (idx !== -1) {
-      library.value.splice(idx, 1)
-      dirSongs.value = dirSongs.value.filter(ds => ds.songId !== id)
-      await delSong(id)  
-    }
-    return idx
+  const idx = library.value.findIndex(s => s.id === id)
+  if (idx !== -1) {
+    const song = library.value[idx]
+    library.value.splice(idx, 1)
+    dirSongs.value = dirSongs.value.filter(ds => ds.songId !== id)
+    if (!song?.isPreset) {
+  await delSong(id)  
+  }
+  }
+  return idx
 }
-
-  async function addDir(name: string, cover?: string) {
+ async function addDir(name: string, cover?: string) {
     const id = 'dir_' + Date.now();
     dirs.value.push({ id, name, cover})
-    await saveDirs(JSON.parse(JSON.stringify(dirs.value)))
+    await saveDirs(JSON.parse(JSON.stringify(dirs.value.filter(d => d.id !== 'preset_dir_1'))))
     return id
   }
 
-async function removeDir(dirId: string): Promise<void> {
-    dirs.value = dirs.value.filter(d => d.id !== dirId)
-    await saveDirs(JSON.parse(JSON.stringify(dirs.value)))
 
+  async function removeDir(dirId: string): Promise<void> {
+    if (dirId === 'preset_dir_1') {
+      alert('「一路向北」是系统默认歌单，不可删除哦~')
+      return
+    }
+
+    dirs.value = dirs.value.filter(d => d.id !== dirId)
+    await saveDirs(JSON.parse(JSON.stringify(dirs.value.filter(d => d.id !== 'preset_dir_1'))))
     dirSongs.value = dirSongs.value.filter(ds => ds.dirId !== dirId)
     await delDirSongsByDir(dirId)
-
     if (curDir.value === dirId) {
       curDir.value = 'all'
     }
-}
+  }
 
 
 async function loadDate(): Promise<void> {
     const loadedDirs = await loadDirs()
-      dirs.value = loadedDirs.filter(d => d.id !== 'default');
-      const loadedDirSongs = await loadDirSongs()
-      dirSongs.value = loadedDirSongs.map(ds => ({ dirId: ds.dirId, songId: ds.songId }))
-      const loadedSongs = await loadSongs()
-      library.value = loadedSongs as Song[]
-      if (dirSongs.value.length === 0 && library.value.length > 0) {
-        const oldMappings = (library.value as any[]).filter(s => s.directoryId && s.directoryId !== 'default')
-        if (oldMappings.length > 0) {
-          for (const s of oldMappings) {
-            const ds: DirSong = { dirId: s.directoryId, songId: s.id }
-            dirSongs.value.push(ds)
-            await saveDirSong(ds.dirId, ds.songId)
+    dirs.value = [
+      { id: 'preset_dir_1', name: '一路向北', cover: '' },
+      ...loadedDirs.filter(d => d.id !== 'default' && d.id !== 'preset_dir_1')
+    ]
+
+    const loadedDirSongs = await loadDirSongs()
+    const presetMappings = presetSongs.map(s => ({ dirId: 'preset_dir_1', songId: s.id }))
+    
+    dirSongs.value = [
+      ...presetMappings,
+      ...loadedDirSongs.map(ds => ({ dirId: ds.dirId, songId: ds.songId }))
+    ]
+
+    const loadedSongs = await loadSongs()
+    library.value = [...presetSongs, ...loadedSongs] as Song[]
+    
+    if (dirSongs.value.length === presetMappings.length && library.value.length > presetSongs.length) {
+      const oldMappings = (library.value as any[]).filter(s => s.directoryId && s.directoryId !== 'default')
+      if (oldMappings.length > 0) {
+        for (const s of oldMappings) {
+          const ds: DirSong = { dirId: s.directoryId, songId: s.id }
+          dirSongs.value.push(ds)
+          await saveDirSong(ds.dirId, ds.songId)
         }
       }
     }

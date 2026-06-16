@@ -9,6 +9,11 @@
       </aside>
 
       <article class="content" ref="contentRef">
+        <!-- 全幅封面图（出血至屏幕边缘） -->
+        <div class="hero-image">
+          <img src="/covers/upper.webp" alt="封面图" />
+        </div>
+
         <h1 class="article-title">{{ article.title }}</h1>
         <div class="meta">
           <span>{{ article.date }}</span>
@@ -43,7 +48,6 @@ const progressRef = ref<HTMLElement | null>(null)
 let dots: HTMLElement[] = []
 let cleanupScroll: () => void
 
-// 生成圆点
 function createDots() {
   if (!contentRef.value || !timelineRef.value) return
   const headings = contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2')
@@ -91,7 +95,6 @@ function handleScroll() {
     dot.classList.toggle('active', i === activeIndex)
   })
 
-  // 进度条高度计算不变（不需要修改）
   const contentEl = contentRef.value!
   const articleTop = contentEl.getBoundingClientRect().top + window.scrollY
   const articleHeight = contentEl.offsetHeight
@@ -100,6 +103,7 @@ function handleScroll() {
   progress = Math.max(0, Math.min(1, progress))
   progressRef.value.style.height = `${progress * 100}%`
 }
+
 function handleResize() {
   updateDotPositions()
   handleScroll()
@@ -129,6 +133,7 @@ onUnmounted(() => {
 </script>
 
 <style>
+/* 非 scoped 样式：dot 和正文图片居中 */
 .timeline .dot {
   position: absolute;
   left: 50%;
@@ -141,12 +146,7 @@ onUnmounted(() => {
   z-index: 10;
   transition: border-color 0.3s, transform 0.3s;
 }
-.markdown-body img {
-  display: block;
-  margin: 1.5em auto;     /* 上下留白，左右自动居中 */
-  max-width: 100%;        /* 不超出容器宽度 */
-  border-radius: 8px;     /* 可选：轻微圆角 */
-}
+
 .timeline .dot.active {
   border-color: #2c3e50;
   animation: pulse 0.25s ease;
@@ -157,16 +157,27 @@ onUnmounted(() => {
   50% { transform: translateX(-50%) scale(1.5); }
   100% { transform: translateX(-50%) scale(1); }
 }
+
+/* 正文内图片居中、圆角 */
+.markdown-body img {
+  display: block;
+  margin: 1.5em auto;
+  max-width: 100%;
+  border-radius: 8px;
+}
 </style>
 
 <style scoped>
+/* 引入 Open Sans 字体（如不需要可移除） */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,700;1,300&display=swap');
+
 .article-page {
   min-height: 100vh;
-  background: #fdf0f0;
+  background: #fef9e7;          /* 米黄色背景 */
   position: relative;
   z-index: 10;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
-  font-weight: 700; /* 或 bold */
+  font-family: 'Open Sans', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  font-weight: 400;              /* 全局正常粗细，标题单独加粗 */
 }
 
 .back-btn {
@@ -234,18 +245,45 @@ main {
 }
 
 .content {
-  margin: 0 auto;          
-  padding: 80px 60px;
-  max-width: 800px;       
+  margin: 0 auto;
+  padding: 0 60px 80px;        /* 顶部 padding 为 0，让封面图贴顶 */
+  max-width: 1200px;
   width: 100%;
-  background: white;
+  background: #fef9e7;          /* 卡片区域也米黄色 */
   min-height: 100vh;
   box-shadow: -5px 0 20px rgba(0,0,0,0.02);
 }
+
+/* ---------- 全幅封面图 ---------- */
+.hero-image {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+  max-height: 350px;
+  overflow: hidden;
+  margin-bottom: 2.5em;
+}
+
+.hero-image img {
+  width: 100%;
+  height: auto;          /* 保持比例 */
+  max-height: 350px;      /* 最高不超过 350px */
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------- 文章主标题 ---------- */
 .article-title {
-  font-size: 2.5em;
-  margin-bottom: 0.2em;
+  font-family: 'Open Sans', sans-serif;
+  font-size: clamp(2rem, 4vw + 1rem, 6rem);
+  font-weight: 700;
+  text-align: center;
+  margin: 0.5em 0 0.2em;
   color: #1a1a1a;
+  line-height: 1.2;
 }
 
 .meta {
@@ -254,21 +292,38 @@ main {
   margin-bottom: 2em;
   display: flex;
   gap: 12px;
+  justify-content: center;    /* 日期居中 */
 }
 
+/* ---------- Markdown 正文 ---------- */
 .markdown-body {
+  font-family: 'Open Sans', sans-serif;
   line-height: 1.8;
-  font-size: 16px;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
   color: #000;
+  max-width: 90ch;             /* 限制行宽，方便阅读 */
+  margin: 0 auto;              /* 居中文本块 */
 }
 
 .markdown-body :deep(h1) {
-  margin: 2em 0 0.5em;
-  font-size: 2em;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3vw + 1rem, 4rem);
+  text-align: center;
+  margin: 1.5em 0 0.5em;
+  line-height: 1.3;
+}
+
+.markdown-body :deep(h2) {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 2.5vw + 1rem, 3rem);
+  margin: 0.6em 0 0.5em;
+  line-height: 1.3;
 }
 
 .markdown-body :deep(p) {
-  margin-bottom: 0.6em;
+  margin-bottom: 1.25rem;
 }
 
 .markdown-body :deep(pre) {
@@ -286,11 +341,13 @@ main {
   margin: 1.5em 0;
 }
 
+/* ---------- 标签 ---------- */
 .tags {
   margin-top: 3em;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;    /* 标签居中 */
 }
 
 .tag {
