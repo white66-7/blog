@@ -103,7 +103,7 @@ onMounted(async () => {
 
   await libraryStore.loadDate()
   audioStore.restoreFromLocalStorage()
-
+  
   // 从未播放过任何歌曲，且有歌曲 → 加载第一首
   if (audioStore.curIdx === -1 && libraryStore.filteredList.length > 0) {
     const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0

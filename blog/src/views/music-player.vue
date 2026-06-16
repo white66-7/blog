@@ -2,7 +2,6 @@
   <div class="app-container">
     <Sidebar />
     <Mainplayer />
-    <Popnumenu />
   </div>
 </template>
 

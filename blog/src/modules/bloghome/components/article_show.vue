@@ -64,6 +64,7 @@ const goToArticle = (id: number) => {
 
 .card {
   display: flex;
+  height: 100%;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: #fff;
   border-radius: 12px;
@@ -77,6 +78,7 @@ const goToArticle = (id: number) => {
 }
 
 /* 纵向卡片 */
+/* 纵向卡片 */
 .card.vertical {
   flex-direction: column;
   grid-row: span 2;
@@ -89,6 +91,9 @@ const goToArticle = (id: number) => {
   object-fit: cover;
 }
 .card.vertical .card__content {
+  flex: 1;              
+  display: flex;
+  flex-direction: column;
   padding: 12px;
 }
 
@@ -120,10 +125,16 @@ const goToArticle = (id: number) => {
   object-fit: cover;
 }
 .card.reverse-horizontal .card__content {
-  width: 50%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 12px;
+  box-sizing: border-box;
 }
-
+.card.reverse-horizontal .card__tags {
+  margin-top: auto;     
+  align-self: flex-start; 
+}
 /* ====== 卡片内容区域 ====== */
 .card__content {
   display: flex;

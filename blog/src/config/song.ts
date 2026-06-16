@@ -9,19 +9,25 @@ export interface PresetSong {
 
 // 预设歌曲列表
 export const songs: PresetSong[] = [
-  {
+    {
     id: 'preset_1',
-    name: '天龙八部之宿敌',
-    artist: '九三', // 或者 九三
-    src: '/audio/天龙八部之宿敌.mp3', // 请确保你的 public/audio 目录下有这个文件
+    name: 'aruarian dance',
+    artist: 'Nujabes', 
+    src: '/audio/aruarian dance.mp3', 
     isPreset: true
   },
-  // 如果你还有其他预设歌曲，可以继续在这里添加
-  // {
-  //   id: 'preset_2',
-  //   name: '素颜',
-  //   artist: '许嵩 / 何曼婷',
-  //   src: '/audio/素颜.mp3',
-  //   isPreset: true
-  // }
+  {
+    id: 'preset_2',
+    name: '天龙八部之宿敌',
+    artist: '九三', 
+    src: '/audio/天龙八部之宿敌.mp3', 
+    isPreset: true
+  },
+  {
+    id: 'preset_3',
+    name: '心许百年',
+    artist: '王天戈',
+    src: '/audio/心许百年.mp3',
+    isPreset: true
+  }
 ];
