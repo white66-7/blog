@@ -2,7 +2,7 @@ import {ref,computed,watch} from 'vue'
 import {defineStore} from 'pinia'
 import type { ComputedRef } from 'vue'
 import type {Song} from './libraryStore'
-import { extractCover } from '@/modules/player/utils/cover'
+import { extractCover,extractCoverFromUrl } from '@/modules/player/utils/cover'
 import { useLibraryStore } from './libraryStore'
 import { delSong } from '@/modules/player/utils/db'
 
@@ -82,33 +82,44 @@ function bindAudioEvent(): void{
     })
 }
 function revokeCurrentUrls():void{
-    if(currentAudioUrl.value){
-        URL.revokeObjectURL(currentAudioUrl.value)
-        currentAudioUrl.value = null
-    }
-    if(currentCoverUrl.value){
-        URL.revokeObjectURL(currentCoverUrl.value)
-        currentCoverUrl.value = null
-    }
+if (currentAudioUrl.value && currentAudioUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(currentAudioUrl.value)
+  }
+  currentAudioUrl.value = null
+
+  if (currentCoverUrl.value && currentCoverUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(currentCoverUrl.value)
+  }
+  currentCoverUrl.value = null
 }
 //核心函数
-async function loadSongByIndex(index:number): Promise<void>{
-    if(index < 0 || index >= libraryStore.library.length) return
-    const song = libraryStore.library[index]
-    if(!song || !song.file) return
+async function loadSongByIndex(index: number): Promise<void> {
+  if (index < 0 || index >= libraryStore.library.length) return
+  const song = libraryStore.library[index]
+  if (!song) return
 
-    revokeCurrentUrls()
-    
+  revokeCurrentUrls()
+
+  if (song.isPreset && song.src) {
+    currentAudioUrl.value = song.src
+    if (audioElement.value) {
+      audioElement.value.src = song.src
+    }
+    const coverUrl = await extractCoverFromUrl(song.src)
+    currentCoverUrl.value = coverUrl
+
+  } else if (song.file) {
     const audioUrl = URL.createObjectURL(song.file)
     currentAudioUrl.value = audioUrl
 
-    if(audioElement.value){
-        audioElement.value.src = audioUrl
+    if (audioElement.value) {
+      audioElement.value.src = audioUrl
     }
     const coverUrl = await extractCover(song.file)
     currentCoverUrl.value = coverUrl
+  }
 
-    curIdx.value = index
+  curIdx.value = index
 }
 
 async function play(): Promise<void> {
@@ -116,8 +127,9 @@ async function play(): Promise<void> {
     if(!el) return
 
     if(curIdx.value === -1){
-        if(libraryStore.library.length > 0){
-            await loadSongByIndex(0)
+        if(libraryStore.filteredList.length > 0){
+           const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
+            await loadSongByIndex(targetIdx)
         }else return
     }else{
         if(!el.src && currentAudioUrl.value)
@@ -125,14 +137,20 @@ async function play(): Promise<void> {
             el.src = currentAudioUrl.value
         }
     }
-    if(!el.src){
+    if(!el.src) {
         const song = libraryStore.library[curIdx.value]
-        if(song && song.file){
-            const url = URL.createObjectURL(song.file)
-            el.src = url
-            currentAudioUrl.value = url
-        }else return
+        if(song) {
+            if(song.isPreset && song.src) {
+                el.src = song.src
+                currentAudioUrl.value = song.src
+            } else if (song.file) {
+                const url = URL.createObjectURL(song.file)
+                el.src = url
+                currentAudioUrl.value = url
+            }
+        } else return
     }
+
    try {
     await el.play();
     paused.value = false; 
@@ -275,6 +293,39 @@ async function prev(): Promise<void>{
     localStorage.setItem('cyber_vol', String(volume.value))
   }
 
+  function syncToElement(): void {
+  const el = audioElement.value
+  if (!el) return
+
+  // 同步 src
+  if (currentAudioUrl.value && el.src !== currentAudioUrl.value) {
+    el.src = currentAudioUrl.value
+  }
+
+  // 同步进度（等待元数据加载后设置）
+  if (currentTime.value > 0) {
+    const setTime = () => {
+      if (el.currentTime !== currentTime.value) {
+        el.currentTime = currentTime.value
+      }
+      el.removeEventListener('loadedmetadata', setTime)
+    }
+    el.addEventListener('loadedmetadata', setTime)
+    // 如果已经加载完元数据，立即执行
+    if (el.readyState >= 1) setTime()
+  }
+
+  // 同步音量
+  if (el.volume !== volume.value) el.volume = volume.value
+
+  // 同步播放状态
+  if (!paused.value) {
+    el.play().catch(e => console.warn('自动播放失败', e))
+  } else {
+    el.pause()
+  }
+}
+
   watch([mode, curIdx, volume], () => { saveState() })
 
   return {
@@ -283,6 +334,6 @@ async function prev(): Promise<void>{
     isShuffle, isLoop, progressPercent, currentSong,
     setAudioElement, loadSongByIndex, play, pause, togglePlay,
     prev, next, playByIndex, replayCurrent, setVolume, seek,
-    stopAndReset, toggleMode, restoreFromLocalStorage, saveState
+    stopAndReset, toggleMode, restoreFromLocalStorage, saveState, syncToElement
   }
 })

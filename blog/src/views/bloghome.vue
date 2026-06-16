@@ -72,6 +72,8 @@ import ImageSlider from '@/modules/bloghome/components/image.vue'
 import ArticleShow from '@/modules/bloghome/components/article_show.vue'
 import WeatherCard from '@/modules/bloghome/components/weatherCard.vue'
 import { articles as articleData } from '@/date/articles'
+import { useLibraryStore } from '@/stores/libraryStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 
 import img1 from '@/assets/home.webp'
@@ -84,6 +86,8 @@ import img7 from '@/assets/classmates.webp'
 import img8 from '@/assets/school.webp'
 const cardsWrapper = ref<HTMLElement | null>(null)
 const mainBody = ref<HTMLElement | null>(null)
+const libraryStore = useLibraryStore()
+const audioStore = useAudioStore()
 const articles = ref(articleData)
 const handleScroll = () => {
   if (!mainBody.value) return
@@ -93,11 +97,27 @@ const handleScroll = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   handleScroll()
-})
 
+  await libraryStore.loadDate()
+  audioStore.restoreFromLocalStorage()
+
+  // 从未播放过任何歌曲，且有歌曲 → 加载第一首
+  if (audioStore.curIdx === -1 && libraryStore.filteredList.length > 0) {
+    const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
+    await audioStore.loadSongByIndex(targetIdx)
+  } 
+  // 有正在播放的索引，但没有音频 URL（比如页面硬刷新后 blob 丢失）→ 重新加载
+  else if (audioStore.curIdx !== -1 && !audioStore.currentAudioUrl) {
+    await audioStore.loadSongByIndex(audioStore.curIdx)
+  }
+  // 有索引且有 URL → 直接将现有状态同步到全局 audio 元素（无需重新加载）
+  else if (audioStore.curIdx !== -1 && audioStore.currentAudioUrl) {
+    audioStore.syncToElement()
+  }
+})
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })

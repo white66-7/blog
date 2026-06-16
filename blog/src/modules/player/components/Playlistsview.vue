@@ -63,7 +63,7 @@ async function onAddFiles(e: Event) {
   const files = (e.target as HTMLInputElement).files
   if (!files?.length) return
   await libraryStore.addSongs(files)
-  ;(e.target as HTMLInputElement).value = ''
+    ; (e.target as HTMLInputElement).value = ''
 }
 // 添加歌曲
 function directAddSong(id: string) {
@@ -79,27 +79,29 @@ function openPlaylist(dirId: string) {
 
 <template>
   <div class="playlist-view">
-        <div class="top-nav">
+    <div class="top-nav">
       <button class="back-btn" @click="goBack" title="返回">
-        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
-        </div>
-    <input type="file" ref="addFileInput" accept="audio/*" multiple webkitdirectory style="display:none" @change="onAddFiles" />
+    </div>
+    <input type="file" ref="addFileInput" accept="audio/*" multiple webkitdirectory style="display:none"
+      @change="onAddFiles" />
     <sleepcat />
     <div class="pl-list">
       <!-- 歌单项循环 -->
       <template v-for="d in libraryStore.dirs" :key="d.id">
         <!-- 隐藏默认歌单 -->
         <div v-if="d.id !== 'default'" class="pl-item" @click="openPlaylist(d.id)">
-          
+
           <!-- 左边：封面 -->
           <div class="pl-cover">
             <img v-if="d.cover" :src="d.cover" class="pl-cover-img" />
             <div v-else class="default-cover-icon">🎵</div>
           </div>
-          
+
           <!-- 中间：名字和数量 -->
           <div class="pl-info">
             <div class="pl-name">{{ d.name }}</div>
@@ -108,20 +110,22 @@ function openPlaylist(dirId: string) {
 
           <!-- 右边：你炫酷的按钮组 -->
           <div class="pl-actions">
-            
+
             <!-- 1. 绿色的添加歌曲按钮 -->
             <button class="add-btn" title="添加歌曲" @click.stop="directAddSong(d.id)">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-width="1.5" d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"></path>
+                <path stroke-width="1.5"
+                  d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"></path>
                 <path stroke-width="1.5" d="M8 12H16"></path>
                 <path stroke-width="1.5" d="M12 16V8"></path>
               </svg>
             </button>
-
-            <!-- 2. 会变形的 Delete 按钮 -->
-            <button class="delete-btn" title="删除歌单" @click.stop="directDeletePlaylist(d.id)">
+            <button v-if="d.id !== 'preset_dir_1'" class="delete-btn" title="删除歌单"
+              @click.stop="directDeletePlaylist(d.id)">
               <svg viewBox="0 0 448 512" class="delete-icon">
-                <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"></path>
+                <path
+                  d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z">
+                </path>
               </svg>
             </button>
 
@@ -145,7 +149,7 @@ function openPlaylist(dirId: string) {
         <div class="card">
           <div class="card2">
             <div class="dialog-inner">
-              
+
               <!-- 左侧：新版文件夹封面上传 -->
               <div class="upload-area">
                 <div class="container">
@@ -202,6 +206,7 @@ function openPlaylist(dirId: string) {
   overflow-y: auto;
   padding: 0 2px;
 }
+
 .top-nav {
   display: flex;
   align-items: center;
@@ -313,7 +318,8 @@ function openPlaylist(dirId: string) {
   display: flex;
   align-items: center;
   gap: 10px;
-  opacity: 0; /* 默认隐藏，鼠标滑过才显示，更高级 */
+  opacity: 0;
+  /* 默认隐藏，鼠标滑过才显示，更高级 */
   transition: opacity 0.3s;
 }
 
@@ -338,9 +344,11 @@ function openPlaylist(dirId: string) {
 }
 
 .add-btn svg {
-  width: 32px;  /* 完美匹配列表的高度 */
+  width: 32px;
+  /* 完美匹配列表的高度 */
   height: 32px;
-  stroke: #14b8a6; /* 青色 */
+  stroke: #14b8a6;
+  /* 青色 */
   fill: none;
   transition: all 0.3s;
 }
@@ -357,7 +365,8 @@ function openPlaylist(dirId: string) {
 
 /* 2. 变形 Delete 按钮 (缩小适配版) */
 .delete-btn {
-  width: 32px; /* 从 50px 缩小到适配列表的 32px */
+  width: 32px;
+  /* 从 50px 缩小到适配列表的 32px */
   height: 32px;
   border-radius: 50%;
   background-color: rgb(20, 20, 20);
@@ -384,7 +393,8 @@ function openPlaylist(dirId: string) {
 }
 
 .delete-btn:hover {
-  width: 80px; /* 悬浮时拉长 */
+  width: 80px;
+  /* 悬浮时拉长 */
   border-radius: 50px;
   background-color: rgb(255, 69, 69);
 }
@@ -446,12 +456,12 @@ function openPlaylist(dirId: string) {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  align-items: center; 
+  align-items: center;
 }
 
 /* ================= 新建歌单：左侧文件夹组件 ================= */
-.upload-area { 
-  flex-shrink: 0; 
+.upload-area {
+  flex-shrink: 0;
 }
 
 .container {
@@ -463,8 +473,8 @@ function openPlaylist(dirId: string) {
   background: linear-gradient(135deg, #6dd5ed, #2193b0);
   border-radius: 15px;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-  width: 140px;  
-  height: 145px; 
+  width: 140px;
+  height: 145px;
   box-sizing: border-box;
   margin-bottom: -10px;
 }
@@ -473,7 +483,7 @@ function openPlaylist(dirId: string) {
   position: relative;
   animation: float 2.5s infinite ease-in-out;
   transition: transform 0.3s ease;
-  margin-bottom: 15px; 
+  margin-bottom: 15px;
 }
 
 .folder:hover {
@@ -482,8 +492,8 @@ function openPlaylist(dirId: string) {
 
 .folder .top {
   background: linear-gradient(135deg, #ff9a56, #ff6f56);
-  width: 60px; 
-  height: 15px; 
+  width: 60px;
+  height: 15px;
   border-radius: 8px 8px 0 0;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -492,26 +502,26 @@ function openPlaylist(dirId: string) {
 
 .folder .bottom {
   background: linear-gradient(135deg, #ffe563, #ffc663);
-  width: 90px; 
-  height: 60px; 
+  width: 90px;
+  height: 60px;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
   border-radius: 0 8px 8px 8px;
   position: relative;
-  top: -6px; 
+  top: -6px;
 }
 
 .custom-file-upload {
-  font-size: 0.85rem; 
+  font-size: 0.85rem;
   color: #ffffff;
   text-align: center;
-  padding: 8px 12px; 
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 8px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: background 0.3s ease;
-  width: 100%; 
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -540,9 +550,17 @@ function openPlaylist(dirId: string) {
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); } 
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 /* ================= 新建歌单：右侧输入框 ================= */
@@ -574,7 +592,7 @@ function openPlaylist(dirId: string) {
 .form-control input:focus,
 .form-control input:valid {
   outline: 0;
-  border-bottom-color: #00ff75; 
+  border-bottom-color: #00ff75;
 }
 
 .form-control label {
@@ -592,20 +610,20 @@ function openPlaylist(dirId: string) {
   transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.form-control input:focus + label span,
-.form-control input:valid + label span {
-  color: #00ff75; 
+.form-control input:focus+label span,
+.form-control input:valid+label span {
+  color: #00ff75;
   transform: translateY(-28px);
   font-size: 14px;
 }
 
 /* ================= 新建歌单：底部按钮 ================= */
 .dialog-btns {
-  width: 100%; 
+  width: 100%;
   display: flex;
   justify-content: flex-end;
   gap: 15px;
-  margin-top: -70px; 
+  margin-top: -70px;
   margin-left: -20px;
 }
 
@@ -624,14 +642,20 @@ function openPlaylist(dirId: string) {
   font-size: .85rem;
 }
 
-.button:hover::before { transform: scaleX(1); }
+.button:hover::before {
+  transform: scaleX(1);
+}
 
-.button-content { position: relative; z-index: 1; }
+.button-content {
+  position: relative;
+  z-index: 1;
+}
 
 .button::before {
   content: "";
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   transform: scaleX(0);
   transform-origin: 0 50%;
   width: 100%;
