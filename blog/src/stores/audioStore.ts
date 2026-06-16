@@ -264,6 +264,7 @@ async function prev(): Promise<void>{
       audioElement.value = el
       bindAudioEvent()
       audioElement.value.volume = volume.value
+      syncToElement()
     }
   }
 
@@ -293,36 +294,49 @@ async function prev(): Promise<void>{
     localStorage.setItem('cyber_vol', String(volume.value))
   }
 
-  function syncToElement(): void {
-  const el = audioElement.value
-  if (!el) return
+function syncToElement(): void {
+  const el = audioElement.value;
+  if (!el) return;
 
-  // 同步 src
-  if (currentAudioUrl.value && el.src !== currentAudioUrl.value) {
-    el.src = currentAudioUrl.value
-  }
+  const targetUrl = currentAudioUrl.value || '';
+  // 利用原生 URL 解析对比
+  const targetNorm = targetUrl ? new URL(targetUrl, window.location.href).href : '';
 
-  // 同步进度（等待元数据加载后设置）
-  if (currentTime.value > 0) {
-    const setTime = () => {
-      if (el.currentTime !== currentTime.value) {
-        el.currentTime = currentTime.value
+  // 1. 同步播放源
+  if (targetUrl && el.src !== targetNorm) {
+    el.src = targetUrl;
+    
+    // 使用 once: true 避免多次绑定内存泄漏
+    el.addEventListener('loadedmetadata', () => {
+      el.currentTime = currentTime.value;
+      
+      // 在确保 metadata 加载且时间设置完毕后，再检查是否需要播放
+      if (!paused.value) {
+        el.play().catch(e => console.warn('自动播放失败', e));
       }
-      el.removeEventListener('loadedmetadata', setTime)
+    }, { once: true });
+    
+    // 换源期间直接 return，等待 loadedmetadata 处理进度和播放
+    return; 
+  } 
+
+  // 2. 仅在播放源相同时，处理进度变化 (建议只在用户拖动进度条时触发此逻辑)
+  if (targetUrl) {
+    const diff = Math.abs(el.currentTime - currentTime.value);
+    // 放宽阈值，且不要反向修改 Store，只作为“跳转”使用
+    if (diff > 1.0) { 
+      el.currentTime = currentTime.value;
     }
-    el.addEventListener('loadedmetadata', setTime)
-    // 如果已经加载完元数据，立即执行
-    if (el.readyState >= 1) setTime()
   }
 
-  // 同步音量
-  if (el.volume !== volume.value) el.volume = volume.value
+  // 3. 同步音量
+  if (el.volume !== volume.value) el.volume = volume.value;
 
-  // 同步播放状态
-  if (!paused.value) {
-    el.play().catch(e => console.warn('自动播放失败', e))
-  } else {
-    el.pause()
+  // 4. 同步播放状态 (仅处理源未改变的情况)
+  if (!paused.value && el.paused && el.readyState >= 1) {
+    el.play().catch(e => console.warn('自动播放失败', e));
+  } else if (paused.value && !el.paused) {
+    el.pause();
   }
 }
 
