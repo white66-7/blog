@@ -114,6 +114,7 @@ onMounted(async () => {
   article.value = articles.find(a => a.id === id) || null
 
   await nextTick()
+  window.scrollTo(0, 0) 
   createDots()
   handleScroll()
 
