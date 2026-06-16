@@ -7,6 +7,7 @@
       :slidesPerView="1"
       :speed="600"
       :mousewheel="{ forceToAxis: true, releaseOnEdges: true }"
+      @swiper="onSwiperInit"
       @slideChange="onSlideChange"
       class="fullpage-swiper"
       :noSwipingClass="'scrollable-content'"
@@ -88,6 +89,36 @@ const audioStore = useAudioStore()
 const modules = [Mousewheel, Pagination]
 const articles = ref(articleData)
 const isFirstScreen = ref(true)
+const swiperInstance = ref<any>(null)
+let touchStartY = 0
+let isSliding = false
+
+const onSwiperInit = (swiper: any) => {
+  swiperInstance.value = swiper
+}
+
+const handleTouchStart = (e: TouchEvent) => {
+  const touch = e.touches?.[0]
+  if (!touch) return
+  touchStartY = touch.clientY
+}
+
+const handleTouchMove = (e: TouchEvent) => {
+  if (isSliding || !swiperInstance.value) return
+
+  const touch = e.touches?.[0]
+  if (!touch) return
+
+  const container = e.currentTarget as HTMLElement
+  const currentY = touch.clientY
+  const diffY = currentY - touchStartY
+
+  if (container.scrollTop <= 0 && diffY > 20) {
+    isSliding = true
+    swiperInstance.value.slidePrev()
+    setTimeout(() => { isSliding = false }, 400)
+  }
+}
 
 const onSlideChange = (swiper: any) => {
   if (swiper.activeIndex === 1) {
