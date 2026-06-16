@@ -25,7 +25,9 @@
 
       <!-- 第二屏 -->
       <swiper-slide class="slide-main">
-        <div class="scrollable-content">
+        <div class="scrollable-content"
+         @touchstart="handleTouchStart"
+  @touchmove="handleTouchMove">
           <div class="main-body" ref="mainBody">
             <div class="two-columns">
               <!-- 左侧：卡片列（information + player） -->
