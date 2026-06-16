@@ -9,7 +9,7 @@
     <!-- 分割线 -->
     <div class="divider"></div>
     <!-- 签名 -->
-    <div class="bio">做点真正想做的</div>
+    <div class="bio">认准的方向,就坚定走下去</div>
     <!-- 社交图标 -->
     <ul class="wrapper">
       <a href="https://github.com/white66-7" target="_blank" class="icon github">
