@@ -1,30 +1,30 @@
 <template>
   <div class="app-flex">
-    <!-- 第一屏：大标题 + 背景图 -->
-    <div class="hero-section">
+    <Navbar :transparent="isFirstScreen"/>
+<swiper
+  :modules="modules"
+  :direction="'vertical'"
+  :slidesPerView="1"
+  :speed="600"
+  :mousewheel="{ forceToAxis: true, releaseOnEdges: true }"
+  @slideChange="onSlideChange"
+  class="fullpage-swiper"
+>
+      <!-- 第一屏 -->
+      <swiper-slide class="slide-hero">
+        <div class="hero-section">
+          <TextEffect />
+          <div class="arrow bounce"></div>
+          <div class="wave-container">
+          </div>
+        </div>
+      </swiper-slide>
 
-      <TextEffect />
-<div class="arrow bounce">
-</div>
-      <div class="wave-container"> <svg class="waves" xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none"
-          shape-rendering="auto">
-          <defs>
-            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-          </defs>
-<g class="parallax">
-  <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,252,250,0.9)" />
-  <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,248,245,0.7)" />
-  <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,242,240,0.5)" />
-  <use xlink:href="#gentle-wave" x="48" y="7" fill="#fdf0f0" />
-</g>
-        </svg></div>
-    </div>
-
-    <!-- 第二屏：白色内容区 -->
-    <div class="main-body" ref="mainBody">
-      <!-- 改用双栏网格布局，替代绝对定位 -->
-      <div class="two-columns">
+      <!-- 第二屏 -->
+      <swiper-slide class="slide-main">
+         <div class="scrollable-content">
+        <div class="main-body" ref="mainBody">
+           <div class="two-columns">
         <!-- 左侧：卡片列（information + player） -->
         <aside class="left-column">
           <Information class="info-card" />
@@ -40,26 +40,13 @@
     </div>
     <div class="articles-section">
       <ArticleShow :articles="paginatedArticles" />
-        <div class="pagination" v-if="totalPages > 1">
-    <button :disabled="currentPage <= 1" @click="goToPage(currentPage - 1)">
-      上一页
-    </button>
-    <span
-      v-for="page in totalPages"
-      :key="page"
-      :class="{ active: page === currentPage }"
-      @click="goToPage(page)"
-    >
-      {{ page }}
-    </span>
-    <button :disabled="currentPage >= totalPages" @click="goToPage(currentPage + 1)">
-      下一页
-    </button>
-  </div>
     </div>
   </div>
-      </div>
-    </div>
+  </div>
+  </div>
+        </div>
+      </swiper-slide>
+    </swiper>
   </div>
 </template>
 
@@ -67,6 +54,7 @@
 import Information from '@/modules/bloghome/components/information.vue';
 import player from '@/modules/bloghome/components/music.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
+import Navbar from '@/modules/bloghome/components/load.vue'
 import { ref, onMounted, onUnmounted,computed } from 'vue'
 import ImageSlider from '@/modules/bloghome/components/image.vue'
 import ArticleShow from '@/modules/bloghome/components/article_show.vue'
@@ -74,6 +62,13 @@ import WeatherCard from '@/modules/bloghome/components/weatherCard.vue'
 import { articles as articleData } from '@/date/articles'
 import { useLibraryStore } from '@/stores/libraryStore'
 import { useAudioStore } from '@/stores/audioStore'
+
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Mousewheel, Pagination } from 'swiper/modules'
+
+import 'swiper/css'
+import 'swiper/css/mousewheel'
+import 'swiper/css/pagination'
 
 
 import img1 from '@/assets/home.webp'
@@ -88,7 +83,12 @@ const cardsWrapper = ref<HTMLElement | null>(null)
 const mainBody = ref<HTMLElement | null>(null)
 const libraryStore = useLibraryStore()
 const audioStore = useAudioStore()
+const modules = [Mousewheel, Pagination]
 const articles = ref(articleData)
+
+
+
+const isFirstScreen = ref(true)
 const handleScroll = () => {
   if (!mainBody.value) return
   const rect = mainBody.value.getBoundingClientRect()
@@ -97,45 +97,37 @@ const handleScroll = () => {
   }
 }
 
-onMounted(async () => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  handleScroll()
 
+const onSlideChange = (swiper: any) => {
+  if (swiper.activeIndex === 1) {
+    mainBody.value?.classList.add('visible')
+    isFirstScreen.value = false   // 进入第二屏，导航栏不透明
+  } else {
+    mainBody.value?.classList.remove('visible')
+    isFirstScreen.value = true    // 回到第一屏，导航栏透明
+  }
+}
+
+onMounted(async () => {
   await libraryStore.loadDate()
   audioStore.restoreFromLocalStorage()
-  
-  // 从未播放过任何歌曲，且有歌曲 → 加载第一首
   if (audioStore.curIdx === -1 && libraryStore.filteredList.length > 0) {
     const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
     await audioStore.loadSongByIndex(targetIdx)
   } 
-  // 有正在播放的索引，但没有音频 URL（比如页面硬刷新后 blob 丢失）→ 重新加载
   else if (audioStore.curIdx !== -1 && !audioStore.currentAudioUrl) {
     await audioStore.loadSongByIndex(audioStore.curIdx)
   }
-  // 有索引且有 URL → 直接将现有状态同步到全局 audio 元素（无需重新加载）
   else if (audioStore.curIdx !== -1 && audioStore.currentAudioUrl) {
     audioStore.syncToElement()
   }
 })
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
-const currentPage = ref(1)
-const pageSize = ref(6) // 每页 6 篇
 
-const totalPages = computed(() => Math.ceil(articles.value.length / pageSize.value))
 
 const paginatedArticles = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  return articles.value.slice(start, start + pageSize.value)
+  return articles.value.slice(0, 3) 
 })
 
-function goToPage(page: number) {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 
 const albumImages = [
   {
@@ -157,10 +149,31 @@ const albumImages = [
 .app-flex {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: #000;
 }
+.scrollable-content {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
+  /* ===== 毛玻璃核心样式 ===== */
+  background: rgba(255, 255, 255, 0.08);     
+  backdrop-filter: blur(20px) saturate(180%); 
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15); 
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);  
+}
+.fullpage-swiper {
+  width: 100%;
+  height: 100vh;
+}
+
+/* 每个 slide 占满容器 */
+.fullpage-swiper .swiper-slide {
+  height: 100vh;
+}
 .hero-section {
   position: relative;
   /* 让波浪相对它定位 */
@@ -170,7 +183,6 @@ const albumImages = [
   align-items: center;
   justify-content: center;
   cursor: default;
-  scroll-snap-align: start;
 }
 
 /* 固定背景图（全屏） */
@@ -209,8 +221,6 @@ const albumImages = [
 .main-body {
   display: block;
   padding: 80px 5% 60px 270px;
-  background: #fdf0f0;
-  scroll-snap-align: start;
 }
 
 .two-columns {
@@ -312,7 +322,7 @@ const albumImages = [
  /* ========= 滚动箭头 ========= */
 .arrow.bounce {
   position: absolute;
-  bottom: 90px;         /* 放在波浪上方 */
+  bottom: 20px;         /* 放在波浪上方 */
   left: 50%;
   margin-left: -20px;
   width: 40px;
