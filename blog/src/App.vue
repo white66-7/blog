@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <router-view />
-     <audio ref="audioRef" style="display: none" />
+     <audio ref="audioRef" style="display: none" preload="metadata"/>
   </div>
 </template>
 

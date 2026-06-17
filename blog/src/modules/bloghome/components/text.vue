@@ -36,7 +36,7 @@ $tertiary-color: #ffffff;
 
 /* ===== “保持进步” 使用图片背景动画 ===== */
 .content {
-  margin-top: 200px;
+  margin-top: 80px;
 }
 
 .animated-text {
@@ -67,7 +67,7 @@ $tertiary-color: #ffffff;
 /* ===== 三行逐行动画（不变） ===== */
 h1 {
   font-size: 75px;
-  margin: 100px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   text-align: center;
   font-family: 'Cabin Condensed', sans-serif;

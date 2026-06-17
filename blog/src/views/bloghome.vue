@@ -17,9 +17,22 @@
         <div class="hero-section">
           <TextEffect />
           <div class="arrow bounce"></div>
-          <div class="wave-container">
-            <!-- 假设这里是你原来的波浪 SVG -->
-          </div>
+
+             <div class="wave-container">
+  <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs>
+      <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+    </defs>
+    <g class="parallax">
+      <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,252,250,0.9)" />
+      <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,248,245,0.7)" />
+      <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,242,240,0.5)" />
+      <use xlink:href="#gentle-wave" x="48" y="7" fill="#fdf0f0" />
+    </g>
+  </svg>
+</div>
+
         </div>
       </swiper-slide>
 
@@ -34,6 +47,7 @@
               <aside class="left-column">
                 <Information class="info-card" />
                 <player class="sticky-card" />
+                <Say />
               </aside>
 
               <!-- 右侧：相册、天气、文章列表 -->
@@ -45,8 +59,9 @@
                   <WeatherCard address="武汉" class="weather-card-comp" />
                 </div>
                 <div class="articles-section">
-                  <ArticleShow :articles="paginatedArticles" />
+                  <ArticleShow :articles="articleData" />
                 </div>
+                <SiteAge />
               </div>
             </div>
           </div>
@@ -59,6 +74,7 @@
 <script setup lang="ts">
 import Information from '@/modules/bloghome/components/information.vue';
 import player from '@/modules/bloghome/components/music.vue'
+import Say from '@/modules/bloghome/components/say.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import { ref, onMounted, computed } from 'vue'
@@ -68,10 +84,11 @@ import WeatherCard from '@/modules/bloghome/components/weatherCard.vue'
 import { articles as articleData } from '@/date/articles'
 import { useLibraryStore } from '@/stores/libraryStore'
 import { useAudioStore } from '@/stores/audioStore'
+import SiteAge from '@/modules/bloghome/components/dateshow.vue'
 
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Mousewheel, Pagination } from 'swiper/modules'
-
+import RotatingCards from '@/modules/bloghome/components/RotatingCards.vue'
 import 'swiper/css'
 import 'swiper/css/mousewheel'
 import 'swiper/css/pagination'
@@ -147,10 +164,6 @@ onMounted(async () => {
   }
 })
 
-const paginatedArticles = computed(() => {
-  return articles.value.slice(0, 3) 
-})
-
 const albumImages = [
   { url: img2, description: `当时刚刚中考完特地换了张头像,之后就再也没换过 挑了好久因为当时觉得头像是一件很重要的事情 最后冥冥之中选了这张的特写` },
   { url: img3, description: `第一次研学在外面住，一直爽玩到一两点 第二天全睡死过去了`},
@@ -170,7 +183,56 @@ const albumImages = [
   overflow: hidden;
   background-color: #000;
 }
+.wave-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 5;
+  overflow: hidden;
+  line-height: 0;
+}
 
+.waves {
+  position: relative;
+  width: 100%;
+  height: 8vh;
+  min-height: 120px;
+  max-height: 150px;
+}
+
+.parallax > use {
+  animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+}
+
+.parallax > use:nth-child(1) {
+  animation-delay: -2s;
+  animation-duration: 7s;
+}
+
+.parallax > use:nth-child(2) {
+  animation-delay: -3s;
+  animation-duration: 10s;
+}
+
+.parallax > use:nth-child(3) {
+  animation-delay: -4s;
+  animation-duration: 13s;
+}
+
+.parallax > use:nth-child(4) {
+  animation-delay: -5s;
+  animation-duration: 20s;
+}
+
+@keyframes move-forever {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
 .fullpage-swiper {
   width: 100%;
   height: 100vh;
@@ -237,19 +299,13 @@ const albumImages = [
   /* 强化移动端触控顺滑度 */
   -webkit-overflow-scrolling: touch; 
   overscroll-behavior: contain; /* 防止滚动链穿透到外层 */
-
-  /* 毛玻璃效果 */
-  background: rgba(255, 255, 255, 0.08);     
-  backdrop-filter: blur(20px) saturate(180%); 
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15); 
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);  
+  background: #fdf0f0;
 }
 
 .main-body {
   display: block;
   /* PC端默认间距：上80px，右5%，下60px，左270px (避开左侧导航) */
-  padding: 80px 5% 60px 270px;
+  padding: 20px 5% 60px 270px;
   box-sizing: border-box;
 }
 
@@ -302,7 +358,7 @@ const albumImages = [
 /* ========= 滚动箭头 ========= */
 .arrow.bounce {
   position: absolute;
-  bottom: 20px;         
+  bottom: 120px;         
   left: 50%;
   margin-left: -20px;
   width: 40px;
