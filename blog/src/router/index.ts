@@ -5,6 +5,8 @@ import SongsView from '@/modules/player/components/songsview.vue'
 import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
 import QQContact from '@/modules/bloghome/views/qq.vue'
 import WechatContact from '@/modules/bloghome/views/wechat.vue'
+import mainarticle from '@/modules/bloghome/components/mainarticle.vue'
+
 
 const ArticleDetail = () => import('@/modules/bloghome/components/ArticleDetail.vue')
 
@@ -32,6 +34,11 @@ const routes = [
       { path: 'playlists', component: PlaylistsView },
       { path: '', redirect: '/player/playlists' }
     ]
+  },
+  {
+    path: '/aticles',    
+    name: 'mainarticle',
+    component: mainarticle
   },
   {
     path: '/article/:id',    

@@ -35,14 +35,14 @@
   </svg>
 </div>
     <div class="navbar__right">
-            <router-link to="/about" class="navbar__item">
+            <router-link to="/" class="navbar__item">
 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
   <path d="M0 0h24v24H0z" fill="none" />
   <path fill="currentColor" d="M4 19v-9q0-.475.213-.9t.587-.7l6-4.5q.525-.4 1.2-.4t1.2.4l6 4.5q.375.275.588.7T20 10v9q0 .825-.588 1.413T18 21h-3q-.425 0-.712-.288T14 20v-5q0-.425-.288-.712T13 14h-2q-.425 0-.712.288T10 15v5q0 .425-.288.713T9 21H6q-.825 0-1.412-.587T4 19" />
 </svg>
         <span>主页</span>
       </router-link>
-            <router-link to="/about" class="navbar__item">
+            <router-link to="/aticles" class="navbar__item">
 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
   <path d="M0 0h24v24H0z" fill="none" />
   <path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h7v-2H7zm0-4h10v-2H7zm0-4h10V7H7z" />
