@@ -27,9 +27,9 @@
             </path>
           </pattern>
         </defs>
-        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="green">火之意志</text>
-        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="url(#wave)" fill-opacity="0.9">火之意志</text>
-        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="url(#gradient)" fill-opacity="0.1">火之意志</text>
+        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="green">第三训练场</text>
+        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="url(#wave)" fill-opacity="0.9">第三训练场</text>
+        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="url(#gradient)" fill-opacity="0.1">第三训练场</text>
       </svg>
       <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 32 32" class="nav-icon">
         <path d="M0 0h32v32H0z" fill="none" />
@@ -49,7 +49,7 @@
         </svg>
         <span>主页</span>
       </router-link>
-      <router-link to="/aticles" class="navbar__item">
+      <router-link to="/articles" class="navbar__item">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />
           <path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h7v-2H7zm0-4h10v-2H7zm0-4h10V7H7z" />
@@ -156,7 +156,7 @@ onUnmounted(() => {
   height: 28px;           
   width: auto;
   flex-shrink: 0;
-  margin-left: -45px;
+  margin-left: -30px;
 }
 
 /* ===== 透明模式（第一屏） ===== */

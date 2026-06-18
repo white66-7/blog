@@ -1,5 +1,5 @@
 <template>
-  <div class="app-flex">
+  <div class="app-flex" :class="{ 'app-flex--scrolled': !isFirstScreen }">
     <Navbar :transparent="isFirstScreen"/>
     <swiper
       :modules="modules"
@@ -180,7 +180,17 @@ const albumImages = [
   height: 100vh; 
   height: 100dvh; 
   overflow: hidden;
-  background-color: #000;
+  background-color:#fdf0f0  ;
+}
+.app-flex::before,
+.app-flex::after {
+  transition: opacity 0.4s ease;
+}
+
+.app-flex--scrolled::before,
+.app-flex--scrolled::after {
+  opacity: 0;
+  pointer-events: none;
 }
 .wave-container {
   position: absolute;
