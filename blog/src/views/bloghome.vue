@@ -88,7 +88,6 @@ import SiteAge from '@/modules/bloghome/components/dateshow.vue'
 
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Mousewheel, Pagination } from 'swiper/modules'
-import RotatingCards from '@/modules/bloghome/components/RotatingCards.vue'
 import 'swiper/css'
 import 'swiper/css/mousewheel'
 import 'swiper/css/pagination'
