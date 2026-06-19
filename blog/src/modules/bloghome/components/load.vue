@@ -240,14 +240,36 @@ onUnmounted(() => {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  .navbar {
+    padding: 0 12px 0 16px;
+  }
+
+  .navbar__left {
+    flex-shrink: 1;
+    min-width: 0;           /* 允许弹性收缩 */
+    max-width: 65%;         /* 防止左侧挤占右侧菜单空间 */
+    overflow: hidden;
+    gap: 4px;
+  }
+
+  .wave-svg {
+    height: 30px;
+    max-width: 100%;        /* 确保 svg 不超出容器 */
+    flex-shrink: 1;         /* 允许 svg 在空间不足时缩小 */
+  }
+
+  .nav-icon {
+    height: 20px;
+    flex-shrink: 0;         /* 小图标不缩小，保持可辨识 */
+    margin-left: 0;         /* 重置负边距 */
+  }
+
   .navbar__right {
     position: absolute;
     left: auto;
-    right: 16px;          
-    transform: none;   
-  }
-  .nav-icon {
-    margin-left: 0;     
+    right: 12px;
+    transform: none;
+    gap: 14px;
   }
 }
 </style>
