@@ -92,14 +92,12 @@ import 'swiper/css'
 import 'swiper/css/mousewheel'
 import 'swiper/css/pagination'
 
-import img1 from '@/assets/home.webp'
-import img2 from '@/assets/think.webp'
-import img3 from '@/assets/play.webp'
+
+import img1 from '@/assets/think.webp'
+import img2 from '@/assets/play.webp'
+import img3 from '@/assets/classmates.webp'
 import img4 from '@/assets/myself.webp'
-import img5 from '@/assets/myself2.webp'
-import img6 from '@/assets/party.webp'
-import img7 from '@/assets/classmates.webp'
-import img8 from '@/assets/school.webp'
+
 
 const mainBody = ref<HTMLElement | null>(null)
 const libraryStore = useLibraryStore()
@@ -164,9 +162,9 @@ onMounted(async () => {
 })
 
 const albumImages = [
-  { url: img2, description: `当时刚刚中考完特地换了张头像,之后就再也没换过 挑了好久因为当时觉得头像是一件很重要的事情 最后冥冥之中选了这张的特写` },
-  { url: img3, description: `第一次研学在外面住，一直爽玩到一两点 第二天全睡死过去了`},
-  { url: img7, description: `一排我高中的同学，几乎全做过同桌，都是好人啊 可惜似乎以后不会再有交集了`},
+  { url: img1, description: `当时刚刚中考完特地换了张头像,之后就再也没换过 挑了好久因为当时觉得头像是一件很重要的事情 最后冥冥之中选了这张的特写` },
+  { url: img2, description: `第一次研学在外面住，一直爽玩到一两点 第二天全睡死过去了`},
+  { url: img3, description: `一排我高中的同学，几乎全做过同桌，都是好人啊 可惜似乎以后不会再有交集了`},
   { url: img4, description: `给朋友拍的照片` },
 ]
 </script>
