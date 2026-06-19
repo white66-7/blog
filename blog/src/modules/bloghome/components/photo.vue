@@ -100,37 +100,61 @@
 import { ref } from 'vue'
 import Navbar from '@/modules/bloghome/components/load.vue'
 
-// ---------- 从本地文件夹自动加载相册数据 ----------
-const photoModules = import.meta.glob('@/assets/album/**/*.{jpg,jpeg,png,webp}', {
-  eager: true,
-  query: '?url',
-  import: 'default'
-})
 
-function buildAlbumsFromFiles() {
-  const albumMap = new Map()
-  for (const [filePath, url] of Object.entries(photoModules)) {
-    const parts = filePath.split('/')
-    const albumDirName = parts[parts.length - 2]
-    const fileName = parts[parts.length - 1]
-    const title = fileName.replace(/\.[^/.]+$/, '')
+import photo1 from '@/assets/album/动漫/超燃.webp'
+import photo2 from '@/assets/album/动漫/沉思.webp'
+import photo3 from '@/assets/album/动漫/黑色五叶草.webp'
+import photo4 from '@/assets/album/动漫/进击的巨人.webp'
+import photo5 from '@/assets/album/动漫/来自深渊.webp'
+import photo6 from '@/assets/album/动漫/圆梦.webp'
+import photo7 from '@/assets/album/动漫/佐助与鼬.webp'
 
-    if (!albumMap.has(albumDirName)) {
-      albumMap.set(albumDirName, {
-        id: `album-${albumDirName}`,
-        title: albumDirName,
-        cover: url,
-        photos: []
-      })
-    }
-    const album = albumMap.get(albumDirName)
-    album.photos.push({ title, url })
+
+import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
+// import view2 from '@/assets/album/风景/高考结束的小区门口.webp'
+// import view3 from '@/assets/album/风景/高考结束的小区门口.webp'
+
+import img1 from '@/assets/album/人物/朋友.webp'
+import img2 from '@/assets/album/人物/研学.webp'
+
+// ========== 2. 手动构建相册数据 ==========
+const albumsData = [
+  {
+    id: 'custom',        
+    title: '动漫',              
+    cover: photo6,      
+    photos: [
+      { title: '燃到起鸡皮疙瘩', url: photo1},
+      { title: '沉思', url: photo2 },
+      { title: '黑色五叶草-一部非常惊艳的战斗番', url: photo3},
+      { title: '进击的巨人', url: photo4},
+      { title: '来自深渊-黄金乡', url: photo5},
+      { title: '圆梦', url: photo6},
+      { title: '佐助与鼬', url: photo7},
+    ]
+  },
+    {
+    id: 'persons',
+    title: '人物',
+    cover: img2,
+    photos: [
+      { title: '给朋友拍的照片', url: img1 },
+      { title: '研学', url: img2 },
+
+    ]
+  },
+  {
+    id: 'views',
+    title: '风景',
+    cover: view1,
+    photos: [
+      { title: '高考结束的小区门口', url: view1 },
+    ]
   }
-  return Array.from(albumMap.values())
-}
+  // ... 更多相册
+]
 
-const albumsData = buildAlbumsFromFiles()
-
+// ==========生成随机样式==========
 const getRandomStyle = () => ({
   transform: `rotate(${(Math.random() * 10 - 5).toFixed(1)}deg) translateY(${(Math.random() * 16 - 8).toFixed(1)}px)`
 })
@@ -139,10 +163,15 @@ const processedAlbums = ref(
   albumsData.map(album => ({
     ...album,
     style: getRandomStyle(),
-    photos: album.photos.map((p, i) => ({ ...p, id: `p-${i}`, style: getRandomStyle() }))
+    photos: album.photos.map((p, i) => ({
+      ...p,
+      id: `p-${i}`,
+      style: getRandomStyle()
+    }))
   }))
 )
 
+// ========== 其余逻辑不变 ==========
 const currentAlbum = ref(null)
 const selectedPhoto = ref(null)
 
