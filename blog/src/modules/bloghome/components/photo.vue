@@ -504,19 +504,23 @@ const closeLightbox = () => {
   cursor: default;
   transform: scale(1) !important;
   display: inline-block;
+  box-sizing: border-box; /* 确保 padding 不会撑破容器 */
 }
 .large-photo {
-  width: auto;          /* 让容器随内容自适应 */
-  height: auto;         /* 消除固定 200px 的限制 */
-  overflow: visible;    /* 或者 hidden（如果希望保留卡片的圆角效果），但要保证尺寸足够 */
+  width: auto;          
+  height: auto !important; /* 强制自适应高度，防止被 .photo 的固定高度覆盖 */
+  overflow: hidden; 
   background: transparent;
+  display: flex;           /* 让内部图片完美居中 */
+  justify-content: center;
+  align-items: center;
 }
 .large-photo::before {
   content: none;
 }
 .real-image-large {
-  max-width: 85vw;
-  max-height: 80vh;
+  max-width: 100%;
+  max-height: 85vh; /* ⬆️ 增大图片最大高度，让竖图可以更大 */
   display: block;
   object-fit: contain;
   filter: contrast(1.1) sepia(0.15);
@@ -549,7 +553,6 @@ const closeLightbox = () => {
   transform: scale(0.9);
 }
 
-/* 移动端 */
 @media (max-width: 768px) {
   .gallery-container {
     padding: 60px 16px 40px;
@@ -565,13 +568,31 @@ const closeLightbox = () => {
   .photo {
     height: 150px;
   }
-  .large-polaroid {
-    padding: 10px 10px 30px 10px;
-    max-width: 90vw;
+  
+  /* ================= 移动端弹窗极致放大优化 ================= */
+  .lightbox-close {
+    top: 10px;
+    right: 15px; /* 把关闭按钮挤到右上角边缘，防止遮挡 */
+    font-size: 32px;
   }
+  
+  .large-polaroid {
+    padding: 6px 6px 20px 6px; /* 极大地缩小白色边框厚度，把空间让给图片 */
+    max-width: 98vw;           /* 宽度几乎占满整个手机屏幕 */
+  }
+  
+  .large-photo {
+    height: auto !important;
+  }
+  
   .real-image-large {
-    max-width: 85vw;
-    max-height: 70vh;
+    max-width: 100%;
+    max-height: 85vh; /* 竖屏图片高度极度放宽 */
+  }
+  
+  .large-polaroid .caption {
+    font-size: 15px;
+    margin-top: 8px; /* 缩小文字与图片的上下间距 */
   }
 }
 </style>
