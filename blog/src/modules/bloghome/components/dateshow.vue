@@ -172,4 +172,48 @@ const chars = computed(() => text.value.split(''))
   from { transform: rotate(360deg); }
   to { transform: rotate(0); }
 }
+@media (max-width: 768px) {
+  .site-age-box {
+    min-width: unset;                /* 移除桌面端 50rem 限制 */
+    max-width: 92vw;                 /* 宽度自适应屏幕，保留少许边距 */
+    height: auto;                    /* 高度随内容变化 */
+    padding: 0.6rem 1rem;            /* 减小内边距 */
+    margin: 20px auto 10px;          /* 移动端居中显示更佳，也可保留原左对齐 */
+    border-radius: 3rem;             /* 圆角适当减小 */
+  }
+
+  .text {
+    font-size: 22px;                 /* 缩小字体，保证在 375px 宽度下正常显示 */
+    letter-spacing: 0.5px;
+    white-space: pre-wrap;           /* 允许文字换行，避免溢出 */
+    line-height: 1.3;
+  }
+
+  /* 星空粒子缩小尺寸，减少渲染开销 */
+  .stars {
+    width: 100rem;
+    height: 100rem;
+  }
+  .stars::after,
+  .stars::before {
+    background-size: 30px 30px;
+  }
+  .stars::after {
+    top: -5rem;
+    left: -50rem;
+  }
+  .stars::before {
+    left: -25%;
+    width: 150%;
+    height: 300%;
+  }
+
+  /* 光晕缩小 */
+  .glow {
+    width: 8rem;
+  }
+  .circle {
+    height: 20px;
+  }
+}
 </style>
