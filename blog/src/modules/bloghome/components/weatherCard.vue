@@ -419,13 +419,12 @@ onUnmounted(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css?family=Lato:300,600');
 
-/* 外层完全继承父组件（比如左边轮播图）的高度，填满 280px 的宽 */
 .weather-card {
   width: 100%;
   height: 100%;
   min-height: 300px;
   border-radius: 5px;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
   box-shadow: 9px 7px 40px -6px rgba(0,0,0,0.25);
   font-family: 'Lato', sans-serif;
