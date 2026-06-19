@@ -1,0 +1,543 @@
+<template>
+  <div class="album-page-wrapper">
+    <!-- ==================== 1. 顶部导航栏 ==================== -->
+    <Navbar :transparent="isFirstScreen" />
+
+    <!-- ==================== 2. 滚动内容区（毛玻璃效果） ==================== -->
+    <div class="scrollable-content">
+      <div class="gallery-container">
+        <!-- 视图 A：相册列表 (当没有选定相册时显示) -->
+        <transition name="fade" mode="out-in">
+          <div v-if="!currentAlbum" key="album-list">
+<header class="page-title">
+  <div class="title-wrapper">
+    <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M0 0h24v24H0z" fill="none" />
+      <g fill="none" fill-rule="evenodd">
+        <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+        <path fill="currentColor" d="M5 3a3 3 0 0 0-3 3v10a2 2 0 0 0 2 2V6a1 1 0 0 1 1-1h14a2 2 0 0 0-2-2zm0 5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v11.333a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zm15 0H7v7.848L10.848 12a1.25 1.25 0 0 1 1.768 0l3.241 3.24l.884-.883a1.25 1.25 0 0 1 1.768 0L20 15.848zm-2 3a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0" />
+      </g>
+    </svg>
+    <h1>相册</h1>
+  </div>
+</header>
+            <main class="photo-wall">
+              <div
+                class="album-stack"
+                v-for="album in processedAlbums"
+                :key="album.id"
+                @click="openAlbum(album)"
+                :style="album.style"
+              >
+                <div class="polaroid">
+                  <div class="photo">
+                    <img :src="album.cover" class="real-image" />
+                    <div class="dust"></div>
+                    <div class="scratches"></div>
+                  </div>
+                  <div class="caption">
+                    <span class="album-name">{{ album.title }}</span>
+                    <span class="album-count">[{{ album.photos.length }} 张]</span>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+
+          <!-- 视图 B：具体相片列表 (当选定相册时显示) -->
+          <div v-else key="photo-list">
+            <header class="page-title album-detail-header">
+              <!-- 简洁返回按钮 -->
+              <button class="back-btn-simple" @click="closeAlbum">
+                <svg height="16" width="16" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024">
+                  <path d="M874.690416 495.52477c0 11.2973-9.168824 20.466124-20.466124 20.466124l-604.773963 0 188.083679 188.083679c7.992021 7.992021 7.992021 20.947078 0 28.939099-4.001127 3.990894-9.240455 5.996574-14.46955 5.996574-5.239328 0-10.478655-1.995447-14.479783-5.996574l-223.00912-223.00912c-3.837398-3.837398-5.996574-9.046027-5.996574-14.46955 0-5.433756 2.159176-10.632151 5.996574-14.46955l223.019353-223.029586c7.992021-7.992021 20.957311-7.992021 28.949332 0 7.992021 8.002254 7.992021 20.957311 0 28.949332l-188.073446 188.073446 604.753497 0C865.521592 475.058646 874.690416 484.217237 874.690416 495.52477z"></path>
+                </svg>
+                <span>Back</span>
+              </button>
+            </header>
+
+            <main class="photo-wall">
+              <div
+                class="polaroid"
+                v-for="photo in currentAlbum.photos"
+                :key="photo.id"
+                :style="photo.style"
+                @click="openLightbox(photo)"
+              >
+                <div class="photo">
+                  <img :src="photo.url" class="real-image" />
+                  <div class="dust"></div>
+                  <div class="scratches"></div>
+                </div>
+                <div class="caption">{{ photo.title }}</div>
+              </div>
+            </main>
+          </div>
+        </transition>
+      </div>
+    </div>
+
+    <!-- ==================== 3. 图片全屏放大弹窗 ==================== -->
+    <transition name="zoom">
+      <div v-if="selectedPhoto" class="lightbox" @click="closeLightbox">
+        <button class="lightbox-close" @click="closeLightbox">×</button>
+        <div class="lightbox-content" @click.stop>
+          <div class="polaroid large-polaroid">
+            <div class="photo large-photo">
+              <img :src="selectedPhoto.url" class="real-image-large" />
+              <div class="dust"></div>
+              <div class="scratches"></div>
+            </div>
+            <div class="caption">{{ selectedPhoto.title }}</div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import Navbar from '@/modules/bloghome/components/load.vue'
+
+// ---------- 从本地文件夹自动加载相册数据 ----------
+const photoModules = import.meta.glob('@/assets/album/**/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+  query: '?url',
+  import: 'default'
+})
+
+function buildAlbumsFromFiles() {
+  const albumMap = new Map()
+  for (const [filePath, url] of Object.entries(photoModules)) {
+    const parts = filePath.split('/')
+    const albumDirName = parts[parts.length - 2]
+    const fileName = parts[parts.length - 1]
+    const title = fileName.replace(/\.[^/.]+$/, '')
+
+    if (!albumMap.has(albumDirName)) {
+      albumMap.set(albumDirName, {
+        id: `album-${albumDirName}`,
+        title: albumDirName,
+        cover: url,
+        photos: []
+      })
+    }
+    const album = albumMap.get(albumDirName)
+    album.photos.push({ title, url })
+  }
+  return Array.from(albumMap.values())
+}
+
+const albumsData = buildAlbumsFromFiles()
+
+const getRandomStyle = () => ({
+  transform: `rotate(${(Math.random() * 10 - 5).toFixed(1)}deg) translateY(${(Math.random() * 16 - 8).toFixed(1)}px)`
+})
+
+const processedAlbums = ref(
+  albumsData.map(album => ({
+    ...album,
+    style: getRandomStyle(),
+    photos: album.photos.map((p, i) => ({ ...p, id: `p-${i}`, style: getRandomStyle() }))
+  }))
+)
+
+const currentAlbum = ref(null)
+const selectedPhoto = ref(null)
+
+const openAlbum = (album) => {
+  currentAlbum.value = album
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+const closeAlbum = () => {
+  currentAlbum.value = null
+}
+const openLightbox = (photo) => {
+  selectedPhoto.value = photo
+  document.body.style.overflow = 'hidden'
+}
+const closeLightbox = () => {
+  selectedPhoto.value = null
+  document.body.style.overflow = 'auto'
+}
+</script>
+
+<style scoped>
+/* ==================== 页面背景与遮罩（与文章列表页一致） ==================== */
+.album-page-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #000;
+}
+
+/* 固定背景图 */
+.album-page-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('@/assets/木叶创立.webp');
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+/* 黑色半透明遮罩 */
+.album-page-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+/* 滚动内容区（毛玻璃效果） */
+.scrollable-content {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* 内容容器 */
+.gallery-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 20px 60px;
+}
+
+/* 以下保留你原有的所有卡片、堆叠、滤镜、灯箱样式，未做改动 */
+.page-title {
+  text-align: start;
+  margin-bottom: 50px;
+  position: relative;
+}
+.page-title h1 {
+  font-family: 'Microsoft YaHei', sans-serif;
+  font-size: 32px;
+  color: #fff;
+  margin: 0 0 10px 0;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.page-title p {
+  color: rgba(255,255,255,0.8);
+  font-size: 16px;
+  margin: 0;
+  font-style: italic;
+}
+
+.album-detail-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* 简洁返回按钮样式 */
+.back-btn-simple {
+  display: flex;
+  height: 3em;
+  width: 100px;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  transition: all 0.2s linear;
+  cursor: pointer;
+  border: none;
+  margin-bottom: 20px;
+}
+
+.back-btn-simple > svg {
+  margin-right: 5px;
+  margin-left: 5px;
+  font-size: 20px;
+  transition: all 0.4s ease-in;
+}
+
+.back-btn-simple:hover > svg {
+  font-size: 1.2em;
+  transform: translateX(-5px);
+}
+
+.back-btn-simple:hover {
+  box-shadow: 9px 9px 33px #d1d1d1, -9px -9px 33px #ffffff;
+  transform: translateY(-2px);
+}
+
+.photo-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 50px 30px;
+  justify-items: center;
+  align-items: center;
+}
+
+/* ==================== 相册堆叠外观 ==================== */
+.album-stack {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.album-stack::before,
+.album-stack::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: -1;
+  transition: all 0.3s;
+}
+.album-stack::before {
+  transform: rotate(-5deg);
+  top: 2px;
+  left: -4px;
+}
+.album-stack::after {
+  transform: rotate(4deg);
+  top: 4px;
+  left: 4px;
+}
+.album-stack:hover {
+  transform: translateY(-10px) !important;
+  z-index: 10;
+}
+.album-stack:hover::before {
+  transform: rotate(-8deg) translate(-5px, 5px);
+}
+.album-stack:hover::after {
+  transform: rotate(8deg) translate(5px, 5px);
+}
+
+.album-name {
+  display: block;
+  font-weight: bold;
+  font-size: 15px;
+}
+.album-count {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  font-weight: normal;
+}
+
+/* ==================== 宝丽来卡片核心样式 ==================== */
+.polaroid {
+  width: 220px;
+  padding: 10px 10px 20px 10px;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.15);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.photo-wall .polaroid:hover {
+  transform: translateY(-15px) scale(1.08) rotate(0deg) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 15px 30px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+.title-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.title-icon {
+  width: 2em;
+  height: auto;
+  flex-shrink: 0;
+  color: #fff;
+}
+.photo {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+.real-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.1) sepia(0.15);
+}
+.caption {
+  font-family: "Courier New", Courier, monospace;
+  text-align: center;
+  margin-top: 12px;
+  color: #333;
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+/* 滤镜特效 */
+.photo::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.4) 32%, rgba(255,255,255,0) 35%);
+  animation: shine 4s infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+.dust {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-image: radial-gradient(#000 1px, transparent 1px), radial-gradient(#000 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0, 25px 25px;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 3;
+}
+.scratches {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: linear-gradient(45deg, transparent 45%, rgba(0,0,0,0.05) 46%, transparent 47%) 0 0,
+              linear-gradient(-45deg, transparent 45%, rgba(0,0,0,0.05) 46%, transparent 47%) 0 0;
+  background-size: 200px 200px;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 3;
+}
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(120deg); }
+  20%, 100% { transform: translateX(100%) rotate(120deg); }
+}
+
+/* ==================== Lightbox 全屏放大 ==================== */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: zoom-out;
+}
+.lightbox-close {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.lightbox-close:hover {
+  transform: scale(1.2);
+}
+.lightbox-content {
+  cursor: default;
+}
+
+.large-polaroid {
+  width: auto;
+  max-width: 95vw;
+  padding: 15px 15px 40px 15px;
+  cursor: default;
+  transform: scale(1) !important;
+  display: inline-block;
+}
+.large-photo {
+  width: auto;
+  height: auto;
+  position: relative;
+  background: transparent;
+}
+.real-image-large {
+  max-width: 85vw;
+  max-height: 80vh;
+  display: block;
+  object-fit: contain;
+  filter: contrast(1.1) sepia(0.15);
+}
+.large-polaroid .caption {
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+/* Vue 过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+.zoom-enter-active,
+.zoom-leave-active {
+  transition: all 0.3s ease;
+}
+.zoom-enter-from,
+.zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* 移动端 */
+@media (max-width: 768px) {
+  .gallery-container {
+    padding: 60px 16px 40px;
+  }
+  .photo-wall {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 30px;
+  }
+  .polaroid {
+    width: 160px;
+    padding: 8px 8px 16px 8px;
+  }
+  .photo {
+    height: 150px;
+  }
+  .large-polaroid {
+    padding: 10px 10px 30px 10px;
+    max-width: 90vw;
+  }
+  .real-image-large {
+    max-width: 85vw;
+    max-height: 70vh;
+  }
+}
+</style>

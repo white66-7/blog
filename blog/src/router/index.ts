@@ -6,6 +6,7 @@ import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
 import QQContact from '@/modules/bloghome/views/qq.vue'
 import WechatContact from '@/modules/bloghome/views/wechat.vue'
 import mainarticle from '@/modules/bloghome/components/mainarticle.vue'
+import Photos from '@/modules/bloghome/components/photo.vue'
 
 
 const ArticleDetail = () => import('@/modules/bloghome/components/ArticleDetail.vue')
@@ -15,6 +16,11 @@ const routes = [
     path: '/',
     name: 'blog',
     component: Bloghome
+  },
+  {
+    path:'/photos',
+    name: 'photo-show',
+    component: Photos
   },
   {
     path: '/qq',
@@ -44,7 +50,7 @@ const routes = [
     path: '/article/:id',    
     name: 'ArticleDetail',
     component: ArticleDetail
-  }
+  },
 ]
 
 const router = createRouter({
