@@ -84,43 +84,42 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
-// 接收父组件传递过来的属性（比如用来判断是否在第一屏）
 defineProps({
   transparent: Boolean
 })
 
-// 控制导航栏显示/上移隐藏的状态
 const isVisible = ref(true)
 let timer = null
 
-// 鼠标移动时的处理函数
-const handleMouseMove = () => {
-  // 只要鼠标动了，就立即显示导航栏
+// 用户活动处理（鼠标移动或触摸滑动）
+const handleUserActivity = () => {
+  // 如果当前隐藏，则立即显示
   if (!isVisible.value) {
     isVisible.value = true
   }
   
-  // 清除上一次的定时器
+  // 重置定时器
   if (timer) clearTimeout(timer)
-  
-  // 重新开启 3 秒定时器
   timer = setTimeout(() => {
     isVisible.value = false
-  }, 3000)
+  }, 2000) // 2秒无活动后隐藏
 }
 
-// 组件挂载时添加全局鼠标移动监听
 onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove)
-  // 初始化时，默认开启一次定时器
+  // 桌面端：鼠标移动监听
+  window.addEventListener('mousemove', handleUserActivity)
+  // 移动端：触摸滑动监听
+  window.addEventListener('touchmove', handleUserActivity, { passive: true })
+  
+  // 初始化时启动隐藏定时器
   timer = setTimeout(() => {
     isVisible.value = false
-  }, 3000)
+  }, 2000)
 })
 
-// 组件销毁时移除监听，避免内存泄漏
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('mousemove', handleUserActivity)
+  window.removeEventListener('touchmove', handleUserActivity)
   if (timer) clearTimeout(timer)
 })
 </script>
@@ -241,14 +240,14 @@ onUnmounted(() => {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0 16px;
-  }
-  .navbar__item span {
-    display: none;
-  }
   .navbar__right {
-    gap: 16px;
+    position: absolute;
+    left: auto;
+    right: 16px;          
+    transform: none;   
+  }
+  .nav-icon {
+    margin-left: 0;     
   }
 }
 </style>

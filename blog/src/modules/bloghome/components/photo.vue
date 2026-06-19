@@ -156,9 +156,9 @@ const albumsData = [
 
 // ==========生成随机样式==========
 const getRandomStyle = () => ({
-  transform: `rotate(${(Math.random() * 10 - 5).toFixed(1)}deg) translateY(${(Math.random() * 16 - 8).toFixed(1)}px)`
+  transform: `rotate(${(Math.random() * 10 - 5).toFixed(1)}deg) translateY(${(Math.random() * 16 - 8).toFixed(1)}px)`,
+  '--shine-delay': `${(Math.random() * 4).toFixed(2)}s`
 })
-
 const processedAlbums = ref(
   albumsData.map(album => ({
     ...album,
@@ -170,7 +170,6 @@ const processedAlbums = ref(
     }))
   }))
 )
-
 // ========== 其余逻辑不变 ==========
 const currentAlbum = ref(null)
 const selectedPhoto = ref(null)
@@ -190,6 +189,7 @@ const closeLightbox = () => {
   selectedPhoto.value = null
   document.body.style.overflow = 'auto'
 }
+
 </script>
 
 <style scoped>
@@ -401,6 +401,7 @@ const closeLightbox = () => {
   position: relative;
   overflow: hidden;
   background: #1a1a1a;
+  
 }
 .real-image {
   width: 100%;
@@ -428,6 +429,7 @@ const closeLightbox = () => {
   bottom: 0;
   background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.4) 32%, rgba(255,255,255,0) 35%);
   animation: shine 4s infinite;
+  animation-delay: var(--shine-delay, 0s);
   z-index: 2;
   pointer-events: none;
 }
@@ -504,10 +506,13 @@ const closeLightbox = () => {
   display: inline-block;
 }
 .large-photo {
-  width: auto;
-  height: auto;
-  position: relative;
+  width: auto;          /* 让容器随内容自适应 */
+  height: auto;         /* 消除固定 200px 的限制 */
+  overflow: visible;    /* 或者 hidden（如果希望保留卡片的圆角效果），但要保证尺寸足够 */
   background: transparent;
+}
+.large-photo::before {
+  content: none;
 }
 .real-image-large {
   max-width: 85vw;
