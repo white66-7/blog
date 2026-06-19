@@ -32,6 +32,8 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const saysList = [
   { id: 1, content: '终于在今天把首页的代码写完了', date: '2026-06-15 22:36' },
+  { id: 2, content: '完成第一篇技术性文章', date: '2026-06-18 23:09' },
+  { id: 3, content: '等我写完十篇文章就好好写一个文章管理仓库', date: '2026-06-20 16:56' },
 ]
 
 const currentIndex = ref(0)
