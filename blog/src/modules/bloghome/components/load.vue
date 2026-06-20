@@ -239,38 +239,44 @@ onUnmounted(() => {
 }
 
 /* 移动端适配 */
+/* 移动端适配 */
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 12px 0 16px;
+    padding: 0 16px; /* 两侧留出安全边距 */
+    /* 父级本身就是 display: flex; justify-content: space-between; 会自然将左右推开 */
   }
 
   .navbar__left {
     flex-shrink: 1;
-    min-width: 0;
-    max-width: 65%;
+    max-width: 45%; /* 限制左侧最大宽度 */
     overflow: hidden;
-    gap: 4px;
   }
 
   .wave-svg {
-    height: 30px;
+    height: 28px; /* 稍微缩小一点 Logo */
     max-width: 100%;
-    flex-shrink: 1;
   }
 
   .nav-icon {
-    display: none;          /* 移动端直接隐藏小图标 */
-    height: 20px;
-    flex-shrink: 0;
-    margin-left: 0;
+    display: none; /* 移动端直接隐藏左侧那个多余的小图标 */
   }
 
   .navbar__right {
-    position: absolute;
-    left: auto;
-    right: 12px;
+    position: static; /* 核心修复 1：取消绝对定位，恢复正常的 flex 布局，这样绝对不会重叠 */
     transform: none;
-    gap: 14px;
+    gap: 16px; /* 控制图标之间的间距 */
+    width: auto;
+  }
+
+  /* 核心修复 2：移动端隐藏文字，只显示图标，释放大量横向空间 */
+  .navbar__item span {
+    display: none; 
+  }
+
+  /* 稍微调整一下移动端图标的大小，使其看起来更精致 */
+  .navbar__item svg {
+    width: 24px;
+    height: 24px;
   }
 }
 </style>
