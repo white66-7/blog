@@ -11,16 +11,9 @@ export interface PresetSong {
 export const songs: PresetSong[] = [
     {
     id: 'preset_1',
-    name: 'doll',
-    artist: '小雪', 
-    src: '/audio/doll.mp3', 
-    isPreset: true
-  },
-    {
-    id: 'preset_3',
-    name: 'aruarian dance',
-    artist: 'Nujabes', 
-    src: '/audio/aruarian dance.mp3', 
+    name: 'Stay Alive',
+    artist: '纯音乐', 
+    src: '/audio/Stay Alive.mp3', 
     isPreset: true
   },
   {
