@@ -7,6 +7,7 @@ import QQContact from '@/modules/bloghome/views/qq.vue'
 import WechatContact from '@/modules/bloghome/views/wechat.vue'
 import mainarticle from '@/modules/bloghome/components/mainarticle.vue'
 import Photos from '@/modules/bloghome/components/photo.vue'
+import projects from '@/modules/bloghome/components/github.vue'
 
 
 const ArticleDetail = () => import('@/modules/bloghome/components/ArticleDetail.vue')
@@ -21,6 +22,11 @@ const routes = [
     path:'/photos',
     name: 'photo-show',
     component: Photos
+  },
+  {
+    path:'/projects',
+    name: 'github',
+    component: projects
   },
   {
     path: '/qq',

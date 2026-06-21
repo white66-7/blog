@@ -119,7 +119,6 @@ const albumsData = [
     title: '动漫',
     cover: photo6,
     photos: [
-
       { title: '沉思', url: photo2 },
       { title: '圆梦', url: photo6 },
       { title: '佐助与鼬', url: photo7 },
