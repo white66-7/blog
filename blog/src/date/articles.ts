@@ -23,7 +23,7 @@ export const articles: Article[] = [
     id: 1,
     title: '从零开始的进阶之路',
     type: 'reflict',
-    date: '2026-06-18',
+    date: '2026-06-14',
     readTime: '10 minutes',
     excerpt: '那是一个月黑风高的白天...',
     tags: ['vue3', '前端','网站构建'],

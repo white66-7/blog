@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@types/jquery": "^4.0.1",
+    "github-calendar": "^2.3.4",
     "gsap": "^3.15.0",
     "jquery": "^4.0.0",
     "jsmediatags": "^3.9.7",
