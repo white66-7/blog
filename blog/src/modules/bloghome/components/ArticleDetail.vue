@@ -1,7 +1,13 @@
 <template>
   <!-- 引入自定义导航栏，非透明模式 -->
   <Navbar :transparent="false" />
-
+  <button class="back-btn" @click="$router.back()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+    返回
+  </button>
   <div class="article-page" v-if="article">
     <main>
       <div class="content" ref="contentRef">
@@ -359,8 +365,10 @@ main {
   white-space: nowrap;
   text-overflow: ellipsis;
   transform: scale(1);
-  transform-origin: center; /* 从中心点开始放大 */
-  transition: all 0.3s ease-in-out; /* 让放大、变色、阴影都带上丝滑过渡 */
+  transform-origin: center;
+  /* 从中心点开始放大 */
+  transition: all 0.3s ease-in-out;
+  /* 让放大、变色、阴影都带上丝滑过渡 */
 }
 
 /* 绿色填充滑入效果 */
@@ -379,7 +387,7 @@ main {
 
 .toc__item:hover {
   color: #ffffff;
-  transform: scale(1.10); 
+  transform: scale(1.10);
 }
 
 .toc__item:hover::before {
@@ -395,6 +403,35 @@ main {
   text-align: center;
   margin-top: 200px;
   color: #999;
+}
+
+.back-btn {
+  position: fixed;
+  top: 80px;
+  left: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e0e0e0;
+  color: #1a1a1a;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 45px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 6px 6px 12px #bebebe, -6px -6px 12px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  box-shadow: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
+  color: #e05a5a;
+}
+
+.back-btn:active {
+  transform: scale(0.96);
 }
 
 @media (max-width: 1200px) {
@@ -413,6 +450,13 @@ main {
   .hero-image {
     max-height: 200px;
     border-radius: 0;
+  }
+
+  .back-btn {
+    top: 24px;
+    left: 12px;
+    padding: 8px 16px;
+    font-size: 13px;
   }
 
   .hero-image img {

@@ -77,7 +77,8 @@ import player from '@/modules/bloghome/components/music.vue'
 import Say from '@/modules/bloghome/components/say.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
 import Navbar from '@/modules/bloghome/components/load.vue'
-import { ref, onMounted, computed } from 'vue'
+import { onActivated, nextTick, ref, onMounted} from 'vue'
+import { onBeforeRouteLeave} from 'vue-router'
 import ImageSlider from '@/modules/bloghome/components/image.vue'
 import ArticleShow from '@/modules/bloghome/components/article_show.vue'
 import WeatherCard from '@/modules/bloghome/components/weatherCard.vue'
@@ -99,6 +100,8 @@ import img3 from '@/assets/classmates.webp'
 import img4 from '@/assets/myself.webp'
 
 
+
+
 const mainBody = ref<HTMLElement | null>(null)
 const libraryStore = useLibraryStore()
 const audioStore = useAudioStore()
@@ -108,6 +111,37 @@ const isFirstScreen = ref(true)
 const swiperInstance = ref<any>(null)
 let touchStartY = 0
 let isSliding = false
+const savedSlideIndex = ref(0)
+const savedScrollTop = ref(0)
+
+
+defineOptions({ name: 'BlogHome' })
+onBeforeRouteLeave((to, from, next) => {
+  if (swiperInstance.value) {
+    savedSlideIndex.value = swiperInstance.value.activeIndex
+  }
+  const container = document.querySelector('.scrollable-content')
+  if (container) {
+    savedScrollTop.value = container.scrollTop
+  }
+  next()
+})
+
+onActivated(async () => {
+  await nextTick()
+
+  if (swiperInstance.value && savedSlideIndex.value === 1 && swiperInstance.value.activeIndex === 0) {
+    swiperInstance.value.slideTo(1, 0)
+    swiperInstance.value.update()
+  }
+
+  // 恢复滚动位置
+  const container = document.querySelector('.scrollable-content') as HTMLElement | null
+  if (container && savedScrollTop.value > 0) {
+    container.scrollTop = savedScrollTop.value
+  }
+})
+
 
 const onSwiperInit = (swiper: any) => {
   swiperInstance.value = swiper

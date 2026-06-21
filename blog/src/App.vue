@@ -1,8 +1,10 @@
 <template>
-  <div id="app">
-    <router-view />
-     <audio ref="audioRef" style="display: none" preload="metadata"/>
-  </div>
+  <router-view v-slot="{ Component }">
+    <keep-alive include="BlogHome">
+      <component :is="Component" />
+    </keep-alive>
+  </router-view>
+  <audio ref="audioRef" />
 </template>
 
 <style>
@@ -51,7 +53,8 @@ import {ref,onMounted} from 'vue'
 import { useAudioStore } from '@/stores/audioStore'
 const audioRef = ref<HTMLAudioElement>()
 const audioStore = useAudioStore()
+
 onMounted(() => {
-  audioStore.setAudioElement(audioRef.value ?? null)  // ← 这里调用绑定
+  audioStore.setAudioElement(audioRef.value ?? null)  
 })
 </script>
