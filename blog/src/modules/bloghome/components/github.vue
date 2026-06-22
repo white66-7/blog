@@ -2,13 +2,12 @@
   <div class="projects-page">
     <Navbar :transparent="isFirstScreen" />
     
-    <!-- 2. 带有“全屏玻璃罩”特效的滚动内容区 -->
     <div class="scrollable-content">
       <!-- 1. GitHub 贡献图区域 -->
       <section class="calendar-section">
         <div class="card-glass">
           <div id="github-calendar" class="calendar">
-            <div class="loading-text">正在拦截 GitHub 神经信号...</div>
+            <div class="loading-text">正在对接white66-7的仓库</div>
           </div>
         </div>
       </section>
