@@ -17,6 +17,7 @@ import md3 from './md/3.md?raw'
 import md4 from './md/4.md?raw'
 import md5 from './md/5.md?raw'
 import md7 from './md/7.md?raw'
+import md8 from './md/8.md?raw'
 
 export const articles: Article[] = [
   {
@@ -71,7 +72,7 @@ export const articles: Article[] = [
     id: 5,
     title: '双网页视图,页面深色遮罩与滚动优化',
     type: '技术',
-    date: '2026-06-13',
+    date: '2026-06-27',
     readTime: '10 minutes',
     excerpt: '浅谈一下波浪动画,页面深色遮罩,上下双页面和磁吸一般的滚动效果如何实现',
     tags: ['组件式设计', 'swiper'],
@@ -83,7 +84,7 @@ export const articles: Article[] = [
     id: 6,
     title: '举几个我最喜欢用到悬停动画效果如何实现',
     type: '技术',
-    date: '2026-06-25',
+    date: '2026-06-30',
     readTime: '3 minutes',
     excerpt: '这张记录几个我最喜欢的悬停效果,适合用在按钮或者想被注意到的地方',
     tags: ['css', 'animation','动画'],
@@ -91,16 +92,28 @@ export const articles: Article[] = [
     layout: 'reverse-horizontal',
     content:`   `,
   },
-        {
+  {
     id: 7,
-    title: '看re0第四季十一集的感动瞬间',
+    title: 're0第四季十一集看感动了说是',
     type: '动漫',
     date: '2026-06-20',
     readTime: '2 minutes',
-    excerpt: 're0看到第十一集后发现,这季的人物刻画是真的生动深刻',
+    excerpt: '把攒了好久了re0第四季一下看完了,确实不负我的期待',
     tags: ['动漫', 're0'],
     cover: '/messages/7/re0.webp',
     layout: 'horizontal', 
        content:md7,
+  },
+  {
+    id: 8,
+    title: '期末复习理解学习一下数据结构',
+    type: '大学',
+    date: '2026-07-01',
+    readTime: '2 minutes',
+    excerpt: '主要是为了期末考试所以复习整理一下',
+    tags: ['大学', '数据结构'],
+    cover: '/messages/8/wushi.webp',
+    layout: 'horizontal', 
+    content:md8,
   },
 ]
