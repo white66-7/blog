@@ -106,7 +106,7 @@ import photo8 from '@/assets/album/动漫/eye.webp'
 
 
 import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
-// import view2 from '@/assets/album/风景/高考结束的小区门口.webp'
+import view2 from '@/assets/album/风景/library.webp'
 // import view3 from '@/assets/album/风景/高考结束的小区门口.webp'
 
 import img1 from '@/assets/album/人物/朋友.webp'
@@ -145,6 +145,7 @@ const albumsData = [
     cover: view1,
     photos: [
       { title: '高考结束的小区门口', url: view1 },
+      { title: '期末周的图书馆', url: view2 },
     ]
   }
   // ... 更多相册
