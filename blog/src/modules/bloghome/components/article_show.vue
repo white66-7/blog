@@ -21,7 +21,6 @@ const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
 
-// ========== 文章选取与轮换逻辑（和之前完全相同）==========
 
 const firstArticle = computed(() =>
   props.articles.find(a => a.id === 1) ?? props.articles[0] ?? null

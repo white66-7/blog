@@ -1,16 +1,31 @@
+<!-- 第一部分：充当“记忆芯片”的外部脚本 -->
+<script lang="ts">
+// 全局变量：记住页码（默认第1页）和滚动位置
+let globalSavedPage = 1
+let globalSavedScroll = 0
+</script>
+
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles'
 
-// 引入你原有的顶部导航栏组件
 import Navbar from '@/modules/bloghome/components/load.vue'
 
 const router = useRouter()
 
+// ===== 获取滚动容器的引用 (修复你之前翻页无法回到顶部的bug) =====
+const scrollRef = ref<HTMLElement | null>(null)
+
 // ===== 分页逻辑 =====
-const currentPage = ref(1)
-const pageSize = ref(6) // 根据需要调整每页显示的数量
+// 1. 初始化时，直接读取“记忆芯片”里的页码
+const currentPage = ref(globalSavedPage) 
+const pageSize = ref(6)
+
+// 2. 只要页码发生变化，就立刻更新给“记忆芯片”
+watch(currentPage, (newPage) => {
+  globalSavedPage = newPage
+})
 
 const totalPages = computed(() => {
   return Math.ceil(allArticles.length / pageSize.value) || 1
@@ -22,29 +37,53 @@ const paginatedArticles = computed(() => {
   return allArticles.slice(start, end)
 })
 
+// 让局部的容器滚动到顶部，而不是用没用的 window.scrollTo
+const scrollToTop = () => {
+  if (scrollRef.value) {
+    scrollRef.value.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollToTop()
   }
 }
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollToTop()
   }
 }
 
 const goToPage = (page: number) => {
   currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  scrollToTop()
 }
 
 // 跳转文章详情
 const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
+
+// ===== 滚动记忆逻辑 =====
+onBeforeRouteLeave((to, from, next) => {
+  // 离开页面时，把当前滚到的高度也存起来
+  if (scrollRef.value) {
+    globalSavedScroll = scrollRef.value.scrollTop
+  }
+  next()
+})
+
+onMounted(async () => {
+  await nextTick()
+  // 返回这个页面时，自动滚回上次看的位置
+  if (scrollRef.value && globalSavedScroll > 0) {
+    scrollRef.value.scrollTop = globalSavedScroll
+  }
+})
 </script>
 
 <template>
@@ -53,8 +92,8 @@ const goToArticle = (id: number) => {
     <!-- 导航栏 -->
     <Navbar :transparent="false" />
 
-    <!-- 滚动内容区 -->
-    <div class="scrollable-content">
+    <!-- 滚动内容区：绑定了 ref="scrollRef" -->
+    <div class="scrollable-content" ref="scrollRef">
       <div class="main-body">
         
         <!-- 页面标题 (SVG 图标 + 全部文章) -->
