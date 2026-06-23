@@ -59,14 +59,16 @@
   </div>
 </template>
 
+
+<!-- 第二部分：替换你原来的 script setup -->
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import { articles } from '@/date/articles'
 import type { Article } from '@/date/articles'
-// 导入自定义导航栏组件
 import Navbar from '@/modules/bloghome/components/load.vue'
+import { articleScrollCache } from '@/router/index'
 
 const md = new MarkdownIt({ html: true })
 const route = useRoute()
@@ -74,7 +76,6 @@ const article = ref<Article | null>(null)
 const renderedContent = computed(() => (article.value ? md.render(article.value.content) : ''))
 
 const contentRef = ref<HTMLElement | null>(null)
-
 const headings = ref<{ text: string; level: number; el: HTMLElement }[]>([])
 const activeHeading = ref(-1)
 
@@ -108,14 +109,21 @@ function handleScroll() {
 
 let cleanupScroll: () => void
 
+onBeforeRouteLeave((to, from, next) => {
+  const currentId = Number(route.params.id)
+  articleScrollCache.set(currentId, window.scrollY || document.documentElement.scrollTop)
+  next()
+})
+
 onMounted(async () => {
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
 
   await nextTick()
-  window.scrollTo(0, 0)
   buildHeadings()
   handleScroll()
+
+  const savedHeight = articleScrollCache.get(id) || 0
 
   const throttledScroll = () => requestAnimationFrame(handleScroll)
   window.addEventListener('scroll', throttledScroll, { passive: true })
@@ -404,7 +412,41 @@ main {
   margin-top: 200px;
   color: #999;
 }
+/* ---------- Markdown 超链接样式 (现代动画款) ---------- */
+.markdown-body :deep(a) {
+  color: #23c483; /* 使用你的标签悬浮主题绿 */
+  text-decoration: none; /* 去掉默认丑陋的下划线 */
+  font-weight: 600; /* 稍微加粗，使其在正文中更显眼 */
+  position: relative;
+  padding: 0 2px;
+  transition: color 0.3s ease;
+}
 
+/* 自定义底部下划线 */
+.markdown-body :deep(a)::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px; /* 下划线粗细 */
+  bottom: -2px; /* 距离文字底部的距离 */
+  left: 0;
+  background-color: #23c483;
+  transform: scaleX(0); /* 默认隐藏 */
+  transform-origin: bottom right; 
+  transition: transform 0.3s ease-out;
+  border-radius: 2px;
+}
+
+/* 鼠标悬浮时的效果 */
+.markdown-body :deep(a):hover {
+  color: #1a9f68; /* 悬浮时文字颜色稍微加深 */
+}
+
+/* 悬浮时下划线从左向右展开 */
+.markdown-body :deep(a):hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
 .back-btn {
   position: fixed;
   top: 80px;
