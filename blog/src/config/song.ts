@@ -16,8 +16,15 @@ export const songs: PresetSong[] = [
     src: '/audio/Stay Alive.mp3', 
     isPreset: true
   },
-  {
+    {
     id: 'preset_2',
+    name: 'Ahead of Us',
+    artist: '小瀬村晶', 
+    src: '/audio/Ahead of Us.mp3', 
+    isPreset: true
+  },
+  {
+    id: 'preset_3',
     name: '天龙八部之宿敌',
     artist: '九三', 
     src: '/audio/天龙八部之宿敌.mp3', 
