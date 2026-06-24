@@ -107,7 +107,7 @@ function handleScroll() {
   activeHeading.value = active
 }
 
-let cleanupScroll: () => void
+let cleanupScroll: () => void = () => {}
 
 onBeforeRouteLeave((to, from, next) => {
   const currentId = Number(route.params.id)
@@ -124,11 +124,12 @@ onMounted(async () => {
   handleScroll()
 
   const savedHeight = articleScrollCache.get(id) || 0
-
-  const throttledScroll = () => requestAnimationFrame(handleScroll)
-  window.addEventListener('scroll', throttledScroll, { passive: true })
-  cleanupScroll = () => {
-    window.removeEventListener('scroll', throttledScroll)
+  // ✅ 恢复滚动位置
+  if (savedHeight > 0) {
+    // 等待下一帧，确保页面已渲染出完整高度（尤其是图片还没加载完也没关系，浏览器会记住大致位置）
+    requestAnimationFrame(() => {
+      window.scrollTo(0, savedHeight)
+    })
   }
 })
 
