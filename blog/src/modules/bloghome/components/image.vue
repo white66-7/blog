@@ -50,7 +50,6 @@ interface SlideImage {
 
 const props = defineProps<{
   images: SlideImage[]
-  autoPlayInterval?: number
 }>()
 
 const currentIndex = ref(0)
@@ -68,7 +67,7 @@ const prevSlide = () => {
 const startAutoPlay = () => {
   if (props.images.length <= 1) return
   stopAutoPlay()
-  timer = setInterval(nextSlide, props.autoPlayInterval || 4000)
+  timer = setInterval(nextSlide,4000)
 }
 
 const stopAutoPlay = () => {
