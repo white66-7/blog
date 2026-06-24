@@ -124,9 +124,7 @@ onMounted(async () => {
   handleScroll()
 
   const savedHeight = articleScrollCache.get(id) || 0
-  // ✅ 恢复滚动位置
   if (savedHeight > 0) {
-    // 等待下一帧，确保页面已渲染出完整高度（尤其是图片还没加载完也没关系，浏览器会记住大致位置）
     requestAnimationFrame(() => {
       window.scrollTo(0, savedHeight)
     })

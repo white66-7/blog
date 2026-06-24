@@ -230,6 +230,7 @@ onUnmounted(() => {
   flex-direction: column;
   height: 100%;
   padding: 12px;
+  width: 50%;
   box-sizing: border-box;
 }
 .card.reverse-horizontal .card__tags {
