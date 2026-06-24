@@ -62,7 +62,7 @@ export const articles: Article[] = [
     type: '技术',
     date: '2026-06-19',
     readTime: '5 minutes',
-    excerpt: '承接上文,解析我的相册组件设计',
+    excerpt: '承接上文,浅谈我的相册组件设计',
     tags: ['组件式设计', '相册展示'],
     cover: '/covers/left.webp',
     layout: 'horizontal',

@@ -120,7 +120,6 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* ========= 卡片 ========= */
 .property-card {
   width: 100%;
   height: 100%;

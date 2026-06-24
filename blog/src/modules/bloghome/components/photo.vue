@@ -111,6 +111,7 @@ import view2 from '@/assets/album/风景/library.webp'
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
+import img3 from '@/assets/album/人物/dji.webp'
 
 // ========== 2. 手动构建相册数据 ==========
 const albumsData = [
@@ -136,6 +137,7 @@ const albumsData = [
     photos: [
       { title: '给朋友拍的照片', url: img1 },
       { title: '研学', url: img2 },
+      { title: '在旧宿舍的最后一晚', url: img3 },
 
     ]
   },
