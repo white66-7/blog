@@ -54,7 +54,7 @@ const pickRandomSay = () => {
 
 const startAutoPlay = () => {
   if (!timer) {
-    timer = window.setInterval(pickRandomSay, 10000)
+    timer = window.setInterval(pickRandomSay, 5000)
   }
 }
 
