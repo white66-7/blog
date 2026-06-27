@@ -9,8 +9,8 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles' 
 import Navbar from '@/modules/bloghome/components/load.vue'
-import SearchRecentCard from '@/modules/bloghome/components/search_article.vue'
-import DonutChart from '@/modules/bloghome/components/DonutChart.vue'   // 新增
+import SearchRecentCard from '@/modules/bloghome/components/articles/search_article.vue'
+import DonutChart from '@/modules/bloghome/components/articles/DonutChart.vue'   // 新增
 
 const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
