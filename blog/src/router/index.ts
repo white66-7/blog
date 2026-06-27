@@ -5,11 +5,11 @@ import SongsView from '@/modules/player/components/songsview.vue'
 import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
 import QQContact from '@/modules/bloghome/views/qq.vue'
 import WechatContact from '@/modules/bloghome/views/wechat.vue'
-import mainarticle from '@/modules/bloghome/components/mainarticle.vue'
-import Photos from '@/modules/bloghome/components/photo.vue'
-import projects from '@/modules/bloghome/components/github.vue'
+import mainarticle from '@/modules/bloghome/components/articles/mainarticle.vue'
+import Photos from '@/modules/bloghome/components/photos/photo.vue'
+import projects from '@/modules/bloghome/components/projects/github.vue'
 
-const ArticleDetail = () => import('@/modules/bloghome/components/ArticleDetail.vue')
+const ArticleDetail = () => import('@/modules/bloghome/components/articles/ArticleDetail.vue')
 
 export const articleScrollCache = new Map<number, number>()
 
