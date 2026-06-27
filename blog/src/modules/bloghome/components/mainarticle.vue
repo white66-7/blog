@@ -9,6 +9,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles' 
 import Navbar from '@/modules/bloghome/components/load.vue'
+import SearchRecentCard from '@/modules/bloghome/components/search_article.vue'
 
 import * as d3 from 'd3'
 import gsap from 'gsap'
@@ -209,6 +210,7 @@ function drawDonutChart() {
         <!-- 甜甜圈图（居中，无右侧面板） -->
         <div class="pie-section-container">
           <div id="donut-chart" class="donut-chart-container"></div>
+          <SearchRecentCard class="search-card" />
         </div>
 
         <!-- 文章卡片列表 -->
