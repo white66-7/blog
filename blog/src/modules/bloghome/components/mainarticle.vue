@@ -10,9 +10,7 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles' 
 import Navbar from '@/modules/bloghome/components/load.vue'
 import SearchRecentCard from '@/modules/bloghome/components/search_article.vue'
-
-import * as d3 from 'd3'
-import gsap from 'gsap'
+import DonutChart from '@/modules/bloghome/components/DonutChart.vue'   // 新增
 
 const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
@@ -70,126 +68,8 @@ onMounted(async () => {
   if (scrollRef.value && globalSavedScroll > 0) {
     scrollRef.value.scrollTop = globalSavedScroll
   }
-  setTimeout(() => {
-    drawDonutChart()
-  }, 100)
+  // 饼图由 DonutChart 自行绘制，无需额外调用
 })
-
-function drawDonutChart() {
-  const container = d3.select('#donut-chart');
-  if (container.empty()) return;
-  container.html('');
-
-  const width = (container.node() as HTMLElement).clientWidth || 400;
-  const height = width;
-  const radius = Math.min(width, height) / 2;
-  const innerRadius = radius * 0.35;
-  const outerRadius = radius - 10;
-
-  // 数据准备
-  const typeMap = new Map<string, number>();
-  allArticles.forEach(article => {
-    const t = article.type || '未分类';
-    typeMap.set(t, (typeMap.get(t) || 0) + 1);
-  });
-  const data = Array.from(typeMap, ([label, value]) => ({ label, value }));
-  const total = allArticles.length;
-
-  // 颜色方案
-  const nvd3Colors = ['#965251', '#00b3ca', '#7dd0b6', '#e38690', '#ead98b'];
-  const extraColors = ['#f39c12', '#8e44ad', '#2ecc71', '#e67e22', '#3498db'];
-  const allColors = [...nvd3Colors, ...extraColors];
-  const colorScale = d3.scaleOrdinal<string>()
-    .domain(data.map(d => d.label))
-    .range(allColors.slice(0, data.length));
-
-  const svg = container
-    .append('svg')
-    .attr('width', '100%')
-    .attr('height', width)
-    .attr('viewBox', `0 0 ${width} ${height}`)
-    .append('g')
-    .attr('transform', `translate(${width / 2},${height / 2})`);
-
-  const pie = d3.pie<any>().value(d => d.value).sort(null);
-  const arc = d3.arc<any>().innerRadius(innerRadius).outerRadius(outerRadius);
-  const hoverArc = d3.arc<any>().innerRadius(innerRadius).outerRadius(outerRadius + 5);
-
-  // ---- 绘制扇形并添加 hover 事件 ----
-  svg.selectAll('path')
-    .data(pie(data))
-    .enter().append('path')
-    .attr('d', arc)
-    .attr('fill', (d: any) => colorScale(d.data.label))
-    .attr('stroke', 'rgba(255,255,255,0.2)')   // 正常描边保留
-    .attr('stroke-width', 1.5)
-    .style('cursor', 'pointer')
-    .on('mouseover', function(event, d: any) {
-      const brighterColor = d3.color(colorScale(d.data.label))?.brighter(0.5)?.toString() || colorScale(d.data.label);
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .attr('d', hoverArc(d))
-        .attr('fill', brighterColor)
-        // 删除了白色描边设置，保持和正常状态一致或不做更改
-        // .attr('stroke', '#ffffff')  // 已删除
-        // .attr('stroke-width', 3)    // 已删除
-        ;
-    })
-    .on('mouseout', function(event, d: any) {
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .attr('d', arc(d))
-        .attr('fill', colorScale(d.data.label))
-        .attr('stroke', 'rgba(255,255,255,0.2)')  // 恢复正常描边
-        .attr('stroke-width', 1.5);
-    });
-
-  // ---- 内部标签：只显示分类名，不显示百分比 ----
-  svg.selectAll('.label')
-    .data(pie(data))
-    .enter().append('text')
-    .attr('transform', (d: any) => {
-      const pos = arc.centroid(d);
-      return `translate(${pos[0]}, ${pos[1]})`;
-    })
-    .attr('text-anchor', 'middle')
-    .attr('dy', '0.35em')
-    .style('fill', '#fff')
-    .style('font-size', '14px')
-    .style('font-weight', '500')
-    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
-    .style('text-shadow', '0 1px 4px rgba(0,0,0,0.6)')
-    .text((d: any) => d.data.label);   // 只显示分类名，不再拼接百分比
-
-  // ---- 中心文字（固定不变） ----
-  svg.append('text')
-    .attr('text-anchor', 'middle')
-    .attr('dy', '-.35em')
-    .style('fill', '#fff')
-    .style('font-size', '22px')
-    .style('font-weight', '300')
-    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
-    .text('文章分类');
-
-  svg.append('text')
-    .attr('text-anchor', 'middle')
-    .attr('dy', '1.2em')
-    .style('fill', '#aaa')
-    .style('font-size', '16px')
-    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
-    .text(`${total} 篇`);
-
-  // GSAP 动画
-  gsap.from('#donut-chart svg', {
-    duration: 0.8,
-    rotation: -120,
-    scale: 0,
-    opacity: 0,
-    ease: 'power2.out'
-  });
-}
 </script>
 
 <template>
@@ -207,9 +87,9 @@ function drawDonutChart() {
           </h1>
         </div>
 
-        <!-- 甜甜圈图（居中，无右侧面板） -->
+        <!-- 饼图 + 搜索卡片并排 -->
         <div class="pie-section-container">
-          <div id="donut-chart" class="donut-chart-container"></div>
+          <DonutChart :articles="allArticles" class="donut-chart-wrapper" />
           <SearchRecentCard class="search-card" />
         </div>
 
@@ -254,26 +134,6 @@ function drawDonutChart() {
 </template>
 
 <style scoped>
-/* 不再引入 nvd3 的 CSS */
-
-/* ========= 甜甜圈图容器（居中） ========= */
-.pie-section-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 50px;
-  min-height: 400px;
-  max-width: 1000px;
-}
-.donut-chart-container {
-  width: 100%;
-  max-width: 450px;
-}
-.donut-chart-container svg {
-  width: 100%;
-  height: auto;
-}
-
 /* ========= 全局布局 ========= */
 .app-page-wrapper {
   position: relative;
@@ -332,6 +192,26 @@ function drawDonutChart() {
   gap: 10px;
 }
 
+/* ========= 饼图 + 搜索卡片并排布局 ========= */
+.pie-section-container {
+  display: flex;
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto 50px auto;
+  align-items: stretch;
+  min-height: 400px;
+}
+
+.donut-chart-wrapper {
+  flex: 0 0 60%;
+  min-height: 400px;
+}
+
+.search-card {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ========= 文章列表容器 ========= */
 .articles-container {
   display: flex;
@@ -358,16 +238,13 @@ function drawDonutChart() {
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
-/* 横排 */
 .card.horizontal {
   flex-direction: row;
 }
-/* 反向横排 */
 .card.reverse-horizontal {
   flex-direction: row-reverse;
 }
 
-/* 图片和内容的通用比例 */
 .card.horizontal .card__img,
 .card.reverse-horizontal .card__img {
   width: 40%;
@@ -393,7 +270,6 @@ function drawDonutChart() {
   box-sizing: border-box;
 }
 
-/* ========= 卡片文字部分样式 ========= */
 .card__title {
   font-size: 18px;
   font-weight: 700;
@@ -494,11 +370,17 @@ function drawDonutChart() {
     height: 180px;
   }
   .pie-section-container {
-    max-width: 100%;
     flex-direction: column;
+    gap: 30px;
+    align-items: stretch;
   }
-  .donut-chart-container {
-    max-width: 100%;
+  .donut-chart-wrapper {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 300px;
+  }
+  .search-card {
+    width: 100%;
   }
   .card.horizontal .card__content,
   .card.reverse-horizontal .card__content {
