@@ -22,7 +22,7 @@ export const articles: Article[] = [
   {
     id: 1,
     title: '从零开始的进阶之路',
-    type: 'reflict',
+    type: '前端',
     date: '2026-06-14',
     readTime: '10 minutes',
     excerpt: '那是一个月黑风高的白天...',
@@ -33,7 +33,7 @@ export const articles: Article[] = [
   {
     id: 2,
     title: '论新手写的第一个网页能有多shit',
-    type: '吐槽',
+    type: '反思',
     date: '2026-06-16',
     readTime: '2 minutes',
     excerpt: '记得5月末写完第一个网页时认为逻辑缜密,甚至于发了个抖音,待到后来复盘时发现漏洞很多,这篇文章做个反省',
@@ -44,7 +44,7 @@ export const articles: Article[] = [
   {
     id: 3,
     title: '浅谈如何实现实时天气动画组件设计',
-    type: '技术',
+    type: '前端',
     date: '2026-06-17',
     readTime: '5 minute',
     excerpt: '列出常用前端网站并浅谈实时天气组件',
@@ -55,7 +55,7 @@ export const articles: Article[] = [
   {
     id: 4,
     title: '浅谈如何实现相册组件设计',
-    type: '技术',
+    type: '前端',
     date: '2026-06-19',
     readTime: '5 minutes',
     excerpt: '承接上文,浅谈我的相册组件设计',
@@ -66,7 +66,7 @@ export const articles: Article[] = [
     {
     id: 5,
     title: '双网页视图,页面深色遮罩与滚动优化',
-    type: '技术',
+    type: '前端',
     date: '2026-06-27',
     readTime: '10 minutes',
     excerpt: '浅谈一下波浪动画,页面深色遮罩,上下双页面和磁吸一般的滚动效果如何实现',
@@ -77,7 +77,7 @@ export const articles: Article[] = [
       {
     id: 6,
     title: '举几个我最喜欢用到悬停动画效果如何实现',
-    type: '技术',
+    type: '前端',
     date: '2026-06-30',
     readTime: '3 minutes',
     excerpt: '这张记录几个我最喜欢的悬停效果,适合用在按钮或者想被注意到的地方',
