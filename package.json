@@ -1,11 +1,15 @@
 {
   "dependencies": {
     "@types/snapsvg": "^0.5.8",
+    "d3": "^7.9.0",
     "eve": "^0.5.4",
+    "gsap": "^3.15.0",
+    "jquery": "^4.0.0",
     "markdown-it": "^14.2.0",
     "snapsvg-cjs": "^0.0.6"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/markdown-it": "^14.1.2"
   }
 }

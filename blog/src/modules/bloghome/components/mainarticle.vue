@@ -1,6 +1,5 @@
-<!-- 第一部分：充当“记忆芯片”的外部脚本 -->
 <script lang="ts">
-// 全局变量：记住页码（默认第1页）和滚动位置
+// 第一部分：记忆芯片
 let globalSavedPage = 1
 let globalSavedScroll = 0
 </script>
@@ -8,42 +7,41 @@ let globalSavedScroll = 0
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
-import { articles as allArticles } from '@/date/articles'
-
+import { articles as allArticles } from '@/date/articles' 
 import Navbar from '@/modules/bloghome/components/load.vue'
 
-const router = useRouter()
+import * as d3 from 'd3'
+import $ from 'jquery'
+import gsap from 'gsap'
 
-// ===== 获取滚动容器的引用 (修复你之前翻页无法回到顶部的bug) =====
+const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
 
 // ===== 分页逻辑 =====
-// 1. 初始化时，直接读取“记忆芯片”里的页码
 const currentPage = ref(globalSavedPage) 
 const pageSize = ref(6)
 
-// 2. 只要页码发生变化，就立刻更新给“记忆芯片”
 watch(currentPage, (newPage) => {
   globalSavedPage = newPage
 })
 
-const totalPages = computed(() => {
-  return Math.ceil(allArticles.length / pageSize.value) || 1
-})
+const totalPages = computed(() => Math.ceil(allArticles.length / pageSize.value) || 1)
 
 const paginatedArticles = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return allArticles.slice(start, end)
+  return allArticles.slice(start, start + pageSize.value)
 })
 
-// 让局部的容器滚动到顶部，而不是用没用的 window.scrollTo
 const scrollToTop = () => {
-  if (scrollRef.value) {
-    scrollRef.value.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  if (scrollRef.value) scrollRef.value.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+const goToPage = (page: number) => {
+  currentPage.value = page
+  scrollToTop()
+}
+
+// 恢复原来的上一页 / 下一页方法
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
@@ -58,45 +56,166 @@ const nextPage = () => {
   }
 }
 
-const goToPage = (page: number) => {
-  currentPage.value = page
-  scrollToTop()
-}
-
-// 跳转文章详情
 const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
 
-// ===== 滚动记忆逻辑 =====
-onBeforeRouteLeave((to, from, next) => {
-  // 离开页面时，把当前滚到的高度也存起来
-  if (scrollRef.value) {
-    globalSavedScroll = scrollRef.value.scrollTop
+// ===== 核心：彻底修复 TypeScript 报错的颜色函数 =====
+function ColorLuminance(hex: string | null | undefined, lum: number): string {
+  let c = String(hex || "000000").replace(/[^0-9a-f]/gi, "");
+  
+  if (c.length < 6) {
+    const r = c.charAt(0) || "0";
+    const g = c.charAt(1) || "0";
+    const b = c.charAt(2) || "0";
+    c = r + r + g + g + b + b;
   }
+
+  lum = lum || 0;
+  let rgb = "#";
+  
+  for (let i = 0; i < 3; i++) {
+    const sub = c.substring(i * 2, i * 2 + 2);
+    let val = parseInt(sub, 16);
+    val = Math.round(Math.min(Math.max(0, val + (val * lum)), 255));
+    const finalHex = val.toString(16);
+    rgb += ("00" + finalHex).slice(-2);
+  }
+  
+  return rgb;
+}
+
+// ===== 滚动记忆与初始化 =====
+onBeforeRouteLeave((to, from, next) => {
+  if (scrollRef.value) globalSavedScroll = scrollRef.value.scrollTop
   next()
 })
 
 onMounted(async () => {
   await nextTick()
-  // 返回这个页面时，自动滚回上次看的位置
   if (scrollRef.value && globalSavedScroll > 0) {
     scrollRef.value.scrollTop = globalSavedScroll
   }
+  setTimeout(() => {
+    drawPieChart()
+  }, 100)
 })
+
+// ===== 饼图绘制逻辑 =====
+function drawPieChart() {
+  const container = document.getElementById('pieChart')
+  if (!container) return
+
+  let width = container.clientWidth
+  if (width <= 0) width = 350 
+  
+  const typeMap = new Map<string, { count: number; titles: string[] }>()
+  allArticles.forEach(article => {
+    const t = article.type || '未分类'
+    if (!typeMap.has(t)) typeMap.set(t, { count: 0, titles: [] })
+    const group = typeMap.get(t)!
+    group.count++
+    group.titles.push(article.title)
+  })
+
+  const data = Array.from(typeMap, ([type, group]) => ({
+    Title: type,
+    Amount: group.count,
+    Description: group.titles.map(title => `<div class="pie-list-item"># ${title}</div>`).join('')
+  }))
+
+  container.innerHTML = ''
+  const radius = (width - 20) / 2
+  const innerRadius = 80 
+  const total = allArticles.length
+
+  const color = d3.scaleOrdinal<string>()
+    .domain(data.map(d => d.Title))
+    .range(['#2BDFBB', '#DF2B4F', '#EE6617', '#FFBF00', '#423E6E', '#E24161', '#9C27B0'])
+
+  const arc = d3.arc().outerRadius(radius - 10).innerRadius(innerRadius)
+  const arcOver = d3.arc().outerRadius(radius + 5).innerRadius(innerRadius)
+  const labelArc = d3.arc().outerRadius((radius + innerRadius) / 2).innerRadius((radius + innerRadius) / 2)
+  const pie = d3.pie<any>().sort(null).value(d => d.Amount)
+
+  const svg = d3.select('#pieChart').append('svg')
+    .attr('width', '100%')
+    .attr('height', width)
+    .attr('viewBox', `0 0 ${width} ${width}`)
+    .append('g')
+    .attr('transform', `translate(${width/2},${width/2})`)
+
+  const updatePanel = (d: any) => {
+    const percentage = Math.round((d.data.Amount / total) * 1000) / 10
+    $('#segmentTitle').html(`${d.data.Title} - ${percentage}%`)
+    $('#segmentText').html(d.data.Description)
+    $('.pie-panel').css({
+      'background-color': ColorLuminance(color(d.data.Title), -0.5),
+      'border-color': color(d.data.Title)
+    })
+  }
+
+  let prevSegment: any = null
+  let buttonToggle = true
+
+  const paths = svg.selectAll('path')
+    .data(pie(data))
+    .enter().append('path')
+    .attr('d', arc as any)
+    .style('fill', d => color(d.data.Title))
+    .style('cursor', 'pointer')
+    .on('click', function(this: any, event: any, d: any) {
+      if (!buttonToggle) return
+      buttonToggle = false
+      setTimeout(() => { buttonToggle = true }, 1100)
+
+      const sliceDirection = 90
+      const angle = sliceDirection - ((d.startAngle * (180 / Math.PI)) + ((d.endAngle - d.startAngle) * (180 / Math.PI) / 2))
+      svg.transition().duration(1000).attr('transform', `translate(${width/2},${width/2}) rotate(${angle})`)
+      
+      if (prevSegment) d3.select(prevSegment).transition().attr('d', arc as any)
+      prevSegment = this
+      d3.select(this).transition().duration(1000).attr('d', arcOver as any)
+
+      const tl = gsap.timeline()
+      tl.to('.pie-content-wrapper', { duration: 0.3, rotationX: 90, opacity: 0, onComplete: () => updatePanel(d) })
+        .to('.pie-panel', { duration: 0.3, scale: 0.95, opacity: 0.8 })
+        .to('.pie-panel', { duration: 0.3, scale: 1, opacity: 1, ease: 'back.out(1.7)' })
+        .to('.pie-content-wrapper', { duration: 0.3, rotationX: 0, opacity: 1 })
+    })
+
+  svg.selectAll('.pie-label')
+    .data(pie(data))
+    .enter().append('text')
+    .attr('dy', '.35em')
+    .style('text-anchor', 'middle')
+    .style('fill', '#fff')
+    .style('font-size', '12px')
+    .style('pointer-events', 'none')
+    .attr('transform', (d: any) => `translate(${labelArc.centroid(d)})`)
+    .text(d => d.data.Amount > 0 ? d.data.Title : '')
+
+  gsap.from('#pieChart', { duration: 0.8, rotation: -120, scale: 0, opacity: 0, ease: 'power2.out' })
+
+  setTimeout(() => {
+    const firstSlice = paths.filter((d, i) => i === 0)
+    if (!firstSlice.empty()) {
+      const d = firstSlice.datum()
+      const angle = 90 - ((d.startAngle * (180 / Math.PI)) + ((d.endAngle - d.startAngle) * (180 / Math.PI) / 2))
+      svg.attr('transform', `translate(${width/2},${width/2}) rotate(${angle})`)
+      d3.select(firstSlice.node()).attr('d', arcOver as any)
+      prevSegment = firstSlice.node()
+      updatePanel(d)
+    }
+  }, 600)
+}
 </script>
 
 <template>
-  <!-- 全局背景容器 -->
   <div class="app-page-wrapper">
-    <!-- 导航栏 -->
     <Navbar :transparent="false" />
-
-    <!-- 滚动内容区：绑定了 ref="scrollRef" -->
     <div class="scrollable-content" ref="scrollRef">
       <div class="main-body">
-        
-        <!-- 页面标题 (SVG 图标 + 全部文章) -->
         <div class="page-header">
           <h1 class="title">
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
@@ -107,7 +226,20 @@ onMounted(async () => {
           </h1>
         </div>
 
-        <!-- 文章列表：使用 index 实现横排和反向横排交替 -->
+        <!-- 饼图对齐区域（保持不变） -->
+        <div class="pie-section-container">
+          <div id="pieChart"></div>
+          <div class="pie-text-panel">
+            <div class="pie-panel">
+              <div class="pie-content-wrapper">
+                <h1 id="segmentTitle">档案同步中...</h1>
+                <div id="segmentText">请选择扇区区块...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 文章卡片列表：已恢复为原来的样式 -->
         <div class="articles-container">
           <div 
             v-for="(article, index) in paginatedArticles" 
@@ -133,20 +265,17 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- 底部分页栏 -->
+        <!-- 分页按钮（恢复为 prevPage / nextPage） -->
         <div class="pagination" v-if="totalPages > 1">
           <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">
             上一页
           </button>
           <div class="page-numbers">
             <button 
-              v-for="page in totalPages" 
-              :key="page"
+              v-for="page in totalPages" :key="page"
               :class="['page-num-btn', { active: currentPage === page }]"
               @click="goToPage(page)"
-            >
-              {{ page }}
-            </button>
+            >{{ page }}</button>
           </div>
           <button class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">
             下一页
@@ -159,7 +288,42 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* ========= 全局背景保持与首页统一 ========= */
+/* ========= 饼图区域样式（保持不变） ========= */
+.pie-section-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 50px;
+  min-height: 400px;
+}
+
+#pieChart {
+  flex: 1;
+  max-width: 450px;
+}
+
+.pie-text-panel {
+  flex: 1.2;
+}
+
+.pie-panel {
+  background-color: #0c0c0c;
+  border: solid 2px #2BDFBB;
+  border-radius: 12px;
+  padding: 30px;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  perspective: 1000px;
+  transition: all 0.5s ease;
+}
+
+.pie-content-wrapper { width: 100%; color: #fff; }
+#segmentTitle { font-size: 24px; text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+#segmentText { font-size: 15px; line-height: 1.8; max-height: 200px; overflow-y: auto; }
+
+/* ========= 全局布局 ========= */
 .app-page-wrapper {
   position: relative;
   width: 100%;
@@ -186,7 +350,6 @@ onMounted(async () => {
   z-index: 1;
 }
 
-/* ========= 滚动内容区 ========= */
 .scrollable-content {
   position: relative;
   z-index: 2;
@@ -213,22 +376,22 @@ onMounted(async () => {
 .page-header .title {
   font-size: 28px;
   margin: 0;
-  display: flex; /* 让图标和文字完美对齐 */
+  display: flex;
   align-items: center;
-  gap: 10px;     /* 图标和文字的间距 */
+  gap: 10px;
 }
 
-/* ========= 文章列表容器 ========= */
+/* ========= 文章列表容器（已恢复原样式） ========= */
 .articles-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
-  font-weight: 700;
+  font-weight: 700;          /* 原全局粗体 */
   max-width: 1000px;
 }
 
-/* ========= 卡片基础样式 ========= */
+/* ========= 卡片基础样式（原高度 200px，原背景/边框/圆角/动效） ========= */
 .card {
   display: flex;
   height: 200px;
@@ -244,17 +407,16 @@ onMounted(async () => {
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
-/* 横排 (左图右文) */
+/* 横排 */
 .card.horizontal {
   flex-direction: row;
 }
-
-/* 反向横排 (右图左文) */
+/* 反向横排 */
 .card.reverse-horizontal {
   flex-direction: row-reverse;
 }
 
-/* 图片和内容的通用比例：图占40%，文占60% */
+/* 图片和内容的通用比例 */
 .card.horizontal .card__img,
 .card.reverse-horizontal .card__img {
   width: 40%;
@@ -276,7 +438,7 @@ onMounted(async () => {
   width: 60%;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 20px;            /* 原内边距 */
   box-sizing: border-box;
 }
 
@@ -315,11 +477,11 @@ onMounted(async () => {
   padding: 4px 12px;
   border-radius: 45px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 600;         /* 原标签粗细 */
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* ========= 分页栏样式 ========= */
+/* ========= 分页栏样式（恢复原粗体） ========= */
 .pagination {
   max-width: 1000px;
   margin-top: 40px;
@@ -370,8 +532,6 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .card { height: auto; }
-  
-  /* 移动端强制上下排列 */
   .card.horizontal,
   .card.reverse-horizontal {
     flex-direction: column !important;
