@@ -7,7 +7,6 @@ export interface Article {
   excerpt: string
   tags: string[]
   cover: string
-  layout: string
   content: string   
 }
 
@@ -29,7 +28,6 @@ export const articles: Article[] = [
     excerpt: '那是一个月黑风高的白天...',
     tags: ['vue3', '前端','网站构建'],
     cover: '/covers/text.webp',
-    layout: 'horizontal',
     content: md1
   },
   {
@@ -40,8 +38,7 @@ export const articles: Article[] = [
     readTime: '2 minutes',
     excerpt: '记得5月末写完第一个网页时认为逻辑缜密,甚至于发了个抖音,待到后来复盘时发现漏洞很多,这篇文章做个反省',
     tags: ['html', 'css','javascript'],
-    cover: '/covers/game.webp',
-    layout: 'vertical',    
+    cover: '/covers/game.webp',   
        content:md2,
   },
   {
@@ -53,7 +50,6 @@ export const articles: Article[] = [
     excerpt: '列出常用前端网站并浅谈实时天气组件',
     tags: ['组件式设计', '实时天气'],
     cover: '/covers/person.webp',
-    layout: 'reverse-horizontal', 
     content:md3,
   },
   {
@@ -65,7 +61,6 @@ export const articles: Article[] = [
     excerpt: '承接上文,浅谈我的相册组件设计',
     tags: ['组件式设计', '相册展示'],
     cover: '/covers/left.webp',
-    layout: 'horizontal',
     content:md4,
   },
     {
@@ -77,7 +72,6 @@ export const articles: Article[] = [
     excerpt: '浅谈一下波浪动画,页面深色遮罩,上下双页面和磁吸一般的滚动效果如何实现',
     tags: ['组件式设计', 'swiper'],
     cover: '/covers/animation.webp',
-    layout: 'vertical',
     content:md5,
   },
       {
@@ -89,7 +83,6 @@ export const articles: Article[] = [
     excerpt: '这张记录几个我最喜欢的悬停效果,适合用在按钮或者想被注意到的地方',
     tags: ['css', 'animation','动画'],
     cover: '/covers/like.webp',
-    layout: 'reverse-horizontal',
     content:`   `,
   },
   {
@@ -101,7 +94,6 @@ export const articles: Article[] = [
     excerpt: '把攒了好久了re0第四季一下看完了,确实不负我的期待',
     tags: ['动漫', 're0'],
     cover: '/messages/7/re0.webp',
-    layout: 'horizontal', 
        content:md7,
   },
   {
@@ -113,7 +105,6 @@ export const articles: Article[] = [
     excerpt: '主要是为了期末考试所以复习整理一下',
     tags: ['大学', '数据结构'],
     cover: '/messages/8/wushi.webp',
-    layout: 'horizontal', 
     content:md8,
   },
 ]
