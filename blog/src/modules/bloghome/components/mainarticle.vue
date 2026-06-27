@@ -1,5 +1,5 @@
 <script lang="ts">
-// 第一部分：记忆芯片
+// 记忆芯片
 let globalSavedPage = 1
 let globalSavedScroll = 0
 </script>
@@ -11,7 +11,6 @@ import { articles as allArticles } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
 
 import * as d3 from 'd3'
-import $ from 'jquery'
 import gsap from 'gsap'
 
 const router = useRouter()
@@ -41,7 +40,6 @@ const goToPage = (page: number) => {
   scrollToTop()
 }
 
-// 恢复原来的上一页 / 下一页方法
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
@@ -60,32 +58,7 @@ const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
 
-// ===== 核心：彻底修复 TypeScript 报错的颜色函数 =====
-function ColorLuminance(hex: string | null | undefined, lum: number): string {
-  let c = String(hex || "000000").replace(/[^0-9a-f]/gi, "");
-  
-  if (c.length < 6) {
-    const r = c.charAt(0) || "0";
-    const g = c.charAt(1) || "0";
-    const b = c.charAt(2) || "0";
-    c = r + r + g + g + b + b;
-  }
-
-  lum = lum || 0;
-  let rgb = "#";
-  
-  for (let i = 0; i < 3; i++) {
-    const sub = c.substring(i * 2, i * 2 + 2);
-    let val = parseInt(sub, 16);
-    val = Math.round(Math.min(Math.max(0, val + (val * lum)), 255));
-    const finalHex = val.toString(16);
-    rgb += ("00" + finalHex).slice(-2);
-  }
-  
-  return rgb;
-}
-
-// ===== 滚动记忆与初始化 =====
+// ===== 滚动记忆 =====
 onBeforeRouteLeave((to, from, next) => {
   if (scrollRef.value) globalSavedScroll = scrollRef.value.scrollTop
   next()
@@ -97,117 +70,124 @@ onMounted(async () => {
     scrollRef.value.scrollTop = globalSavedScroll
   }
   setTimeout(() => {
-    drawPieChart()
+    drawDonutChart()
   }, 100)
 })
 
-// ===== 饼图绘制逻辑 =====
-function drawPieChart() {
-  const container = document.getElementById('pieChart')
-  if (!container) return
+function drawDonutChart() {
+  const container = d3.select('#donut-chart');
+  if (container.empty()) return;
+  container.html('');
 
-  let width = container.clientWidth
-  if (width <= 0) width = 350 
-  
-  const typeMap = new Map<string, { count: number; titles: string[] }>()
+  const width = (container.node() as HTMLElement).clientWidth || 400;
+  const height = width;
+  const radius = Math.min(width, height) / 2;
+  const innerRadius = radius * 0.35;
+  const outerRadius = radius - 10;
+
+  // 数据准备
+  const typeMap = new Map<string, number>();
   allArticles.forEach(article => {
-    const t = article.type || '未分类'
-    if (!typeMap.has(t)) typeMap.set(t, { count: 0, titles: [] })
-    const group = typeMap.get(t)!
-    group.count++
-    group.titles.push(article.title)
-  })
+    const t = article.type || '未分类';
+    typeMap.set(t, (typeMap.get(t) || 0) + 1);
+  });
+  const data = Array.from(typeMap, ([label, value]) => ({ label, value }));
+  const total = allArticles.length;
 
-  const data = Array.from(typeMap, ([type, group]) => ({
-    Title: type,
-    Amount: group.count,
-    Description: group.titles.map(title => `<div class="pie-list-item"># ${title}</div>`).join('')
-  }))
+  // 颜色方案
+  const nvd3Colors = ['#965251', '#00b3ca', '#7dd0b6', '#e38690', '#ead98b'];
+  const extraColors = ['#f39c12', '#8e44ad', '#2ecc71', '#e67e22', '#3498db'];
+  const allColors = [...nvd3Colors, ...extraColors];
+  const colorScale = d3.scaleOrdinal<string>()
+    .domain(data.map(d => d.label))
+    .range(allColors.slice(0, data.length));
 
-  container.innerHTML = ''
-  const radius = (width - 20) / 2
-  const innerRadius = 80 
-  const total = allArticles.length
-
-  const color = d3.scaleOrdinal<string>()
-    .domain(data.map(d => d.Title))
-    .range(['#2BDFBB', '#DF2B4F', '#EE6617', '#FFBF00', '#423E6E', '#E24161', '#9C27B0'])
-
-  const arc = d3.arc().outerRadius(radius - 10).innerRadius(innerRadius)
-  const arcOver = d3.arc().outerRadius(radius + 5).innerRadius(innerRadius)
-  const labelArc = d3.arc().outerRadius((radius + innerRadius) / 2).innerRadius((radius + innerRadius) / 2)
-  const pie = d3.pie<any>().sort(null).value(d => d.Amount)
-
-  const svg = d3.select('#pieChart').append('svg')
+  const svg = container
+    .append('svg')
     .attr('width', '100%')
     .attr('height', width)
-    .attr('viewBox', `0 0 ${width} ${width}`)
+    .attr('viewBox', `0 0 ${width} ${height}`)
     .append('g')
-    .attr('transform', `translate(${width/2},${width/2})`)
+    .attr('transform', `translate(${width / 2},${height / 2})`);
 
-  const updatePanel = (d: any) => {
-    const percentage = Math.round((d.data.Amount / total) * 1000) / 10
-    $('#segmentTitle').html(`${d.data.Title} - ${percentage}%`)
-    $('#segmentText').html(d.data.Description)
-    $('.pie-panel').css({
-      'background-color': ColorLuminance(color(d.data.Title), -0.5),
-      'border-color': color(d.data.Title)
-    })
-  }
+  const pie = d3.pie<any>().value(d => d.value).sort(null);
+  const arc = d3.arc<any>().innerRadius(innerRadius).outerRadius(outerRadius);
+  const hoverArc = d3.arc<any>().innerRadius(innerRadius).outerRadius(outerRadius + 5);
 
-  let prevSegment: any = null
-  let buttonToggle = true
-
-  const paths = svg.selectAll('path')
+  // ---- 绘制扇形并添加 hover 事件 ----
+  svg.selectAll('path')
     .data(pie(data))
     .enter().append('path')
-    .attr('d', arc as any)
-    .style('fill', d => color(d.data.Title))
+    .attr('d', arc)
+    .attr('fill', (d: any) => colorScale(d.data.label))
+    .attr('stroke', 'rgba(255,255,255,0.2)')   // 正常描边保留
+    .attr('stroke-width', 1.5)
     .style('cursor', 'pointer')
-    .on('click', function(this: any, event: any, d: any) {
-      if (!buttonToggle) return
-      buttonToggle = false
-      setTimeout(() => { buttonToggle = true }, 1100)
-
-      const sliceDirection = 90
-      const angle = sliceDirection - ((d.startAngle * (180 / Math.PI)) + ((d.endAngle - d.startAngle) * (180 / Math.PI) / 2))
-      svg.transition().duration(1000).attr('transform', `translate(${width/2},${width/2}) rotate(${angle})`)
-      
-      if (prevSegment) d3.select(prevSegment).transition().attr('d', arc as any)
-      prevSegment = this
-      d3.select(this).transition().duration(1000).attr('d', arcOver as any)
-
-      const tl = gsap.timeline()
-      tl.to('.pie-content-wrapper', { duration: 0.3, rotationX: 90, opacity: 0, onComplete: () => updatePanel(d) })
-        .to('.pie-panel', { duration: 0.3, scale: 0.95, opacity: 0.8 })
-        .to('.pie-panel', { duration: 0.3, scale: 1, opacity: 1, ease: 'back.out(1.7)' })
-        .to('.pie-content-wrapper', { duration: 0.3, rotationX: 0, opacity: 1 })
+    .on('mouseover', function(event, d: any) {
+      const brighterColor = d3.color(colorScale(d.data.label))?.brighter(0.5)?.toString() || colorScale(d.data.label);
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr('d', hoverArc(d))
+        .attr('fill', brighterColor)
+        // 删除了白色描边设置，保持和正常状态一致或不做更改
+        // .attr('stroke', '#ffffff')  // 已删除
+        // .attr('stroke-width', 3)    // 已删除
+        ;
     })
+    .on('mouseout', function(event, d: any) {
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr('d', arc(d))
+        .attr('fill', colorScale(d.data.label))
+        .attr('stroke', 'rgba(255,255,255,0.2)')  // 恢复正常描边
+        .attr('stroke-width', 1.5);
+    });
 
-  svg.selectAll('.pie-label')
+  // ---- 内部标签：只显示分类名，不显示百分比 ----
+  svg.selectAll('.label')
     .data(pie(data))
     .enter().append('text')
-    .attr('dy', '.35em')
-    .style('text-anchor', 'middle')
+    .attr('transform', (d: any) => {
+      const pos = arc.centroid(d);
+      return `translate(${pos[0]}, ${pos[1]})`;
+    })
+    .attr('text-anchor', 'middle')
+    .attr('dy', '0.35em')
     .style('fill', '#fff')
-    .style('font-size', '12px')
-    .style('pointer-events', 'none')
-    .attr('transform', (d: any) => `translate(${labelArc.centroid(d)})`)
-    .text(d => d.data.Amount > 0 ? d.data.Title : '')
+    .style('font-size', '14px')
+    .style('font-weight', '500')
+    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
+    .style('text-shadow', '0 1px 4px rgba(0,0,0,0.6)')
+    .text((d: any) => d.data.label);   // 只显示分类名，不再拼接百分比
 
-  gsap.from('#pieChart', { duration: 0.8, rotation: -120, scale: 0, opacity: 0, ease: 'power2.out' })
+  // ---- 中心文字（固定不变） ----
+  svg.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('dy', '-.35em')
+    .style('fill', '#fff')
+    .style('font-size', '22px')
+    .style('font-weight', '300')
+    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
+    .text('文章分类');
 
-  setTimeout(() => {
-    const firstSlice = paths.filter((d, i) => i === 0)
-    if (!firstSlice.empty()) {
-      const d = firstSlice.datum()
-      const angle = 90 - ((d.startAngle * (180 / Math.PI)) + ((d.endAngle - d.startAngle) * (180 / Math.PI) / 2))
-      svg.attr('transform', `translate(${width/2},${width/2}) rotate(${angle})`)
-      d3.select(firstSlice.node()).attr('d', arcOver as any)
-      prevSegment = firstSlice.node()
-      updatePanel(d)
-    }
-  }, 600)
+  svg.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('dy', '1.2em')
+    .style('fill', '#aaa')
+    .style('font-size', '16px')
+    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
+    .text(`${total} 篇`);
+
+  // GSAP 动画
+  gsap.from('#donut-chart svg', {
+    duration: 0.8,
+    rotation: -120,
+    scale: 0,
+    opacity: 0,
+    ease: 'power2.out'
+  });
 }
 </script>
 
@@ -226,20 +206,12 @@ function drawPieChart() {
           </h1>
         </div>
 
-        <!-- 饼图对齐区域（保持不变） -->
+        <!-- 甜甜圈图（居中，无右侧面板） -->
         <div class="pie-section-container">
-          <div id="pieChart"></div>
-          <div class="pie-text-panel">
-            <div class="pie-panel">
-              <div class="pie-content-wrapper">
-                <h1 id="segmentTitle">档案同步中...</h1>
-                <div id="segmentText">请选择扇区区块...</div>
-              </div>
-            </div>
-          </div>
+          <div id="donut-chart" class="donut-chart-container"></div>
         </div>
 
-        <!-- 文章卡片列表：已恢复为原来的样式 -->
+        <!-- 文章卡片列表 -->
         <div class="articles-container">
           <div 
             v-for="(article, index) in paginatedArticles" 
@@ -247,11 +219,8 @@ function drawPieChart() {
             :class="['card', index % 2 === 0 ? 'horizontal' : 'reverse-horizontal']"
             @click="goToArticle(article.id)"
           >
-            <!-- 封面图 -->
             <img v-if="article.cover" :src="article.cover" class="card__img" />
             <div v-else class="card__img placeholder-img">暂无封面</div>
-
-            <!-- 内容区 -->
             <div class="card__content">
               <div class="card__title">{{ article.title }}</div>
               <div class="card__date">{{ article.date }}</div>
@@ -265,11 +234,9 @@ function drawPieChart() {
           </div>
         </div>
 
-        <!-- 分页按钮（恢复为 prevPage / nextPage） -->
+        <!-- 分页 -->
         <div class="pagination" v-if="totalPages > 1">
-          <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">
-            上一页
-          </button>
+          <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">上一页</button>
           <div class="page-numbers">
             <button 
               v-for="page in totalPages" :key="page"
@@ -277,51 +244,33 @@ function drawPieChart() {
               @click="goToPage(page)"
             >{{ page }}</button>
           </div>
-          <button class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">
-            下一页
-          </button>
+          <button class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">下一页</button>
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* ========= 饼图区域样式（保持不变） ========= */
+/* 不再引入 nvd3 的 CSS */
+
+/* ========= 甜甜圈图容器（居中） ========= */
 .pie-section-container {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 50px;
+  align-items: center;
   margin-bottom: 50px;
   min-height: 400px;
+  max-width: 1000px;
 }
-
-#pieChart {
-  flex: 1;
+.donut-chart-container {
+  width: 100%;
   max-width: 450px;
 }
-
-.pie-text-panel {
-  flex: 1.2;
+.donut-chart-container svg {
+  width: 100%;
+  height: auto;
 }
-
-.pie-panel {
-  background-color: #0c0c0c;
-  border: solid 2px #2BDFBB;
-  border-radius: 12px;
-  padding: 30px;
-  min-height: 250px;
-  display: flex;
-  align-items: center;
-  perspective: 1000px;
-  transition: all 0.5s ease;
-}
-
-.pie-content-wrapper { width: 100%; color: #fff; }
-#segmentTitle { font-size: 24px; text-align: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-#segmentText { font-size: 15px; line-height: 1.8; max-height: 200px; overflow-y: auto; }
 
 /* ========= 全局布局 ========= */
 .app-page-wrapper {
@@ -381,17 +330,17 @@ function drawPieChart() {
   gap: 10px;
 }
 
-/* ========= 文章列表容器（已恢复原样式） ========= */
+/* ========= 文章列表容器 ========= */
 .articles-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
-  font-weight: 700;          /* 原全局粗体 */
+  font-weight: 700;
   max-width: 1000px;
 }
 
-/* ========= 卡片基础样式（原高度 200px，原背景/边框/圆角/动效） ========= */
+/* ========= 卡片基础样式 ========= */
 .card {
   display: flex;
   height: 200px;
@@ -438,7 +387,7 @@ function drawPieChart() {
   width: 60%;
   display: flex;
   flex-direction: column;
-  padding: 20px;            /* 原内边距 */
+  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -461,6 +410,7 @@ function drawPieChart() {
   margin-bottom: 12px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -477,11 +427,11 @@ function drawPieChart() {
   padding: 4px 12px;
   border-radius: 45px;
   font-size: 12px;
-  font-weight: 600;         /* 原标签粗细 */
+  font-weight: 600;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* ========= 分页栏样式（恢复原粗体） ========= */
+/* ========= 分页栏样式 ========= */
 .pagination {
   max-width: 1000px;
   margin-top: 40px;
@@ -540,6 +490,13 @@ function drawPieChart() {
   .card.reverse-horizontal .card__img {
     width: 100%;
     height: 180px;
+  }
+  .pie-section-container {
+    max-width: 100%;
+    flex-direction: column;
+  }
+  .donut-chart-container {
+    max-width: 100%;
   }
   .card.horizontal .card__content,
   .card.reverse-horizontal .card__content {

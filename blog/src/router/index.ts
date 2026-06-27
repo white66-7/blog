@@ -64,29 +64,22 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // 🔹 如果是文章详情页，优先使用缓存位置
     if (to.name === 'ArticleDetail') {
       const id = Number(to.params.id)
       const cachedY = articleScrollCache.get(id)
 
       if (cachedY !== undefined) {
-        // 使用极短延迟（0ms）保证 DOM 已挂载，滚动在渲染前完成
         return new Promise(resolve => {
           setTimeout(() => {
             resolve({ top: cachedY, behavior: 'instant' as const })
           }, 0)
         })
       }
-      // 没有缓存就回到顶部
       return { top: 0 }
     }
-
-    // 🔹 浏览器前进/后退时保持原先位置
     if (savedPosition) {
       return savedPosition
     }
-
-    // 🔹 其他路由默认回到顶部
     return { top: 0, behavior: 'smooth' }
   }
 })
