@@ -1,75 +1,70 @@
 <template>
   <div class="card">
-    <!-- 搜索框（新样式） -->
-    <div class="group">
-      <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-        <g>
-          <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"/>
-        </g>
-      </svg>
-      <input
-        type="search"
-        class="input"
-        placeholder="Search"
-        v-model="searchQuery"
-      />
-      <button v-if="searchQuery" class="clear-btn" @click="searchQuery = ''">✕</button>
+    <!-- 搜索标题 -->
+    <div class="search-header">
+      <span class="search-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+          <path d="M0 0h16v16H0z" fill="none" />
+          <path fill="currentColor" d="M10.823 11.883a5.5 5.5 0 1 1 1.06-1.06l2.897 2.897a.75.75 0 1 1-1.06 1.06zM11.5 7.5a4 4 0 1 0-8 0a4 4 0 0 0 8 0" />
+        </svg>
+        搜索
+      </span>
     </div>
 
-    <!-- 结果列表 -->
-    <div class="result-list">
-      <div v-if="filteredArticles.length === 0" class="empty-tip">
-        {{ searchQuery ? '没有找到匹配的文章' : '暂无文章' }}
-      </div>
-      <div
-        v-for="article in filteredArticles"
-        :key="article.id"
-        class="article-item"
-        @click="goToArticle(article.id)"
-      >
-        <div class="item-title">{{ article.title }}</div>
-        <div class="item-meta">
-          <span class="item-date">{{ article.date }}</span>
-          <span class="item-type">{{ article.type || '未分类' }}</span>
-        </div>
-      </div>
-    </div>
+    <!-- 搜索框 -->
+    <form class="form" @submit.prevent="handleSearch">
+      <button type="button" @click="handleSearch">
+        <svg width="17" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="search">
+          <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9" stroke="currentColor" stroke-width="1.333" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <input 
+        class="input" 
+        placeholder="search" 
+        required 
+        type="text"
+        v-model="searchQuery"
+      />
+      <button class="reset" type="reset" @click="clearSearch">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { articles as allArticles } from '@/date/articles'
+import { computed } from 'vue'
 
-const router = useRouter()
-const searchQuery = ref('')
+const props = defineProps<{
+  modelValue: string
+}>()
 
-// 按日期降序排列
-const sortedArticles = computed(() => {
-  return [...allArticles].sort((a, b) => (a.date > b.date ? -1 : 1))
-})
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+  (e: 'search', query: string): void            
+}>()
 
-// 搜索结果：搜索时过滤，否则显示最近三篇
-const filteredArticles = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase()
-  if (!query) {
-    return sortedArticles.value.slice(0, 3)
+const searchQuery = computed({
+  get: () => props.modelValue,
+  set: (val) => {
+    emit('update:modelValue', val)             
   }
-  return sortedArticles.value.filter(article =>
-    article.title.toLowerCase().includes(query) ||
-    article.excerpt?.toLowerCase().includes(query) ||
-    article.tags?.some(tag => tag.toLowerCase().includes(query))
-  )
 })
 
-const goToArticle = (id: number) => {
-  router.push(`/article/${id}`)
+const handleSearch = () => {
+  emit('search', props.modelValue)
+}
+
+const clearSearch = () => {
+  emit('update:modelValue', '')
+  emit('search', '')
 }
 </script>
 
+
 <style scoped>
-/* ======= 外壳：你提供的 .card 样式 ======= */
 .card {
   box-sizing: border-box;
   width: 100%;
@@ -102,131 +97,108 @@ const goToArticle = (id: number) => {
   transform: scale(0.95) rotateZ(1.7deg);
 }
 
-/* ======= 搜索框（你提供的新样式） ======= */
-.group {
+/* ======= 搜索标题栏（黑线分隔） ======= */
+.search-header {
   display: flex;
-  line-height: 28px;
   align-items: center;
-  position: relative;
-  width: 100%;               /* 改为100%，让输入框填满卡片宽度 */
+  padding-bottom: 10px;
   margin-bottom: 16px;
+  border-bottom: 1px solid #000;  /* 黑色分隔线 */
 }
 
-.input {
-  height: 40px;
-  line-height: 28px;
-  padding: 0 1rem;
-  width: 100%;
-  padding-left: 2.5rem;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  outline: none;
-  background-color: #D9E8D8;
-  color: #0d0c22;
-  box-shadow: 0 0 5px #C1D9BF, 0 0 0 10px #f5f5f5eb;
-  transition: .3s ease;
-  font-weight: 500;
-}
-
-.input::placeholder {
-  color: #777;
-}
-
-.input:focus {
-  border-color: #0d0c22;
-  box-shadow: 0 0 8px #C1D9BF, 0 0 0 10px #f5f5f5eb;
-}
-
-.icon {
-  position: absolute;
-  left: 1rem;
-  fill: #777;
-  width: 1rem;
-  height: 1rem;
-  pointer-events: none;
-}
-
-/* ======= 清除按钮（仿照图标位置，置于右侧） ======= */
-.clear-btn {
-  position: absolute;
-  right: 0.8rem;
-  background: none;
-  border: none;
-  font-size: 18px;
-  color: #777;
-  cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
-  transition: color 0.2s;
-}
-.clear-btn:hover {
-  color: #0d0c22;
-}
-
-/* ======= 文章列表 ======= */
-.result-list {
-  flex: 1;
-  overflow-y: auto;
+.search-label {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-right: 4px;
-  text-align: left;
-}
-
-.result-list::-webkit-scrollbar {
-  width: 4px;
-}
-.result-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-.result-list::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-.article-item {
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
-}
-.article-item:hover {
-  background: rgba(255, 255, 255, 0.4);
-  transform: translateX(4px);
-}
-
-.item-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 600;
   color: #000;
 }
 
-.item-meta {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
-  font-weight: 500;
-}
-.item-type {
-  background: rgba(0, 0, 0, 0.08);
-  padding: 0 10px;
-  border-radius: 20px;
-  color: rgba(0, 0, 0, 0.7);
+.search-label svg {
+  font-size: 18px;
 }
 
-.empty-tip {
-  text-align: center;
-  color: rgba(0, 0, 0, 0.4);
-  padding: 30px 0;
-  font-size: 14px;
-  font-weight: 500;
+/* ======= 搜索框新样式 ======= */
+.form {
+  --timing: 0.3s;
+  --width-of-input: 100%;
+  --height-of-input: 40px;
+  --border-height: 2px;
+  --input-bg: #fff;
+  --border-color: #2f2ee9;
+  --border-radius: 30px;
+  --after-border-radius: 1px;
+  position: relative;
+  width: var(--width-of-input);
+  height: var(--height-of-input);
+  display: flex;
+  align-items: center;
+  padding-inline: 0.8em;
+  border-radius: var(--border-radius);
+  transition: border-radius 0.5s ease;
+  background: var(--input-bg, #fff);
+}
+
+.form button {
+  border: none;
+  background: none;
+  color: #8b8ba7;
+}
+
+.input {
+  font-size: 0.9rem;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  padding-inline: 0.5em;
+  padding-block: 0.7em;
+  border: none;
+}
+
+/* 下划线动画（聚焦时出现） */
+.form:before {
+  content: "";
+  position: absolute;
+  background: var(--border-color);
+  transform: scaleX(0);
+  transform-origin: center;
+  width: 100%;
+  height: var(--border-height);
+  left: 0;
+  bottom: 0;
+  border-radius: 1px;
+  transition: transform var(--timing) ease;
+}
+
+.form:focus-within {
+  border-radius: var(--after-border-radius);
+}
+
+.input:focus {
+  outline: none;
+}
+
+.form:focus-within:before {
+  transform: scale(1);
+}
+
+/* 重置按钮（清空输入） */
+.reset {
+  border: none;
+  background: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* 当输入框有内容时显示清除按钮 */
+.input:not(:placeholder-shown) ~ .reset {
+  opacity: 1;
+  visibility: visible;
+}
+
+.form svg {
+  width: 17px;
+  margin-top: 3px;
 }
 </style>

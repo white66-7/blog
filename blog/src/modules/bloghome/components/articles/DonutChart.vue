@@ -8,7 +8,7 @@ import * as d3 from 'd3'
 import gsap from 'gsap'
 
 const props = defineProps<{
-  articles: any[]  // 文章数据，用于统计分类
+  articles: any[]
 }>()
 
 const container = ref<HTMLElement | null>(null)
@@ -16,7 +16,6 @@ const container = ref<HTMLElement | null>(null)
 function drawDonutChart() {
   const el = container.value
   if (!el) return
-  // 清空容器
   d3.select(el).html('')
 
   const width = el.clientWidth || 400
@@ -25,7 +24,6 @@ function drawDonutChart() {
   const innerRadius = radius * 0.35
   const outerRadius = radius - 10
 
-  // 数据准备：统计各分类文章数量
   const typeMap = new Map<string, number>()
   props.articles.forEach(article => {
     const t = article.type || '未分类'
@@ -34,7 +32,6 @@ function drawDonutChart() {
   const data = Array.from(typeMap, ([label, value]) => ({ label, value }))
   const total = props.articles.length
 
-  // 颜色方案
   const nvd3Colors = ['#965251', '#00b3ca', '#7dd0b6', '#e38690', '#ead98b']
   const extraColors = ['#f39c12', '#8e44ad', '#2ecc71', '#e67e22', '#3498db']
   const allColors = [...nvd3Colors, ...extraColors]
@@ -54,7 +51,6 @@ function drawDonutChart() {
   const arc = d3.arc<any>().innerRadius(innerRadius).outerRadius(outerRadius)
   const hoverArc = d3.arc<any>().innerRadius(innerRadius).outerRadius(outerRadius + 5)
 
-  // 绘制扇形 + hover 效果
   svg.selectAll('path')
     .data(pie(data))
     .enter().append('path')
@@ -98,23 +94,7 @@ function drawDonutChart() {
     .style('text-shadow', '0 1px 4px rgba(0,0,0,0.6)')
     .text((d: any) => d.data.label)
 
-  // 中心文字
-  svg.append('text')
-    .attr('text-anchor', 'middle')
-    .attr('dy', '-.35em')
-    .style('fill', '#fff')
-    .style('font-size', '22px')
-    .style('font-weight', '300')
-    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
-    .text('文章分类')
-
-  svg.append('text')
-    .attr('text-anchor', 'middle')
-    .attr('dy', '1.2em')
-    .style('fill', '#aaa')
-    .style('font-size', '16px')
-    .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
-    .text(`${total} 篇`)
+  // ----- 中心文字已删除 -----
 
   // GSAP 入场动画
   const svgEl = d3.select(el).select('svg').node()
@@ -129,7 +109,6 @@ function drawDonutChart() {
   }
 }
 
-// 生命周期：挂载后绘制，数据变化时重绘
 onMounted(() => {
   nextTick(() => drawDonutChart())
 })
@@ -148,5 +127,8 @@ watch(() => props.articles, () => {
 .donut-chart-container svg {
   width: 100%;
   height: auto;
+}
+.donut-chart-container svg text {
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif !important;
 }
 </style>
