@@ -12,7 +12,6 @@ const props = defineProps<{
     excerpt: string
     tags: string[]
     cover: string
-    layout: string
   }>
 }>()
 

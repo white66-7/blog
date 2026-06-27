@@ -72,20 +72,20 @@
 </template>
 
 <script setup lang="ts">
-import Information from '@/modules/bloghome/components/information.vue';
-import player from '@/modules/bloghome/components/music.vue'
-import Say from '@/modules/bloghome/components/say.vue'
+import Information from '@/modules/bloghome/components/bloghome/information.vue';
+import player from '@/modules/bloghome/components/bloghome/music.vue'
+import Say from '@/modules/bloghome/components/bloghome/say.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import { onActivated, nextTick, ref, onMounted} from 'vue'
 import { onBeforeRouteLeave} from 'vue-router'
-import ImageSlider from '@/modules/bloghome/components/image.vue'
-import ArticleShow from '@/modules/bloghome/components/article_show.vue'
-import WeatherCard from '@/modules/bloghome/components/weatherCard.vue'
+import ImageSlider from '@/modules/bloghome/components/bloghome/image.vue'
+import ArticleShow from '@/modules/bloghome/components/bloghome/article_show.vue'
+import WeatherCard from '@/modules/bloghome/components/bloghome/weatherCard.vue'
 import { articles as articleData } from '@/date/articles'
 import { useLibraryStore } from '@/stores/libraryStore'
 import { useAudioStore } from '@/stores/audioStore'
-import SiteAge from '@/modules/bloghome/components/dateshow.vue'
+import SiteAge from '@/modules/bloghome/components/bloghome/dateshow.vue'
 
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Mousewheel, Pagination } from 'swiper/modules'
