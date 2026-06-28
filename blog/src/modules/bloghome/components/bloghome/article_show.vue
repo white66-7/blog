@@ -169,13 +169,14 @@ onUnmounted(() => {
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
   will-change: transform, opacity; /* 优化动画性能 */
 }
 .card:hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 /* ---------- 横向卡片 (第一篇) ---------- */

@@ -154,17 +154,9 @@ onMounted(async () => {
 /* ========= 全局布局 ========= */
 .app-page-wrapper {
   position: relative; width: 100%; height: 100vh; height: 100dvh;
-  overflow: hidden; background-color: #000;
+  overflow: hidden; background-color:#f0f0f0;
 }
-.app-page-wrapper::before {
-  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url('@/assets/木叶创立.webp'); background-size: cover;
-  background-position: center; z-index: 0;
-}
-.app-page-wrapper::after {
-  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.45); z-index: 1;
-}
+
 
 .scrollable-content {
   position: relative; z-index: 2; height: 100vh; height: 100dvh;
@@ -192,7 +184,8 @@ onMounted(async () => {
   animation-duration: 0.6s !important;
 }
 
-.articles-container .card { height: 200px; display: flex; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.9); border-radius: 12px; overflow: hidden; transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer; }
+.articles-container .card { height: 200px; display: flex; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.9); border-radius: 12px; overflow: hidden; transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08); }
 .articles-container .card:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
 .card.horizontal { flex-direction: row; }
 .card.reverse-horizontal { flex-direction: row-reverse; }

@@ -1,9 +1,9 @@
 <template>
-  <nav 
-    class="navbar" 
-    :class="{ 
+  <nav
+    class="navbar"
+    :class="{
       'navbar--transparent': transparent,
-      'navbar--hidden': !isVisible 
+      'navbar--hidden': !isVisible
     }"
   >
     <!-- 左侧 Logo -->
@@ -11,11 +11,22 @@
       <svg viewBox="0 0 120 20" class="wave-svg">
         <defs>
           <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stop-color="#FF4500"/>
-            <stop offset="95%" stop-color="#FF0000"/>
+            <stop offset="5%" stop-color="#FF4500" />
+            <stop offset="95%" stop-color="#FF0000" />
           </linearGradient>
-          <pattern id="wave" x="0" y="0" width="120" height="20" patternUnits="userSpaceOnUse">
-            <path id="wavePath" d="M-40 9 Q-30 7 -20 9 T0 9 T20 9 T40 9 T60 9 T80 9 T100 9 T120 9 V20 H-40z" fill="url(#gradient)">
+          <pattern
+            id="wave"
+            x="0"
+            y="0"
+            width="120"
+            height="20"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              id="wavePath"
+              d="M-40 9 Q-30 7 -20 9 T0 9 T20 9 T40 9 T60 9 T80 9 T100 9 T120 9 V20 H-40z"
+              fill="url(#gradient)"
+            >
               <animateTransform
                 attributeName="transform"
                 begin="0s"
@@ -23,22 +34,72 @@
                 type="translate"
                 from="0,0"
                 to="40,0"
-                repeatCount="indefinite" 
+                repeatCount="indefinite"
               />
             </path>
           </pattern>
         </defs>
-        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="green">第三训练场</text>
-        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="url(#wave)" fill-opacity="0.9">第三训练场</text>
-        <text text-anchor="middle" x="60" y="15" font-size="17" font-family="Microsoft YaHei, sans-serif" font-weight="bold" fill="url(#gradient)" fill-opacity="0.1">第三训练场</text>
+        <text
+          text-anchor="middle"
+          x="60"
+          y="15"
+          font-size="17"
+          font-family="Microsoft YaHei, sans-serif"
+          font-weight="bold"
+          fill="green"
+        >
+          第三训练场
+        </text>
+        <text
+          text-anchor="middle"
+          x="60"
+          y="15"
+          font-size="17"
+          font-family="Microsoft YaHei, sans-serif"
+          font-weight="bold"
+          fill="url(#wave)"
+          fill-opacity="0.9"
+        >
+          第三训练场
+        </text>
+        <text
+          text-anchor="middle"
+          x="60"
+          y="15"
+          font-size="17"
+          font-family="Microsoft YaHei, sans-serif"
+          font-weight="bold"
+          fill="url(#gradient)"
+          fill-opacity="0.1"
+        >
+          第三训练场
+        </text>
       </svg>
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 32 32" class="nav-icon">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 32 32"
+        class="nav-icon"
+      >
         <path d="M0 0h32v32H0z" fill="none" />
         <g fill="none">
-          <path fill="#D3D3D3" d="M4.45 6.52a.47.47 0 0 1-.35-.15c-.2-.2-.2-.51 0-.71C6.47 3.3 9.61 2 12.96 2c1.23 0 2.46.18 3.63.54a.5.5 0 0 1 .33.62c-.08.27-.36.42-.62.33A11.8 11.8 0 0 0 12.96 3C9.88 3 6.98 4.2 4.81 6.38c-.1.1-.23.14-.36.14" />
-          <path fill="#D3D3D3" d="M2.5 16.48c-.28 0-.5-.22-.5-.5C2 9.94 6.92 5.02 12.96 5.02c.28 0 .5.22.5.5s-.22.5-.5.5C7.47 6.02 3 10.49 3 15.98c0 .28-.22.5-.5.5m19.81 0c0 .28.22.5.5.5c1.49 0 2.92-.45 4.13-1.31A7.2 7.2 0 0 0 30 9.78c0-.27-.22-.5-.5-.5s-.5.22-.5.5c0 2.02-.99 3.91-2.63 5.08a6.2 6.2 0 0 1-3.56 1.12c-.28 0-.5.22-.5.5" />
-          <path fill="#00D26A" d="M28 6.43V4.48l-.69.52h-5.35c-4.17 0-7.55 3.53-7.55 7.7v.43c0 .47.38.85.85.85h5.19A7.55 7.55 0 0 0 28 6.43M5 18.88v-2.87L6 17h7.89c6.15 0 11.14 4.99 11.14 11.14v.63c0 .69-.56 1.25-1.25 1.25h-7.64C9.99 30.02 5 25.03 5 18.88" />
-          <path fill="#008463" d="M18.67 11.35a.514.514 0 0 1-.69-.21a.5.5 0 0 1 .2-.69l8.08-4.41c.44-.25.72-.71.72-1.22V2.53c0-.28.23-.51.51-.51s.51.23.51.51v2.3c0 .88-.48 1.68-1.25 2.11zm.08 14.77q.18.09.36.09c.26 0 .52-.14.65-.39c.2-.37.06-.82-.3-1.02l-11.9-6.5a2.05 2.05 0 0 1-1.06-1.79v-3.38c0-.41-.34-.75-.75-.75s-.75.34-.75.75v3.38c0 1.3.71 2.49 1.85 3.11z" />
+          <path
+            fill="#D3D3D3"
+            d="M4.45 6.52a.47.47 0 0 1-.35-.15c-.2-.2-.2-.51 0-.71C6.47 3.3 9.61 2 12.96 2c1.23 0 2.46.18 3.63.54a.5.5 0 0 1 .33.62c-.08.27-.36.42-.62.33A11.8 11.8 0 0 0 12.96 3C9.88 3 6.98 4.2 4.81 6.38c-.1.1-.23.14-.36.14"
+          />
+          <path
+            fill="#D3D3D3"
+            d="M2.5 16.48c-.28 0-.5-.22-.5-.5C2 9.94 6.92 5.02 12.96 5.02c.28 0 .5.22.5.5s-.22.5-.5.5C7.47 6.02 3 10.49 3 15.98c0 .28-.22.5-.5.5m19.81 0c0 .28.22.5.5.5c1.49 0 2.92-.45 4.13-1.31A7.2 7.2 0 0 0 30 9.78c0-.27-.22-.5-.5-.5s-.5.22-.5.5c0 2.02-.99 3.91-2.63 5.08a6.2 6.2 0 0 1-3.56 1.12c-.28 0-.5.22-.5.5"
+          />
+          <path
+            fill="#00D26A"
+            d="M28 6.43V4.48l-.69.52h-5.35c-4.17 0-7.55 3.53-7.55 7.7v.43c0 .47.38.85.85.85h5.19A7.55 7.55 0 0 0 28 6.43M5 18.88v-2.87L6 17h7.89c6.15 0 11.14 4.99 11.14 11.14v.63c0 .69-.56 1.25-1.25 1.25h-7.64C9.99 30.02 5 25.03 5 18.88"
+          />
+          <path
+            fill="#008463"
+            d="M18.67 11.35a.514.514 0 0 1-.69-.21a.5.5 0 0 1 .2-.69l8.08-4.41c.44-.25.72-.71.72-1.22V2.53c0-.28.23-.51.51-.51s.51.23.51.51v2.3c0 .88-.48 1.68-1.25 2.11zm.08 14.77q.18.09.36.09c.26 0 .52-.14.65-.39c.2-.37.06-.82-.3-1.02l-11.9-6.5a2.05 2.05 0 0 1-1.06-1.79v-3.38c0-.41-.34-.75-.75-.75s-.75.34-.75.75v3.38c0 1.3.71 2.49 1.85 3.11z"
+          />
         </g>
       </svg>
     </div>
@@ -48,35 +109,50 @@
       <router-link to="/" class="navbar__item">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />
-          <path fill="currentColor" d="M4 19v-9q0-.475.213-.9t.587-.7l6-4.5q.525-.4 1.2-.4t1.2.4l6 4.5q.375.275.588.7T20 10v9q0 .825-.588 1.413T18 21h-3q-.425 0-.712-.288T14 20v-5q0-.425-.288-.712T13 14h-2q-.425 0-.712.288T10 15v5q0 .425-.288.713T9 21H6q-.825 0-1.412-.587T4 19" />
+          <path
+            fill="currentColor"
+            d="M4 19v-9q0-.475.213-.9t.587-.7l6-4.5q.525-.4 1.2-.4t1.2.4l6 4.5q.375.275.588.7T20 10v9q0 .825-.588 1.413T18 21h-3q-.425 0-.712-.288T14 20v-5q0-.425-.288-.712T13 14h-2q-.425 0-.712.288T10 15v5q0 .425-.288.713T9 21H6q-.825 0-1.412-.587T4 19"
+          />
         </svg>
         <span>主页</span>
       </router-link>
       <router-link to="/articles" class="navbar__item">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />
-          <path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h7v-2H7zm0-4h10v-2H7zm0-4h10V7H7z" />
+          <path
+            fill="currentColor"
+            d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h7v-2H7zm0-4h10v-2H7zm0-4h10V7H7z"
+          />
         </svg>
         <span>文章</span>
       </router-link>
       <router-link to="/photos" class="navbar__item">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 56 56">
           <path d="M0 0h56v56H0z" fill="none" />
-          <path fill="currentColor" d="M7.715 49.574h40.57c4.899 0 7.36-2.437 7.36-7.265V13.69c0-4.828-2.461-7.265-7.36-7.265H7.715C2.84 6.426.355 8.84.355 13.69v28.62c0 4.851 2.485 7.265 7.36 7.265m10.218-21c-3.187 0-5.789-2.601-5.789-5.789c0-3.164 2.602-5.789 5.79-5.789c3.164 0 5.765 2.625 5.765 5.79c0 3.187-2.601 5.788-5.766 5.788M7.762 45.801c-2.25 0-3.633-1.36-3.633-3.657v-1.43l7.195-6.28c1.031-.914 2.156-1.383 3.211-1.383c1.125 0 2.32.469 3.352 1.43l4.5 4.03l11.18-9.937c1.171-1.031 2.46-1.5 3.773-1.5c1.289 0 2.625.492 3.75 1.524l10.78 9.984v3.61c0 2.25-1.405 3.609-3.632 3.609Z" />
+          <path
+            fill="currentColor"
+            d="M7.715 49.574h40.57c4.899 0 7.36-2.437 7.36-7.265V13.69c0-4.828-2.461-7.265-7.36-7.265H7.715C2.84 6.426.355 8.84.355 13.69v28.62c0 4.851 2.485 7.265 7.36 7.265m10.218-21c-3.187 0-5.789-2.601-5.789-5.789c0-3.164 2.602-5.789 5.79-5.789c3.164 0 5.765 2.625 5.765 5.79c0 3.187-2.601 5.788-5.766 5.788M7.762 45.801c-2.25 0-3.633-1.36-3.633-3.657v-1.43l7.195-6.28c1.031-.914 2.156-1.383 3.211-1.383c1.125 0 2.32.469 3.352 1.43l4.5 4.03l11.18-9.937c1.171-1.031 2.46-1.5 3.773-1.5c1.289 0 2.625.492 3.75 1.524l10.78 9.984v3.61c0 2.25-1.405 3.609-3.632 3.609Z"
+          />
         </svg>
         <span>相册</span>
       </router-link>
       <router-link to="/projects" class="navbar__item">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />
-          <path fill="currentColor" d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+          <path
+            fill="currentColor"
+            d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"
+          />
         </svg>
         <span>项目</span>
       </router-link>
       <router-link to="/about" class="navbar__item">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />
-          <path fill="currentColor" d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2" />
+          <path
+            fill="currentColor"
+            d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2"
+          />
         </svg>
         <span>关于</span>
       </router-link>
@@ -170,18 +246,31 @@ const initTheme = () => {
   left: 0;
   width: 100%;
   height: 60px;
-  color: #000000;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 左右两侧分布，中间用 flex:1 撑开 */
-  padding: 0 20px 0 0px; /* 右侧留白由 padding-right 控制，但会被按钮占用 */
+  justify-content: space-between;
+  padding: 0 20px 0 0px;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.9);
+  
+  /* 亮色默认背景 */
+  background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  color: #000000;
+  
   z-index: 100;
-  transition: transform 0.4s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: transform 0.4s ease, background 0.3s ease, backdrop-filter 0.3s ease,
+    border-color 0.3s ease, color 0.3s ease;
+}
+
+/* 暗色模式下的导航栏 */
+[data-theme='dark'] .navbar {
+  background: rgba(20, 20, 20, 0.3); /* 深色半透明，参考 --el-bg-color / --header-bg */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f0f0f0;
 }
 
 .navbar--hidden {
@@ -208,10 +297,15 @@ const initTheme = () => {
   height: 28px;
   width: auto;
   flex-shrink: 0;
-  margin-left: -10px; /* 微调位置 */
+  margin-left: -30px;
 }
 
 .navbar__left:hover {
+  color: #e05a5a;
+}
+
+/* 暗色下 logo 悬停保持一致 */
+[data-theme='dark'] .navbar__left:hover {
   color: #e05a5a;
 }
 
@@ -220,8 +314,9 @@ const initTheme = () => {
   display: flex;
   gap: 24px;
   align-items: center;
-  flex: 1; /* 占据剩余空间 */
-  justify-content: center; /* 水平居中 */
+  flex: 1;
+  justify-content: center;
+  margin-left: -20px;
 }
 
 .navbar__item {
@@ -260,22 +355,28 @@ const initTheme = () => {
   outline: none;
 }
 
+/* 暗色模式下保持激活/悬停颜色 */
+[data-theme='dark'] .navbar__item:hover,
+[data-theme='dark'] .navbar__item.router-link-active {
+  color: #e05a5a;
+}
+
 /* ===== 右侧：切换按钮 ===== */
 .navbar__right {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  padding-right: 20px; /* 右边距 */
+  padding-right: 20px;
 }
 
 .theme-toggle-wrapper {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 60%; /* 控制切换按钮整体大小 */
+  font-size: 60%;
 }
 
-/* 切换按钮样式（基于原设计缩小） */
+/* 切换按钮样式 */
 .tdnn {
   position: relative;
   height: 4em;
@@ -287,7 +388,7 @@ const initTheme = () => {
 }
 
 .tdnn.day {
-  background: #FFBF71;
+  background: #ffbf71;
 }
 
 .moon {
@@ -300,8 +401,7 @@ const initTheme = () => {
   width: 2.5em;
   height: 2.5em;
   background: #423966;
-  box-shadow: 
-    0.75em 0.625em 0 0em #D9FBFF inset,
+  box-shadow: 0.75em 0.625em 0 0em #d9fbff inset,
     rgba(255, 255, 255, 0.1) 0em -1.75em 0 -1.125em,
     rgba(255, 255, 255, 0.1) 0.75em 1.75em 0 -1.125em,
     rgba(255, 255, 255, 0.1) 0.5em 3.25em 0 -1em,
@@ -319,15 +419,10 @@ const initTheme = () => {
   width: 1.75em;
   height: 1.75em;
   background: #fff;
-  box-shadow: 
-    0.75em 0.75em 0 1.25em #fff inset,
-    0 -1.25em 0 -0.675em #fff,
-    0.875em -0.875em 0 -0.75em #fff,
-    1.25em 0 0 -0.675em #fff,
-    0.875em 0.875em 0 -0.75em #fff,
-    0 1.25em 0 -0.675em #fff,
-    -0.875em 0.875em 0 -0.75em #fff,
-    -1.25em 0 0 -0.675em #fff,
+  box-shadow: 0.75em 0.75em 0 1.25em #fff inset, 0 -1.25em 0 -0.675em #fff,
+    0.875em -0.875em 0 -0.75em #fff, 1.25em 0 0 -0.675em #fff,
+    0.875em 0.875em 0 -0.75em #fff, 0 1.25em 0 -0.675em #fff,
+    -0.875em 0.875em 0 -0.75em #fff, -1.25em 0 0 -0.675em #fff,
     -0.875em -0.875em 0 -0.75em #fff;
 }
 
