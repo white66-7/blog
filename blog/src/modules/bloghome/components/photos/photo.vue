@@ -9,11 +9,9 @@
         <!-- 视图 A：相册列表与相片列表的切换 -->
         <!-- 【已修改】使用 animate.css 控制出现和消失的动画 -->
         <transition 
-  appear
+ appear
   mode="out-in"
-  :enter-active-class="currentAlbum 
-    ? 'animate__animated animate__bounceIn fast-enter' 
-    : 'animate__animated animate__fadeIn fast-enter'"
+  enter-active-class="animate__animated animate__fadeIn fast-enter"
   leave-active-class="animate__animated animate__fadeOut fast-leave"
 >
           <div v-if="!currentAlbum" key="album-list">
@@ -31,6 +29,7 @@
                 <h1>相册</h1>
               </div>
             </header>
+
             <main class="photo-wall">
               <div class="album-stack" v-for="album in processedAlbums" :key="album.id" @click="openAlbum(album)"
                 :style="album.style">
@@ -47,6 +46,7 @@
                 </div>
               </div>
             </main>
+             
           </div>
 
           <!-- 视图 B：具体相片列表 (当选定相册时显示) -->
@@ -62,7 +62,11 @@
                 <span>Back</span>
               </button>
             </header>
-
+            <transition
+    appear
+    enter-active-class="animate__animated animate__bounceIn fast-enter"
+    leave-active-class="animate__animated animate__fadeOut fast-leave"
+  >
             <main class="photo-wall">
               <div class="polaroid" v-for="photo in currentAlbum.photos" :key="photo.id" :style="photo.style"
                 @click="openLightbox(photo)">
@@ -74,6 +78,7 @@
                 <div class="caption">{{ photo.title }}</div>
               </div>
             </main>
+            </transition>
           </div>
         </transition>
       </div>
