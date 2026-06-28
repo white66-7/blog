@@ -12,7 +12,6 @@ import Navbar from '@/modules/bloghome/components/load.vue'
 import SearchRecentCard from '@/modules/bloghome/components/articles/search_article.vue'
 import PageHeader from '@/modules/bloghome/components/articles/PageHeader.vue'
 
-// 引入 Animate.css
 import 'animate.css'
 
 const router = useRouter()
