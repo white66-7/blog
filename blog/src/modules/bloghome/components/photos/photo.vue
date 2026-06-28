@@ -6,8 +6,16 @@
     <!-- ==================== 2. 滚动内容区（毛玻璃效果） ==================== -->
     <div class="scrollable-content">
       <div class="gallery-container">
-        <!-- 视图 A：相册列表 (当没有选定相册时显示) -->
-        <transition name="fade" mode="out-in">
+        <!-- 视图 A：相册列表与相片列表的切换 -->
+        <!-- 【已修改】使用 animate.css 控制出现和消失的动画 -->
+        <transition 
+  appear
+  mode="out-in"
+  :enter-active-class="currentAlbum 
+    ? 'animate__animated animate__bounceIn fast-enter' 
+    : 'animate__animated animate__fadeIn fast-enter'"
+  leave-active-class="animate__animated animate__fadeOut fast-leave"
+>
           <div v-if="!currentAlbum" key="album-list">
             <header class="page-title">
               <div class="title-wrapper">
@@ -94,6 +102,8 @@
 import { ref } from 'vue'
 import Navbar from '@/modules/bloghome/components/load.vue'
 
+// 【新增】引入 Animate.css
+import 'animate.css'
 
 import photo1 from '@/assets/album/动漫/超燃.webp'
 import photo2 from '@/assets/album/动漫/沉思.webp'
@@ -138,7 +148,6 @@ const albumsData = [
       { title: '给朋友拍的照片', url: img1 },
       { title: '研学', url: img2 },
       { title: '在旧宿舍的最后一晚', url: img3 },
-
     ]
   },
   {
@@ -150,7 +159,6 @@ const albumsData = [
       { title: '期末周的图书馆', url: view2 },
     ]
   }
-  // ... 更多相册
 ]
 
 // ==========生成随机样式==========
@@ -169,6 +177,7 @@ const processedAlbums = ref(
     }))
   }))
 )
+
 // ========== 其余逻辑不变 ==========
 const currentAlbum = ref(null)
 const selectedPhoto = ref(null)
@@ -247,7 +256,17 @@ const closeLightbox = () => {
   padding: 80px 20px 60px;
 }
 
-/* 以下保留你原有的所有卡片、堆叠、滤镜、灯箱样式，未做改动 */
+/* ==================== Vue/Animate.css 动画速度优化 ==================== */
+/* 出场动画稍微快一点，避免拖沓 */
+.fast-enter {
+  animation-duration: 0.8s !important;
+}
+/* 退场动画必须极快，这样出场动画才能瞬间接上 */
+.fast-leave {
+  animation-duration: 0.2s !important;
+}
+
+/* ==================== 以下为原有样式，保持不变 ==================== */
 .page-title {
   text-align: start;
   margin-bottom: 50px;
@@ -317,7 +336,7 @@ const closeLightbox = () => {
   align-items: center;
 }
 
-/* ==================== 相册堆叠外观 ==================== */
+/* 相册堆叠外观 */
 .album-stack {
   position: relative;
   cursor: pointer;
@@ -378,7 +397,7 @@ const closeLightbox = () => {
   font-weight: normal;
 }
 
-/* ==================== 宝丽来卡片核心样式 ==================== */
+/* 宝丽来卡片核心样式 */
 .polaroid {
   width: 220px;
   padding: 10px 10px 20px 10px;
@@ -413,7 +432,6 @@ const closeLightbox = () => {
   position: relative;
   overflow: hidden;
   background: #1a1a1a;
-
 }
 
 .real-image {
@@ -477,17 +495,11 @@ const closeLightbox = () => {
 }
 
 @keyframes shine {
-  0% {
-    transform: translateX(-100%) rotate(120deg);
-  }
-
-  20%,
-  100% {
-    transform: translateX(100%) rotate(120deg);
-  }
+  0% { transform: translateX(-100%) rotate(120deg); }
+  20%, 100% { transform: translateX(100%) rotate(120deg); }
 }
 
-/* ==================== Lightbox 全屏放大 ==================== */
+/* Lightbox 全屏放大 (灯箱动画保持不变) */
 .lightbox {
   position: fixed;
   top: 0;
@@ -531,17 +543,14 @@ const closeLightbox = () => {
   transform: scale(1) !important;
   display: inline-block;
   box-sizing: border-box;
-  /* 确保 padding 不会撑破容器 */
 }
 
 .large-photo {
   width: auto;
   height: auto !important;
-  /* 强制自适应高度，防止被 .photo 的固定高度覆盖 */
   overflow: hidden;
   background: transparent;
   display: flex;
-  /* 让内部图片完美居中 */
   justify-content: center;
   align-items: center;
 }
@@ -553,7 +562,6 @@ const closeLightbox = () => {
 .real-image-large {
   max-width: 100%;
   max-height: 85vh;
-  /* ⬆️ 增大图片最大高度，让竖图可以更大 */
   display: block;
   object-fit: contain;
   filter: contrast(1.1) sepia(0.15);
@@ -564,27 +572,10 @@ const closeLightbox = () => {
   margin-top: 20px;
 }
 
-/* Vue 过渡动画 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-20px);
-}
-
 .zoom-enter-active,
 .zoom-leave-active {
   transition: all 0.3s ease;
 }
-
 .zoom-enter-from,
 .zoom-leave-to {
   opacity: 0;
@@ -593,57 +584,14 @@ const closeLightbox = () => {
 
 /* 移动端 */
 @media (max-width: 768px) {
-  .gallery-container {
-    padding: 60px 16px 40px;
-  }
-
-  .photo-wall {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 30px;
-  }
-
-  .polaroid {
-    width: 160px;
-    padding: 8px 8px 16px 8px;
-  }
-
-  .photo {
-    height: 150px;
-  }
-
-  /* ================= 移动端弹窗终极放大修复 ================= */
-  .lightbox-close {
-    top: 10px;
-    right: 15px;
-    font-size: 32px;
-  }
-
-  .large-polaroid {
-    width: auto;
-    max-width: 96vw;
-    /* 允许相框最宽占满手机屏幕 96% */
-    padding: 8px 8px 28px 8px;
-    /* 极窄的白色边距 */
-  }
-
-  .large-photo {
-    height: auto !important;
-  }
-
-  .real-image-large {
-    /* 核心魔法：强制图片放大 */
-    width: 2000px;
-    /* 给一个巨大的初始宽度，强迫图片往外撑 */
-    max-width: 100%;
-    /* 撑到相框边界(96vw)时立刻停下，横图完美 */
-    max-height: 75vh;
-    /* 高度撑到屏幕 75% 时立刻停下，竖图完美 */
-    object-fit: contain;
-  }
-
-  .large-polaroid .caption {
-    font-size: 16px;
-    margin-top: 10px;
-  }
+  .gallery-container { padding: 60px 16px 40px; }
+  .photo-wall { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 30px; }
+  .polaroid { width: 160px; padding: 8px 8px 16px 8px; }
+  .photo { height: 150px; }
+  .lightbox-close { top: 10px; right: 15px; font-size: 32px; }
+  .large-polaroid { width: auto; max-width: 96vw; padding: 8px 8px 28px 8px; }
+  .large-photo { height: auto !important; }
+  .real-image-large { width: 2000px; max-width: 100%; max-height: 75vh; object-fit: contain; }
+  .large-polaroid .caption { font-size: 16px; margin-top: 10px; }
 }
 </style>

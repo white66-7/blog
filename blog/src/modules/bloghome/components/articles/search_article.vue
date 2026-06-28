@@ -68,8 +68,8 @@ const clearSearch = () => {
 .card {
   box-sizing: border-box;
   width: 100%;
-  height: 100%;
-  min-height: 400px;
+  height: auto;          
+  min-height: auto;
   background: rgba(217, 217, 217, 0.58);
   border: 1px solid white;
   box-shadow: 12px 17px 51px rgba(0, 0, 0, 0.22);

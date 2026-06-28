@@ -11,6 +11,9 @@ const props = defineProps<{
   articles: any[]
 }>()
 
+// 新增 emit，用于将点击的类别抛出给父组件
+const emit = defineEmits(['category-click'])
+
 const container = ref<HTMLElement | null>(null)
 
 function drawDonutChart() {
@@ -30,7 +33,6 @@ function drawDonutChart() {
     typeMap.set(t, (typeMap.get(t) || 0) + 1)
   })
   const data = Array.from(typeMap, ([label, value]) => ({ label, value }))
-  const total = props.articles.length
 
   const nvd3Colors = ['#965251', '#00b3ca', '#7dd0b6', '#e38690', '#ead98b']
   const extraColors = ['#f39c12', '#8e44ad', '#2ecc71', '#e67e22', '#3498db']
@@ -76,6 +78,10 @@ function drawDonutChart() {
         .attr('stroke', 'rgba(255,255,255,0.2)')
         .attr('stroke-width', 1.5)
     })
+    // 新增：点击事件，触发 emit，将选中的标签传给主页面
+    .on('click', function(event, d: any) {
+      emit('category-click', d.data.label)
+    })
 
   // 内部标签：只显示分类名
   svg.selectAll('.label')
@@ -92,9 +98,8 @@ function drawDonutChart() {
     .style('font-weight', '500')
     .style('font-family', 'Microsoft YaHei, PingFang SC, Heiti SC, sans-serif')
     .style('text-shadow', '0 1px 4px rgba(0,0,0,0.6)')
+    .style('pointer-events', 'none') // 穿透文本点击事件，避免点击文字时不触发path的click
     .text((d: any) => d.data.label)
-
-  // ----- 中心文字已删除 -----
 
   // GSAP 入场动画
   const svgEl = d3.select(el).select('svg').node()
@@ -122,11 +127,14 @@ watch(() => props.articles, () => {
 .donut-chart-container {
   width: 100%;
   height: 100%;
-  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .donut-chart-container svg {
   width: 100%;
   height: auto;
+  display: block; 
 }
 .donut-chart-container svg text {
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif !important;
