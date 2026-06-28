@@ -19,18 +19,18 @@
           <div class="arrow bounce"></div>
 
              <div class="wave-container">
-  <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+<svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
     viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
     <defs>
       <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
     </defs>
     <g class="parallax">
-      <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,252,250,0.9)" />
-      <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,248,245,0.7)" />
-      <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,242,240,0.5)" />
-      <use xlink:href="#gentle-wave" x="48" y="7" fill="#fdf0f0" />
+      <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(240,240,240,0.9)" />
+      <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(240,240,240,0.7)" />
+      <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(240,240,240,0.5)" />
+      <use xlink:href="#gentle-wave" x="48" y="7" fill="#f0f0f0" />
     </g>
-  </svg>
+</svg>
 </div>
 
         </div>
@@ -212,7 +212,7 @@ const albumImages = [
   height: 100vh; 
   height: 100dvh; 
   overflow: hidden;
-  background-color:#fdf0f0  ;
+  background-color:#f0f0f0  ;
 }
 .app-flex::before,
 .app-flex::after {
@@ -337,15 +337,14 @@ const albumImages = [
   height: 100vh;
   height: 100dvh;
   overflow-y: auto;
-  /* 强化移动端触控顺滑度 */
+
   -webkit-overflow-scrolling: touch; 
   overscroll-behavior: contain; /* 防止滚动链穿透到外层 */
-  background: #fdf0f0;
+   background: #f0f0f0;
 }
 
 .main-body {
   display: block;
-  /* PC端默认间距：上80px，右5%，下60px，左270px (避开左侧导航) */
   padding: 20px 5% 60px 270px;
   box-sizing: border-box;
 }
