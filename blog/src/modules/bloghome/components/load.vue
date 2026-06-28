@@ -6,6 +6,7 @@
       'navbar--hidden': !isVisible 
     }"
   >
+    <!-- 左侧 Logo -->
     <div class="navbar__left" @click="$router.push('/')">
       <svg viewBox="0 0 120 20" class="wave-svg">
         <defs>
@@ -41,7 +42,9 @@
         </g>
       </svg>
     </div>
-    <div class="navbar__right">
+
+    <!-- 中间菜单（居中） -->
+    <div class="navbar__center">
       <router-link to="/" class="navbar__item">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />
@@ -78,6 +81,15 @@
         <span>关于</span>
       </router-link>
     </div>
+
+    <!-- 右侧：主题切换按钮（最右侧） -->
+    <div class="navbar__right">
+      <div class="theme-toggle-wrapper" @click="toggleTheme">
+        <div class="tdnn" :class="{ day: isDark }">
+          <div class="moon" :class="{ sun: isDark }"></div>
+        </div>
+      </div>
+    </div>
   </nav>
 </template>
 
@@ -88,33 +100,25 @@ defineProps({
   transparent: Boolean
 })
 
+// ---------- 导航栏自动隐藏 ----------
 const isVisible = ref(true)
 let timer = null
 
-// 用户活动处理（鼠标移动或触摸滑动）
 const handleUserActivity = () => {
-  // 如果当前隐藏，则立即显示
-  if (!isVisible.value) {
-    isVisible.value = true
-  }
-  
-  // 重置定时器
+  if (!isVisible.value) isVisible.value = true
   if (timer) clearTimeout(timer)
   timer = setTimeout(() => {
     isVisible.value = false
-  }, 2000) // 2秒无活动后隐藏
+  }, 2000)
 }
 
 onMounted(() => {
-  // 桌面端：鼠标移动监听
   window.addEventListener('mousemove', handleUserActivity)
-  // 移动端：触摸滑动监听
   window.addEventListener('touchmove', handleUserActivity, { passive: true })
-  
-  // 初始化时启动隐藏定时器
   timer = setTimeout(() => {
     isVisible.value = false
   }, 2000)
+  initTheme()
 })
 
 onUnmounted(() => {
@@ -122,66 +126,76 @@ onUnmounted(() => {
   window.removeEventListener('touchmove', handleUserActivity)
   if (timer) clearTimeout(timer)
 })
+
+// ---------- 主题切换 ----------
+const isDark = ref(false)
+
+const toggleTheme = () => {
+  isDark.value = !isDark.value
+  applyTheme(isDark.value)
+}
+
+const applyTheme = (dark) => {
+  const html = document.documentElement
+  if (dark) {
+    html.setAttribute('data-theme', 'dark')
+    localStorage.setItem('theme', 'dark')
+  } else {
+    html.removeAttribute('data-theme')
+    localStorage.setItem('theme', 'light')
+  }
+}
+
+const initTheme = () => {
+  const saved = localStorage.getItem('theme')
+  if (saved === 'dark') {
+    isDark.value = true
+    applyTheme(true)
+  } else if (saved === 'light') {
+    isDark.value = false
+    applyTheme(false)
+  } else {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    isDark.value = prefersDark
+    applyTheme(prefersDark)
+  }
+}
 </script>
 
 <style scoped>
+/* ===== 导航栏主体 ===== */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 60px;
+  color: #000000;
   display: flex;
   align-items: center;
-  color: #000000;
-  justify-content: space-between;
-  padding: 0 40px 0 0px;
+  justify-content: space-between; /* 左右两侧分布，中间用 flex:1 撑开 */
+  padding: 0 20px 0 0px; /* 右侧留白由 padding-right 控制，但会被按钮占用 */
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   z-index: 100;
-  /* 确保 transform 在过渡动画列表中 */
   transition: transform 0.4s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
-/* 隐藏状态：鼠标静止 3 秒后上划隐藏整个组件 */
 .navbar--hidden {
   transform: translateY(-100%);
 }
 
-.nav-icon {
-  height: 28px;           
-  width: auto;
-  flex-shrink: 0;
-  margin-left: -30px;
-}
-
-/* ===== 透明模式（第一屏） ===== */
-/* 你原本的逻辑已完整保留 */
-.navbar--transparent {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-bottom: none !important;
-  color: white !important;
-}
-
-/* 在透明模式（第一屏）下隐藏右侧导航链接 */
-.navbar--transparent .navbar__right {
-  display: none;
-}
-
-.navbar--transparent .navbar__left {
-  color: white !important;
-}
-
+/* ===== 左侧 Logo ===== */
 .navbar__left {
   display: flex;
   align-items: center;
   height: 100%;
   cursor: pointer;
+  flex-shrink: 0;
+  padding-left: 20px;
 }
 
 .wave-svg {
@@ -189,17 +203,25 @@ onUnmounted(() => {
   width: auto;
   display: block;
 }
+
+.nav-icon {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+  margin-left: -10px; /* 微调位置 */
+}
+
 .navbar__left:hover {
   color: #e05a5a;
 }
 
-/* ===== 右侧菜单：居中 ===== */
-.navbar__right {
+/* ===== 中间菜单 ===== */
+.navbar__center {
   display: flex;
   gap: 24px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  align-items: center;
+  flex: 1; /* 占据剩余空间 */
+  justify-content: center; /* 水平居中 */
 }
 
 .navbar__item {
@@ -228,7 +250,7 @@ onUnmounted(() => {
 
 .navbar__item:focus-visible {
   outline: none;
-  box-shadow: none; 
+  box-shadow: none;
 }
 
 .navbar__item:hover,
@@ -238,45 +260,140 @@ onUnmounted(() => {
   outline: none;
 }
 
-/* 移动端适配 */
-/* 移动端适配 */
+/* ===== 右侧：切换按钮 ===== */
+.navbar__right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-right: 20px; /* 右边距 */
+}
+
+.theme-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 60%; /* 控制切换按钮整体大小 */
+}
+
+/* 切换按钮样式（基于原设计缩小） */
+.tdnn {
+  position: relative;
+  height: 4em;
+  width: 7.5em;
+  border-radius: 4em;
+  transition: all 500ms ease-in-out;
+  background: #423966;
+  flex-shrink: 0;
+}
+
+.tdnn.day {
+  background: #FFBF71;
+}
+
+.moon {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  transition: all 400ms ease-in-out;
+  top: 0.75em;
+  left: 0.75em;
+  width: 2.5em;
+  height: 2.5em;
+  background: #423966;
+  box-shadow: 
+    0.75em 0.625em 0 0em #D9FBFF inset,
+    rgba(255, 255, 255, 0.1) 0em -1.75em 0 -1.125em,
+    rgba(255, 255, 255, 0.1) 0.75em 1.75em 0 -1.125em,
+    rgba(255, 255, 255, 0.1) 0.5em 3.25em 0 -1em,
+    rgba(255, 255, 255, 0.1) 1.5em 0.5em 0 -1.025em,
+    rgba(255, 255, 255, 0.1) 2em 2em 0 -1.125em,
+    rgba(255, 255, 255, 0.1) 1.5em 3.25em 0 -1.125em,
+    rgba(255, 255, 255, 0.1) -1em 1.75em 0 -1.125em,
+    rgba(255, 255, 255, 0.1) -0.25em 2.5em 0 -1.125em;
+}
+
+.sun {
+  top: 1.125em;
+  left: 4.5em;
+  transform: rotate(0deg);
+  width: 1.75em;
+  height: 1.75em;
+  background: #fff;
+  box-shadow: 
+    0.75em 0.75em 0 1.25em #fff inset,
+    0 -1.25em 0 -0.675em #fff,
+    0.875em -0.875em 0 -0.75em #fff,
+    1.25em 0 0 -0.675em #fff,
+    0.875em 0.875em 0 -0.75em #fff,
+    0 1.25em 0 -0.675em #fff,
+    -0.875em 0.875em 0 -0.75em #fff,
+    -1.25em 0 0 -0.675em #fff,
+    -0.875em -0.875em 0 -0.75em #fff;
+}
+
+/* ===== 透明模式（第一屏） ===== */
+.navbar--transparent {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: none !important;
+  color: white !important;
+}
+
+/* 透明模式下隐藏中间菜单和右侧按钮（只保留左侧 Logo） */
+.navbar--transparent .navbar__center,
+.navbar--transparent .navbar__right {
+  display: none;
+}
+
+.navbar--transparent .navbar__left {
+  color: white !important;
+}
+
+/* ===== 移动端适配 ===== */
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 16px; /* 两侧留出安全边距 */
-    /* 父级本身就是 display: flex; justify-content: space-between; 会自然将左右推开 */
+    padding: 0 10px;
   }
 
   .navbar__left {
+    padding-left: 0;
     flex-shrink: 1;
-    max-width: 45%; /* 限制左侧最大宽度 */
+    max-width: 45%;
     overflow: hidden;
   }
 
   .wave-svg {
-    height: 28px; /* 稍微缩小一点 Logo */
+    height: 28px;
     max-width: 100%;
   }
 
   .nav-icon {
-    display: none; /* 移动端直接隐藏左侧那个多余的小图标 */
+    display: none;
   }
 
-  .navbar__right {
-    position: static; /* 核心修复 1：取消绝对定位，恢复正常的 flex 布局，这样绝对不会重叠 */
-    transform: none;
-    gap: 16px; /* 控制图标之间的间距 */
-    width: auto;
+  .navbar__center {
+    gap: 12px;
+    flex: 1;
+    justify-content: center;
   }
 
-  /* 核心修复 2：移动端隐藏文字，只显示图标，释放大量横向空间 */
   .navbar__item span {
-    display: none; 
+    display: none;
   }
 
-  /* 稍微调整一下移动端图标的大小，使其看起来更精致 */
   .navbar__item svg {
     width: 24px;
     height: 24px;
+  }
+
+  .navbar__right {
+    padding-right: 0;
+  }
+
+  .theme-toggle-wrapper {
+    font-size: 16%;
+    margin-left: 2px;
   }
 }
 </style>
