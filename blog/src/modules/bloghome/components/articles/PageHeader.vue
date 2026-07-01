@@ -1,4 +1,5 @@
 <template>
+  <!-- 原有头部区域 -->
   <div class="page-header">
     <div class="header-left">
       <h1 class="case-title">
@@ -11,14 +12,29 @@
         <br>
         <span class="r r6">杂</span>
         <span class="r r7">谈</span>
-        <span class="r-sub">对于真正的学习,要抱有敬畏之心</span>
+        <span class="r-sub">对于真正的学习,我认为还是要抱有些许敬畏之心</span>
       </h1>
     </div>
     <div class="header-right">
       <div class="mask">
-        <div class="magenta_overlay"></div>   <!-- 这层就是粉红/蓝色遮罩 -->
+        <div class="magenta_overlay"></div>
         <img class="test" src="/messages/1/1.webp" alt="">
       </div>
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>大学</span><span class="dot">●</span>
+      <span>前端</span><span class="dot">●</span>
+      <span>复盘</span><span class="dot">●</span>
+      <span>动漫</span><span class="dot">●</span>
+      <span>后端</span><span class="dot">●</span>
+      <span>大学</span><span class="dot">●</span>
+      <span>前端</span><span class="dot">●</span>
+      <span>复盘</span><span class="dot">●</span>
+      <span>Web &amp; Interaction</span><span class="dot">●</span>
+      <span>动漫</span><span class="dot">●</span>
     </div>
   </div>
 </template>
@@ -26,7 +42,60 @@
 <script setup lang="ts">
 </script>
 
-<style scoped>
+<style>
+
+:root {
+  --c-bg: oklch(96% 0.005 90);
+  --c-fg: oklch(15% 0 0);
+  --c-line: oklch(15% 0 0);
+  --c-accent: oklch(88% 0.22 125);
+  --ff-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+  --bw: 1px;
+  --s-3: 0.75rem;
+}
+
+.marquee {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  border-block: var(--bw) solid var(--c-line);
+  background: var(--c-fg);
+  color: var(--c-bg);
+  margin-bottom: 4rem;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--ff-display);
+  font-size: clamp(1.5rem, 4cqi, 3rem);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  padding: var(--s-3) 0;
+}
+.marquee__track {
+  display: inline-block;
+  animation: marquee 40s linear infinite;
+  padding-left: 100%;
+}
+
+.marquee__track span {
+  padding-inline: 0.5em;
+}
+
+.marquee__track span.dot {
+  color: var(--c-accent);
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track {
+    animation: none;
+  }
+}
+
+
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&display=swap');
 
 /* ===== 整体容器 ===== */
@@ -51,17 +120,18 @@
 
 .case-title {
   font-family: "Noto Serif SC", serif;
+  display: flex;
   line-height: 1.3;
   color: #1a1410;
   margin: 0 0 16px 0;
-  display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.15em 0.25em;
+  gap: 0.5em 0.90em;
 }
 
 .case-title .r {
   display: inline-block;
+   margin-right: 0.3em;
   background: #f4ecd8;
   color: #111;
   padding: 0.05em 0.12em;
