@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import DonutChart from './DonutChart.vue' // 如果在同级目录，直接使用相对路径即可
+import DonutChart from './DonutChart.vue' 
 
 // 接收主页面传来的数据
 const props = defineProps<{
-  totalCount: number // 过滤后的文章总数
-  articles: any[]    // 全部文章数据（用于画饼图）
+  totalCount: number
+  articles: any[]  
 }>()
 
 // ===== 饼图卡片简介逻辑 =====
-const activeCategory = ref('前端') // 默认显示前端
+const activeCategory = ref('前端') 
 
 // 【请在这里修改你的分类简介字典】
 const categoryDescriptions: Record<string, string> = {
-  '前端': '这里记录了前端技术的相关文章，包括 Vue, React 等热门框架的探讨与项目实践。',
-  '后端': '探索 Node.js, Java, Python 等后端技术的深奥世界，分享服务器运维经验。',
-  '生活': '记录日常生活的点点滴滴，分享所见所闻所感，感受技术之外的温度。',
-  '未分类': '一些杂七杂八、尚未归类的有趣想法与随笔。'
+  '前端': '前端三件套与vue技术栈下的一些文章,主要记录一下复用性高的组件和一些自以为的技巧',
+  '动漫': '基本就是记录一下喜欢的动漫作品',
+  '大学': '记录大学发生的一些印象深刻的事情',
+  '反思': '对做的事情或是代码做复盘与反思'
 }
 
 const currentCategoryDesc = computed(() => {
@@ -33,9 +33,8 @@ const handleCategoryClick = (label: string) => {
     <!-- 左侧：标题信息 -->
     <div class="header-left">
       <h1 class="title">全部文章</h1>
-      <p class="subtitle">记录技术与生活的点滴</p>
+      <p class="subtitle">对学习还是要有一些敬畏之心</p>
       <div class="meta-info">
-        <span class="count-badge">共 {{ totalCount }} 篇</span>
       </div>
     </div>
     
