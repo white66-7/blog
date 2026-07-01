@@ -33,7 +33,7 @@ export const articles: Article[] = [
   {
     id: 2,
     title: '论新手写的第一个网页能有多shit',
-    type: '反思',
+    type: '复盘',
     date: '2026-06-16',
     readTime: '2 minutes',
     excerpt: '记得5月末写完第一个网页时认为逻辑缜密,甚至于发了个抖音,待到后来复盘时发现漏洞很多,这篇文章做个反省',
@@ -98,7 +98,7 @@ export const articles: Article[] = [
   },
   {
     id: 8,
-    title: '期末复习理解学习一下数据结构',
+    title: '期末复习所有笔记的记录',
     type: '大学',
     date: '2026-07-01',
     readTime: '2 minutes',
