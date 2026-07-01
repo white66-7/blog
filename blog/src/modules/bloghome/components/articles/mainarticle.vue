@@ -249,6 +249,21 @@ onMounted(async () => {
 .page-num-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: #fff; cursor: pointer; font-weight: bold; }
 .page-num-btn.active { background-color: #23c483; color: white; }
 
+.scrollable-content {
+  overflow-x: hidden; 
+  overflow-y: auto;  
+
+}
+.scrollable-content::-webkit-scrollbar:vertical {
+  width: 0.5rem;
+}
+.scrollable-content::-webkit-scrollbar-track:vertical {
+  background-color: oklch(88% 0.22 125);
+}
+.scrollable-content::-webkit-scrollbar-thumb:vertical {
+  background-color: oklch(15% 0 0);
+}
+
 @media (max-width: 768px) {
   .main-body { padding: 80px 5% 40px 5%; }
   .articles-container .card { height: auto; }
