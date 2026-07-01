@@ -16,6 +16,7 @@ import 'animate.css'
 
 const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
+const articlesContainerRef = ref<HTMLElement | null>(null)
 const searchKeyword = ref('')
 
 // ===== 分页逻辑 =====
@@ -75,6 +76,42 @@ const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
 
+// ========= 滚动触发的弹跳动画逻辑 =========
+const animatedIds = ref(new Set<number>())  // 已触发过动画的文章 ID
+let observer: IntersectionObserver | null = null
+
+// 当文章列表变化时，重置动画状态并重新观察卡片
+watch(filteredArticles, async () => {
+  animatedIds.value.clear()
+  await nextTick()
+  if (!articlesContainerRef.value) return
+
+  // 断开旧的观察器
+  observer?.disconnect()
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const card = entry.target as HTMLElement
+          const id = Number(card.dataset.articleId)
+          if (id && !animatedIds.value.has(id)) {
+            animatedIds.value.add(id)
+            observer?.unobserve(card)  // 只触发一次，向上滚动不再重复
+          }
+        }
+      })
+    },
+    {
+      threshold: 0.1, // 卡片 10% 进入视口即触发
+    }
+  )
+
+  // 观察当前所有卡片
+  const cards = articlesContainerRef.value.querySelectorAll('.card')
+  cards.forEach(card => observer!.observe(card))
+}, { immediate: true })
+
 onBeforeRouteLeave((to, from, next) => {
   if (scrollRef.value) globalSavedScroll = scrollRef.value.scrollTop
   next()
@@ -82,6 +119,7 @@ onBeforeRouteLeave((to, from, next) => {
 
 onMounted(async () => {
   await nextTick()
+  // 恢复滚动位置（如果之前有保存）
   if (scrollRef.value && globalSavedScroll > 0) {
     scrollRef.value.scrollTop = globalSavedScroll
   }
@@ -102,17 +140,20 @@ onMounted(async () => {
         <div class="content-full">
           <SearchRecentCard v-model="searchKeyword" class="search-card" />
 
-          <!-- 【修改点】去掉了 leave-active-class，只保留 appear 和 bounceIn -->
-          <TransitionGroup 
-            tag="div" 
+          <!-- 卡片列表：移除 TransitionGroup，改用 IntersectionObserver 控制动画 -->
+          <div 
+            ref="articlesContainerRef"
             class="articles-container"
-            appear
-            enter-active-class="animate__animated animate__bounceIn fast-enter"
           >
             <div
               v-for="(article, index) in paginatedArticles"
               :key="article.id"
-              :class="['card', index % 2 === 0 ? 'horizontal' : 'reverse-horizontal']"
+              :class="[
+                'card',
+                index % 2 === 0 ? 'horizontal' : 'reverse-horizontal',
+                { 'animate__animated animate__bounceIn fast-enter': animatedIds.has(article.id) }
+              ]"
+              :data-article-id="article.id"
               @click="goToArticle(article.id)"
             >
               <img v-if="article.cover" :src="article.cover" class="card__img" />
@@ -128,7 +169,7 @@ onMounted(async () => {
                 </div>
               </div>
             </div>
-          </TransitionGroup>
+          </div>
 
           <div class="pagination" v-if="totalPages > 1">
             <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">上一页</button>
@@ -157,7 +198,6 @@ onMounted(async () => {
   overflow: hidden; background-color:#f0f0f0;
 }
 
-
 .scrollable-content {
   position: relative; z-index: 2; height: 100vh; height: 100dvh;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -173,19 +213,22 @@ onMounted(async () => {
 .content-full { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 .search-card { width: 100%; height: auto; }
 
-/* ========= 文章列表容器及过渡动画 ========= */
+/* ========= 文章列表容器及卡片样式 ========= */
 .articles-container { 
   display: flex; flex-direction: column; gap: 20px; 
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif; font-weight: 700; 
 }
 
-/* 优化进入速度：让弹跳稍微快一点点，感觉更轻盈 */
 .fast-enter {
   animation-duration: 0.6s !important;
 }
 
-.articles-container .card { height: 200px; display: flex; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.9); border-radius: 12px; overflow: hidden; transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer;
-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08); }
+.articles-container .card { 
+  height: 250px; display: flex; border: 1px solid rgba(255, 255, 255, 0.1); 
+  background: rgba(255, 255, 255, 0.9); border-radius: 12px; overflow: hidden; 
+  transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08); 
+}
 .articles-container .card:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
 .card.horizontal { flex-direction: row; }
 .card.reverse-horizontal { flex-direction: row-reverse; }
@@ -198,7 +241,6 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08); }
 .card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; align-self: flex-start; }
 .tag { background: #fff; color: #000; padding: 2px 10px; border-radius: 45px; font-size: 11px; font-weight: 600; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08); }
 
-/* ========= 分页栏样式 ========= */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 10px 0; }
 .page-btn { padding: 6px 14px; border: none; background-color: #fff; color: #333; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
 .page-btn:hover:not(:disabled) { background-color: #23c483; color: #fff; }
@@ -207,7 +249,6 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08); }
 .page-num-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: #fff; cursor: pointer; font-weight: bold; }
 .page-num-btn.active { background-color: #23c483; color: white; }
 
-/* ========= 移动端适配 ========= */
 @media (max-width: 768px) {
   .main-body { padding: 80px 5% 40px 5%; }
   .articles-container .card { height: auto; }
