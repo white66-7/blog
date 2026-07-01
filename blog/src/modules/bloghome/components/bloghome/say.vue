@@ -1,5 +1,4 @@
 <template>
-  <!-- 堆叠卡片容器，悬浮暂停定时器 -->
   <div class="stack" @mouseenter="stopAutoPlay" @mouseleave="startAutoPlay">
     <div class="card">
       <!-- 聊天气泡图标 + 标题 -->
@@ -31,12 +30,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const saysList = [
-  { id: 1, content: '世界的慷慨常以匮乏为底色，横陈于你我眉睫之前的，其实往往两难。     ———高考结束有感', date: '2025-06-09 17:21' },
+  { id: 1, content: '世界的慷慨常以匮乏为底色，横陈于你我眉睫之前的，其实往往两难。     ——高考结束有感', date: '2025-06-09 17:21' },
   { id: 2, content: '终于在今天把首页的代码写完了', date: '2026-06-15 22:36' },
   { id: 3, content: '第一篇技术性文章拖到现在也是写完了', date: '2026-06-16 23:09' },
   { id: 4, content: '等我写完十篇文章就好好写一个文章管理仓库', date: '2026-06-20 16:56' },
   { id: 5, content: '过完端午马上期末这个焦虑啊', date: '2026-06-22 17:50' },
   { id: 6, content: '搬到新宿舍好累啊，明天又要考近代史纲要了，紧张了', date: '2026-06-25 22:05' },
+  { id: 7, content: '考完了终于可以开始爽玩了', date: '2026-07-01 12:48' },
 ]
 
 const currentIndex = ref(0)
