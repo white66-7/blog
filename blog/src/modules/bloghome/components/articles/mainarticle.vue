@@ -217,7 +217,8 @@ transparent 1px
 
 /* ========= 全宽内容区 ========= */
 .content-full { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-.search-card { width: 100%; height: auto; }
+.search-card { width: 100%; height: auto; 
+margin-top: -10px;}
 
 /* ========= 文章列表容器及卡片样式 ========= */
 .articles-container { 
