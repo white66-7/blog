@@ -8,6 +8,7 @@ import WechatContact from '@/modules/bloghome/views/wechat.vue'
 import mainarticle from '@/modules/bloghome/components/articles/mainarticle.vue'
 import Photos from '@/modules/bloghome/components/photos/photo.vue'
 import projects from '@/modules/bloghome/components/projects/github.vue'
+import About from '@/modules/bloghome/components/about/about.vue'
 
 const ArticleDetail = () => import('@/modules/bloghome/components/articles/ArticleDetail.vue')
 
@@ -57,6 +58,11 @@ const routes = [
     path: '/article/:id',
     name: 'ArticleDetail',
     component: ArticleDetail
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: About
   },
 ]
 

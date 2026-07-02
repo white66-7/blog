@@ -45,32 +45,9 @@ onMounted(() => {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background-color: #000;
+  background-color:#f0f0f0;
 }
 
-.projects-page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('@/assets/木叶创立.webp');
-  background-size: cover;
-  background-position: center;
-  z-index: 0;
-}
-
-.projects-page::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 1;
-}
 
 /* ==================== 2. 全屏玻璃罩 + 独立滚动区 ==================== */
 .scrollable-content {

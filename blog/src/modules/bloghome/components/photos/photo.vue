@@ -144,7 +144,7 @@ const albumsData = [
       { title: '燃到起鸡皮疙瘩', url: photo1 },
       { title: '来自深渊-黄金乡', url: photo5 },
       { title: '一双全是你的眼睛', url: photo8 },
-      { title: '慢节奏的异世界番剧', url: photo9 },
+      { title: '慢节奏的异世界好番', url: photo9 },
     ]
   },
   {
