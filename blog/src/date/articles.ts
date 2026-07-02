@@ -15,6 +15,7 @@ import md2 from './md/2.md?raw'
 import md3 from './md/3.md?raw'
 import md4 from './md/4.md?raw'
 import md5 from './md/5.md?raw'
+import md6 from './md/6.md?raw'
 import md7 from './md/7.md?raw'
 import md8 from './md/8.md?raw'
 
@@ -83,7 +84,7 @@ export const articles: Article[] = [
     excerpt: '记录几个我喜欢的悬停效果和入场动画,适合用在按钮亦或是装饰性的元素上',
     tags: ['css', 'animation','动画'],
     cover: '/covers/like.webp',
-    content:`   `,
+    content:md6,
   },
   {
     id: 7,
