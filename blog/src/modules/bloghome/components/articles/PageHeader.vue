@@ -36,8 +36,26 @@
           >对于真正的学习,我仍抱有敬畏之心</span
         >
       </h1>
-    </div>
+           <div class="hero-meta animate__animated animate__fadeIn" style="animation-delay:1.2s">
 
+    <div class="meta-divider"></div>
+
+    <div class="meta-row">
+      <div class="meta-item">
+        <span class="meta-label">最近更新</span>
+        <span class="meta-value"> {{ latestDate }}</span>
+      </div>
+
+      <div class="meta-dot"></div>
+
+      <div class="meta-item">
+        <span class="meta-label">所有文章</span>
+        <span class="meta-value">{{ totalArticles }} 篇</span>
+      </div>
+    </div>
+    </div>
+ 
+</div>
     <div class="header-right">
       <div class="mask animate__animated animate__fadeInLeft" style="animation-delay: 1.2s">
         <div class="magenta_overlay"></div>
@@ -46,28 +64,58 @@
     </div>
   </div>
 
-  <div class="tape-wrapper">
-    <div class="tape-track">
-      <!-- 第一组 -->
-      <span class="tape-item">全栈</span>
-      <span class="tape-item">前端</span>
-      <span class="tape-item">大学</span>
-      <span class="tape-item">反思</span>
-      <span class="tape-item">后端</span>
-      <span class="tape-item">动漫</span>
-      <!-- 第二组（无缝衔接） -->
-      <span class="tape-item">全栈</span>
-      <span class="tape-item">前端</span>
-      <span class="tape-item">大学</span>
-      <span class="tape-item">反思</span>
-      <span class="tape-item">后端</span>
-      <span class="tape-item">动漫</span>
-    </div>
+    <div class="tape-wrapper">
+
+<div class="category-bar">
+  <div
+    class="category-item"
+    v-for="item in categoryStats"
+    :key="item.name"
+  >
+    <span class="name">{{ item.name }}</span>
+    <span class="count">{{ item.count }} 篇</span>
   </div>
 </div>
+
+  </div>
+</div>
+
+
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { articles } from '@/date/articles'
+
+const totalArticles = computed(() => articles.length)
+
+const latestDate = computed(() => {
+  if (!articles.length) return ''
+
+  return articles.reduce((latest, article) => {
+    return new Date(article.date) > new Date(latest.date)
+      ? article
+      : latest
+  }).date
+})
+
+const order = [
+  '前端',
+  '后端',
+  '全栈',
+  '动漫',
+  '大学',
+  '复盘'
+]
+
+const categoryStats = computed(() => {
+  return order.map(type => ({
+    name: type,
+    count: articles.filter(
+      article => article.type === type
+    ).length
+  }))
+})
 </script>
 
 <style>
@@ -115,19 +163,21 @@ body {
 }
 
 /* 左侧标题区 */
-.header-left {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 20px 0;
+.header-left{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+
+    padding:20px 0;
+
+    margin-bottom:0px;
 }
 
 .case-title {
   font-family: "Noto Serif SC", serif;
   display: flex;
-  flex-wrap: wrap;          /* 允许换行 */
+  flex-wrap: wrap;         
   line-height: 1.3;
   color: #1a1410;
   margin: 0 0 16px 0;
@@ -135,7 +185,7 @@ body {
   gap: 0.5em 0.9em;
 }
 
-/* 用于强制换行的元素 */
+
 .line-break {
   width: 100%;
   display: block;
@@ -228,66 +278,122 @@ body {
   opacity: 0.75;
   z-index: 2;
 }
-
-
-.tape-wrapper {
-  margin-top: auto;  
-  margin-bottom: 10vh;
-  position: relative;
-  width: 100vw;                
-  margin-left: calc(-50vw + 50%);  
-  left: 0;
-  bottom: 0;
-  z-index: 100;
-  background: #dac8b0;
-  color: #3e2c1b;
-  animation: fadeInUpRotate 0.8s ease both;
-  animation-delay: 1.3s;
-  padding: 16px 0;
-  border-top: 4px solid #6b4c2c;
-  border-bottom: 4px solid #6b4c2c;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(90,60,30,0.15);
-  background-image: repeating-linear-gradient(0deg, rgba(180,150,110,0.07) 0px, rgba(180,150,110,0.07) 2px, transparent 2px, transparent 4px);
-  overflow: hidden;
+.hero-meta{
+    margin-top:40px;
+    width:480px;
 }
 
-.tape-track {
-  display: flex;
-  /* 修复2：必须显式声明 nowrap，防止部分浏览器下 flex 子元素被挤压换行 */
-  flex-wrap: nowrap;
-  width: max-content;
-  animation: scrollTape 14s linear infinite;
+.meta-divider{
+    width:100%;
+    height:1px;
+    background:#d6c7b6;
+    margin-bottom:22px;
 }
 
-.tape-item {
-  /* 修复3：转为 inline-flex 保证文本和内部伪元素在垂直方向绝对居中 */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Times New Roman', 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: clamp(1.8rem, 5vw, 3.5rem);
-  white-space: nowrap;
-  letter-spacing: 0.08em;
-  padding: 0 4rem; /* 稍微减小 padding 让画面更紧凑 */
-  text-shadow: 1px 1px 0 rgba(255,215,170,0.3);
-  flex-shrink: 0;
-  position: relative;
+.meta-row{
+    display:flex;
+    align-items:flex-start;
+    gap:40px;
 }
 
-.tape-item::after {
-  content: "◆";
-  position: absolute;
-  /* 修复4：精确定位。right:0 结合 translate(50%,-50%) 
-     能让菱形极其完美地卡在两个元素的 padding 正中间，无论屏幕多大都不会偏 */
-  right: 0;
-  top: 50%;
-  transform: translate(50%, -50%);
-  color: #7a5a3a;
-  font-size: 0.6em;
-  opacity: 0.4;
+.meta-item{
+    display:flex;
+    flex-direction:column;
 }
 
+.meta-label{
+    font-size:12px;
+    letter-spacing:.22em;
+    color:#8a7158;
+    font-family: "Times New Roman", serif;
+    text-transform:uppercase;
+    margin-bottom:8px;
+}
+
+.meta-value{
+    font-family:"Noto Serif SC";
+    font-size:20px;
+    font-weight:700;
+    color:#2d1d12;
+}
+
+.meta-dot{
+    width:1px;
+    height:42px;
+    background:#d8c8b5;
+    margin-top:0;
+}
+
+.tape-wrapper{
+
+    width:100vw;
+    margin-left:calc(-50vw + 50%);
+    margin-top:auto;
+    margin-bottom:8vh;
+    padding:24px 0;
+    border-top:1px solid #c7b090;
+    border-bottom:1px solid #c7b090;
+    box-shadow:
+        0 8px 18px rgba(0,0,0,.08),
+        inset 0 1px rgba(255,255,255,.4);
+        background:
+
+linear-gradient(
+180deg,
+#efdfc7,
+#e7d2b3
+);
+
+background-image:
+
+radial-gradient(
+rgba(90,70,40,.03) 1px,
+transparent 1px
+);
+
+background-size:10px 10px;
+}
+
+.category-item{
+    flex:1;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    position:relative;
+
+    user-select:none;
+
+    cursor:default;
+}
+
+.name{
+    font-family:"Noto Serif SC";
+    font-size:26px;
+    font-weight:900;
+    color:#2d1d12;
+    letter-spacing:.03em;
+}
+
+.count{
+    margin-top:4px;
+    font-size:12px;
+    color:#6b5441;
+    letter-spacing:.15em;
+}
+
+.category-bar{
+    max-width:1300px;
+    margin:0 auto;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:20px;
+}
 @keyframes fadeInUpRotate {
   from {
     opacity: 0;
@@ -299,17 +405,7 @@ body {
   }
 }
 
-@keyframes scrollTape {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
 
-/* 悬浮暂停 */
-.tape-wrapper:hover .tape-track {
-  animation-play-state: paused;
-}
-
-/* 移动端适配保持不变 */
 @media (max-width: 640px) {
   .tape-wrapper { padding: 8px 0; }
   .tape-item {

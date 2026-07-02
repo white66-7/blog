@@ -197,6 +197,11 @@ onMounted(async () => {
 .app-page-wrapper {
   position: relative; width: 100%; height: 100vh; height: 100dvh;
   overflow: hidden; background-color:#f0f0f0;
+  background-image:
+radial-gradient(
+rgba(120,90,60,.03) 1px,
+transparent 1px
+);
 }
 
 .scrollable-content {
@@ -259,7 +264,7 @@ onMounted(async () => {
   width: 0.5rem;
 }
 .scrollable-content::-webkit-scrollbar-track:vertical {
-  background-color: oklch(88% 0.22 125);
+  background-color: brown;
 }
 .scrollable-content::-webkit-scrollbar-thumb:vertical {
   background-color: oklch(15% 0 0);
