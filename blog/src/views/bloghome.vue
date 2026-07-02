@@ -1,67 +1,80 @@
 <template>
   <div class="app-flex" :class="{ 'app-flex--scrolled': !isFirstScreen }">
-    <Navbar :transparent="isFirstScreen"/>
-    <swiper
-      :modules="modules"
-      :direction="'vertical'"
-      :slidesPerView="1"
-      :speed="600"
-      :mousewheel="{ forceToAxis: true, releaseOnEdges: true }"
-      @swiper="onSwiperInit"
-      @slideChange="onSlideChange"
-      class="fullpage-swiper"
-      :noSwipingClass="'scrollable-content'"
-    >
+    <Navbar :transparent="isFirstScreen" />
+    <swiper :modules="modules" :direction="'vertical'" :slidesPerView="1" :speed="600"
+      :mousewheel="{ forceToAxis: true, releaseOnEdges: true }" @swiper="onSwiperInit" @slideChange="onSlideChange"
+      class="fullpage-swiper" :noSwipingClass="'scrollable-content'">
       <!-- 第一屏 -->
       <swiper-slide class="slide-hero">
         <div class="hero-section">
           <TextEffect />
           <div class="arrow bounce"></div>
 
-             <div class="wave-container">
-<svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-    viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-    <defs>
-      <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-    </defs>
-    <g class="parallax">
-      <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(240,240,240,0.9)" />
-      <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(240,240,240,0.7)" />
-      <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(240,240,240,0.5)" />
-      <use xlink:href="#gentle-wave" x="48" y="7" fill="#f0f0f0" />
-    </g>
-</svg>
-</div>
+          <div class="wave-container">
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+              <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+              </defs>
+              <g class="parallax">
+                <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(240,240,240,0.9)" />
+                <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(240,240,240,0.7)" />
+                <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(240,240,240,0.5)" />
+                <use xlink:href="#gentle-wave" x="48" y="7" fill="#f0f0f0" />
+              </g>
+            </svg>
+          </div>
 
         </div>
       </swiper-slide>
 
       <!-- 第二屏 -->
       <swiper-slide class="slide-main">
-        <div class="scrollable-content"
-         @touchstart="handleTouchStart"
-  @touchmove="handleTouchMove">
+        <div class="scrollable-content" @touchstart="handleTouchStart" @touchmove="handleTouchMove">
           <div class="main-body" ref="mainBody">
             <div class="two-columns">
               <!-- 左侧：卡片列（information + player） -->
               <aside class="left-column">
-                <Information class="info-card" />
-                <player class="sticky-card" />
-                <Say />
+                <Information class="info-card" :class="[
+                  showAnimation &&
+                  'animate__animated animate__fadeInLeft'
+                ]" />
+
+                <player class="sticky-card" :class="[
+                  showAnimation &&
+                  'animate__animated animate__fadeInLeft animate__delay-1s'
+                ]" style="--animate-delay: .15s;" />
+
+                <Say :class="[
+                  showAnimation &&
+                  'animate__animated animate__fadeInLeft animate__delay-1s'
+                ]" style="--animate-delay: .3s;" />
               </aside>
 
               <!-- 右侧：相册、天气、文章列表 -->
               <div class="right-column">
                 <div class="top-row">
                   <div class="album-container">
-                    <ImageSlider :images="albumImages" />
+                    <ImageSlider :images="albumImages" :class="[
+                      showAnimation &&
+                      'animate__animated animate__zoomIn'
+                    ]" />
                   </div>
-                  <WeatherCard address="武汉" class="weather-card-comp" />
+                  <WeatherCard address="武汉" class="weather-card-comp" :class="[
+                    showAnimation &&
+                    'animate__animated animate__fadeInRight animate__delay-1s'
+                  ]" style="--animate-delay: .15s;" />
                 </div>
                 <div class="articles-section">
-                  <ArticleShow :articles="articleData" />
+                  <ArticleShow :articles="articleData" :class="[
+                    showAnimation &&
+                    'animate__animated animate__fadeInUp animate__delay-1s'
+                  ]" style="--animate-delay: .3s;" />
                 </div>
-                <SiteAge />
+                <SiteAge :class="[
+                  showAnimation &&
+                  'animate__animated animate__fadeInUp animate__delay-1s'
+                ]" style="--animate-delay: .75s;" />
               </div>
             </div>
           </div>
@@ -77,8 +90,8 @@ import player from '@/modules/bloghome/components/bloghome/music.vue'
 import Say from '@/modules/bloghome/components/bloghome/say.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
 import Navbar from '@/modules/bloghome/components/load.vue'
-import { onActivated, nextTick, ref, onMounted} from 'vue'
-import { onBeforeRouteLeave} from 'vue-router'
+import { onActivated, nextTick, ref, onMounted } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import ImageSlider from '@/modules/bloghome/components/bloghome/image.vue'
 import ArticleShow from '@/modules/bloghome/components/bloghome/article_show.vue'
 import WeatherCard from '@/modules/bloghome/components/bloghome/weatherCard.vue'
@@ -92,7 +105,7 @@ import { Mousewheel, Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/mousewheel'
 import 'swiper/css/pagination'
-
+import 'animate.css'
 
 import img1 from '@/assets/think.webp'
 import img2 from '@/assets/play.webp'
@@ -113,7 +126,7 @@ let touchStartY = 0
 let isSliding = false
 const savedSlideIndex = ref(0)
 const savedScrollTop = ref(0)
-
+const showAnimation = ref(false)
 
 defineOptions({ name: 'BlogHome' })
 onBeforeRouteLeave((to, from, next) => {
@@ -173,10 +186,16 @@ const handleTouchMove = (e: TouchEvent) => {
 const onSlideChange = (swiper: any) => {
   if (swiper.activeIndex === 1) {
     mainBody.value?.classList.add('visible')
-    isFirstScreen.value = false 
+    isFirstScreen.value = false
+
+    showAnimation.value = false
+    requestAnimationFrame(() => {
+      showAnimation.value = true
+    })
   } else {
     mainBody.value?.classList.remove('visible')
-    isFirstScreen.value = true  
+    isFirstScreen.value = true
+    showAnimation.value = false
   }
 }
 
@@ -186,7 +205,7 @@ onMounted(async () => {
   if (audioStore.curIdx === -1 && libraryStore.filteredList.length > 0) {
     const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
     await audioStore.loadSongByIndex(targetIdx)
-  } 
+  }
   else if (audioStore.curIdx !== -1 && !audioStore.currentAudioUrl) {
     await audioStore.loadSongByIndex(audioStore.curIdx)
   }
@@ -197,8 +216,8 @@ onMounted(async () => {
 
 const albumImages = [
   { url: img1, description: `当时刚刚中考完特地换了张头像,之后就再也没换过 挑了好久因为当时觉得头像是一件很重要的事情 最后冥冥之中选了这张的特写` },
-  { url: img2, description: `第一次研学在外面住，一直爽玩到一两点 第二天全睡死过去了`},
-  { url: img3, description: `一排我高中的同学，几乎全做过同桌，都是好人啊 可惜似乎以后不会再有交集了`},
+  { url: img2, description: `第一次研学在外面住，一直爽玩到一两点 第二天全睡死过去了` },
+  { url: img3, description: `一排我高中的同学，几乎全做过同桌，都是好人啊 可惜似乎以后不会再有交集了` },
   { url: img4, description: `给朋友拍的照片` },
 ]
 </script>
@@ -209,11 +228,12 @@ const albumImages = [
   position: relative;
   width: 100%;
   /* 优化：移动端使用 dvh 防止底部工具栏遮挡 */
-  height: 100vh; 
-  height: 100dvh; 
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  background-color:#f0f0f0  ;
+  background-color: #f0f0f0;
 }
+
 .app-flex::before,
 .app-flex::after {
   transition: opacity 0.4s ease;
@@ -224,6 +244,7 @@ const albumImages = [
   opacity: 0;
   pointer-events: none;
 }
+
 .wave-container {
   position: absolute;
   bottom: 0;
@@ -242,26 +263,26 @@ const albumImages = [
   max-height: 150px;
 }
 
-.parallax > use {
+.parallax>use {
   animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
 }
 
-.parallax > use:nth-child(1) {
+.parallax>use:nth-child(1) {
   animation-delay: -2s;
   animation-duration: 7s;
 }
 
-.parallax > use:nth-child(2) {
+.parallax>use:nth-child(2) {
   animation-delay: -3s;
   animation-duration: 10s;
 }
 
-.parallax > use:nth-child(3) {
+.parallax>use:nth-child(3) {
   animation-delay: -4s;
   animation-duration: 13s;
 }
 
-.parallax > use:nth-child(4) {
+.parallax>use:nth-child(4) {
   animation-delay: -5s;
   animation-duration: 20s;
 }
@@ -270,10 +291,12 @@ const albumImages = [
   0% {
     transform: translate3d(-90px, 0, 0);
   }
+
   100% {
     transform: translate3d(85px, 0, 0);
   }
 }
+
 .fullpage-swiper {
   width: 100%;
   height: 100vh;
@@ -315,7 +338,7 @@ const albumImages = [
 }
 
 /* 确保所有子元素在遮罩上面 */
-.app-flex > * {
+.app-flex>* {
   position: relative;
   z-index: 2;
 }
@@ -338,9 +361,10 @@ const albumImages = [
   height: 100dvh;
   overflow-y: auto;
 
-  -webkit-overflow-scrolling: touch; 
-  overscroll-behavior: contain; /* 防止滚动链穿透到外层 */
-   background: #f0f0f0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* 防止滚动链穿透到外层 */
+  background: #f0f0f0;
 }
 
 .main-body {
@@ -360,20 +384,20 @@ const albumImages = [
 .left-column {
   width: 320px;
   flex-shrink: 0;
-  display: flex;          
-  flex-direction: column;  
-  gap: 20px;            
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 /* 右侧内容区 */
 .right-column {
   flex: 1;
-  min-width: 0; 
+  min-width: 0;
 }
 
 .top-row {
   display: flex;
-  gap: 16px;             
+  gap: 16px;
   align-items: stretch;
   margin-bottom: 48px;
 }
@@ -385,9 +409,9 @@ const albumImages = [
 }
 
 .weather-card-comp {
-  width: 280px;           
-  flex: 0 0 auto;  
-  align-self: stretch; 
+  width: 280px;
+  flex: 0 0 auto;
+  align-self: stretch;
 }
 
 .articles-section {
@@ -398,7 +422,7 @@ const albumImages = [
 /* ========= 滚动箭头 ========= */
 .arrow.bounce {
   position: absolute;
-  bottom: 120px;         
+  bottom: 120px;
   left: 50%;
   margin-left: -20px;
   width: 40px;
@@ -411,9 +435,22 @@ const albumImages = [
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-30px); }
-  60% { transform: translateY(-15px); }
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-30px);
+  }
+
+  60% {
+    transform: translateY(-15px);
+  }
 }
 
 
@@ -421,7 +458,7 @@ const albumImages = [
 @media (max-width: 900px) {
   .main-body {
     /* 优化：取消 PC 端 270px 的左边距，使内容居中显示 */
-    padding: 80px 5% 40px 5%;   
+    padding: 80px 5% 40px 5%;
   }
 
   /* 优化：从左右并排改为上下堆叠结构 */
@@ -435,18 +472,20 @@ const albumImages = [
   .album-container,
   .weather-card-comp,
   .articles-section {
-    width: 100% !important; 
+    width: 100% !important;
     max-width: 100%;
   }
 
   .top-row {
-    flex-direction: column; /* 优化：相册和天气模块在移动端上下排列 */
+    flex-direction: column;
+    /* 优化：相册和天气模块在移动端上下排列 */
     gap: 20px;
     margin-bottom: 24px;
   }
 
   .arrow.bounce {
-    bottom: 40px; /* 提升箭头高度，避免被底部控制栏挡住 */
+    bottom: 40px;
+    /* 提升箭头高度，避免被底部控制栏挡住 */
   }
 }
 
@@ -460,11 +499,11 @@ const albumImages = [
   .two-columns {
     gap: 16px;
   }
-  
+
   .top-row {
     gap: 16px;
   }
-  
+
   /* 确保文章在极窄屏幕上不会越界 */
   .articles-section {
     overflow-x: hidden;

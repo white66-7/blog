@@ -157,15 +157,6 @@
         <span>关于</span>
       </router-link>
     </div>
-
-    <!-- 右侧：主题切换按钮（最右侧） -->
-    <div class="navbar__right">
-      <div class="theme-toggle-wrapper" @click="toggleTheme">
-        <div class="tdnn" :class="{ day: isDark }">
-          <div class="moon" :class="{ sun: isDark }"></div>
-        </div>
-      </div>
-    </div>
   </nav>
 </template>
 

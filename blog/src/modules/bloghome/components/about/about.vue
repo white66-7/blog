@@ -2,7 +2,7 @@
   <div class="home-page">
     <Navbar :transparent="false" />
     <div class="graphic-card">
-        <div class="text">
+        <div class="text animate__animated animate__fadeIn" style="animation-delay: 0.3s">
              <h1>我的技术栈</h1>
         </div>
     <!-- 主图形容器 -->
