@@ -32,7 +32,7 @@
         </span>
 
         <!-- 副标题 -->
-        <span class="r-sub animate__animated animate__fadeIn" style="animation-delay: 1s"
+        <span class="r-sub animate__animated animate__fadeIn" style="animation-delay: 0.9s"
           >对于真正的学习,我仍抱有敬畏之心</span
         >
       </h1>
@@ -40,7 +40,7 @@
 
     <div class="meta-divider"></div>
 
-    <div class="meta-row">
+    <div class="meta-row animate__animated animate__slideInDown" style="animation-delay: 1.3s">
       <div class="meta-item">
         <span class="meta-label">最近更新</span>
         <span class="meta-value"> {{ latestDate }}</span>
@@ -64,9 +64,9 @@
     </div>
   </div>
 
-    <div class="tape-wrapper">
+<div class="tape-wrapper animate__animated animate__fadeIn" style="animation-delay: 1.4s">
 
-<div class="category-bar">
+<div class="category-bar ">
   <div
     class="category-item"
     v-for="item in categoryStats"

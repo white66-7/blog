@@ -167,7 +167,14 @@ const albumsData = [
     ]
   }
 ]
-
+const positions = [
+  {x:-80,y:20,r:-8},
+  {x:40,y:-10,r:6},
+  {x:-30,y:40,r:-3},
+  {x:70,y:10,r:8},
+  {x:-60,y:-30,r:-6},
+  {x:30,y:30,r:4},
+]
 // ==========生成随机样式==========
 const getRandomStyle = () => ({
   transform: `rotate(${(Math.random() * 10 - 5).toFixed(1)}deg) translateY(${(Math.random() * 16 - 8).toFixed(1)}px)`,
@@ -311,21 +318,37 @@ const closeLightbox = () => {
   transform: translateY(-2px);
 }
 
-.photo-wall {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 50px 30px;
-  justify-items: center;
-  align-items: center;
-}
+.photo-wall{
+    position: relative;
+    width:100%;
+    min-height:800px;
 
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:flex-start;
+
+    gap:70px 60px;
+
+    padding:40px 0 120px;
+}
 /* 相册堆叠外观 */
 .album-stack {
   position: relative;
   cursor: pointer;
   transition: transform 0.3s;
 }
+.album-stack:nth-child(2n){
+    margin-top:80px;
+}
 
+.album-stack:nth-child(3n){
+    margin-top:-30px;
+}
+
+.album-stack:nth-child(4n){
+    margin-left:50px;
+}
 .album-stack::before,
 .album-stack::after {
   content: "";

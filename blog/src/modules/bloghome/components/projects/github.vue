@@ -2,7 +2,7 @@
   <div class="projects-page">
     <Navbar :transparent="isFirstScreen" />
     
-    <div class="scrollable-content">
+    <div class="scrollable-content animate__animated animate__bounceIn fast-enter">
       <!-- 1. GitHub 贡献图区域 -->
       <section class="calendar-section">
         <div class="card-glass">
