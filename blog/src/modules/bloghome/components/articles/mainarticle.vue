@@ -132,15 +132,16 @@ onMounted(async () => {
     <div class="scrollable-content" ref="scrollRef">
       <div class="main-body">
         
-        <PageHeader 
-          :total-count="filteredArticles.length" 
-          :articles="allArticles" 
-        />
+     <PageHeader
+  v-if="currentPage === 1"
+  :total-count="filteredArticles.length"
+  :articles="allArticles"
+/>
 
         <div class="content-full">
-          <SearchRecentCard v-model="searchKeyword" class="search-card" />
-
-          <!-- 卡片列表：移除 TransitionGroup，改用 IntersectionObserver 控制动画 -->
+          <div class="animate__animated animate__fadeInUp" style="animation-delay: 1.40s">
+  <SearchRecentCard v-model="searchKeyword" class="search-card" />
+</div>
           <div 
             ref="articlesContainerRef"
             class="articles-container"
