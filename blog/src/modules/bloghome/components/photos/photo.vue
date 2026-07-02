@@ -118,6 +118,7 @@ import photo5 from '@/assets/album/动漫/来自深渊.webp'
 import photo6 from '@/assets/album/动漫/圆梦.webp'
 import photo7 from '@/assets/album/动漫/佐助与鼬.webp'
 import photo8 from '@/assets/album/动漫/eye.webp'
+import photo9 from '@/assets/album/动漫/video.webp'
 
 
 import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
@@ -143,6 +144,7 @@ const albumsData = [
       { title: '燃到起鸡皮疙瘩', url: photo1 },
       { title: '来自深渊-黄金乡', url: photo5 },
       { title: '一双全是你的眼睛', url: photo8 },
+      { title: '慢节奏的异世界番剧', url: photo9 },
     ]
   },
   {
