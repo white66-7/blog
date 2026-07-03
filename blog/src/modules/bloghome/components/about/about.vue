@@ -8,11 +8,10 @@
   <TechStackCard />
 
   <div class="skill-sections">
-    <SkillGroup
-      v-for="group in skillGroups"
-      :key="group.title"
-      :group="group"
-    />
+<SkillGroup v-for="(group, index) in skillGroups"
+            :key="group.title"
+            :group="group"
+            :index="index" />
   </div>
 </div>
   <Textshow />
@@ -24,6 +23,7 @@ import Navbar from '@/modules/bloghome/components/load.vue'
 import TechStackCard from '@/modules/bloghome/components/about/info.vue'
 import SkillGroup from '@/modules/bloghome/components/about/skills.vue'  
 import Textshow from '@/modules/bloghome/components/about/text.vue'
+
 const skillGroups = [
   {
     title: '前端',
