@@ -396,4 +396,118 @@ body {
 
 /* ===== 工具类 ===== */
 .float-slow { will-change: transform; }
+
+/* ===== 移动端适配 ===== */
+/* ===== 移动端适配 ===== */
+@media (max-width: 900px) {
+  .home-page {
+    padding-top: 60px;
+  }
+
+  .graphic-card {
+    width: 92%;
+    max-width: 500px;
+    height: auto;
+    min-height: 420px;
+    margin: 40px auto;
+    padding: 24px 12px;
+    box-sizing: border-box;
+  }
+
+  .text h1 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .graphic-container {
+    width: 100%;
+    max-width: 100%;
+    height: auto;          /* 仍由内部决定，但配合 min-height 兜底 */
+    min-height: 320px;     /* 防止高度塌陷，保证绝对定位元素有容器可依 */
+    /* ❌ 移除 aspect-ratio，避免高度计算为 0 的问题 */
+    position: relative;
+    margin-top: 8px;
+  }
+
+  /* 如果某些浏览器仍出现高度不足，可使用 padding-bottom 百分比强制比例（备用） */
+  .graphic-container::after {
+    content: '';
+    display: block;
+    padding-bottom: 56.25%; /* 16:9 比例，如果觉得不合适可调 */
+  }
+
+  /* 同心圆缩小 */
+  .circles {
+    width: 200px;
+    height: 200px;
+  }
+  .circles::before {
+    width: 130px;
+    height: 130px;
+  }
+  .circles::after {
+    width: 70px;
+    height: 70px;
+  }
+
+  /* 头像缩小 */
+  .avatar-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* SVG 连线自适应 */
+  .lines-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 节点缩小并重新定位 */
+  .icon-node {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+  .icon-node svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .n-l1 { top: 15%; left: 10%; }
+  .n-l3 { bottom: 18%; left: 10%; }
+  .n-r1 { top: 15%; right: 10%; }
+  .n-r3 { bottom: 18%; right: 10%; }
+
+  /* 移动端取消部分浮动动画（性能优化） */
+  .float-anim,
+  .float-anim-alt {
+    animation: none;
+  }
+
+  /* 点击态反馈（移动端无 hover） */
+  .icon-node:active {
+    transform: scale(1.15);
+    transition: transform 0.2s ease;
+  }
+
+  .logo-text {
+    font-size: 13px;
+  }
+}
+
+/* 极小屏（如 375px） */
+@media (max-width: 400px) {
+  .icon-node {
+    width: 38px;
+    height: 38px;
+  }
+  .icon-node svg {
+    width: 20px;
+    height: 20px;
+  }
+  .n-l1 { top: 12%; left: 8%; }
+  .n-l3 { bottom: 16%; left: 8%; }
+  .n-r1 { top: 12%; right: 8%; }
+  .n-r3 { bottom: 16%; right: 8%; }
+}
 </style>

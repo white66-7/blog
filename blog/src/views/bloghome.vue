@@ -489,23 +489,31 @@ const albumImages = [
 }
 
 /* ========== 小屏手机极简适配 ========== */
-@media (max-width: 480px) {
+@media (max-width: 900px) {
   .main-body {
-    /* 进一步压缩左右边距，给内容留出更多空间 */
-    padding: 60px 4% 30px 4%;
+    padding: 70px 16px 40px 16px;
+    /* 1. 强制预留滚动条空间，避免宽度抖动 */
+    scrollbar-gutter: stable;
+    /* 2. 内容较少时也能撑满一屏，防止高度突变引起的跳动 */
+    min-height: 100vh;
+    min-height: 100dvh; /* 动态视口高度，移动端更精准 */
+    box-sizing: border-box;
   }
 
   .two-columns {
-    gap: 16px;
+    flex-direction: column;
+    gap: 18px;
   }
 
-  .top-row {
-    gap: 16px;
+  .left-column {
+    width: 100%;
   }
 
-  /* 确保文章在极窄屏幕上不会越界 */
-  .articles-section {
-    overflow-x: hidden;
+  .right-column {
+    width: 100%;
+    /* 3. 给文章区一个最小高度，避免加载中高度归零再弹起 */
+    min-height: 60vh;
+    min-height: 60dvh;
   }
 }
 </style>

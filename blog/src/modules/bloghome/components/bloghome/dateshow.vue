@@ -19,14 +19,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const launchDate = new Date('2026-06-14') // 网站上线日期，请按实际情况修改
+const launchDate = new Date('2026-06-14')
 const days = computed(() => {
   const now = new Date()
   const diffTime = now.getTime() - launchDate.getTime()
   return Math.floor(diffTime / (1000 * 60 * 60 * 24))
 })
 
-const text = computed(() => `该网站已存在 ${days.value} 天`)
+const text = computed(() => `该网站已上线 ${days.value} 天`)
 const chars = computed(() => text.value.split(''))
 </script>
 
@@ -39,8 +39,8 @@ const chars = computed(() => text.value.split(''))
   margin: 25px auto 10px 0; 
   padding: 0 1.5rem;
   height: 6rem;
-  width: fit-content;           /* 宽度自适应文字 */
-  min-width: 50rem;             /* 保留一个最小宽度，保持美观 */
+  width: fit-content;          
+  min-width: 50rem;            
   border-radius: 5rem;
   background-image: linear-gradient(#212121, #212121),
     linear-gradient(
@@ -60,7 +60,6 @@ const chars = computed(() => text.value.split(''))
   transition: transform 0.3s ease;
 }
 
-/* 文字样式 */
 .text {
   z-index: 2;
   font-family: 'Microsoft YaHei', 'SimHei', sans-serif;

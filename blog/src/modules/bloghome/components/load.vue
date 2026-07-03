@@ -185,7 +185,6 @@ onMounted(() => {
   timer = setTimeout(() => {
     isVisible.value = false
   }, 2000)
-  initTheme()
 })
 
 onUnmounted(() => {
@@ -193,40 +192,6 @@ onUnmounted(() => {
   window.removeEventListener('touchmove', handleUserActivity)
   if (timer) clearTimeout(timer)
 })
-
-// ---------- 主题切换 ----------
-const isDark = ref(false)
-
-const toggleTheme = () => {
-  isDark.value = !isDark.value
-  applyTheme(isDark.value)
-}
-
-const applyTheme = (dark) => {
-  const html = document.documentElement
-  if (dark) {
-    html.setAttribute('data-theme', 'dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    html.removeAttribute('data-theme')
-    localStorage.setItem('theme', 'light')
-  }
-}
-
-const initTheme = () => {
-  const saved = localStorage.getItem('theme')
-  if (saved === 'dark') {
-    isDark.value = true
-    applyTheme(true)
-  } else if (saved === 'light') {
-    isDark.value = false
-    applyTheme(false)
-  } else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    isDark.value = prefersDark
-    applyTheme(prefersDark)
-  }
-}
 </script>
 
 <style scoped>
@@ -242,8 +207,6 @@ const initTheme = () => {
   justify-content: space-between;
   padding: 0 20px 0 0px;
   box-sizing: border-box;
-  
-  /* 亮色默认背景 */
   background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -253,15 +216,6 @@ const initTheme = () => {
   z-index: 100;
   transition: transform 0.4s ease, background 0.3s ease, backdrop-filter 0.3s ease,
     border-color 0.3s ease, color 0.3s ease;
-}
-
-/* 暗色模式下的导航栏 */
-[data-theme='dark'] .navbar {
-  background: rgba(20, 20, 20, 0.3); /* 深色半透明，参考 --el-bg-color / --header-bg */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: #f0f0f0;
 }
 
 .navbar--hidden {
@@ -295,11 +249,6 @@ const initTheme = () => {
   color: #e05a5a;
 }
 
-/* 暗色下 logo 悬停保持一致 */
-[data-theme='dark'] .navbar__left:hover {
-  color: #e05a5a;
-}
-
 /* ===== 中间菜单 ===== */
 .navbar__center {
   display: flex;
@@ -307,7 +256,7 @@ const initTheme = () => {
   align-items: center;
   flex: 1;
   justify-content: center;
-  margin-left: -20px;
+  margin-left: -180px;
 }
 
 .navbar__item {
@@ -346,77 +295,6 @@ const initTheme = () => {
   outline: none;
 }
 
-/* 暗色模式下保持激活/悬停颜色 */
-[data-theme='dark'] .navbar__item:hover,
-[data-theme='dark'] .navbar__item.router-link-active {
-  color: #e05a5a;
-}
-
-/* ===== 右侧：切换按钮 ===== */
-.navbar__right {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  padding-right: 20px;
-}
-
-.theme-toggle-wrapper {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 60%;
-}
-
-/* 切换按钮样式 */
-.tdnn {
-  position: relative;
-  height: 4em;
-  width: 7.5em;
-  border-radius: 4em;
-  transition: all 500ms ease-in-out;
-  background: #423966;
-  flex-shrink: 0;
-}
-
-.tdnn.day {
-  background: #ffbf71;
-}
-
-.moon {
-  position: absolute;
-  display: block;
-  border-radius: 50%;
-  transition: all 400ms ease-in-out;
-  top: 0.75em;
-  left: 0.75em;
-  width: 2.5em;
-  height: 2.5em;
-  background: #423966;
-  box-shadow: 0.75em 0.625em 0 0em #d9fbff inset,
-    rgba(255, 255, 255, 0.1) 0em -1.75em 0 -1.125em,
-    rgba(255, 255, 255, 0.1) 0.75em 1.75em 0 -1.125em,
-    rgba(255, 255, 255, 0.1) 0.5em 3.25em 0 -1em,
-    rgba(255, 255, 255, 0.1) 1.5em 0.5em 0 -1.025em,
-    rgba(255, 255, 255, 0.1) 2em 2em 0 -1.125em,
-    rgba(255, 255, 255, 0.1) 1.5em 3.25em 0 -1.125em,
-    rgba(255, 255, 255, 0.1) -1em 1.75em 0 -1.125em,
-    rgba(255, 255, 255, 0.1) -0.25em 2.5em 0 -1.125em;
-}
-
-.sun {
-  top: 1.125em;
-  left: 4.5em;
-  transform: rotate(0deg);
-  width: 1.75em;
-  height: 1.75em;
-  background: #fff;
-  box-shadow: 0.75em 0.75em 0 1.25em #fff inset, 0 -1.25em 0 -0.675em #fff,
-    0.875em -0.875em 0 -0.75em #fff, 1.25em 0 0 -0.675em #fff,
-    0.875em 0.875em 0 -0.75em #fff, 0 1.25em 0 -0.675em #fff,
-    -0.875em 0.875em 0 -0.75em #fff, -1.25em 0 0 -0.675em #fff,
-    -0.875em -0.875em 0 -0.75em #fff;
-}
-
 /* ===== 透明模式（第一屏） ===== */
 .navbar--transparent {
   background: transparent !important;
@@ -426,9 +304,7 @@ const initTheme = () => {
   color: white !important;
 }
 
-/* 透明模式下隐藏中间菜单和右侧按钮（只保留左侧 Logo） */
-.navbar--transparent .navbar__center,
-.navbar--transparent .navbar__right {
+.navbar--transparent .navbar__center {
   display: none;
 }
 
@@ -471,15 +347,6 @@ const initTheme = () => {
   .navbar__item svg {
     width: 24px;
     height: 24px;
-  }
-
-  .navbar__right {
-    padding-right: 0;
-  }
-
-  .theme-toggle-wrapper {
-    font-size: 16%;
-    margin-left: 2px;
   }
 }
 </style>
