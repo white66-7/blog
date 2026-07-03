@@ -18,6 +18,7 @@ import md5 from './md/5.md?raw'
 import md6 from './md/6.md?raw'
 import md7 from './md/7.md?raw'
 import md8 from './md/8.md?raw'
+import md9 from './md/9.md?raw'
 
 export const articles: Article[] = [
   {
@@ -95,7 +96,7 @@ export const articles: Article[] = [
     excerpt: '把攒了好久了re0第四季前半部分一下看完了,确实不负我的期待',
     tags: ['动漫', 're0'],
     cover: '/messages/7/re0.webp',
-       content:md7,
+    content:md7,
   },
   {
     id: 8,
@@ -107,5 +108,16 @@ export const articles: Article[] = [
     tags: ['大学', '数据结构'],
     cover: '/messages/8/wushi.webp',
     content:md8,
+  },
+    {
+    id: 9,
+    title: '备战ACM选拔赛',
+    type: '大学',
+    date: '2026-07-03',
+    readTime: '20 minutes',
+    excerpt: '大一其实也只是想着去感受一下,所以就稍微复习一下之前做过的有关算法的题目,等到时候去看看到底是怎么个事',
+    tags: ['大学', 'ACM', '算法'],
+    cover: '/messages/9/tomorrow.webp',
+    content:md9,
   },
 ]

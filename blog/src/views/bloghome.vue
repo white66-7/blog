@@ -119,7 +119,6 @@ const mainBody = ref<HTMLElement | null>(null)
 const libraryStore = useLibraryStore()
 const audioStore = useAudioStore()
 const modules = [Mousewheel, Pagination]
-const articles = ref(articleData)
 const isFirstScreen = ref(true)
 const swiperInstance = ref<any>(null)
 let touchStartY = 0
