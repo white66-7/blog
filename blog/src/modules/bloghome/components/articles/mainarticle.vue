@@ -196,7 +196,7 @@ onMounted(async () => {
 /* ========= 全局布局 ========= */
 .app-page-wrapper {
   position: relative; width: 100%; height: 100vh; height: 100dvh;
-  overflow: hidden; background-color:#f0f0f0;
+  overflow: hidden; background-color:#FAF7F2;
   background-image:
 radial-gradient(
 rgba(120,90,60,.03) 1px,

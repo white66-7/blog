@@ -222,7 +222,7 @@ const closeLightbox = () => {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background-color:#f0f0f0;
+  background-color:#FAF7F2;
 }
 
 

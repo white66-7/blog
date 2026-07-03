@@ -363,7 +363,7 @@ const albumImages = [
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   /* 防止滚动链穿透到外层 */
-  background: #f0f0f0;
+  background: #FAF7F2;
 }
 
 .main-body {
