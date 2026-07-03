@@ -406,27 +406,45 @@ background-size:10px 10px;
 }
 
 
-@media (max-width: 640px) {
-  .tape-wrapper { padding: 8px 0; }
-  .tape-item {
-    font-size: clamp(1.2rem, 6vw, 1.8rem);
-    padding: 0 1.2rem;
-  }
-}
+/* =========================================
+   移动端适配方案
+   ========================================= */
 
-/* ===== 移动端适配 ===== */
+/* 1. 平板 & 小屏笔记本 (max-width: 900px) */
 @media (max-width: 900px) {
+  .hero-fullscreen {
+    padding-top: 40px; /* 顶部留白，防止挤压导航栏 */
+  }
+
+  /* 左右布局改为上下堆叠 */
   .page-header {
     flex-direction: column;
-    gap: 32px;
+    gap: 40px;
   }
+  
+  /* 文字区整体居中 */
   .header-left {
     align-items: center;
     text-align: center;
+    padding: 0 20px;
   }
+  
   .case-title {
     justify-content: center;
   }
+
+  /* 🎯 修复 meta 区域溢出和对齐问题 */
+  .hero-meta {
+    width: 100%;       /* 解除原来的固定 480px 宽度 */
+    max-width: 400px;
+    margin-top: 30px;
+  }
+  
+  .meta-row {
+    justify-content: center; /* 让下方的数据也居中对齐 */
+  }
+
+  /* 图片区缩小 */
   .header-right {
     flex: 0 0 auto;
     width: 100%;
@@ -438,13 +456,52 @@ background-size:10px 10px;
   }
 }
 
-
-@media (max-width: 480px) {
-  .case-title .r {
-    font-size: clamp(1.6rem, 7vw, 2.4rem);
+/* 2. 大屏手机 (max-width: 640px) */
+@media (max-width: 640px) {
+  /* 🎯 修复底部横幅条挤压问题：改为网格布局，一行放 3 个 */
+  .tape-wrapper { 
+    padding: 20px 0; 
   }
+  
+  .category-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px 0px; /* 上下间距20px，左右0 */
+    padding: 0 10px;
+  }
+
+  /* 缩小分类字体 */
+  .name {
+    font-size: 20px;
+  }
+  .count {
+    font-size: 11px;
+  }
+}
+
+/* 3. 小屏手机 (max-width: 480px) */
+@media (max-width: 480px) {
+  /* 标题文字进一步缩小 */
+  .case-title .r {
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
+    margin-bottom: 6px;
+  }
+  
   .r-sub {
     font-size: 0.85rem;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* 图片在小手机上再稍微缩小一点 */
+  .mask {
+    max-width: 260px;
+  }
+
+  /* 🎯 底部横幅条太窄时，改为一行放 2 个，变成 3 行 2 列 */
+  .category-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 0px;
   }
 }
 </style>

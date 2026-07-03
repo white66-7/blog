@@ -272,7 +272,8 @@ body {
   position: relative;
   width: 100%;
   max-width: 800px;
-  height: 450px;
+  /* 关键：强行让 HTML 容器和 SVG画布 (800x450) 保持完全一致的缩放比例 */
+  aspect-ratio: 16 / 9; 
   margin: 0;   
   display: flex;
   justify-content: center;
@@ -384,12 +385,10 @@ body {
 }
 
 /* 节点位置 */
-.n-l1 { top: 20%; left: 15%; }
-.n-l2 { top: 50%; left: 10%; transform: translateY(-50%); }
-.n-l3 { bottom: 20%; left: 15%; }
-.n-r1 { top: 20%; right: 15%; }
-.n-r2 { top: 50%; right: 10%; transform: translateY(-50%); font-family: serif; }
-.n-r3 { bottom: 20%; right: 15%; }
+.n-l1 { top: 26.66%; left: 20%; margin-top: -32px; margin-left: -32px; }
+.n-l3 { top: 73.33%; left: 20%; margin-top: -32px; margin-left: -32px; }
+.n-r1 { top: 26.66%; left: 80%; margin-top: -32px; margin-left: -32px; }
+.n-r3 { top: 73.33%; left: 80%; margin-top: -32px; margin-left: -32px; }
 
 .logo-text { font-size: 16px; letter-spacing: -0.5px; }
 
@@ -422,18 +421,8 @@ body {
   .graphic-container {
     width: 100%;
     max-width: 100%;
-    height: auto;          /* 仍由内部决定，但配合 min-height 兜底 */
-    min-height: 320px;     /* 防止高度塌陷，保证绝对定位元素有容器可依 */
-    /* ❌ 移除 aspect-ratio，避免高度计算为 0 的问题 */
-    position: relative;
     margin-top: 8px;
-  }
-
-  /* 如果某些浏览器仍出现高度不足，可使用 padding-bottom 百分比强制比例（备用） */
-  .graphic-container::after {
-    content: '';
-    display: block;
-    padding-bottom: 56.25%; /* 16:9 比例，如果觉得不合适可调 */
+    /* 删除了 ::after 的 padding-bottom 代码，因为 aspect-ratio 已经足够完美 */
   }
 
   /* 同心圆缩小 */
@@ -473,10 +462,11 @@ body {
     height: 24px;
   }
 
-  .n-l1 { top: 15%; left: 10%; }
-  .n-l3 { bottom: 18%; left: 10%; }
-  .n-r1 { top: 15%; right: 10%; }
-  .n-r3 { bottom: 18%; right: 10%; }
+  /* 🎯 关键修正：全部使用 margin-top 和 margin-left 进行负值居中 */
+  .n-l1 { margin-top: -22px; margin-left: -22px; }
+  .n-l3 { margin-top: -22px; margin-left: -22px; }
+  .n-r1 { margin-top: -22px; margin-left: -22px; }
+  .n-r3 { margin-top: -22px; margin-left: -22px; }
 
   /* 移动端取消部分浮动动画（性能优化） */
   .float-anim,
@@ -505,9 +495,11 @@ body {
     width: 20px;
     height: 20px;
   }
-  .n-l1 { top: 12%; left: 8%; }
-  .n-l3 { bottom: 16%; left: 8%; }
-  .n-r1 { top: 12%; right: 8%; }
-  .n-r3 { bottom: 16%; right: 8%; }
+  
+  /* 🎯 关键修正：全部使用 margin-top 和 margin-left 进行负值居中 */
+  .n-l1 { margin-top: -19px; margin-left: -19px; }
+  .n-l3 { margin-top: -19px; margin-left: -19px; }
+  .n-r1 { margin-top: -19px; margin-left: -19px; }
+  .n-r3 { margin-top: -19px; margin-left: -19px; }
 }
 </style>
