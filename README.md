@@ -4,6 +4,7 @@
 技术栈如下<br>
 <img width="2557" height="1483" alt="屏幕截图 2026-07-04 223353" src="https://github.com/user-attachments/assets/376c33d9-2676-46df-9a50-2eb46b57f829" />
 <br>
+<br>
 缺陷是：<br>
 未进行备案<br>无真实服务器<br>没学真正的后端
 <br><br>
