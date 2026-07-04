@@ -1,4 +1,4 @@
-<img width="808" height="144" alt="image" src="https://github.com/user-attachments/assets/e0c6eacc-184e-4374-a44f-684469a8bc5f" />一个从零开始手搓的个人博客网站<br>
+一个从零开始手搓的个人博客网站<br>
 <br>
 <img width="2557" height="1483" alt="屏幕截图 2026-07-04 223353" src="https://github.com/user-attachments/assets/376c33d9-2676-46df-9a50-2eb46b57f829" />
 <br><br>
@@ -15,3 +15,4 @@
 优设标题黑<br>
 字体管家楷体<br>
 上首江湖书法体<br>
+<img width="808" height="144" alt="image" src="https://github.com/user-attachments/assets/e0c6eacc-184e-4374-a44f-684469a8bc5f" />
