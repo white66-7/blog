@@ -7,20 +7,34 @@ export interface PresetSong {
   isPreset: boolean;
 }
 
-// 预设歌曲列表
+// 预设歌曲列表Young Roddo -
 export const songs: PresetSong[] = [
     {
     id: 'preset_1',
+    name: 'No Bad Grades',
+    artist: 'Young Roddo', 
+    src: '/audio/No Bad Grades.mp3', 
+    isPreset: true
+  },
+  {
+    id: 'preset_2',
     name: 'Stay Alive',
     artist: '纯音乐', 
     src: '/audio/Stay Alive.mp3', 
     isPreset: true
   },
     {
-    id: 'preset_2',
+    id: 'preset_3',
     name: 'Ahead of Us',
     artist: '小瀬村晶', 
     src: '/audio/Ahead of Us.mp3', 
+    isPreset: true
+  },
+      {
+    id: 'preset_4',
+    name: '深海',
+    artist: '刘森', 
+    src: '/audio/刘森 - 深海.mp3', 
     isPreset: true
   },
 ];

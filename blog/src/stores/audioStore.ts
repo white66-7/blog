@@ -123,39 +123,26 @@ async function loadSongByIndex(index: number): Promise<void> {
 }
 
 async function play(): Promise<void> {
-    const el = audioElement.value
-    if(!el) return
+  const el = audioElement.value
+  if (!el) return
 
-    if(curIdx.value === -1){
-        if(libraryStore.filteredList.length > 0){
-           const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
-            await loadSongByIndex(targetIdx)
-        }else return
-    }else{
-        if(!el.src && currentAudioUrl.value)
-        {
-            el.src = currentAudioUrl.value
-        }
+  // 如果 curIdx 无效，自动选择列表第一首
+  if (curIdx.value === -1) {
+    if (libraryStore.filteredList.length > 0) {
+      const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
+      await loadSongByIndex(targetIdx)
+    } else {
+      return
     }
-    if(!el.src) {
-        const song = libraryStore.library[curIdx.value]
-        if(song) {
-            if(song.isPreset && song.src) {
-                el.src = song.src
-                currentAudioUrl.value = song.src
-            } else if (song.file) {
-                const url = URL.createObjectURL(song.file)
-                el.src = url
-                currentAudioUrl.value = url
-            }
-        } else return
-    }
+  } else {
+    await loadSongByIndex(curIdx.value)
+  }
 
-   try {
-    await el.play();
-    paused.value = false; 
+  try {
+    await el.play()
+    paused.value = false
   } catch (e) {
-    console.warn('播放失败', e);
+    console.warn('播放失败', e)
   }
 }
 

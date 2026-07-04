@@ -35,8 +35,9 @@ export async function extractCoverFromUrl(audioUrl: string): Promise<string | nu
         onSuccess: (tag: any) => {
           const picture = tag.tags?.picture;
           if (picture && picture.data && picture.format) {
-            const base64 = btoa(String.fromCharCode(...new Uint8Array(picture.data)));
-            resolve(`data:${picture.format};base64,${base64}`);
+            // ✅ 直接用 Blob + createObjectURL，不转 base64
+            const blob = new Blob([new Uint8Array(picture.data)], { type: picture.format });
+            resolve(URL.createObjectURL(blob));
           } else {
             resolve(null);
           }
