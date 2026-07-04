@@ -20,7 +20,6 @@
 <style scoped lang="scss">
 $secondary-color: #ffe221;
 $tertiary-color: #ffffff;
-
 .container {
   width: 100%;
   min-height: 100vh;
@@ -40,7 +39,7 @@ $tertiary-color: #ffffff;
 }
 
 .animated-text {
-  font: 700 4.6em/1 "Oswald", "Microsoft YaHei", sans-serif;
+  font: 5.5em/1 'ShangShouJiangHuShuFa', '优设标题黑', sans-serif;
   letter-spacing: 4px;
   padding: 0.25em 0 0.325em;
   display: block;
@@ -70,7 +69,8 @@ h1 {
   margin: 10px 0 0;
   padding: 0;
   text-align: center;
-  font-family: 'Cabin Condensed', sans-serif;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-weight: normal;
 
   span {
     width: 100%;

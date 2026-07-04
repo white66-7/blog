@@ -82,7 +82,6 @@ onUnmounted(() => {
   max-width: 420px;
   margin: 0 auto;
   transition: 0.25s ease;
-  font-family: 'SimHei', 'Microsoft YaHei', '黑体', sans-serif;
 }
 
 .stack:hover {
@@ -147,10 +146,11 @@ onUnmounted(() => {
 
 .say-header h3 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 25px;
+  font-family: 'ShangShouJiangHuShuFa', '优设标题黑', sans-serif;
+  font-weight: 400;
   letter-spacing: 1px;
-  color: #1a1a1a;
+  color: #000000;
 }
 
 .say-header svg {
@@ -173,6 +173,7 @@ onUnmounted(() => {
 
 .content {
   margin: 0 0 10px 0;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   font-size: 14.5px;
   line-height: 1.6;
   font-weight: 400;

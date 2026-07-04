@@ -88,10 +88,10 @@
 
 /* ===== 昵称 ===== */
 .name {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: normal;
   color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
 }
 
 /* ===== 分割线 ===== */
@@ -105,10 +105,10 @@
 
 /* ===== 签名 ===== */
 .bio {
-  font-size: 12px;
+  font-size: 14px;
   color: #6b7280;
   text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
 }
 
 /* ===== 社交图标 ===== */

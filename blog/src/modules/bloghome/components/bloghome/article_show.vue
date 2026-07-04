@@ -144,10 +144,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+
 .articles-section {
   margin-top: 20px;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
-  font-weight: 700;
 }
 
 /* ---------- Grid 基础 ---------- */
@@ -169,7 +168,7 @@ onUnmounted(() => {
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
-   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
   will-change: transform, opacity; /* 优化动画性能 */
@@ -245,8 +244,9 @@ onUnmounted(() => {
   overflow: hidden;
 }
 .card__title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 400;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   margin-bottom: 6px;
   line-height: 1.3;
   color: #1a1a1a;
@@ -257,6 +257,7 @@ onUnmounted(() => {
   margin-bottom: 8px;
 }
 .card__excerpt {
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   font-size: 13px;
   color: #555;
   line-height: 1.4;
@@ -279,8 +280,8 @@ onUnmounted(() => {
   padding: 4px 14px;
   border-radius: 45px;
   font-size: 12px;
-  font-weight: 600;
-  font-family: 'SimHei', 'Microsoft YaHei', sans-serif;
+  font-weight: 500;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 4px;

@@ -44,7 +44,7 @@
           x="60"
           y="15"
           font-size="17"
-          font-family="Microsoft YaHei, sans-serif"
+          font-family="'YouSheBiaoTiHei', '优设标题黑', sans-serif"
           font-weight="bold"
           fill="green"
         >
@@ -55,7 +55,7 @@
           x="60"
           y="15"
           font-size="17"
-          font-family="Microsoft YaHei, sans-serif"
+          font-family="'YouSheBiaoTiHei', '优设标题黑', sans-serif"
           font-weight="bold"
           fill="url(#wave)"
           fill-opacity="0.9"
@@ -67,7 +67,7 @@
           x="60"
           y="15"
           font-size="17"
-          font-family="Microsoft YaHei, sans-serif"
+          font-family="'YouSheBiaoTiHei', '优设标题黑', sans-serif"
           font-weight="bold"
           fill="url(#gradient)"
           fill-opacity="0.1"
@@ -195,6 +195,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+@font-face {
+  font-family: 'YouSheBiaoTiHei';
+  src: url('/text/YouSheBiaoTiHei-2.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 /* ===== 导航栏主体 ===== */
 .navbar {
   position: fixed;
@@ -266,7 +273,8 @@ onUnmounted(() => {
   color: inherit;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 500;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-weight: normal;
   letter-spacing: 0.5px;
   transition: color 0.2s;
   outline: none;
@@ -279,8 +287,10 @@ onUnmounted(() => {
 }
 
 .navbar__item span {
+  font-size: 20px;
   white-space: nowrap;
-  font-family: 'SimHei', 'Microsoft YaHei', sans-serif;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-weight: normal;
 }
 
 .navbar__item:focus-visible {

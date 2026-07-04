@@ -35,8 +35,9 @@ defineProps({
   display: flex;
   align-items: center;
   margin-bottom: 18px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-weight: normal;
   letter-spacing: 2px;
   color: #6F6A63;
 }
@@ -62,7 +63,8 @@ defineProps({
   justify-content: center;
   padding: 7px 14px;
   font-size: 13px;
-  font-weight: 600;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-weight: normal;
   color: #3C3935;
   background: #EEE7DA;
   border-radius: 5px;

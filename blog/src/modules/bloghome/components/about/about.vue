@@ -47,6 +47,13 @@ const skillGroups = [
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
+@font-face {
+  font-family: 'YouSheBiaoTiHei';
+  src: url('/text/YouSheBiaoTiHei-2.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 .home-page {
   background: #FAF7F2;
   min-height: 100vh;
@@ -62,6 +69,10 @@ const skillGroups = [
   font-size:24px;
   margin-top:80px;
   margin-bottom:20px;
+}
+.text h1 {
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-weight: normal;
 }
 .content-wrapper{
     display:grid;
@@ -79,7 +90,6 @@ const skillGroups = [
     gap:20px;
 }
 
-/* 响应式：小屏堆叠 */
 @media (max-width: 900px) {
   .home-page {
     padding-top: 60px;

@@ -26,7 +26,7 @@ const days = computed(() => {
   return Math.floor(diffTime / (1000 * 60 * 60 * 24))
 })
 
-const text = computed(() => `该网站已上线 ${days.value} 天`)
+const text = computed(() => `网站已上线 ${days.value} 天`)
 const chars = computed(() => text.value.split(''))
 </script>
 
@@ -173,12 +173,12 @@ const chars = computed(() => text.value.split(''))
 }
 @media (max-width: 768px) {
   .site-age-box {
-    min-width: unset;                /* 移除桌面端 50rem 限制 */
-    max-width: 92vw;                 /* 宽度自适应屏幕，保留少许边距 */
+    min-width: unset;                
+    max-width: 92vw;              
     height: auto;                    /* 高度随内容变化 */
-    padding: 0.6rem 1rem;            /* 减小内边距 */
-    margin: 20px auto 10px;          /* 移动端居中显示更佳，也可保留原左对齐 */
-    border-radius: 3rem;             /* 圆角适当减小 */
+    padding: 0.6rem 1rem;          
+    margin: 20px auto 10px;          
+    border-radius: 3rem;             
   }
 
   .text {

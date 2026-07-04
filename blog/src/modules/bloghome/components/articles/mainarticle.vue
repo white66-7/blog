@@ -241,13 +241,75 @@ margin-top: -10px;}
 .card.reverse-horizontal { flex-direction: row-reverse; }
 .card.horizontal .card__img, .card.reverse-horizontal .card__img { width: 40%; height: 100%; object-fit: cover; }
 .placeholder-img { width: 40%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; }
-.card.horizontal .card__content, .card.reverse-horizontal .card__content { width: 60%; display: flex; flex-direction: column; padding: 16px; box-sizing: border-box; }
-.card__title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #1a1a1a; }
-.card__date { font-size: 11px; color: #666; margin-bottom: 8px; }
-.card__excerpt { font-size: 13px; color: #444; line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; align-self: flex-start; }
-.tag { background: #fff; color: #000; padding: 2px 10px; border-radius: 45px; font-size: 11px; font-weight: 600; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08); }
+/* ========= 重新调整卡片内容区 ========= */
+.card.horizontal .card__content, 
+.card.reverse-horizontal .card__content { 
+  width: 60%; 
+  display: flex; 
+  flex-direction: column; 
+  padding: 20px 30px; 
+  box-sizing: border-box; 
+  justify-content: center; 
+}
 
+.card__title { 
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-size: 22px;  
+  font-weight: normal;      
+  margin-bottom: 10px; 
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.card__date { 
+  font-size: 12px; 
+  color: #888; 
+  margin-bottom: 12px; 
+}
+
+.card__excerpt { 
+  font-family: 'ZiTiGuanJiaKaiTi', '优设标题黑', sans-serif;
+  font-size: 15px; /* 摘要稍微加大一点点 */
+  font-weight: normal;  
+  color: #555; 
+  line-height: 1.6; /* 增加行高，阅读更舒适 */
+  margin-bottom: 16px; /* 【关键修改2】：只保留固定间距，不再依赖撑开 */
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  line-clamp: 2; 
+  -webkit-box-orient: vertical; 
+  overflow: hidden; 
+}
+
+.card__tags { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+  /* 【关键修改3】：删除了 margin-top: auto; 不再把标签强制推到底部 */
+  align-self: flex-start; 
+}
+
+.tag { 
+  background: #fff;
+  color: #000;
+  padding: 6px 15px;
+  border-radius: 45px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease 0s;
+  cursor: default;
+}
+.tag:hover {
+  background-color: #23c483;
+  color: #fff;
+  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+  transform: scale(1.15);  
+}
 .pagination { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 10px 0; }
 .page-btn { padding: 6px 14px; border: none; background-color: #fff; color: #333; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
 .page-btn:hover:not(:disabled) { background-color: #23c483; color: #fff; }
