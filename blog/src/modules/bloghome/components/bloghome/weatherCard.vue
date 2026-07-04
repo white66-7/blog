@@ -89,37 +89,31 @@ const weatherNames: Record<string, string> = {
 // ── 获取武汉天气 ──
 async function fetchWeather() {
   try {
-    const lat = 30.5833 
-    const lon = 114.2667
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`
-    )
-    const data = await res.json()
-    const current = data.current_weather
-    temp.value = String(Math.round(current.temperature))
+    const url = 'https://wttr.in/30.49,114.38?format=j1';
+    //千灯 32.32 120.87
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('请求失败');
+    const data = await res.json();
+    const current = data.current_condition[0];
+    temp.value = String(Math.round(parseFloat(current.temp_C)));
 
-    const code = current.weathercode
-    let type = 'wind'
-    if (code === 0) type = 'sun'
-    else if (code >= 1 && code <= 3) type = 'wind'
-    else if (code >= 45 && code <= 48) type = 'wind'
-    else if (code >= 51 && code <= 67) type = 'rain'
-    else if (code >= 80 && code <= 82) type = 'rain'
-    else if (code >= 95 && code <= 99) type = 'thunder'
-    else if (code >= 71 && code <= 77) type = 'snow'
+    const descEn = current.weatherDesc[0].value; 
+    let type = 'wind';
+    if (descEn.includes('Sunny') || descEn.includes('Clear')) type = 'sun';
+    else if (descEn.includes('Rain')) type = 'rain';
+    else if (descEn.includes('Snow')) type = 'snow';
+    else if (descEn.includes('Thunder') || descEn.includes('Storm')) type = 'thunder';
 
-    weatherDesc.value = weatherNames[type] || 'Unknown'
-
-    const now = new Date()
-    formattedDate.value = now.toLocaleDateString('en-US', {
+    weatherDesc.value = weatherNames[type] || 'Unknown';
+    const nowDate = new Date();
+    formattedDate.value = nowDate.toLocaleDateString('en-US', {
       weekday: 'long', day: 'numeric', month: 'long'
-    })
-
-    changeWeather(type)
+    });
+    changeWeather(type);
   } catch (err) {
-    console.error('获取天气失败', err)
-    weatherDesc.value = 'Error'
-    changeWeather('wind')
+    console.error('获取天气失败', err);
+    weatherDesc.value = 'Error';
+    changeWeather('wind');
   }
 }
 

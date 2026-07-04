@@ -16,7 +16,7 @@
 <style scoped>
 .about-section{
     width:100%;
-    margin-top:-20px;
+    margin-top:-30px;
     align-self: flex-start;     
     padding-left: 220px;          
 }
@@ -26,7 +26,7 @@
 }
 
 .about-title{
-    font-size:72px;
+    font-size:52px;
     font-weight:800;
     color:#2C2C2C;
     margin:0 0 28px;
