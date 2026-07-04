@@ -214,35 +214,34 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 1. 最外层卡片：彻底放弃固定宽度，改为自适应 */
 .graphic-card {
-  width: 860px;
-  height: 500px;
-  margin: 80px auto;
-  border-radius: 17px;
+  width: 100%; 
+  max-width: 860px; /* PC 端最大宽度 */
+  margin: 40px auto; 
+  padding: 0 16px; /* 保证两边永远有留白 */
+  box-sizing: border-box;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   position: relative;
+  overflow: hidden; /* 防止任何子元素溢出撑爆屏幕 */
 }
 
+/* 2. 画布容器：保持 16:9 比例 */
 .graphic-container {
   position: relative;
   width: 100%;
   max-width: 800px;
   aspect-ratio: 16 / 9;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin: 0 auto;
 }
 
-/* ===== 同心圆 ===== */
+/* 3. 同心圆：🚀 核心修复！改用 inset + margin，防止被 GSAP 动画吃掉居中效果 */
 .circles {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0; bottom: 0; left: 0; right: 0; /* 上下左右全部贴边 */
+  margin: auto; /* 浏览器自动计算完美居中 */
   width: 300px;
   height: 300px;
   border-radius: 50%;
@@ -272,19 +271,21 @@ onMounted(() => {
   position: absolute;
 }
 
+/* 4. 头像中心：同样使用 inset + margin 完美居中 */
 .avatar-wrapper {
-  position: relative;
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto; 
   z-index: 10;
-  width: auto;
+  width: 170px;
   height: 170px;
   border-radius: 50%;
-  cursor: default; /* 不再可点击上传 */
+  cursor: default;
   filter: var(--brain-glow);
   box-shadow: var(--clay-shadow-out), var(--clay-shadow-in);
   border: 2px solid rgba(255, 255, 255, 0.15);
   overflow: hidden;
   background: #2a2a2a;
-  flex-shrink: 0;
 }
 .avatar-wrapper img {
   width: 100%;
@@ -297,16 +298,14 @@ onMounted(() => {
 /* ===== SVG 连线 ===== */
 .lines-svg {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   z-index: 2;
   pointer-events: none;
 }
 .line-path {
   fill: none;
-  stroke: #333; /* 深灰色线条，在浅色背景上清晰可见 */
+  stroke: #333;
   stroke-width: 1.5;
   stroke-linecap: round;
   opacity: 0.6;
@@ -331,174 +330,49 @@ onMounted(() => {
   transition: border-color 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
+.icon-node:hover { border-color: rgba(255, 255, 255, 0.3); }
+.icon-node svg { width: 32px; height: 32px; }
 
-.icon-node:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-}
-.icon-node svg {
-  width: 32px;
-  height: 32px;
-}
+/* 节点精准百分比定位 */
+.n-l1 { top: 26.66%; left: 20%; margin-top: -32px; margin-left: -32px; }
+.n-l3 { top: 73.33%; left: 20%; margin-top: -32px; margin-left: -32px; }
+.n-r1 { top: 26.66%; left: 80%; margin-top: -32px; margin-left: -32px; }
+.n-r3 { top: 73.33%; left: 80%; margin-top: -32px; margin-left: -32px; }
 
-/* 节点位置 */
-.n-l1 {
-  top: 26.66%;
-  left: 20%;
-  margin-top: -32px;
-  margin-left: -32px;
-}
-.n-l3 {
-  top: 73.33%;
-  left: 20%;
-  margin-top: -32px;
-  margin-left: -32px;
-}
-.n-r1 {
-  top: 26.66%;
-  left: 80%;
-  margin-top: -32px;
-  margin-left: -32px;
-}
-.n-r3 {
-  top: 73.33%;
-  left: 80%;
-  margin-top: -32px;
-  margin-left: -32px;
-}
+.logo-text { font-size: 16px; letter-spacing: -0.5px; }
+.float-slow { will-change: transform; }
 
-.logo-text {
-  font-size: 16px;
-  letter-spacing: -0.5px;
-}
-
-/* ===== 工具类 ===== */
-.float-slow {
-  will-change: transform;
-}
-
-/* ===== 移动端适配 ===== */
+/* =========================================
+   移动端自动缩放适配 (无需修改位置，自然等比缩小)
+========================================= */
 @media (max-width: 900px) {
-  .graphic-card {
-    width: 92%;
-    max-width: 500px;
-    height: auto;
-    min-height: 420px;
-    margin: 40px auto;
-    padding: 24px 12px;
-    box-sizing: border-box;
-  }
+.circles { width: 170px; height: 170px; }
+  .circles::before { width: 110px; height: 110px; }
+  .circles::after { width: 60px; height: 60px; }
+  
+  .avatar-wrapper { width: 56px; height: 56px; } /* 头像也对应稍微缩小一点点 */
+  
 
-  .text h1 {
-    font-size: 20px;
-    margin-bottom: 12px;
-  }
+  .icon-node { width: 44px; height: 44px; border-radius: 12px; }
+  .icon-node svg { width: 22px; height: 22px; }
+  
+  /* 节点居中偏移值调整为移动端尺寸的一半 */
+  .n-l1 { margin-top: -22px; margin-left: -22px; }
+  .n-l3 { margin-top: -22px; margin-left: -22px; }
+  .n-r1 { margin-top: -22px; margin-left: -22px; }
+  .n-r3 { margin-top: -22px; margin-left: -22px; }
 
-  .graphic-container {
-    width: 100%;
-    max-width: 100%;
-    margin-top: 8px;
-    /* 删除了 ::after 的 padding-bottom 代码，因为 aspect-ratio 已经足够完美 */
-  }
-
-  /* 同心圆缩小 */
-  .circles {
-    width: 200px;
-    height: 200px;
-  }
-  .circles::before {
-    width: 130px;
-    height: 130px;
-  }
-  .circles::after {
-    width: 70px;
-    height: 70px;
-  }
-
-  /* 头像缩小 */
-  .avatar-wrapper {
-    width: 48px;
-    height: 48px;
-  }
-
-  /* SVG 连线自适应 */
-  .lines-svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  /* 节点缩小并重新定位 */
-  .icon-node {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-  }
-  .icon-node svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  /* 🎯 关键修正：全部使用 margin-top 和 margin-left 进行负值居中 */
-  .n-l1 {
-    margin-top: -22px;
-    margin-left: -22px;
-  }
-  .n-l3 {
-    margin-top: -22px;
-    margin-left: -22px;
-  }
-  .n-r1 {
-    margin-top: -22px;
-    margin-left: -22px;
-  }
-  .n-r3 {
-    margin-top: -22px;
-    margin-left: -22px;
-  }
-
-  /* 移动端取消部分浮动动画（性能优化） */
-  .float-anim,
-  .float-anim-alt {
-    animation: none;
-  }
-
-  /* 点击态反馈（移动端无 hover） */
-  .icon-node:active {
-    transform: scale(1.15);
-    transition: transform 0.2s ease;
-  }
-
-  .logo-text {
-    font-size: 13px;
-  }
+  /* 移动端关闭悬浮/浮动动画，节约性能 */
+  .float-anim, .float-anim-alt { animation: none; }
+  .icon-node:active { transform: scale(1.1); }
 }
 
-/* 极小屏（如 375px） */
 @media (max-width: 400px) {
-  .icon-node {
-    width: 38px;
-    height: 38px;
-  }
-  .icon-node svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  /* 🎯 关键修正：全部使用 margin-top 和 margin-left 进行负值居中 */
-  .n-l1 {
-    margin-top: -19px;
-    margin-left: -19px;
-  }
-  .n-l3 {
-    margin-top: -19px;
-    margin-left: -19px;
-  }
-  .n-r1 {
-    margin-top: -19px;
-    margin-left: -19px;
-  }
-  .n-r3 {
-    margin-top: -19px;
-    margin-left: -19px;
-  }
+  .icon-node { width: 36px; height: 36px; }
+  .icon-node svg { width: 18px; height: 18px; }
+  .n-l1 { margin-top: -18px; margin-left: -18px; }
+  .n-l3 { margin-top: -18px; margin-left: -18px; }
+  .n-r1 { margin-top: -18px; margin-left: -18px; }
+  .n-r3 { margin-top: -18px; margin-left: -18px; }
 }
 </style>

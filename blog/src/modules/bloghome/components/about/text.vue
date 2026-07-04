@@ -42,4 +42,25 @@
     font-family: 'ZiTiGuanJiaKaiTi';
     font-weight: normal;
 }
+/* 移动端 / 平板适配 */
+@media (max-width: 900px) {
+  .about-section {
+    padding-left: 30px; /* 取消 220px 的巨大留白 */
+    padding-right: 30px;
+    margin-top: 40px; /* 改为正数，和上面的卡片拉开距离，避免重叠 */
+    box-sizing: border-box;
+  }
+  .about-title { font-size: 36px; margin-bottom: 20px; text-align: center; } /* 手机端标题居中更好看 */
+  .about-text { font-size: 18px; line-height: 1.6; width: 100%; text-align: center; } /* 正文稍微缩小并居中 */
+}
+
+/* 极小屏幕手机适配 */
+@media (max-width: 480px) {
+  .about-section { padding-left: 20px; padding-right: 20px; margin-top: 20px; }
+  .about-title { font-size: 28px; margin-bottom: 16px; }
+  .about-text { font-size: 15px; }
+  
+  /* 关键：隐藏你的 <br> 标签。手机屏幕窄，会自动换行，保留 <br> 会导致排版断句很奇怪 */
+  .about-text br { display: none; } 
+}
 </style>

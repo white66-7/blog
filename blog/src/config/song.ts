@@ -23,18 +23,4 @@ export const songs: PresetSong[] = [
     src: '/audio/Ahead of Us.mp3', 
     isPreset: true
   },
-  {
-    id: 'preset_3',
-    name: '天龙八部之宿敌',
-    artist: '九三', 
-    src: '/audio/天龙八部之宿敌.mp3', 
-    isPreset: true
-  },
-  {
-    id: 'preset_4',
-    name: '心许百年',
-    artist: '王天戈',
-    src: '/audio/心许百年.mp3',
-    isPreset: true
-  }
 ];

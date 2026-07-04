@@ -325,19 +325,18 @@ onUnmounted(() => {
 /* ===== 移动端适配 ===== */
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 10px;
+    padding: 0 12px; /* 稍微增加一点左右内边距 */
   }
 
   .navbar__left {
     padding-left: 0;
-    flex-shrink: 1;
-    max-width: 45%;
-    overflow: hidden;
+    flex-shrink: 0; 
+    margin: -5px;
   }
 
   .wave-svg {
-    height: 28px;
-    max-width: 100%;
+    height: 32px; /* 移动端字稍微缩小一点即可 */
+    width: auto;
   }
 
   .nav-icon {
@@ -345,18 +344,20 @@ onUnmounted(() => {
   }
 
   .navbar__center {
-    gap: 12px;
+    margin-left: 0; 
+    
     flex: 1;
-    justify-content: center;
+    justify-content: flex-end; 
+    gap: 10px; /* 调整移动端图标之间的间距 */
   }
 
   .navbar__item span {
-    display: none;
+    display: none; /* 移动端隐藏文字，只留图标 */
   }
 
   .navbar__item svg {
-    width: 24px;
-    height: 24px;
+    width: 26px; /* 移动端图标稍微加大一点方便手指点击 */
+    height: 26px;
   }
 }
 </style>

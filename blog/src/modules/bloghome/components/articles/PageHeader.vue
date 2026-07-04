@@ -175,7 +175,7 @@ body {
 }
 
 .case-title {
-  font-family: "Noto Serif SC", serif;
+  font-family: "ShangShouJiangHuShuFa", serif;
   display: flex;
   flex-wrap: wrap;         
   line-height: 1.3;
@@ -204,7 +204,7 @@ body {
   color: #111;
   padding: 0.05em 0.12em;
   font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 900;
+  font-weight: normal;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
   white-space: nowrap;
   transition: transform 0.3s ease;
@@ -228,7 +228,7 @@ body {
 .r-sub {
   display: block;
   width: 100%;
-  font-family: "Noto Serif SC", serif;
+  font-family: "ZiTiGuanJiaKaiTi", serif;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   color: #3d2710;
   letter-spacing: 0.2em;

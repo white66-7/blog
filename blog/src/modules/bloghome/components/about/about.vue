@@ -92,12 +92,24 @@ const skillGroups = [
 
 @media (max-width: 900px) {
   .home-page {
-    padding-top: 60px;
+    padding-top: 20px;
   }
+  
   .content-wrapper {
+    /* 🚀 关键修复1：必须先声明 flex，下面的 column 才会生效 */
+    display: flex; 
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    
+    /* 🚀 关键修复2：重置 PC 端的错位 margin 和 gap */
+    margin-top: 0; 
+    row-gap: 40px; /* 卡片和下面文字的上下间距 */
+    padding: 0 16px;
+    box-sizing: border-box;
+    transform: none; /* 取消手机端不需要的 Y 轴偏移 */
   }
+  
   .skill-sections {
     width: 100%;
     max-width: 500px;

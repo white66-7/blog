@@ -323,15 +323,6 @@ margin-top: -10px;}
   overflow-y: auto;  
 
 }
-.scrollable-content::-webkit-scrollbar:vertical {
-  width: 0.5rem;
-}
-.scrollable-content::-webkit-scrollbar-track:vertical {
-  background-color: brown;
-}
-.scrollable-content::-webkit-scrollbar-thumb:vertical {
-  background-color: oklch(15% 0 0);
-}
 
 @media (max-width: 768px) {
   .main-body { padding: 80px 5% 40px 5%; }
