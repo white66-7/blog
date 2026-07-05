@@ -277,7 +277,7 @@ main {
 }
 
 .markdown-body :deep(h1) {
-  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
   font-size: clamp(1.8rem, 3vw + 1rem, 4rem);
   text-align: center;
@@ -286,7 +286,7 @@ main {
 }
 
 .markdown-body :deep(h2) {
-  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
   font-size: clamp(1.5rem, 2.5vw + 1rem, 3rem);
   margin: 0.6em 0 0.5em;
@@ -329,6 +329,7 @@ main {
   border-radius: 24px;
   padding: 24px 18px;
   box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+  font-family: 'YouSheBiaoTiHei';
   z-index: 15;
   display: flex;
   flex-direction: column;
@@ -349,6 +350,7 @@ main {
 }
 
 .toc__title {
+  font-family: 'YouSheBiaoTiHei';
   font-size: 16px;
   font-weight: 700;
   color: #1a1a1a;
@@ -359,13 +361,13 @@ main {
 .toc__item {
   position: relative;
   display: block;
-  font-size: 14px;
+  font-size: 18px;
   color: #212121;
   text-decoration: none;
   padding: 12px 20px;
   border-radius: 15px;
   background: #e0e0e0;
-  font-weight: 500;
+  font-weight: normal;
   overflow: hidden;
   z-index: 1;
   transition: color 0.25s ease;
@@ -373,9 +375,7 @@ main {
   text-overflow: ellipsis;
   transform: scale(1);
   transform-origin: center;
-  /* 从中心点开始放大 */
   transition: all 0.3s ease-in-out;
-  /* 让放大、变色、阴影都带上丝滑过渡 */
 }
 
 /* 绿色填充滑入效果 */
@@ -413,9 +413,9 @@ main {
 }
 /* ---------- Markdown 超链接样式 (现代动画款) ---------- */
 .markdown-body :deep(a) {
-  color: #23c483; /* 使用你的标签悬浮主题绿 */
+  color: #23c483; 
   text-decoration: none; /* 去掉默认丑陋的下划线 */
-  font-weight: 600; /* 稍微加粗，使其在正文中更显眼 */
+  font-weight: 700; 
   position: relative;
   padding: 0 2px;
   transition: color 0.3s ease;
@@ -458,8 +458,9 @@ main {
   border: none;
   padding: 10px 20px;
   border-radius: 45px;
-  font-size: 14px;
-  font-weight: 600;
+   font-family: 'YouSheBiaoTiHei';
+  font-size: 16px;
+  font-weight: normal;
   cursor: pointer;
   z-index: 20;
   box-shadow: 6px 6px 12px #bebebe, -6px -6px 12px #ffffff;
@@ -483,7 +484,7 @@ main {
 
 @media (max-width: 768px) {
   .content {
-    margin: 20px 12px;
+    margin: 0 12px 20px;
     padding: 0 20px 60px;
     border-radius: 20px;
   }
@@ -494,7 +495,7 @@ main {
   }
 
   .back-btn {
-    top: 24px;
+    top: 80px;
     left: 12px;
     padding: 8px 16px;
     font-size: 13px;

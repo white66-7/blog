@@ -111,11 +111,11 @@ export const articles: Article[] = [
   },
     {
     id: 9,
-    title: '备战ACM选拔赛',
+    title: '算法基本知识总结',
     type: '算法',
     date: '2026-07-03',
     readTime: '20 minutes',
-    excerpt: '大一其实也只是想着去感受一下,所以就稍微复习一下之前做过的有关算法的题目,等到时候去看看到底是怎么个事',
+    excerpt: '大一下有机会去感受一下ACM,所以我就稍微总结一下有关算法的知识和理解,毕竟怎么说算法也是八股很重要的一部分',
     tags: ['大学', 'ACM', '算法'],
     cover: '/messages/9/tomorrow.webp',
     content:md9,
