@@ -27,7 +27,7 @@ import Textshow from '@/modules/bloghome/components/about/text.vue'
 const skillGroups = [
   {
     title: '前端',
-    items: ['Vue.js', 'JavaScript', 'Css', 'Html']
+    items: ['Vue', 'JavaScript', 'Css', 'Html']
   },
   {
     title: '后端',
