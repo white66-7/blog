@@ -109,13 +109,13 @@ export const articles: Article[] = [
     cover: '/messages/8/wushi.webp',
     content:md8,
   },
-    {
+  {
     id: 9,
     title: '算法基本知识总结',
     type: '算法',
     date: '2026-07-03',
     readTime: '20 minutes',
-    excerpt: '大一下有机会去感受一下ACM,所以我就稍微总结一下有关算法的知识和理解,毕竟怎么说算法也是八股很重要的一部分',
+    excerpt: '大一下有机会去感受一下ACM,所以我就总结了一下我对算法知识的理解',
     tags: ['大学', 'ACM', '算法'],
     cover: '/messages/9/tomorrow.webp',
     content:md9,
