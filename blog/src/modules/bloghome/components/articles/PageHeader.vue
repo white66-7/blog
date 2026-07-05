@@ -102,7 +102,7 @@ const latestDate = computed(() => {
 const order = [
   '前端',
   '后端',
-  '全栈',
+  '算法',
   '动漫',
   '大学',
   '复盘'

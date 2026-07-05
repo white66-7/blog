@@ -208,9 +208,9 @@ main {
 }
 
 .article-title {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'ShangShouJiangHuShuFa', sans-serif;
   font-size: clamp(2rem, 4vw + 1rem, 6rem);
-  font-weight: 700;
+  font-weight: normal;
   text-align: center;
   margin: 0.5em 0 0.2em;
   color: #1a1a1a;
@@ -266,7 +266,7 @@ main {
 }
 
 .markdown-body {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'ZiTiGuanJiaKaiTi', sans-serif;
   line-height: 1.8;
   font-size: clamp(1rem, 2.5vw, 1.3rem);
   color: #000;
@@ -277,8 +277,8 @@ main {
 }
 
 .markdown-body :deep(h1) {
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 700;
+  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  font-weight: normal;
   font-size: clamp(1.8rem, 3vw + 1rem, 4rem);
   text-align: center;
   margin: 1.5em 0 0.5em;
@@ -286,8 +286,8 @@ main {
 }
 
 .markdown-body :deep(h2) {
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 700;
+  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  font-weight: normal;
   font-size: clamp(1.5rem, 2.5vw + 1rem, 3rem);
   margin: 0.6em 0 0.5em;
   line-height: 1.3;

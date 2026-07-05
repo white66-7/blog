@@ -112,7 +112,7 @@ export const articles: Article[] = [
     {
     id: 9,
     title: '备战ACM选拔赛',
-    type: '大学',
+    type: '算法',
     date: '2026-07-03',
     readTime: '20 minutes',
     excerpt: '大一其实也只是想着去感受一下,所以就稍微复习一下之前做过的有关算法的题目,等到时候去看看到底是怎么个事',
