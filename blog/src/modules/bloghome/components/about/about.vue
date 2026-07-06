@@ -15,6 +15,10 @@
   </div>
 </div>
   <Textshow />
+  <div class="">
+  <Comments />
+  
+  </div>
   </div>
 </template>
 
@@ -23,6 +27,7 @@ import Navbar from '@/modules/bloghome/components/load.vue'
 import TechStackCard from '@/modules/bloghome/components/about/info.vue'
 import SkillGroup from '@/modules/bloghome/components/about/skills.vue'  
 import Textshow from '@/modules/bloghome/components/about/text.vue'
+import Comments from '@/modules/bloghome/components/about/comments.vue'
 
 const skillGroups = [
   {
