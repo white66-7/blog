@@ -402,7 +402,6 @@ main {
 }
 
 .toc__item--active {
-  color: #e05a5a;
   font-weight: 700;
 }
 
