@@ -37,6 +37,7 @@ const saysList = [
   { id: 5, content: '过完端午马上期末这个焦虑啊', date: '2026-06-22 17:50' },
   { id: 6, content: '搬到新宿舍好累啊，明天要考近代史纲要了，紧张了有点', date: '2026-06-25 22:05' },
   { id: 7, content: '终于考完了可以开始爽玩了', date: '2026-07-01 12:48' },
+  { id: 7, content: '参加了一趟ACM,圆了高中时候的一个梦', date: '2026-07-06 17:21' },
 ]
 
 const currentIndex = ref(0)
