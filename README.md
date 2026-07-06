@@ -1,6 +1,7 @@
 一个从零开始手搓的个人博客网站<br>
 <br>
 <img width="2557" height="1483" alt="屏幕截图 2026-07-04 223353" src="https://github.com/user-attachments/assets/376c33d9-2676-46df-9a50-2eb46b57f829" />
+<img width="1271" height="739" alt="image" src="https://github.com/user-attachments/assets/e413b6fb-6f5a-41f7-8d72-ed718c10665b" />
 <br><br>
 技术栈如下<br><br>
 <img width="2557" height="775" alt="屏幕截图 2026-07-04 223401" src="https://github.com/user-attachments/assets/b2984c78-89fa-4dfb-ae3c-14f8d8f65db1" />
