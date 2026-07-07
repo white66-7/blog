@@ -33,7 +33,7 @@ import { gsap } from 'gsap'
 // --- 数据变量 ---
 const cardRef = ref<HTMLElement | null>(null)
 const innerSvgRef = ref<SVGElement | null>(null)
-const address = ref('武汉')
+const address = ref('昆山千灯')
 
 const temp = ref('--')
 const weatherDesc = ref('加载中...')
@@ -89,7 +89,7 @@ const weatherNames: Record<string, string> = {
 // ── 获取武汉天气 ──
 async function fetchWeather() {
   try {
-    const url = 'https://wttr.in/30.49,114.38?format=j1';
+    const url = 'https://wttr.in/32.32,120.87?format=j1';
     //千灯 32.32 120.87
     const res = await fetch(url);
     if (!res.ok) throw new Error('请求失败');
