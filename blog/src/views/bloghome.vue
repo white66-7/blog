@@ -24,7 +24,6 @@
               </g>
             </svg>
           </div>
-
         </div>
       </swiper-slide>
 
@@ -35,46 +34,23 @@
             <div class="two-columns">
               <!-- 左侧：卡片列（information + player） -->
               <aside class="left-column">
-                <Information class="info-card" :class="[
-                  showAnimation &&
-                  'animate__animated animate__fadeInLeft'
-                ]" />
-
-                <player class="sticky-card" :class="[
-                  showAnimation &&
-                  'animate__animated animate__fadeInLeft animate__delay-1s'
-                ]" style="--animate-delay: .15s;" />
-
-                <Say :class="[
-                  showAnimation &&
-                  'animate__animated animate__fadeInLeft animate__delay-1s'
-                ]" style="--animate-delay: .3s;" />
+                <Information class="info-card" :class="[showAnimation && 'animate__animated animate__fadeInLeft']" />
+                <player class="sticky-card" :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']" style="--animate-delay: .15s;" />
+                <Say :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']" style="--animate-delay: .3s;" />
               </aside>
 
               <!-- 右侧：相册、天气、文章列表 -->
               <div class="right-column">
                 <div class="top-row">
                   <div class="album-container">
-                    <ImageSlider :images="albumImages" :class="[
-                      showAnimation &&
-                      'animate__animated animate__zoomIn'
-                    ]" />
+                    <ImageSlider :images="albumImages" :class="[showAnimation && 'animate__animated animate__zoomIn']" />
                   </div>
-                  <WeatherCard address="武汉" class="weather-card-comp" :class="[
-                    showAnimation &&
-                    'animate__animated animate__fadeInRight animate__delay-1s'
-                  ]" style="--animate-delay: .15s;" />
+                  <WeatherCard address="武汉" class="weather-card-comp" :class="[showAnimation && 'animate__animated animate__fadeInRight animate__delay-1s']" style="--animate-delay: .15s;" />
                 </div>
                 <div class="articles-section">
-                  <ArticleShow :articles="articleData" :class="[
-                    showAnimation &&
-                    'animate__animated animate__fadeInUp animate__delay-1s'
-                  ]" style="--animate-delay: .3s;" />
+                  <ArticleShow :articles="articleData" :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']" style="--animate-delay: .3s;" />
                 </div>
-                <SiteAge :class="[
-                  showAnimation &&
-                  'animate__animated animate__fadeInUp animate__delay-1s'
-                ]" style="--animate-delay: .75s;" />
+                <SiteAge :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']" style="--animate-delay: .75s;" />
               </div>
             </div>
           </div>
@@ -90,15 +66,13 @@ import player from '@/modules/bloghome/components/bloghome/music.vue'
 import Say from '@/modules/bloghome/components/bloghome/say.vue'
 import TextEffect from '@/modules/bloghome/components/text.vue'
 import Navbar from '@/modules/bloghome/components/load.vue'
-import { onActivated, nextTick, ref, onMounted } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
 import ImageSlider from '@/modules/bloghome/components/bloghome/image.vue'
 import ArticleShow from '@/modules/bloghome/components/bloghome/article_show.vue'
 import WeatherCard from '@/modules/bloghome/components/bloghome/weatherCard.vue'
-import { articles as articleData } from '@/date/articles'
-import { useLibraryStore } from '@/stores/libraryStore'
-import { useAudioStore } from '@/stores/audioStore'
 import SiteAge from '@/modules/bloghome/components/bloghome/dateshow.vue'
+import { articles as articleData } from '@/date/articles'
+import { onActivated, nextTick, ref } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Mousewheel, Pagination } from 'swiper/modules'
@@ -112,22 +86,19 @@ import img2 from '@/assets/play.webp'
 import img3 from '@/assets/classmates.webp'
 import img4 from '@/assets/myself.webp'
 
-
-
-
 const mainBody = ref<HTMLElement | null>(null)
-const libraryStore = useLibraryStore()
-const audioStore = useAudioStore()
 const modules = [Mousewheel, Pagination]
 const isFirstScreen = ref(true)
 const swiperInstance = ref<any>(null)
-let touchStartY = 0
-let isSliding = false
 const savedSlideIndex = ref(0)
 const savedScrollTop = ref(0)
 const showAnimation = ref(false)
 
+let touchStartY = 0
+let isSliding = false
+
 defineOptions({ name: 'BlogHome' })
+
 onBeforeRouteLeave((to, from, next) => {
   if (swiperInstance.value) {
     savedSlideIndex.value = swiperInstance.value.activeIndex
@@ -153,7 +124,6 @@ onActivated(async () => {
     container.scrollTop = savedScrollTop.value
   }
 })
-
 
 const onSwiperInit = (swiper: any) => {
   swiperInstance.value = swiper
@@ -186,7 +156,6 @@ const onSlideChange = (swiper: any) => {
   if (swiper.activeIndex === 1) {
     mainBody.value?.classList.add('visible')
     isFirstScreen.value = false
-
     showAnimation.value = false
     requestAnimationFrame(() => {
       showAnimation.value = true
@@ -198,25 +167,10 @@ const onSlideChange = (swiper: any) => {
   }
 }
 
-onMounted(async () => {
-  await libraryStore.loadDate()
-  audioStore.restoreFromLocalStorage()
-  if (audioStore.curIdx === -1 && libraryStore.filteredList.length > 0) {
-    const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
-    await audioStore.loadSongByIndex(targetIdx)
-  }
-  else if (audioStore.curIdx !== -1 && !audioStore.currentAudioUrl) {
-    await audioStore.loadSongByIndex(audioStore.curIdx)
-  }
-  else if (audioStore.curIdx !== -1 && audioStore.currentAudioUrl) {
-    audioStore.syncToElement()
-  }
-})
-
 const albumImages = [
-  { url: img1, description: `当时刚刚中考完特地换了张头像,之后就再也没换过 挑了好久因为当时觉得头像是一件很重要的事情 最后冥冥之中选了这张的特写` },
-  { url: img2, description: `第一次研学在外面住，一直爽玩到一两点 第二天全睡死过去了` },
-  { url: img3, description: `一排我高中的同学，几乎全做过同桌，都是好人啊 可惜似乎以后不会再有交集了` },
+  { url: img1, description: `当时刚刚中考完特地换了张头像...` },
+  { url: img2, description: `第一次研学在外面住...` },
+  { url: img3, description: `一排我高中的同学...` },
   { url: img4, description: `给朋友拍的照片` },
 ]
 </script>
@@ -237,7 +191,11 @@ const albumImages = [
 .app-flex::after {
   transition: opacity 0.4s ease;
 }
-
+/* 确保所有子元素在遮罩上面，但排除加载屏 */
+.app-flex > :not(.splash-screen) {
+  position: relative;
+  z-index: 2;
+}
 .app-flex--scrolled::before,
 .app-flex--scrolled::after {
   opacity: 0;
