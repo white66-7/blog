@@ -1,13 +1,13 @@
 <template>
-  <!-- 全局路由出口，保留 KeepAlive 以支持你的 onActivated 逻辑 -->
-<router-view v-slot="{ Component }">
-  <!-- 假设你的首页 name 叫 BlogHome，音乐播放器叫 MusicPlayer -->
-  <keep-alive include="BlogHome,MusicPlayer">
-    <component :is="Component" />
-  </keep-alive>
-</router-view>
+  <!-- 全局路由出口 -->
+  <router-view v-slot="{ Component }">
+    <!-- 缓存首页、音乐播放器、文章列表页 -->
+    <keep-alive include="BlogHome,MusicPlayer,MainArticle">
+      <component :is="Component" />
+    </keep-alive>
+  </router-view>
 
-  <!-- 全局开场动画，使用 Teleport 确保层级最高 -->
+  <!-- 全局开场动画 -->
   <Teleport to="body">
     <SplashScreen v-if="showGlobalSplash" @finish="onSplashFinish" />
   </Teleport>
@@ -25,16 +25,13 @@ const onSplashFinish = () => {
   showGlobalSplash.value = false
 }
 
-// 在 App 启动时全局拉取必要数据
 onMounted(async () => {
   const libraryStore = useLibraryStore()
   const audioStore = useAudioStore()
   
-  // 预先加载数据
   await libraryStore.loadDate()
   audioStore.restoreFromLocalStorage()
   
-  // 处理音乐初始逻辑
   if (audioStore.curIdx === -1 && libraryStore.filteredList.length > 0) {
     const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
     await audioStore.loadSongByIndex(targetIdx)
@@ -45,10 +42,12 @@ onMounted(async () => {
   else if (audioStore.curIdx !== -1 && audioStore.currentAudioUrl) {
     audioStore.syncToElement()
   }
-  
 })
 </script>
 
+<style>
+/* ... 你的全局样式保持不变 ... */
+</style>
 <style>
 :root {
   --neon-cyan: #00f3ff;

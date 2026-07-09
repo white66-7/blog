@@ -119,9 +119,6 @@ const categoryStats = computed(() => {
 </script>
 
 <style>
-/* ===== 引入外部样式 ===== */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&display=swap');
 
 /* ===== CSS 变量与基础重置 ===== */
 * {

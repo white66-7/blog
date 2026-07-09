@@ -4,9 +4,14 @@
     <!-- 手写文字 SVG 动画 -->
     <div class="wrapperON">
       <svg width="100%" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
-        <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="animated-text">
-          一路向北的站点
-        </text>
+<text 
+  x="50%" y="50%" 
+  text-anchor="middle" dy=".3em" 
+  class="animated-text"
+  :class="{ play: fontsLoaded }"
+>
+  一路向北的站点
+</text>
       </svg>
     </div>
 
@@ -24,10 +29,12 @@
 import { ref, onMounted } from 'vue'
 import bgImage from '@/assets/木叶创立.webp'
 
+const fontsLoaded = ref(false)
+
 const emit = defineEmits<{ (e: 'finish'): void }>()
 
 const isExiting = ref(false)
-const MIN_DISPLAY_TIME = 3500 
+const MIN_DISPLAY_TIME = 2500 
 
 onMounted(() => {
   const startTime = Date.now()
@@ -44,6 +51,7 @@ onMounted(() => {
 
   // 3. 等待全部资源就绪，然后保证最短显示时间
   Promise.all([loadImage, loadFonts]).then(() => {
+    fontsLoaded.value = true
     const elapsed = Date.now() - startTime
     const delay = Math.max(MIN_DISPLAY_TIME - elapsed, 0)
     setTimeout(() => {
@@ -106,7 +114,15 @@ const exitSplash = () => {
   fill: transparent;
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  animation: drawText 3.5s ease-in-out forwards;
+  /* 默认不播放动画，透明 */
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.animated-text.play {
+  animation: drawText 2.5s ease-in-out forwards;
+  opacity: 1;
 }
 
 @keyframes drawText {

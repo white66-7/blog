@@ -2,10 +2,15 @@
 // 记忆芯片
 let globalSavedPage = 1
 let globalSavedScroll = 0
+
+export default {
+  name: 'MainArticle'
+}
 </script>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+
+import { onActivated,ref, computed, watch, onMounted, nextTick ,onDeactivated} from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
@@ -13,6 +18,8 @@ import SearchRecentCard from '@/modules/bloghome/components/articles/search_arti
 import PageHeader from '@/modules/bloghome/components/articles/PageHeader.vue'
 
 import 'animate.css'
+
+
 
 const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
@@ -23,6 +30,15 @@ const searchKeyword = ref('')
 const currentPage = ref(globalSavedPage)
 const pageSize = ref(6)
 
+
+
+onActivated(() => {
+  console.log('✅ MainArticle 从缓存恢复，不会重走 onMounted')
+})
+
+onDeactivated(() => {
+  console.log('📦 MainArticle 被缓存，离开页面')
+})
 watch(currentPage, (newPage) => {
   globalSavedPage = newPage
 })
@@ -132,8 +148,8 @@ onMounted(async () => {
     <div class="scrollable-content" ref="scrollRef">
       <div class="main-body">
         
-     <PageHeader
-  v-if="currentPage === 1"
+<PageHeader
+  v-show="currentPage === 1"
   :total-count="filteredArticles.length"
   :articles="allArticles"
 />
