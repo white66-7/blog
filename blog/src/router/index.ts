@@ -1,4 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import BlogHome from '@/views/bloghome.vue'
+import PhotoShow from '@/modules/bloghome/components/photos/photo.vue'
+import Github from '@/modules/bloghome/components/projects/github.vue'
+import QqContact from '@/modules/bloghome/views/qq.vue'
+import WechatContact from '@/modules/bloghome/views/wechat.vue'
+import MusicPlayer from '@/views/music-player.vue'
+import SongsView from '@/modules/player/components/songsview.vue'
+import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
+import MainArticle from '@/modules/bloghome/components/articles/mainarticle.vue'
+import ArticleDetail from '@/modules/bloghome/components/articles/ArticleDetail.vue'
+import About from '@/modules/bloghome/components/about/about.vue'
 
 export const articleScrollCache = new Map<number, number>()
 
@@ -6,52 +17,51 @@ const routes = [
   {
     path: '/',
     name: 'blog',
-    // 懒加载：只有访问该路由时，才会下载对应的代码包
-    component: () => import('@/views/bloghome.vue')
+    component: BlogHome
   },
   {
     path:'/photos',
     name: 'photo-show',
-    component: () => import('@/modules/bloghome/components/photos/photo.vue')
+    component: PhotoShow
   },
   {
     path:'/projects',
     name: 'github',
-    component: () => import('@/modules/bloghome/components/projects/github.vue')
+    component: Github
   },
   {
     path: '/qq',
     name: 'qq-contact',
-    component: () => import('@/modules/bloghome/views/qq.vue')
+    component: QqContact
   },
   {
     path: '/wechat',
     name: 'wechat-contact',
-    component: () => import('@/modules/bloghome/views/wechat.vue')
+    component: WechatContact
   },
   {
     path: '/player',
-    component: () => import('@/views/music-player.vue'),
+    component: MusicPlayer,
     children: [
-      { path: 'songs', component: () => import('@/modules/player/components/songsview.vue') },
-      { path: 'playlists', component: () => import('@/modules/player/components/Playlistsview.vue') },
+      { path: 'songs', component: SongsView },
+      { path: 'playlists', component: PlaylistsView },
       { path: '', redirect: '/player/playlists' }
     ]
   },
   {
     path: '/articles',
     name: 'mainarticle',
-    component: () => import('@/modules/bloghome/components/articles/mainarticle.vue')
+    component: MainArticle
   },
   {
     path: '/article/:id',
     name: 'ArticleDetail',
-    component: () => import('@/modules/bloghome/components/articles/ArticleDetail.vue')
+    component: ArticleDetail
   },
   {
     path: '/about',
     name: 'about',
-    component: () => import('@/modules/bloghome/components/about/about.vue')
+    component: About
   },
 ]
 

@@ -7,7 +7,7 @@
     </keep-alive>
   </router-view>
 
-  <!-- 全局开场动画 -->
+  <!-- 全局开场动画1 -->
   <Teleport to="body">
     <SplashScreen v-if="showGlobalSplash" @finish="onSplashFinish" />
   </Teleport>
