@@ -123,7 +123,7 @@ import photo9 from '@/assets/album/动漫/video.webp'
 
 import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
 import view2 from '@/assets/album/风景/library.webp'
-// import view3 from '@/assets/album/风景/高考结束的小区门口.webp'
+import view3 from '@/assets/album/风景/tree.webp'
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
@@ -164,6 +164,7 @@ const albumsData = [
     photos: [
       { title: '高考结束的小区门口', url: view1 },
       { title: '期末周的图书馆', url: view2 },
+      { title: '不是说7月这几天要硬抗台风吗', url: view3 },
     ]
   }
 ]

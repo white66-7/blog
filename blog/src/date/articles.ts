@@ -19,6 +19,7 @@ import md6 from './md/6.md?raw'
 import md7 from './md/7.md?raw'
 import md8 from './md/8.md?raw'
 import md9 from './md/9.md?raw'
+import md10 from './md/10.md?raw'
 
 export const articles: Article[] = [
   {
@@ -120,15 +121,15 @@ export const articles: Article[] = [
     cover: '/messages/9/tomorrow.webp',
     content:md9,
   },
-  // {
-  //   id: 10,
-  //   title: '算法基本知识总结',
-  //   type: '算法',
-  //   date: '2026-07-03',
-  //   readTime: '20 minutes',
-  //   excerpt: '大一下去感受了一下ACM,考前总结了一下我对算法知识的理解',
-  //   tags: ['大学', 'ACM', '算法'],
-  //   cover: '/messages/9/tomorrow.webp',
-  //   content:md9,
-  // },
+  {
+    id: 10,
+    title: '浅谈建站的步骤与基本原理',
+    type: '复盘',
+    date: '2026-07-10',
+    readTime: '20 minutes',
+    excerpt: '因为我的网站更换网络后不稳定,所以研究了一下国内网络下如何正常的建站',
+    tags: ['vercel', '网站', '阿里云'],
+    cover: '/messages/10/man.webp',
+    content:md10,
+  },
 ]

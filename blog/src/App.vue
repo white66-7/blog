@@ -46,9 +46,6 @@ onMounted(async () => {
 </script>
 
 <style>
-/* ... 你的全局样式保持不变 ... */
-</style>
-<style>
 :root {
   --neon-cyan: #00f3ff;
   --neon-pink: #ff00ff;
