@@ -8,23 +8,43 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 如果你的项目依赖需要在服务端运行（如 PHP），则安装；
-      # 但对于纯静态项目，可跳过 npm install
-      # - name: Install dependencies (optional)
-      #   run: npm install   # 这步可删除，因为库是通过 CDN 或本地引用的
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'   # 使用 LTS 版本，与项目要求的 ^20.19.0 或 >=22.12.0 匹配
 
-      # 直接部署整个项目（排除不必要的目录）
+      - name: Install dependencies
+        run: |
+          cd blog
+          npm install
+
+      - name: Build project
+        run: |
+          cd blog
+          npm run build   # 生成 blog/dist/ 目录
+
       - name: Deploy to server
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
           REMOTE_USER: ${{ secrets.SERVER_USER }}
-          SOURCE: './'                     # 部署仓库根目录
-          TARGET: ${{ secrets.SERVER_PATH }}
-          ARGS: '-avzr --delete --exclude=.git --exclude=.github --exclude=node_modules --exclude=*.log'
+          SOURCE: 'blog/dist/'          # 只传输构建后的静态文件
+          TARGET: ${{ secrets.SERVER_PATH }}   # 即 /www/wwwroot/118.31.108.2/
+          ARGS: '-avzr --delete'
+
+      - name: Fix permissions
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo chown -R www:www ${{ secrets.SERVER_PATH }}
+            sudo find ${{ secrets.SERVER_PATH }} -type d -exec chmod 755 {} \;
+            sudo find ${{ secrets.SERVER_PATH }} -type f -exec chmod 644 {} \;
