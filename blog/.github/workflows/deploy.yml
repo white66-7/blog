@@ -3,37 +3,28 @@ name: Deploy to BT Server
 on:
   push:
     branches:
-      - main  # 当推送到 main 分支时触发
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. 拉取代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 安装 Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+      # 如果你的项目依赖需要在服务端运行（如 PHP），则安装；
+      # 但对于纯静态项目，可跳过 npm install
+      # - name: Install dependencies (optional)
+      #   run: npm install   # 这步可删除，因为库是通过 CDN 或本地引用的
 
-      # 3. 安装依赖并构建
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build
-
-      # 4. 部署到服务器（只同步 dist 内容到目标目录）
+      # 直接部署整个项目（排除不必要的目录）
       - name: Deploy to server
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ secrets.SERVER_IP }}
           REMOTE_USER: ${{ secrets.SERVER_USER }}
-          SOURCE: 'dist/'
+          SOURCE: './'                     # 部署仓库根目录
           TARGET: ${{ secrets.SERVER_PATH }}
-          ARGS: '-avzr --delete'
+          ARGS: '-avzr --delete --exclude=.git --exclude=.github --exclude=node_modules --exclude=*.log'
