@@ -128,7 +128,7 @@ export const articles: Article[] = [
     date: '2026-07-10',
     readTime: '20 minutes',
     excerpt: '因为我的网站更换网络后不稳定,所以研究了一下国内网络下如何正常的建站',
-    tags: ['vercel', '网站', '阿里云'],
+    tags: ['vercel', '网站', '服务器'],
     cover: '/messages/10/man.webp',
     content:md10,
   },
