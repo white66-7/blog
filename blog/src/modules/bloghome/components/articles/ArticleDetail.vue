@@ -27,21 +27,18 @@
         </div>
 
         <!-- 正文 -->
-        <div class="markdown-body" v-html="renderedContent"></div>
+        <div class="markdown-body" v-html="renderedContent" @click="handleCopy"></div>
       </div>
+      
       <aside class="toc" v-if="headings.length">
         <div class="toc__header">
-          <!-- 你提供的 SVG 图标 -->
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 80 80">
             <path d="M0 0h80v80H0z" fill="none" />
             <g fill="none" fill-rule="evenodd" clip-rule="evenodd">
-              <path fill="#219653"
-                d="M48.56 20.477A19.402 19.402 0 0 1 74.97 34.4h-9.6l-4.4-4.4l-4.402 4.401H44.775A66 66 0 0 0 42.279 26h-1.215a19.4 19.4 0 0 1 7.496-5.523" />
+              <path fill="#219653" d="M48.56 20.477A19.402 19.402 0 0 1 74.97 34.4h-9.6l-4.4-4.4l-4.402 4.401H44.775A66 66 0 0 0 42.279 26h-1.215a19.4 19.4 0 0 1 7.496-5.523" />
               <path fill="#f2994a" d="M35.622 34.66A65.54 65.54 0 0 1 29 68h14.618a66.18 66.18 0 0 0-.812-40.525z" />
-              <path fill="#219653"
-                d="M31.41 13.477A19.402 19.402 0 0 0 5 27.4h9.599L19 23l3.738 3.738a19.41 19.41 0 0 1 17.03-1.068a19.4 19.4 0 0 1 3.17 1.672l-.059.06h.09a19.4 19.4 0 0 0-11.56-13.925" />
-              <path fill="#219653"
-                d="M14.419 36.17a19.4 19.4 0 0 1 28.52-8.828L29.102 41.179h-6.224v6.224L16.09 54.19a19.4 19.4 0 0 1-1.672-18.02" />
+              <path fill="#219653" d="M31.41 13.477A19.402 19.402 0 0 0 5 27.4h9.599L19 23l3.738 3.738a19.41 19.41 0 0 1 17.03-1.068a19.4 19.4 0 0 1 3.17 1.672l-.059.06h.09a19.4 19.4 0 0 0-11.56-13.925" />
+              <path fill="#219653" d="M14.419 36.17a19.4 19.4 0 0 1 28.52-8.828L29.102 41.179h-6.224v6.224L16.09 54.19a19.4 19.4 0 0 1-1.672-18.02" />
             </g>
           </svg>
           <span class="toc__title">目录</span>
@@ -59,18 +56,93 @@
   </div>
 </template>
 
-
-<!-- 第二部分：替换你原来的 script setup -->
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import MarkdownIt from 'markdown-it'
+
+import hljs from 'highlight.js'
+import 'highlight.js/styles/vs2015.css'
+
 import { articles } from '@/date/articles'
 import type { Article } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import { articleScrollCache } from '@/router/index'
 
 const md = new MarkdownIt({ html: true })
+
+md.renderer.rules.fence = function (tokens, idx) {
+  const token = tokens[idx]
+  if (!token) return ''
+
+  const code = token.content || ''
+  const rawLang = (token.info || '').trim()
+  
+  // 用于 UI 标题显示，保留大写（比如 C++）
+  const displayLang = rawLang.toUpperCase() || 'CODE'
+
+  // 用于 Highlight.js 处理，全部转小写，并映射特殊语言名
+  let hljsLang = rawLang.toLowerCase()
+  if (hljsLang === 'c++') hljsLang = 'cpp'
+  else if (hljsLang === 'c#') hljsLang = 'csharp'
+  else if (hljsLang === 'vue') hljsLang = 'xml' // Vue 借用 xml 渲染最好
+
+  let highlightedCode = ''
+  if (hljsLang && hljs.getLanguage(hljsLang)) {
+    try {
+      highlightedCode = hljs.highlight(code, { language: hljsLang, ignoreIllegals: true }).value
+    } catch (__) {
+      highlightedCode = md.utils.escapeHtml(code)
+    }
+  } else {
+    // 找不到对应语言，直接转义文本
+    highlightedCode = md.utils.escapeHtml(code)
+  }
+
+  // 此时使用的 class="hljs ${hljsLang}" 绝对安全，不会包含加号
+  return `
+    <div class="code-editor">
+      <div class="header">
+        <span class="title">${displayLang}</span>
+        <button class="copy-btn" data-code="${encodeURIComponent(code)}" title="复制代码">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path fill="currentColor" d="M6.6 11.397c0-2.726 0-4.089.843-4.936c.844-.847 2.201-.847 4.917-.847h2.88c2.715 0 4.073 0 4.916.847c.844.847.844 2.21.844 4.936v4.82c0 2.726 0 4.089-.844 4.936c-.843.847-2.201.847-4.916.847h-2.88c-2.716 0-4.073 0-4.917-.847s-.843-2.21-.843-4.936z" />
+            <path fill="currentColor" d="M4.172 3.172C3 4.343 3 6.229 3 10v2c0 3.771 0 5.657 1.172 6.828c.617.618 1.433.91 2.62 1.048c-.192-.84-.192-1.996-.192-3.66v-4.819c0-2.726 0-4.089.843-4.936c.844-.847 2.201-.847 4.917-.847h2.88c1.652 0 2.8 0 3.638.19c-.138-1.193-.43-2.012-1.05-2.632C16.657 2 14.771 2 11 2S5.343 2 4.172 3.172" opacity=".5" />
+          </svg>
+          <span class="copy-tips">已复制</span>
+        </button>
+      </div>
+      <div class="editor-content">
+        <pre><code class="hljs ${hljsLang}">${highlightedCode}</code></pre>
+      </div>
+    </div>
+  `
+}
+// 🌟🌟🌟 结束 🌟🌟🌟
+
+
+// 🌟🌟🌟 剪贴板复制逻辑 🌟🌟🌟
+async function handleCopy(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  const btn = target.closest('.copy-btn') as HTMLElement
+  if (!btn) return
+
+  const codeStr = btn.getAttribute('data-code')
+  if (codeStr) {
+    try {
+      await navigator.clipboard.writeText(decodeURIComponent(codeStr))
+      btn.classList.add('copied')
+      setTimeout(() => {
+        btn.classList.remove('copied')
+      }, 2000)
+    } catch (err) {
+      console.error('复制失败', err)
+      alert('您的浏览器不支持自动复制，请手动复制。')
+    }
+  }
+}
+
 const route = useRoute()
 const article = ref<Article | null>(null)
 const renderedContent = computed(() => (article.value ? md.render(article.value.content) : ''))
@@ -123,6 +195,11 @@ onMounted(async () => {
   buildHeadings()
   handleScroll()
 
+  window.addEventListener('scroll', handleScroll)
+  cleanupScroll = () => {
+    window.removeEventListener('scroll', handleScroll)
+  }
+
   const savedHeight = articleScrollCache.get(id) || 0
   if (savedHeight > 0) {
     requestAnimationFrame(() => {
@@ -164,10 +241,15 @@ onUnmounted(() => {
   background: #e0e0e0;
   position: relative;
   z-index: 10;
-  font-family: 'Open Sans', 'Microsoft YaHei', 'PingFang SC', sans-serif;
   font-weight: 400;
   padding-top: 1px;
-  /* 避免外边距合并，确保顶部背景色完整 */
+}
+
+.article-page *,
+.content *,
+.markdown-body * {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 main {
@@ -228,7 +310,7 @@ main {
   justify-content: center;
 }
 
-/* ---------- 标签移到标题下方左侧 ---------- */
+/* ---------- 标签 ---------- */
 .tags {
   margin: 0 0 2em 0;
   display: flex;
@@ -245,7 +327,8 @@ main {
   padding: 4px 14px;
   border-radius: 45px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
+  font-family: 'YouSheBiaoTiHei';
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -266,7 +349,7 @@ main {
 }
 
 .markdown-body {
-  font-family: 'ZiTiGuanJiaKaiTi', sans-serif;
+  font-family: 'WenQuanWeiMiHei';
   line-height: 1.8;
   font-size: clamp(1rem, 2.5vw, 1.3rem);
   color: #000;
@@ -297,15 +380,6 @@ main {
   margin-bottom: 1.25rem;
 }
 
-.markdown-body :deep(pre) {
-  background: #282c34;
-  color: #abb2bf;
-  padding: 20px;
-  border-radius: 14px;
-  overflow-x: auto;
-  box-shadow: inset 4px 4px 8px #1a1e24, inset -4px -4px 8px #363c46;
-}
-
 .markdown-body :deep(blockquote) {
   border-left: 4px solid #bebebe;
   padding-left: 16px;
@@ -315,6 +389,122 @@ main {
   border-radius: 0 12px 12px 0;
   padding: 12px 16px;
 }
+
+
+/* ---------- 🌟 修复后的 Uiverse 代码块样式 🌟 ---------- */
+
+/* 1. 普通行内小段代码（加深背景，保持原字体） */
+.markdown-body :deep(p code),
+.markdown-body :deep(li code),
+.markdown-body :deep(h1 code),
+.markdown-body :deep(h2 code) {
+  font-family: 'WenQuanWeiMiHei', monospace;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* 2. 编辑器外层容器 */
+.markdown-body :deep(.code-editor) {
+  max-width: 100%;
+  background-color: #1e1e1e; /* 经典 VS Code 深色底 */
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 2px;
+  margin: 1.5em 0;
+}
+
+/* 3. 顶部 Header */
+.markdown-body :deep(.code-editor .header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 12px;
+}
+
+/* 4. 标题文字（JS, VUE, CSS等） */
+.markdown-body :deep(.code-editor .title) {
+  font-family: Lato, 'Open Sans', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 1.57px;
+  color: rgb(212, 212, 212);
+}
+
+/* 5. 复制按钮样式 */
+.markdown-body :deep(.code-editor .copy-btn) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #8b92a5;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 20px;
+}
+
+.markdown-body :deep(.code-editor .copy-btn:hover) {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.markdown-body :deep(.code-editor .copy-btn:active) {
+  transform: scale(0.9);
+}
+
+.markdown-body :deep(.code-editor .copy-btn.copied svg) {
+  color: #23c483;
+}
+
+.markdown-body :deep(.code-editor .copy-btn .copy-tips) {
+  position: absolute;
+  right: 36px;
+  font-size: 12px;
+  font-family: sans-serif;
+  color: #23c483;
+  font-weight: bold;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.markdown-body :deep(.code-editor .copy-btn.copied .copy-tips) {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 6. 编辑器内容区域 */
+.markdown-body :deep(.code-editor .editor-content) {
+  margin: 0 10px 10px;
+}
+
+/* 🌟 7. 彻底修复代码块字体和行距问题 🌟 */
+.markdown-body :deep(.code-editor .editor-content pre) {
+  background: transparent !important;
+  margin: 0;
+  padding: 10px 14px;
+  overflow-x: auto;
+  /* 强制使用专业等宽代码字体，拒绝中文字体干扰 */
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace !important;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #d4d4d4; /* 匹配 vs2015 的文字亮灰色 */
+}
+
+/* 确保内部的高亮标签强制继承好看的代码字体 */
+.markdown-body :deep(.code-editor .editor-content pre code.hljs) {
+  background: transparent !important;
+  padding: 0;
+  font-family: inherit !important;
+}
+
 
 /* ---------- 左侧目录导航 ---------- */
 .toc {
@@ -336,7 +526,6 @@ main {
   gap: 2px;
 }
 
-/* 目录头部 */
 .toc__header {
   display: flex;
   align-items: center;
@@ -357,7 +546,6 @@ main {
   margin: 0;
 }
 
-/* 目录项（新拟态凸起，无额外边框） */
 .toc__item {
   position: relative;
   display: block;
@@ -378,7 +566,6 @@ main {
   transition: all 0.3s ease-in-out;
 }
 
-/* 绿色填充滑入效果 */
 .toc__item::before {
   content: "";
   position: absolute;
@@ -410,41 +597,40 @@ main {
   margin-top: 200px;
   color: #999;
 }
+
 /* ---------- Markdown 超链接样式 (现代动画款) ---------- */
 .markdown-body :deep(a) {
   color: #23c483; 
-  text-decoration: none; /* 去掉默认丑陋的下划线 */
+  text-decoration: none;
   font-weight: 700; 
   position: relative;
   padding: 0 2px;
   transition: color 0.3s ease;
 }
 
-/* 自定义底部下划线 */
 .markdown-body :deep(a)::after {
   content: '';
   position: absolute;
   width: 100%;
-  height: 2px; /* 下划线粗细 */
-  bottom: -2px; /* 距离文字底部的距离 */
+  height: 2px;
+  bottom: -2px;
   left: 0;
   background-color: #23c483;
-  transform: scaleX(0); /* 默认隐藏 */
+  transform: scaleX(0);
   transform-origin: bottom right; 
   transition: transform 0.3s ease-out;
   border-radius: 2px;
 }
 
-/* 鼠标悬浮时的效果 */
 .markdown-body :deep(a):hover {
-  color: #1a9f68; /* 悬浮时文字颜色稍微加深 */
+  color: #1a9f68;
 }
 
-/* 悬浮时下划线从左向右展开 */
 .markdown-body :deep(a):hover::after {
   transform: scaleX(1);
   transform-origin: bottom left;
 }
+
 .back-btn {
   position: fixed;
   top: 80px;
@@ -457,7 +643,7 @@ main {
   border: none;
   padding: 10px 20px;
   border-radius: 45px;
-   font-family: 'YouSheBiaoTiHei';
+  font-family: 'YouSheBiaoTiHei';
   font-size: 16px;
   font-weight: normal;
   cursor: pointer;

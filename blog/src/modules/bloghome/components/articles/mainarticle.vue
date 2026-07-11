@@ -269,7 +269,7 @@ margin-top: -10px;}
 }
 
 .card__title { 
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family: 'YouSheBiaoTiHei';
   font-size: 22px;  
   font-weight: normal;      
   margin-bottom: 10px; 
@@ -284,7 +284,7 @@ margin-top: -10px;}
 }
 
 .card__excerpt { 
-  font-family: 'ZiTiGuanJiaKaiTi', '优设标题黑', sans-serif;
+  font-family: 'WenQuanWeiMiHei';
   font-size: 15px; /* 摘要稍微加大一点点 */
   font-weight: normal;  
   color: #555; 
@@ -301,7 +301,6 @@ margin-top: -10px;}
   display: flex; 
   flex-wrap: wrap; 
   gap: 8px; 
-  /* 【关键修改3】：删除了 margin-top: auto; 不再把标签强制推到底部 */
   align-self: flex-start; 
 }
 
@@ -312,7 +311,7 @@ margin-top: -10px;}
   border-radius: 45px;
   font-size: 14px;
   font-weight: 500;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family: 'YouSheBiaoTiHei';
   display: inline-flex;
   align-items: center;
   gap: 4px;

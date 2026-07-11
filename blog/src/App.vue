@@ -80,8 +80,8 @@ body {
   font-display: swap;
 }
 @font-face {
-  font-family: 'ZiTiGuanJiaKaiTi';
-  src: url('/text/ZiTiGuanJiaKaiTi-1.ttf') format('truetype');
+  font-family: 'WenQuanWeiMiHei';
+  src: url('/text/WenQuanWeiMiHei-1.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
