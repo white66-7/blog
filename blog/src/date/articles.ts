@@ -20,6 +20,8 @@ import md7 from './md/7.md?raw'
 import md8 from './md/8.md?raw'
 import md9 from './md/9.md?raw'
 import md10 from './md/10.md?raw'
+import md11 from './md/11.md?raw'
+import md12 from './md/12.md?raw'
 
 export const articles: Article[] = [
   {
@@ -132,4 +134,26 @@ export const articles: Article[] = [
     cover: '/messages/10/man.webp',
     content:md10,
   },
+  {
+    id: 11,
+    title: '浅谈文章主界面的逻辑与样式',
+    type: '前端',
+    date: '2026-07-12',
+    readTime: '20 minutes',
+    excerpt: '这个文章界面能讲的点还是很多的,而且大都很有意思',
+    tags: ['文章', '前端', '动态路由'],
+    cover: '/messages/11/pal.webp',
+    content:md11,
+  },
+  // {
+  //   id: 12,
+  //   title: '浅谈文章主界面的逻辑与样式',
+  //   type: '前端',
+  //   date: '2026-07-12',
+  //   readTime: '20 minutes',
+  //   excerpt: '这个文章界面能讲的点还是很多的,而且大都很有意思',
+  //   tags: ['文章', '前端', '动态路由'],
+  //   cover: '/messages/12/dao.webp',
+  //   content:md11,
+  // },
 ]
