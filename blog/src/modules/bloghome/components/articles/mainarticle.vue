@@ -2,6 +2,8 @@
 // 记忆芯片
 let globalSavedPage = 1
 let globalSavedScroll = 0
+// 记录这个页面的初始进入动画是否已经播放过
+let globalSearchAnimated = false 
 
 export default {
   name: 'MainArticle'
@@ -9,8 +11,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-
-import { onActivated,ref, computed, watch, onMounted, nextTick ,onDeactivated} from 'vue'
+import { onActivated, ref, computed, watch, onMounted, nextTick, onDeactivated } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
@@ -19,33 +20,38 @@ import PageHeader from '@/modules/bloghome/components/articles/PageHeader.vue'
 
 import 'animate.css'
 
-
-
 const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
 const articlesContainerRef = ref<HTMLElement | null>(null)
+// 锚点：获取文章列表容器的 DOM 引用，用于精准定位
+const contentTopRef = ref<HTMLElement | null>(null) 
 const searchKeyword = ref('')
 
 // ===== 分页逻辑 =====
 const currentPage = ref(globalSavedPage)
 const pageSize = ref(6)
 
+// 判断是否要播放搜索框进入动画
+const playSearchAnimation = ref(!globalSearchAnimated)
 
-
-onActivated(() => {
-  console.log('✅ MainArticle 从缓存恢复，不会重走 onMounted')
-})
-
-onDeactivated(() => {
-  console.log('📦 MainArticle 被缓存，离开页面')
-})
 watch(currentPage, (newPage) => {
   globalSavedPage = newPage
 })
 
+// 💡 核心优化：取消平滑滚动，瞬间跳到文章列表顶部
+const scrollToArticles = async () => {
+  await nextTick() // 等待 Vue 把新一页的数据渲染完
+  if (scrollRef.value && contentTopRef.value) {
+    const targetTop = contentTopRef.value.offsetTop - 80
+    // 使用 'auto' 替代 'smooth'，瞬间完成跳转，不产生滚动过程！
+    scrollRef.value.scrollTo({ top: targetTop, behavior: 'auto' }) 
+  }
+}
+
+// 搜索触发
 watch(searchKeyword, () => {
   currentPage.value = 1
-  scrollToTop()
+  scrollToArticles()
 })
 
 const sortedArticles = computed(() =>
@@ -74,35 +80,37 @@ const paginatedArticles = computed(() => {
 
 const totalPages = computed(() => Math.ceil(filteredArticles.value.length / pageSize.value) || 1)
 
-const scrollToTop = () => {
-  if (scrollRef.value) scrollRef.value.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
+// 分页触发
 const goToPage = (page: number) => {
   currentPage.value = page
-  scrollToTop()
+  scrollToArticles()
 }
 const prevPage = () => {
-  if (currentPage.value > 1) { currentPage.value--; scrollToTop() }
+  if (currentPage.value > 1) { 
+    currentPage.value-- 
+    scrollToArticles()
+  }
 }
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) { currentPage.value++; scrollToTop() }
+  if (currentPage.value < totalPages.value) { 
+    currentPage.value++ 
+    scrollToArticles()
+  }
 }
 const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
 
 // ========= 滚动触发的弹跳动画逻辑 =========
-const animatedIds = ref(new Set<number>())  // 已触发过动画的文章 ID
+const animatedIds = ref(new Set<number>())  
 let observer: IntersectionObserver | null = null
 
-// 当文章列表变化时，重置动画状态并重新观察卡片
-watch(filteredArticles, async () => {
-  animatedIds.value.clear()
+// 因为是瞬间跳转，不用担心半路触发的问题，逻辑恢复到最简单的状态
+const initCardsObserver = async () => {
+  animatedIds.value.clear() 
   await nextTick()
   if (!articlesContainerRef.value) return
 
-  // 断开旧的观察器
   observer?.disconnect()
 
   observer = new IntersectionObserver(
@@ -113,20 +121,29 @@ watch(filteredArticles, async () => {
           const id = Number(card.dataset.articleId)
           if (id && !animatedIds.value.has(id)) {
             animatedIds.value.add(id)
-            observer?.unobserve(card)  // 只触发一次，向上滚动不再重复
+            observer?.unobserve(card) 
           }
         }
       })
     },
-    {
-      threshold: 0.1, // 卡片 10% 进入视口即触发
-    }
+    { threshold: 0.1 }
   )
 
-  // 观察当前所有卡片
   const cards = articlesContainerRef.value.querySelectorAll('.card')
   cards.forEach(card => observer!.observe(card))
-}, { immediate: true })
+}
+
+// 每次列表数据变化（翻页/搜索），重新初始化监听器
+watch(paginatedArticles, initCardsObserver, { immediate: true })
+
+onActivated(async () => {
+  console.log('✅ MainArticle 从缓存恢复')
+  await initCardsObserver()
+})
+
+onDeactivated(() => {
+  console.log('📦 MainArticle 被缓存，离开页面')
+})
 
 onBeforeRouteLeave((to, from, next) => {
   if (scrollRef.value) globalSavedScroll = scrollRef.value.scrollTop
@@ -135,7 +152,13 @@ onBeforeRouteLeave((to, from, next) => {
 
 onMounted(async () => {
   await nextTick()
-  // 恢复滚动位置（如果之前有保存）
+  if (!globalSearchAnimated) {
+    globalSearchAnimated = true
+    setTimeout(() => {
+      playSearchAnimation.value = false 
+    }, 3000)
+  }
+
   if (scrollRef.value && globalSavedScroll > 0) {
     scrollRef.value.scrollTop = globalSavedScroll
   }
@@ -148,16 +171,19 @@ onMounted(async () => {
     <div class="scrollable-content" ref="scrollRef">
       <div class="main-body">
         
-<PageHeader
-  v-show="currentPage === 1"
-  :total-count="filteredArticles.length"
-  :articles="allArticles"
-/>
+        <PageHeader
+          v-show="currentPage === 1"
+          :total-count="filteredArticles.length"
+          :articles="allArticles"
+        />
 
-        <div class="content-full">
-          <div class="animate__animated animate__fadeInUp" style="animation-delay: 1.40s">
-  <SearchRecentCard v-model="searchKeyword" class="search-card" />
-</div>
+        <!-- 锚点：不管上面海报在不在，永远对准这里跳转 -->
+        <div class="content-full" ref="contentTopRef">
+          
+          <div :class="[playSearchAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 1.40s">
+            <SearchRecentCard v-model="searchKeyword" class="search-card" />
+          </div>
+          
           <div 
             ref="articlesContainerRef"
             class="articles-container"

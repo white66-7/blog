@@ -1,91 +1,106 @@
 <template>
   <div class="hero-fullscreen">
-  <div class="page-header">
-    <div class="header-left">
-      <h1 class="case-title">
-        <!-- 第一行：一路向北的 -->
-        <span class="char-wrapper animate__animated animate__fadeInUp" style="animation-delay: 0s">
-          <span class="r r1">一</span>
-        </span>
-        <span class="char-wrapper animate__animated animate__fadeInUp" style="animation-delay: 0.12s">
-          <span class="r r2">路</span>
-        </span>
-        <span class="char-wrapper animate__animated animate__fadeInUp" style="animation-delay: 0.24s">
-          <span class="r r3">向</span>
-        </span>
-        <span class="char-wrapper animate__animated animate__fadeInUp" style="animation-delay: 0.36s">
-          <span class="r r4">北</span>
-        </span>
-        <span class="char-wrapper animate__animated animate__fadeInUp" style="animation-delay: 0.48s">
-          <span class="r r5">的</span>
-        </span>
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="case-title">
+          <!-- 第一行：一路向北的 -->
+          <!-- 动态绑定：仅在第一次载入时加入 animate__ 相关的类名 -->
+          <span :class="['char-wrapper', playAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 0s">
+            <span class="r r1">一</span>
+          </span>
+          <span :class="['char-wrapper', playAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 0.12s">
+            <span class="r r2">路</span>
+          </span>
+          <span :class="['char-wrapper', playAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 0.24s">
+            <span class="r r3">向</span>
+          </span>
+          <span :class="['char-wrapper', playAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 0.36s">
+            <span class="r r4">北</span>
+          </span>
+          <span :class="['char-wrapper', playAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 0.48s">
+            <span class="r r5">的</span>
+          </span>
 
-        <!-- 换行断点 -->
-        <span class="line-break"></span>
+          <!-- 换行断点 -->
+          <span class="line-break"></span>
 
-        <!-- 第二行：杂谈 -->
-        <span class="char-wrapper animate__animated animate__fadeInUp" style="animation-delay: 0.60s">
-          <span class="r r6">杂</span>
-        </span>
-        <span class="char-wrapper animate__animated animate__fadeInUp" style="animation-delay: 0.72s">
-          <span class="r r7">谈</span>
-        </span>
+          <!-- 第二行：杂谈 -->
+          <span :class="['char-wrapper', playAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 0.60s">
+            <span class="r r6">杂</span>
+          </span>
+          <span :class="['char-wrapper', playAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 0.72s">
+            <span class="r r7">谈</span>
+          </span>
 
-        <!-- 副标题 -->
-        <span class="r-sub animate__animated animate__fadeIn" style="animation-delay: 0.9s"
-          >对于真正的学习,我仍抱有敬畏之心</span
+          <!-- 副标题 -->
+          <span :class="['r-sub', playAnimation ? 'animate__animated animate__fadeIn' : '']" style="animation-delay: 0.9s"
+            >对于真正的学习,我仍抱有敬畏之心</span
+          >
+        </h1>
+        <div :class="['hero-meta', playAnimation ? 'animate__animated animate__fadeIn' : '']" style="animation-delay:1.2s">
+          <div class="meta-divider"></div>
+          <div :class="['meta-row', playAnimation ? 'animate__animated animate__slideInDown' : '']" style="animation-delay: 1.3s">
+            <div class="meta-item">
+              <span class="meta-label">最近更新</span>
+              <span class="meta-value"> {{ latestDate }}</span>
+            </div>
+
+            <div class="meta-dot"></div>
+
+            <div class="meta-item">
+              <span class="meta-label">所有文章</span>
+              <span class="meta-value">{{ totalArticles }} 篇</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div :class="['mask', playAnimation ? 'animate__animated animate__fadeInLeft' : '']" style="animation-delay: 1.2s">
+          <div class="magenta_overlay"></div>
+          <img class="test" src="/covers/game.webp" alt="" />
+        </div>
+      </div>
+    </div>
+
+    <div :class="['tape-wrapper', playAnimation ? 'animate__animated animate__fadeIn' : '']" style="animation-delay: 1.4s">
+      <div class="category-bar ">
+        <div
+          class="category-item"
+          v-for="item in categoryStats"
+          :key="item.name"
         >
-      </h1>
-           <div class="hero-meta animate__animated animate__fadeIn" style="animation-delay:1.2s">
-
-    <div class="meta-divider"></div>
-
-    <div class="meta-row animate__animated animate__slideInDown" style="animation-delay: 1.3s">
-      <div class="meta-item">
-        <span class="meta-label">最近更新</span>
-        <span class="meta-value"> {{ latestDate }}</span>
-      </div>
-
-      <div class="meta-dot"></div>
-
-      <div class="meta-item">
-        <span class="meta-label">所有文章</span>
-        <span class="meta-value">{{ totalArticles }} 篇</span>
-      </div>
-    </div>
-    </div>
- 
-</div>
-    <div class="header-right">
-      <div class="mask animate__animated animate__fadeInLeft" style="animation-delay: 1.2s">
-        <div class="magenta_overlay"></div>
-        <img class="test" src="/covers/game.webp" alt="" />
+          <span class="name">{{ item.name }}</span>
+          <span class="count">{{ item.count }} 篇</span>
+        </div>
       </div>
     </div>
   </div>
-
-<div class="tape-wrapper animate__animated animate__fadeIn" style="animation-delay: 1.4s">
-
-<div class="category-bar ">
-  <div
-    class="category-item"
-    v-for="item in categoryStats"
-    :key="item.name"
-  >
-    <span class="name">{{ item.name }}</span>
-    <span class="count">{{ item.count }} 篇</span>
-  </div>
-</div>
-
-  </div>
-</div>
-
-
 </template>
 
+<script lang="ts">
+// 记忆芯片：PageHeader的独占全局变量，确保跨路由保留唯一状态
+let headerHasAnimated = false
+export default {
+  name: 'PageHeader'
+}
+</script>
+
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { articles } from '@/date/articles'
+
+const playAnimation = ref(!headerHasAnimated)
+
+onMounted(() => {
+  // 💡 核心修改：不但要拦截下次，还要在本次播放完毕后(3秒后)把 class 扒掉
+  if (!headerHasAnimated) {
+    headerHasAnimated = true // 标记已经播过
+    setTimeout(() => {
+      playAnimation.value = false // 3秒后移除 DOM 上的所有动画类名
+    }, 3000) 
+  }
+})
 
 const totalArticles = computed(() => articles.length)
 
@@ -118,23 +133,12 @@ const categoryStats = computed(() => {
 })
 </script>
 
-<style>
-
+<style scoped>
 /* ===== CSS 变量与基础重置 ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-:root {
-  --c-bg: oklch(96% 0.005 90);
-  --c-fg: oklch(15% 0 0);
-  --c-line: oklch(15% 0 0);
-  --c-accent: oklch(88% 0.22 125);
-  --ff-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
-  --bw: 1px;
-  --s-3: 0.75rem;
 }
 
 body {
@@ -165,9 +169,7 @@ body {
     display:flex;
     flex-direction:column;
     justify-content:center;
-
     padding:20px 0;
-
     margin-bottom:0px;
 }
 
@@ -181,7 +183,6 @@ body {
   align-items: baseline;
   gap: 0.5em 0.9em;
 }
-
 
 .line-break {
   width: 100%;
@@ -322,7 +323,6 @@ body {
 }
 
 .tape-wrapper{
-
     width:100vw;
     margin-left:calc(-50vw + 50%);
     margin-top:auto;
@@ -330,39 +330,20 @@ body {
     padding:24px 0;
     border-top:1px solid #c7b090;
     border-bottom:1px solid #c7b090;
-    box-shadow:
-        0 8px 18px rgba(0,0,0,.08),
-        inset 0 1px rgba(255,255,255,.4);
-        background:
-
-linear-gradient(
-180deg,
-#efdfc7,
-#e7d2b3
-);
-
-background-image:
-
-radial-gradient(
-rgba(90,70,40,.03) 1px,
-transparent 1px
-);
-
-background-size:10px 10px;
+    box-shadow: 0 8px 18px rgba(0,0,0,.08), inset 0 1px rgba(255,255,255,.4);
+    background: linear-gradient(180deg, #efdfc7, #e7d2b3);
+    background-image: radial-gradient(rgba(90,70,40,.03) 1px, transparent 1px);
+    background-size:10px 10px;
 }
 
 .category-item{
     flex:1;
-
     display:flex;
     flex-direction:column;
     justify-content:center;
     align-items:center;
-
     position:relative;
-
     user-select:none;
-
     cursor:default;
 }
 
@@ -384,121 +365,37 @@ background-size:10px 10px;
 .category-bar{
     max-width:1300px;
     margin:0 auto;
-
     display:flex;
     justify-content:space-between;
     align-items:center;
-
     gap:20px;
 }
-@keyframes fadeInUpRotate {
-  from {
-    opacity: 0;
-    transform: translateY(100px) rotate(-2deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(-2deg);
-  }
-}
-
-
-/* =========================================
-   移动端适配方案
-   ========================================= */
 
 /* 1. 平板 & 小屏笔记本 (max-width: 900px) */
 @media (max-width: 900px) {
-  .hero-fullscreen {
-    padding-top: 40px; /* 顶部留白，防止挤压导航栏 */
-  }
-
-  /* 左右布局改为上下堆叠 */
-  .page-header {
-    flex-direction: column;
-    gap: 40px;
-  }
-  
-  /* 文字区整体居中 */
-  .header-left {
-    align-items: center;
-    text-align: center;
-    padding: 0 20px;
-  }
-  
-  .case-title {
-    justify-content: center;
-  }
-
-  /* 🎯 修复 meta 区域溢出和对齐问题 */
-  .hero-meta {
-    width: 100%;       /* 解除原来的固定 480px 宽度 */
-    max-width: 400px;
-    margin-top: 30px;
-  }
-  
-  .meta-row {
-    justify-content: center; /* 让下方的数据也居中对齐 */
-  }
-
-  /* 图片区缩小 */
-  .header-right {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
-  }
-  .mask {
-    max-width: 320px;
-  }
+  .hero-fullscreen { padding-top: 40px; }
+  .page-header { flex-direction: column; gap: 40px; }
+  .header-left { align-items: center; text-align: center; padding: 0 20px; }
+  .case-title { justify-content: center; }
+  .hero-meta { width: 100%; max-width: 400px; margin-top: 30px; }
+  .meta-row { justify-content: center; }
+  .header-right { flex: 0 0 auto; width: 100%; max-width: 320px; margin: 0 auto; }
+  .mask { max-width: 320px; }
 }
 
 /* 2. 大屏手机 (max-width: 640px) */
 @media (max-width: 640px) {
-  /* 🎯 修复底部横幅条挤压问题：改为网格布局，一行放 3 个 */
-  .tape-wrapper { 
-    padding: 20px 0; 
-  }
-  
-  .category-bar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px 0px; /* 上下间距20px，左右0 */
-    padding: 0 10px;
-  }
-
-  /* 缩小分类字体 */
-  .name {
-    font-size: 20px;
-  }
-  .count {
-    font-size: 11px;
-  }
+  .tape-wrapper { padding: 20px 0; }
+  .category-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 0px; padding: 0 10px; }
+  .name { font-size: 20px; }
+  .count { font-size: 11px; }
 }
 
 /* 3. 小屏手机 (max-width: 480px) */
 @media (max-width: 480px) {
-  /* 标题文字进一步缩小 */
-  .case-title .r {
-    font-size: clamp(1.6rem, 8vw, 2.2rem);
-    margin-bottom: 6px;
-  }
-  
-  .r-sub {
-    font-size: 0.85rem;
-    margin-top: 8px;
-    line-height: 1.5;
-  }
-
-  /* 图片在小手机上再稍微缩小一点 */
-  .mask {
-    max-width: 260px;
-  }
-
-  /* 🎯 底部横幅条太窄时，改为一行放 2 个，变成 3 行 2 列 */
-  .category-bar {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px 0px;
-  }
+  .case-title .r { font-size: clamp(1.6rem, 8vw, 2.2rem); margin-bottom: 6px; }
+  .r-sub { font-size: 0.85rem; margin-top: 8px; line-height: 1.5; }
+  .mask { max-width: 260px; }
+  .category-bar { grid-template-columns: repeat(2, 1fr); gap: 16px 0px; }
 }
 </style>

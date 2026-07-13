@@ -40,11 +40,15 @@ const skillGroups = [
   },
   {
     title: '服务器',
-    items: ['Vercel']
+    items: ['Vercel', '阿里云']
   },
   {
     title: '工具',
     items: ['Git', 'VS Code']
+  },
+  {
+    title: '其他',
+    items: ['DaVinci Resolve','Photoshop', ]
   }
 ]
 </script>
@@ -92,7 +96,7 @@ const skillGroups = [
     width:360px;
     display:flex;
     flex-direction:column;
-    gap:20px;
+    gap:6px;
 }
 
 @media (max-width: 900px) {
