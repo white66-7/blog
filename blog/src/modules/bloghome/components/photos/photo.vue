@@ -123,12 +123,14 @@ import photo9 from '@/assets/album/动漫/video.webp'
 
 import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
 import view2 from '@/assets/album/风景/library.webp'
-import view3 from '@/assets/album/风景/tree.webp'
+
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
 import img3 from '@/assets/album/人物/dji.webp'
 
+import holiday1 from '@/assets/album/暑假/tree.webp'
+import holiday2 from '@/assets/album/暑假/晚餐.webp'
 // ========== 2. 手动构建相册数据 ==========
 const albumsData = [
   {
@@ -164,7 +166,15 @@ const albumsData = [
     photos: [
       { title: '高考结束的小区门口', url: view1 },
       { title: '期末周的图书馆', url: view2 },
-      { title: '不是说7月这几天要硬抗台风吗', url: view3 },
+    ]
+  },
+  {
+    id: 'holiday',
+    title: '大一的暑假',
+    cover: holiday1,
+    photos: [
+      { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
+      { title: '极其奢侈的一顿晚餐', url: holiday2 },
     ]
   }
 ]
