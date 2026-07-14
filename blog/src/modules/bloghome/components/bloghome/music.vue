@@ -39,7 +39,7 @@
             </svg>
           </button>
           <div class="play-pause-btns">
-            <button class="control-button play-pause-button" @click="audioStore.togglePlay">
+            <button  class="control-button play-pause-button" @click.stop="audioStore.togglePlay()">
               <svg v-if="paused" class="icon-play" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M11.596 8.697l-6.363 3.692c-.54.314-1.233-.065-1.233-.696V4.308c0-.63.693-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393" />
               </svg>
@@ -73,6 +73,8 @@ import { useLibraryStore } from '@/stores/libraryStore'
 const router = useRouter()
 const audioStore = useAudioStore()
 const libraryStore = useLibraryStore()
+
+const audioRef = ref<HTMLAudioElement | null>(null)
 
 
 const titleContainer = ref<HTMLElement>()
@@ -141,10 +143,32 @@ function toggleShuffle() {
 function goToPlayer() {
   router.push('/player')
 }
+onMounted(async () => {
+  const libraryStore = useLibraryStore()
+  const audioStore = useAudioStore()
+
+  // 1️⃣ 将音频元素注入 Store（必须最先执行）
+  if (audioRef.value) {
+    audioStore.setAudioElement(audioRef.value)
+  }
+
+  // 2️⃣ 加载数据和恢复状态（顺序无影响，但恢复后可能需要 sync）
+  await libraryStore.loadDate()
+  audioStore.restoreFromLocalStorage()
+
+  // 3️⃣ 自动加载歌曲（原有逻辑）
+  if (audioStore.curIdx === -1 && libraryStore.filteredList.length > 0) {
+    const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
+    await audioStore.loadSongByIndex(targetIdx)
+  } else if (audioStore.curIdx !== -1 && !audioStore.currentAudioUrl) {
+    await audioStore.loadSongByIndex(audioStore.curIdx)
+  } else if (audioStore.curIdx !== -1 && audioStore.currentAudioUrl) {
+    audioStore.syncToElement()   // 现在 audioElement 已存在，可以正常同步
+  }
+})
 </script>
 
 <style scoped>
-/* 保持原样式，只需确保 .volume-bars .bar 的动画不受播放状态影响（始终运行） */
 .main-music-card {
   width: 100%; 
   padding: 18px;

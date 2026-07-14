@@ -37,7 +37,6 @@ onMounted(() => {
 </script>
 
 <style>
-/* 引入官方基础样式适配 */
 @import "github-calendar/dist/github-calendar-responsive.css";
 .projects-page {
   position: relative;

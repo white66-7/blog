@@ -134,9 +134,12 @@ async function play(): Promise<void> {
     } else {
       return
     }
-  } else {
+  } 
+  // 只在音频源为空时才需要重新加载
+  else if (!currentAudioUrl.value) {
     await loadSongByIndex(curIdx.value)
   }
+  // 否则直接播放，不重新加载
 
   try {
     await el.play()

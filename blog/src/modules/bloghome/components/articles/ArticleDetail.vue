@@ -214,8 +214,6 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* 引入字体 */
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,700;1,300&display=swap');
 
 /* 正文内图片居中、圆角 */
 .markdown-body img {

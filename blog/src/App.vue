@@ -6,7 +6,7 @@
       <component :is="Component" />
     </keep-alive>
   </router-view>
-
+  <audio ref="audioRef" style="display: none;"></audio>
   <!-- 全局开场动画1 -->
   <Teleport to="body">
     <SplashScreen v-if="showGlobalSplash" @finish="onSplashFinish" />
