@@ -37,7 +37,7 @@ onMounted(() => {
 })
 </script>
 
-<style>
+<style >
 @import "github-calendar/dist/github-calendar-responsive.css";
 .projects-page {
   position: relative;
