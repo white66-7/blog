@@ -10,9 +10,9 @@
             <div class="loading-text">正在对接white66-7的仓库</div>
           </div>
         </div>
+            <Fruit />
       </section>
     </div>
-
   </div>
 </template>
 
@@ -20,6 +20,7 @@
 import { onMounted, nextTick } from 'vue'
 import GitHubCalendar from 'github-calendar'
 import Navbar from '@/modules/bloghome/components/load.vue'
+import Fruit from '@/modules/bloghome/components/projects/fruits.vue'
 
 const GITHUB_USERNAME = 'white66-7' 
 
