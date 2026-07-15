@@ -1,13 +1,12 @@
-import * as mm from 'music-metadata-browser';
+import * as mm from 'music-metadata';
 
-// 1. 解析本地 File 或 Blob
+// 1. 解析本地 File 或 Blob（这个保持不变）
 export async function extractCover(file: File | Blob): Promise<string | null> {
   try {
     const metadata = await mm.parseBlob(file);
-    const picture = metadata.common.picture?.[0]; // 获取第一张图片
+    const picture = metadata.common.picture?.[0];
     
     if (picture && picture.data && picture.format) {
-      // ✅ 修复类型报错：用 new Uint8Array() 包裹一下
       const blob = new Blob([new Uint8Array(picture.data)], { type: picture.format });
       return URL.createObjectURL(blob);
     }
@@ -18,16 +17,21 @@ export async function extractCover(file: File | Blob): Promise<string | null> {
   }
 }
 
-// 2. 解析网络 URL
+// 2. 解析网络 URL（修复版）
 export async function extractCoverFromUrl(audioUrl: string): Promise<string | null> {
   try {
-    const metadata = await mm.fetchFromUrl(audioUrl);
+    // 1. 先 fetch 音频文件
+    const response = await fetch(audioUrl);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const audioBlob = await response.blob();
+
+    // 2. 用 music-metadata 解析 blob
+    const metadata = await mm.parseBlob(audioBlob);
     const picture = metadata.common.picture?.[0];
     
     if (picture && picture.data && picture.format) {
-      // ✅ 修复类型报错：用 new Uint8Array() 包裹一下
-      const blob = new Blob([new Uint8Array(picture.data)], { type: picture.format });
-      return URL.createObjectURL(blob);
+      const coverBlob = new Blob([new Uint8Array(picture.data)], { type: picture.format });
+      return URL.createObjectURL(coverBlob);
     }
     return null;
   } catch (e: any) {
