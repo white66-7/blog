@@ -124,28 +124,17 @@ async function loadSongByIndex(index: number): Promise<void> {
 
 async function play(): Promise<void> {
   const el = audioElement.value
+  console.log('1. 准备播放，元素存在吗？', !!el)
   if (!el) return
-
-  // 如果 curIdx 无效，自动选择列表第一首
-  if (curIdx.value === -1) {
-    if (libraryStore.filteredList.length > 0) {
-      const targetIdx = libraryStore.filteredList[0]?._globalIdx || 0
-      await loadSongByIndex(targetIdx)
-    } else {
-      return
-    }
-  } 
-  // 只在音频源为空时才需要重新加载
-  else if (!currentAudioUrl.value) {
-    await loadSongByIndex(curIdx.value)
-  }
-  // 否则直接播放，不重新加载
-
+  
+  console.log('2. 当前播放的 URL 是:', currentAudioUrl.value)
+  
   try {
     await el.play()
+    console.log('3. 播放成功！')
     paused.value = false
   } catch (e) {
-    console.warn('播放失败', e)
+    console.error('3. 播放抛出异常！', e)
   }
 }
 
