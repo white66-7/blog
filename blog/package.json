@@ -19,6 +19,7 @@
     "music-metadata": "^11.14.0",
     "pinia": "^3.0.4",
     "router": "^2.2.0",
+    "snapsvg-cjs": "^0.0.6",
     "swiper": "^12.2.0",
     "vue": "^3.5.32",
     "vue-router": "^5.1.0"
