@@ -3,7 +3,7 @@
 let globalSavedPage = 1
 let globalSavedScroll = 0
 // 记录这个页面的初始进入动画是否已经播放过
-let globalSearchAnimated = false 
+let globalSearchAnimated = false
 
 export default {
   name: 'MainArticle'
@@ -11,6 +11,7 @@ export default {
 </script>
 
 <script setup lang="ts">
+import axios from 'axios'
 import { onActivated, ref, computed, watch, onMounted, nextTick, onDeactivated } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles'
@@ -24,7 +25,7 @@ const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
 const articlesContainerRef = ref<HTMLElement | null>(null)
 // 锚点：获取文章列表容器的 DOM 引用，用于精准定位
-const contentTopRef = ref<HTMLElement | null>(null) 
+const contentTopRef = ref<HTMLElement | null>(null)
 const searchKeyword = ref('')
 
 // ===== 分页逻辑 =====
@@ -44,7 +45,7 @@ const scrollToArticles = async () => {
   if (scrollRef.value && contentTopRef.value) {
     const targetTop = contentTopRef.value.offsetTop - 80
     // 使用 'auto' 替代 'smooth'，瞬间完成跳转，不产生滚动过程！
-    scrollRef.value.scrollTo({ top: targetTop, behavior: 'auto' }) 
+    scrollRef.value.scrollTo({ top: targetTop, behavior: 'auto' })
   }
 }
 
@@ -86,14 +87,14 @@ const goToPage = (page: number) => {
   scrollToArticles()
 }
 const prevPage = () => {
-  if (currentPage.value > 1) { 
-    currentPage.value-- 
+  if (currentPage.value > 1) {
+    currentPage.value--
     scrollToArticles()
   }
 }
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) { 
-    currentPage.value++ 
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
     scrollToArticles()
   }
 }
@@ -102,12 +103,12 @@ const goToArticle = (id: number) => {
 }
 
 // ========= 滚动触发的弹跳动画逻辑 =========
-const animatedIds = ref(new Set<number>())  
+const animatedIds = ref(new Set<number>())
 let observer: IntersectionObserver | null = null
 
 // 因为是瞬间跳转，不用担心半路触发的问题，逻辑恢复到最简单的状态
 const initCardsObserver = async () => {
-  animatedIds.value.clear() 
+  animatedIds.value.clear()
   await nextTick()
   if (!articlesContainerRef.value) return
 
@@ -121,7 +122,7 @@ const initCardsObserver = async () => {
           const id = Number(card.dataset.articleId)
           if (id && !animatedIds.value.has(id)) {
             animatedIds.value.add(id)
-            observer?.unobserve(card) 
+            observer?.unobserve(card)
           }
         }
       })
@@ -139,8 +140,9 @@ watch(paginatedArticles, initCardsObserver, { immediate: true })
 onActivated(async () => {
   console.log('✅ MainArticle 从缓存恢复')
   await initCardsObserver()
+  // 🆕 重新获取当前页文章的浏览量（从详情页返回时更新）
+  await fetchViewsForArticles(paginatedArticles.value)
 })
-
 onDeactivated(() => {
   console.log('📦 MainArticle 被缓存，离开页面')
 })
@@ -155,7 +157,7 @@ onMounted(async () => {
   if (!globalSearchAnimated) {
     globalSearchAnimated = true
     setTimeout(() => {
-      playSearchAnimation.value = false 
+      playSearchAnimation.value = false
     }, 3000)
   }
 
@@ -163,6 +165,30 @@ onMounted(async () => {
     scrollRef.value.scrollTop = globalSavedScroll
   }
 })
+
+//后端联动
+const articleViews = ref<Record<number, number>>({})
+
+const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) => {
+  if (!articles.length) return
+  // 并发请求所有文章的浏览量
+  const promises = articles.map(article =>
+    axios.get(`http://localhost:8080/api/views/${article.id}`)
+      .then(res => ({ id: article.id, views: res.data.views }))
+      .catch(() => ({ id: article.id, views: 0 })) // 请求失败时默认为0
+  )
+  const results = await Promise.all(promises)
+  // 更新 articleViews
+  results.forEach(({ id, views }) => {
+    articleViews.value[id] = views
+  })
+}
+
+// 监听分页数据变化，自动获取新一页的浏览量
+watch(paginatedArticles, (newArticles) => {
+  fetchViewsForArticles(newArticles)
+}, { immediate: true })  // immediate 让组件挂载时立即执行一次
+
 </script>
 
 <template>
@@ -170,35 +196,23 @@ onMounted(async () => {
     <Navbar :transparent="false" />
     <div class="scrollable-content" ref="scrollRef">
       <div class="main-body">
-        
-        <PageHeader
-          v-show="currentPage === 1"
-          :total-count="filteredArticles.length"
-          :articles="allArticles"
-        />
+
+        <PageHeader v-show="currentPage === 1" :total-count="filteredArticles.length" :articles="allArticles" />
 
         <!-- 锚点：不管上面海报在不在，永远对准这里跳转 -->
         <div class="content-full" ref="contentTopRef">
-          
-          <div :class="[playSearchAnimation ? 'animate__animated animate__fadeInUp' : '']" style="animation-delay: 1.40s">
+
+          <div :class="[playSearchAnimation ? 'animate__animated animate__fadeInUp' : '']"
+            style="animation-delay: 1.40s">
             <SearchRecentCard v-model="searchKeyword" class="search-card" />
           </div>
-          
-          <div 
-            ref="articlesContainerRef"
-            class="articles-container"
-          >
-            <div
-              v-for="(article, index) in paginatedArticles"
-              :key="article.id"
-              :class="[
-                'card',
-                index % 2 === 0 ? 'horizontal' : 'reverse-horizontal',
-                { 'animate__animated animate__bounceIn fast-enter': animatedIds.has(article.id) }
-              ]"
-              :data-article-id="article.id"
-              @click="goToArticle(article.id)"
-            >
+
+          <div ref="articlesContainerRef" class="articles-container">
+            <div v-for="(article, index) in paginatedArticles" :key="article.id" :class="[
+              'card',
+              index % 2 === 0 ? 'horizontal' : 'reverse-horizontal',
+              { 'animate__animated animate__bounceIn fast-enter': animatedIds.has(article.id) }
+            ]" :data-article-id="article.id" @click="goToArticle(article.id)">
               <img v-if="article.cover" :src="article.cover" class="card__img" />
               <div v-else class="card__img placeholder-img">暂无封面</div>
               <div class="card__content">
@@ -210,6 +224,9 @@ onMounted(async () => {
                     <i class="fa fa-tag"></i> {{ tag || '未知' }}
                   </span>
                 </div>
+                <div class="card__views">
+                  <i class="fa fa-eye"></i> {{ articleViews[article.id] ?? 0 }} 次浏览
+                </div>
               </div>
             </div>
           </div>
@@ -217,12 +234,8 @@ onMounted(async () => {
           <div class="pagination" v-if="totalPages > 1">
             <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">上一页</button>
             <div class="page-numbers">
-              <button
-                v-for="page in totalPages"
-                :key="page"
-                :class="['page-num-btn', { active: currentPage === page }]"
-                @click="goToPage(page)"
-              >
+              <button v-for="page in totalPages" :key="page" :class="['page-num-btn', { active: currentPage === page }]"
+                @click="goToPage(page)">
                 {{ page }}
               </button>
             </div>
@@ -237,100 +250,155 @@ onMounted(async () => {
 <style scoped>
 /* ========= 全局布局 ========= */
 .app-page-wrapper {
-  position: relative; width: 100%; height: 100vh; height: 100dvh;
-  overflow: hidden; background-color:#FAF7F2;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #FAF7F2;
   background-image:
-radial-gradient(
-rgba(120,90,60,.03) 1px,
-transparent 1px
-);
+    radial-gradient(rgba(120, 90, 60, .03) 1px,
+      transparent 1px);
 }
 
 .scrollable-content {
-  position: relative; z-index: 2; height: 100vh; height: 100dvh;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
-  background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px) saturate(180%);
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
 }
 
 .main-body {
-  padding: 80px 5% 60px 5%; box-sizing: border-box;
-  max-width: 1400px; margin: 0 auto;
+  padding: 80px 5% 60px 5%;
+  box-sizing: border-box;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 /* ========= 全宽内容区 ========= */
-.content-full { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-.search-card { width: 100%; height: auto; 
-margin-top: -10px;}
+.content-full {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-card {
+  width: 100%;
+  height: auto;
+  margin-top: -10px;
+}
 
 /* ========= 文章列表容器及卡片样式 ========= */
-.articles-container { 
-  display: flex; flex-direction: column; gap: 20px; 
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif; font-weight: 700; 
+.articles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
+  font-weight: 700;
 }
 
 .fast-enter {
   animation-duration: 0.6s !important;
 }
 
-.articles-container .card { 
-  height: 250px; display: flex; border: 1px solid rgba(255, 255, 255, 0.1); 
-  background: rgba(255, 255, 255, 0.9); border-radius: 12px; overflow: hidden; 
-  transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08); 
-}
-.articles-container .card:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
-.card.horizontal { flex-direction: row; }
-.card.reverse-horizontal { flex-direction: row-reverse; }
-.card.horizontal .card__img, .card.reverse-horizontal .card__img { width: 40%; height: 100%; object-fit: cover; }
-.placeholder-img { width: 40%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; }
-/* ========= 重新调整卡片内容区 ========= */
-.card.horizontal .card__content, 
-.card.reverse-horizontal .card__content { 
-  width: 60%; 
-  display: flex; 
-  flex-direction: column; 
-  padding: 20px 30px; 
-  box-sizing: border-box; 
-  justify-content: center; 
+.articles-container .card {
+  height: 250px;
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-.card__title { 
+.articles-container .card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.card.horizontal {
+  flex-direction: row;
+}
+
+.card.reverse-horizontal {
+  flex-direction: row-reverse;
+}
+
+.card.horizontal .card__img,
+.card.reverse-horizontal .card__img {
+  width: 40%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder-img {
+  width: 40%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+/* ========= 重新调整卡片内容区 ========= */
+.card.horizontal .card__content,
+.card.reverse-horizontal .card__content {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 30px;
+  box-sizing: border-box;
+  justify-content: center;
+}
+
+.card__title {
   font-family: 'YouSheBiaoTiHei';
-  font-size: 22px;  
-  font-weight: normal;      
-  margin-bottom: 10px; 
+  font-size: 22px;
+  font-weight: normal;
+  margin-bottom: 10px;
   color: #1a1a1a;
   line-height: 1.3;
 }
 
-.card__date { 
-  font-size: 12px; 
-  color: #888; 
-  margin-bottom: 12px; 
+.card__date {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 12px;
 }
 
-.card__excerpt { 
+.card__excerpt {
   font-family: 'WenQuanWeiMiHei';
-  font-size: 15px; /* 摘要稍微加大一点点 */
-  font-weight: normal;  
-  color: #555; 
-  line-height: 1.6; /* 增加行高，阅读更舒适 */
-  margin-bottom: 16px; /* 【关键修改2】：只保留固定间距，不再依赖撑开 */
-  display: -webkit-box; 
-  -webkit-line-clamp: 2; 
-  line-clamp: 2; 
-  -webkit-box-orient: vertical; 
-  overflow: hidden; 
+  font-size: 15px;
+  /* 摘要稍微加大一点点 */
+  font-weight: normal;
+  color: #555;
+  line-height: 1.6;
+  /* 增加行高，阅读更舒适 */
+  margin-bottom: 16px;
+  /* 【关键修改2】：只保留固定间距，不再依赖撑开 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.card__tags { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 8px; 
-  align-self: flex-start; 
+.card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-self: flex-start;
 }
 
-.tag { 
+.tag {
   background: #fff;
   color: #000;
   padding: 6px 15px;
@@ -345,32 +413,109 @@ margin-top: -10px;}
   transition: all 0.3s ease 0s;
   cursor: default;
 }
+
 .tag:hover {
   background-color: #23c483;
   color: #fff;
   box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
-  transform: scale(1.15);  
+  transform: scale(1.15);
 }
-.pagination { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 10px 0; }
-.page-btn { padding: 6px 14px; border: none; background-color: #fff; color: #333; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
-.page-btn:hover:not(:disabled) { background-color: #23c483; color: #fff; }
-.page-btn:disabled { background-color: rgba(255, 255, 255, 0.3); color: #999; cursor: not-allowed; }
-.page-numbers { display: flex; gap: 6px; }
-.page-num-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: #fff; cursor: pointer; font-weight: bold; }
-.page-num-btn.active { background-color: #23c483; color: white; }
+
+
+.card__views {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #999;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.page-btn {
+  padding: 6px 14px;
+  border: none;
+  background-color: #fff;
+  color: #333;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: #23c483;
+  color: #fff;
+}
+
+.page-btn:disabled {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #999;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 6px;
+}
+
+.page-num-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.page-num-btn.active {
+  background-color: #23c483;
+  color: white;
+}
 
 .scrollable-content {
-  overflow-x: hidden; 
-  overflow-y: auto;  
+  overflow-x: hidden;
+  overflow-y: auto;
 
 }
 
 @media (max-width: 768px) {
-  .main-body { padding: 80px 5% 40px 5%; }
-  .articles-container .card { height: auto; }
-  .card.horizontal, .card.reverse-horizontal { flex-direction: column !important; }
-  .card.horizontal .card__img, .card.reverse-horizontal .card__img { width: 100%; height: 160px; }
-  .card.horizontal .card__content, .card.reverse-horizontal .card__content { width: 100%; padding: 16px; }
-  .page-numbers { display: none; }
+  .main-body {
+    padding: 80px 5% 40px 5%;
+  }
+
+  .articles-container .card {
+    height: auto;
+  }
+
+  .card.horizontal,
+  .card.reverse-horizontal {
+    flex-direction: column !important;
+  }
+
+  .card.horizontal .card__img,
+  .card.reverse-horizontal .card__img {
+    width: 100%;
+    height: 160px;
+  }
+
+  .card.horizontal .card__content,
+  .card.reverse-horizontal .card__content {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .page-numbers {
+    display: none;
+  }
 }
 </style>
