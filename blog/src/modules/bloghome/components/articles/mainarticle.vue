@@ -217,16 +217,24 @@ watch(paginatedArticles, (newArticles) => {
               <div v-else class="card__img placeholder-img">暂无封面</div>
               <div class="card__content">
                 <div class="card__title">{{ article.title }}</div>
-                <div class="card__date">{{ article.date }}</div>
+<div class="card__info-bar">
+  <div class="card__date">{{ article.date }}</div>
+  <div class="card__views">
+    <!-- 替换为您的 SVG -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24" style="flex-shrink: 0;">
+      <path d="M0 0h24v24H0z" fill="none" />
+      <path fill="currentColor" d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5" />
+    </svg>
+    {{ articleViews[article.id] ?? 0 }}
+  </div>
+</div>
                 <div class="card__excerpt">{{ article.excerpt }}</div>
                 <div class="card__tags">
                   <span v-for="tag in article.tags" :key="tag" class="tag">
                     <i class="fa fa-tag"></i> {{ tag || '未知' }}
                   </span>
                 </div>
-                <div class="card__views">
-                  <i class="fa fa-eye"></i> {{ articleViews[article.id] ?? 0 }} 次浏览
-                </div>
+
               </div>
             </div>
           </div>
@@ -370,8 +378,10 @@ watch(paginatedArticles, (newArticles) => {
 
 .card__date {
   font-size: 12px;
-  color: #888;
-  margin-bottom: 12px;
+  color: #9CA3AF;
+  margin-bottom: 0;    /* 必须设为 0，因为父容器 info-bar 已经有下间距了 */
+  display: flex;
+  align-items: center;
 }
 
 .card__excerpt {
@@ -379,7 +389,7 @@ watch(paginatedArticles, (newArticles) => {
   font-size: 15px;
   /* 摘要稍微加大一点点 */
   font-weight: normal;
-  color: #555;
+  color:#4B5563;
   line-height: 1.6;
   /* 增加行高，阅读更舒适 */
   margin-bottom: 16px;
@@ -422,10 +432,19 @@ watch(paginatedArticles, (newArticles) => {
 }
 
 
+.card__info-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;      /* 日期和浏览量之间的间距 */
+  margin-bottom: 12px; /* 原本 date 的下边距移到这里 */
+}
+
+/* 2. 修改原本的 card__views 样式 */
 .card__views {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #999;
+  margin-top: 0;   /* 清除原本的 margin-top: 8px */
+  font-family: 'YouSheBiaoTiHei';
+  font-size: 12px; /* 调小一点，跟日期匹配 */
+  color:#9CA3AF;
   font-weight: normal;
   display: flex;
   align-items: center;
