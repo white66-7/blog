@@ -48,7 +48,7 @@ export const articles: Article[] = [
   },
   {
     id: 3,
-    title: '浅谈如何实现实时天气动画组件设计',
+    title: '实时天气动画组件设计',
     type: '前端',
     date: '2026-06-17',
     readTime: '5 minute',
@@ -59,7 +59,7 @@ export const articles: Article[] = [
   },
   {
     id: 4,
-    title: '浅谈如何实现相册组件设计',
+    title: '相册组件设计',
     type: '前端',
     date: '2026-06-19',
     readTime: '5 minutes',
@@ -70,7 +70,7 @@ export const articles: Article[] = [
   },
     {
     id: 5,
-    title: '如何做到双网页视图,页面深色遮罩与滚动优化',
+    title: '双网页视图,页面深色遮罩与滚动优化',
     type: '前端',
     date: '2026-06-27',
     readTime: '10 minutes',
@@ -81,7 +81,7 @@ export const articles: Article[] = [
   },
       {
     id: 6,
-    title: '举几个我最喜欢用到悬停,入场动画效果如何实现',
+    title: '几个悬停,入场动画效果如何实现',
     type: '前端',
     date: '2026-06-30',
     readTime: '3 minutes',
@@ -92,7 +92,7 @@ export const articles: Article[] = [
   },
   {
     id: 7,
-    title: 're0第四季十一集看感动了说是',
+    title: 're0第四季十一集',
     type: '动漫',
     date: '2026-06-20',
     readTime: '2 minutes',
@@ -103,7 +103,7 @@ export const articles: Article[] = [
   },
   {
     id: 8,
-    title: '期末复习所有笔记',
+    title: '期末复习笔记',
     type: '大学',
     date: '2026-07-01',
     readTime: '2 minutes',
@@ -114,7 +114,7 @@ export const articles: Article[] = [
   },
   {
     id: 9,
-    title: '算法基本知识总结',
+    title: '算法的基本知识',
     type: '算法',
     date: '2026-07-03',
     readTime: '20 minutes',
@@ -125,7 +125,7 @@ export const articles: Article[] = [
   },
   {
     id: 10,
-    title: '浅谈建站的步骤与基本原理',
+    title: '建站的步骤与基本原理',
     type: '复盘',
     date: '2026-07-10',
     readTime: '20 minutes',
@@ -136,7 +136,7 @@ export const articles: Article[] = [
   },
   {
     id: 11,
-    title: '浅谈文章主界面的逻辑与样式',
+    title: '文章主界面的逻辑与样式',
     type: '前端',
     date: '2026-07-12',
     readTime: '20 minutes',

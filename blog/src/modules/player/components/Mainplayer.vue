@@ -98,7 +98,7 @@ function onSetVolume(e: MouseEvent) {
 }
 </script>
 
-<style>
+<style scoped>
 .main {
   display: flex;
   flex: 1;
