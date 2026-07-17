@@ -36,7 +36,7 @@ const skillGroups = [
   },
   {
     title: '后端',
-    items: ['Node.js']
+    items: ['Node.js','SpringBoot(学习中)']
   },
   {
     title: '服务器',

@@ -205,7 +205,7 @@ body {
   font-weight: normal;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
   white-space: nowrap;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .case-title .r:hover {
