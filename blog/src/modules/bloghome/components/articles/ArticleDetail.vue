@@ -193,8 +193,8 @@ onMounted(async () => {
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
 
-    try {
-    await axios.post(`http://localhost:8080/api/views/${id}/increment`)
+  try {
+  await axios.post(`http://localhost:8080/api/views/${id}/increment`)
     console.log(`✅ 文章 ${id} 浏览量 +1`)
   } catch (err) {
     console.error('❌ 增加浏览量失败', err)
