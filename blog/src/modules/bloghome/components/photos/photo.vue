@@ -132,6 +132,7 @@ import img3 from '@/assets/album/人物/dji.webp'
 
 import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
+import holiday3 from '@/assets/album/暑假/deepseek.webp'
 // ========== 2. 手动构建相册数据 ==========
 const albumsData = [
   {
@@ -177,6 +178,7 @@ const albumsData = [
     photos: [
       { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
       { title: '极其奢侈的一顿晚餐', url: holiday2 },
+      { title: 'deepseek招人的话那我真想去一手,看看实习有没有机会能够到吧', url: holiday3 },
     ]
   }
 ]
