@@ -154,14 +154,12 @@ const handleTouchMove = (e: TouchEvent) => {
 
 const onSlideChange = (swiper: any) => {
   if (swiper.activeIndex === 1) {
-    mainBody.value?.classList.add('visible')
     isFirstScreen.value = false
     showAnimation.value = false
     requestAnimationFrame(() => {
       showAnimation.value = true
     })
   } else {
-    mainBody.value?.classList.remove('visible')
     isFirstScreen.value = true
     showAnimation.value = false
   }

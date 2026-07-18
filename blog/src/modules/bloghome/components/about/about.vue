@@ -39,12 +39,12 @@ const skillGroups = [
     items: ['Node.js','SpringBoot(学习中)']
   },
   {
-    title: '服务器',
-    items: ['Vercel', '阿里云']
+    title: '数据库',
+    items: ['MySQL(学习中)']
   },
   {
     title: '工具',
-    items: ['Git', 'VS Code']
+    items: ['Git', 'VS Code','IDEA']
   },
   {
     title: '其他',
