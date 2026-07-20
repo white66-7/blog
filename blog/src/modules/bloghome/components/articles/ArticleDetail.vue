@@ -43,10 +43,16 @@
           </svg>
           <span class="toc__title">目录</span>
         </div>
-        <a v-for="(h, i) in headings" :key="i" class="toc__item" :class="{ 'toc__item--active': activeHeading === i }"
-          :style="{ paddingLeft: h.level === 2 ? '24px' : '12px' }" @click.prevent="scrollToHeading(i)">
-          {{ h.text }}
-        </a>
+<a v-for="(h, i) in headings" 
+   :key="i" 
+   class="toc__item" 
+   :class="{ 'toc__item--active': activeHeading === i }"  
+   :style="{ paddingLeft: (h.level - 1) * 12 + 'px',
+            fontSize: (20 - h.level * 2) + 'px'
+   }"       对应缩进和字的大小不同
+   @click.prevent="scrollToHeading(i)">
+  {{ h.text }}
+</a>
       </aside>
     </main>
   </div>
@@ -69,6 +75,7 @@ import { articles } from '@/date/articles'
 import type { Article } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import { articleScrollCache } from '@/router/index'
+
 
 const md = new MarkdownIt({ html: true })
 
@@ -146,18 +153,31 @@ async function handleCopy(e: MouseEvent) {
 
 const route = useRoute()
 const article = ref<Article | null>(null)
-const renderedContent = computed(() => (article.value ? md.render(article.value.content) : ''))
 
+// 🌟 纯原生正则：自动在中文和英文/数字之间加空格，永不报错！
+function addSpacing(text: string): string {
+  if (!text) return ''
+  return text
+    .replace(/([\u4e00-\u9fa5])([a-zA-Z0-9])/g, '$1 $2')
+    .replace(/([a-zA-Z0-9])([\u4e00-\u9fa5])/g, '$1 $2')
+}
+
+const renderedContent = computed(() => {
+  if (!article.value) return ''
+  // 使用纯原生正则处理文本
+  const spacedContent = addSpacing(article.value.content)
+  return md.render(spacedContent)
+})
 const contentRef = ref<HTMLElement | null>(null)
 const headings = ref<{ text: string; level: number; el: HTMLElement }[]>([])
 const activeHeading = ref(-1)
 
 function buildHeadings() {
   if (!contentRef.value) return
-  const els = contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2')
+  const els = contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2,.markdown-body h3')
   headings.value = Array.from(els).map(el => ({
     text: (el as HTMLElement).textContent || '',
-    level: el.tagName === 'H1' ? 1 : 2,
+    level: Number((el as HTMLElement).tagName.charAt(1)), //charAt是获取索引为1的元素(H1则拿1)
     el: el as HTMLElement
   }))
 }
@@ -357,7 +377,7 @@ main {
 }
 
 .markdown-body {
-  font-family: 'WenQuanWeiMiHei';
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", 'WenQuanWeiMiHei', sans-serif;
   line-height: 1.8;
   font-size: clamp(1rem, 2.5vw, 1.3rem);
   color: #000;
@@ -365,6 +385,11 @@ main {
   margin: 0 auto;
   position: relative;
   z-index: 1;
+  letter-spacing: 0.02em;
+
+  text-align: justify;
+  text-justify: inter-ideograph;
+  word-break: break-word;
 }
 
 .markdown-body :deep(h1) {
@@ -400,7 +425,6 @@ main {
 
 
 /* ---------- 🌟 修复后的 Uiverse 代码块样式 🌟 ---------- */
-
 /* 1. 普通行内小段代码（加深背景，保持原字体） */
 .markdown-body :deep(p code),
 .markdown-body :deep(li code),
@@ -557,7 +581,6 @@ main {
 .toc__item {
   position: relative;
   display: block;
-  font-size: 18px;
   color: #212121;
   text-decoration: none;
   padding: 12px 20px;
