@@ -63,14 +63,12 @@ onMounted(async () => {
   --panel-border: rgba(0, 243, 255, 0.08);
   --text-main: #e0e0e8;
   --text-dim: #6b6b8a;
-  --font-mono: 'Courier New', Courier, 'SF Mono', Monaco, monospace;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none;
  scroll-snap-type: y proximity;}
 body {
   background: var(--bg-dark);
   color: var(--text-main);
-  font-family: var(--font-mono);
   min-height: 100vh;
 }
 #app {

@@ -38,7 +38,8 @@ const saysList = [
   { id: 6, content: '终于考完了可以开始爽玩了', date: '2026-07-01 12:48' },
   { id: 7, content: '参加了趟ACM,圆了高中时候的一个梦', date: '2026-07-06 17:21' },
   { id: 8, content: '到千灯了', date: '2026-07-07 22:06' },
-  { id: 9, content: '最近在学Java', date: '2026-07-20 19:41' },
+  { id: 9, content: '不知道为啥,我真的很喜欢在打雷下雨天的时候打游戏,非常解压', date: '2026-07-20 19:41' },
+  
 ]
 
 const currentIndex = ref(0)
@@ -150,7 +151,7 @@ onUnmounted(() => {
   margin: 0;
   font-size: 25px;
   font-family: 'ShangShouJiangHuShuFa';
-  font-weight: 400;
+  font-weight: normal;
   letter-spacing: 1px;
   color: #000000;
 }

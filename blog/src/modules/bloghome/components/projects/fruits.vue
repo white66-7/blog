@@ -1,206 +1,248 @@
 <template>
-  <div class="project-showcase">
-    <div class="section-header">
-      <h2 class="header-title">我的项目</h2>
+  <section id="projects">
+    <div class="projects-header">
+      <div>
+        <div class="section-label">Selected Work</div>
+        <div class="projects-title">作品集<br /><span>&一路向北</span></div>
+      </div>
+      <div class="projects-count">{{ projects.length }} Projects</div>
     </div>
-    <div class="project-list">
-      <div 
-        v-for="project in projects" 
-        :key="project.id" 
-        class="card-container"
-      >
-        <!-- 底部虚线边框 -->
-        <div class="card-border"></div>
-        
-        <!-- 主卡片 -->
-        <a :href="project.link" target="_blank" class="card">
-          <!-- 背景图片：默认完全显示，悬浮时变透明 -->
-          <div class="card-bg" :style="{ backgroundImage: `url(${project.poster})` }"></div>
-          
-          <!-- 默认显示的标题：悬浮时向上滑出并消失 -->
-          <p class="title-main">{{ project.title }}</p>
-          
-          <!-- 悬浮滑入的详情内容 -->
-          <div class="card-content-hover">
-            <p class="title-detail">{{ project.title }}</p>
-            <p class="description">{{ project.description }}</p>
-          </div>
+    <div id="project-list">
+      <div v-for="project in projects" :key="project.id" class="project-item" @mousemove="movePreview"
+        @mouseenter="showPreview(project)" @mouseleave="hidePreview">
+        <div class="project-num">{{ String(project.id).padStart(2, '0') }}</div>
+        <div class="project-info">
+          <div class="project-name">{{ project.title }}</div>
+          <div class="project-desc">{{ project.description }}</div>
+        </div>
+        <div class="project-tech">
+          <span v-for="tag in project.tags" :key="tag" class="tech-badge">{{ tag }}</span>
+        </div>
+        <a :href="project.link" target="_blank" class="project-link">
+          View
+          <svg width="14" height="14" viewBox="0 0 14 14">
+            <path d="M1 13L13 1M13 1H4M13 1V10" stroke="currentColor" stroke-width="1.5" />
+          </svg>
         </a>
       </div>
     </div>
-  </div>
+    <img ref="previewImage" class="project-preview" :src="currentPoster" />
+  </section>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-
 const projects = ref([
-    {
+  {
     id: 1,
     title: '火影忍者',
-    description: '一款基于C++开发,引入SFML与Box2d库的简陋小游戏  海报极其"照骗"',
-    poster: '/project/game.webp',
-    link: 'https://github.com/white66-7/Naruto-battle-game'
+    description: '一款基于 C++ 开发，引入 SFML 与 Box2D 库的简陋小游戏，海报极其"照骗"',
+    poster: '/project/vs.webp',
+    link: 'https://github.com/white66-7/Naruto-battle-game',
+    tags: ['C++', 'SFML', 'Box2D']
   },
   {
     id: 2,
     title: '博客',
-    description: '基于 Vue3 前端框架下的个人博客系统',
-    poster: '/project/blog.webp', 
-    link: 'https://github.com/white66-7/blog'
-  },
-
+    description: '基于 Vue3 前端框架开发的个人博客系统',
+    poster: '/project/blog.webp',
+    link: 'https://github.com/white66-7/blog',
+    tags: ['Vue3', 'JavaScript', 'CSS']
+  }
 ])
+const currentPoster = ref('')
+const previewImage = ref(null)
+const movePreview = (e) => {
+  if (!previewImage.value) return
+  previewImage.value.style.left = e.clientX + 30 + 'px'
+  previewImage.value.style.top = e.clientY + 30 + 'px'
+}
+const showPreview = (project) => {
+  currentPoster.value = project.poster
+  if (previewImage.value) {
+    previewImage.value.style.opacity = 1
+    previewImage.value.style.transform = 'scale(1)'
+  }
+}
+const hidePreview = () => {
+  if (previewImage.value) {
+    previewImage.value.style.opacity = 0
+    previewImage.value.style.transform = 'scale(.9)'
+  }
+}
 </script>
 
 <style scoped>
-
-.section-header {
-  width: 860px;
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 20px;
-  margin-bottom: -10px;    /* 与下方卡片的间距 */
-  color: #232323;         /* 使用和你卡片一致的深色 */
-}
-
-.header-title {
-  font-size: 3rem;
-  font-family: 'ShangShouJiangHuShuFa';
-  font-weight: normal;
-  margin: 0;
-  letter-spacing: -1px;   /* 紧凑的字间距更有现代感 */
-}
-
-/* --- 原有列表样式保持不变 --- */
-.project-list {
-  display: grid;
-  grid-template-columns: repeat(2, 400px);
-  gap: 60px;
-  justify-content: center;
-  padding: 10px 40px 40px; /* 顶部间距微调 */
-}
-
-/* 容器布局：一行两个，固定宽度 */
-.project-list {
-  display: grid;
-  grid-template-columns: repeat(2, 400px); /* 强制一行两个 */
-  gap: 60px; /* 增大间距，显得更大气 */
-  justify-content: center;
-  padding: 40px;
-}
-
-.card-container {
-  position: relative;
-  width: 400px;
-  height: 225px; /* 16:9 比例 */
-}
-
-/* 底部虚线背景层 */
-.card-border {
-  position: absolute;
+#projects {
   width: 100%;
-  height: 100%;
+  padding: 5rem 3rem;
+  background: #FAF7F2;
+}
+
+.projects-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 4rem;
+}
+
+.section-label {
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: .2em;
+  color: #0047FF;
+  margin-bottom: 20px;
+  text-transform: uppercase;     /* 强制全大写 */
+  display: flex;                 /* 让伪元素横线能对齐 */
+  align-items: center;           /* 垂直居中 */
+  gap: 12px;                     /* 文字和横线的间距 */
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #D8D2C8;           /* 或你喜欢的颜色，比如 #0047FF 或 #6B6560 */
+  max-width: 60px;               /* 控制横线最长宽度 */
+}
+
+.projects-title {
+  font-family: 'ShangShouJiangHuShuFa';
+  font-size: clamp(52px, 7vw, 96px);
+  line-height: 0.9;
+  letter-spacing: .05em;
+  color: #161411;
+}
+
+.projects-title span {
+color:#8d857c;
+font-size:.75em;
+}
+
+.projects-count {
+  font-family: monospace;
+  font-size: 13px;
+  color: #6B6560;
+}
+
+#project-list {
+  width: 100%;
+}
+
+.project-item {
+  display: grid;
+  grid-template-columns: 80px 1fr 220px 120px;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 1rem;
+  margin: 0 -2rem;
+  border-bottom: 1px solid #D8D2C8;
+  position: relative;
+  transition: .3s;
+}
+
+.project-item:hover {
+  background: #F5F1EA;
+}
+
+.project-num {
+  font-family: "IBM Plex Mono", "Courier Prime", monospace;
+  font-size: 12px;
+  letter-spacing: .22em;
+  color: #8d857c;
+}
+
+.project-name {
+  font-family: 'ShangShouJiangHuShuFa';
+  font-size: 32px;
+  color: #1A1814;
+  margin-bottom: 10px;
+}
+
+.project-desc {
+  max-width: 420px;
+  font-weight: 600px;
+  font-family: 'WenQuanWeiMiHei';
+  font-size: 12px;
+  line-height: 1.8;
+  color: #6B6560;
+}
+
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tech-badge {
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif; 
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #6B6560;
+  font-weight: 500; 
+  border: 1px solid #D8D2C8;
+}
+
+.project-link {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  color: #0047FF;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif; 
+  font-size: 11px;
+  font-weight: 900; 
+  letter-spacing: .15em;
+  text-decoration: none;
+}
+
+.project-link:hover {
+  color: #1A1814;
+}
+
+.project-preview {
+  position: fixed;
   left: 0;
   top: 0;
-  border: 2px dashed #232323;
-  border-radius: 12px;
-  z-index: 1;
-}
-
-/* 主卡片主体 */
-.card {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: #fff; /* 悬浮时显现的背景底色 */
-  border-radius: 12px;
-  color: #232323;
-  padding: 30px;
-  border: 2px solid #232323;
-  transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end; /* 标题默认在底部 */
-  text-decoration: none;
-  z-index: 2;
-}
-
-/* 背景图逻辑：默认不透明，Hover时变透明(0.1) */
-.card-bg {
-  position: absolute;
-  top: 0; 
-  left: 0; 
-  width: 100%; 
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  opacity: 1; /* 默认完全可见 */
-  transition: opacity .4s ease;
-  z-index: -1;
-}
-
-/* 默认标题：加了一个简单的阴影增强在图片上的可读性 */
-.title-main {
-  font-family: 'YouSheBiaoTiHei';
-  font-size: 1.6rem;
-  margin: 0;
-  color: #fff;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5); /* 防止浅色图片看不清字 */
-  transition: all .4s ease;
-}
-
-/* 悬浮状态 */
-.card:hover {
-  transform: translate(-12px, -12px);
-  border-color: #5bc0eb;
-}
-
-.card:hover .card-bg {
-  opacity: 0.1; /* 悬浮时图片变淡，露出底下的文字 */
-}
-
-/* 解决你提到的标题冲突：Hover时原标题向上滑出并消失 */
-.card:hover .title-main {
-  transform: translateY(-50px);
+  width: 260px;
+  height: 160px;
+  object-fit: cover;
   opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transform: scale(.9);
+  transition: opacity .25s ease, transform .25s ease;
+  border: 1px solid #D8D2C8;
 }
 
-/* 详情内容区域 */
-.card-content-hover {
-  position: absolute;
-  inset: 0;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  transform: translateY(100px); /* 默认在下方隐藏 */
-  transition: all .4s ease;
-  opacity: 0;
-}
+@media (max-width: 768px) {
+  #projects {
+    padding: 5rem 1.5rem;
+  }
 
-.card:hover .card-content-hover {
-  transform: translateY(0);
-  opacity: 1;
-}
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
 
-.title-detail {
-  font-family: 'YouSheBiaoTiHei';
-  font-size: 1.5rem;
-  margin: 0 0 10px 0;
-  color: #232323;
-}
+  .project-item {
+    grid-template-columns: 40px 1fr;
+  }
 
-.description {
-  font-size: 14px;
-  color: #444;
-  line-height: 1.6;
-  margin: 0;
-  display: -webkit-box;
-  font-family: 'WenQuanWeiMiHei';
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  .project-tech,
+  .project-link {
+    display: none;
+  }
+
+  .project-preview {
+    display: none;
+  }
+
+  .project-name {
+    font-size: 24px;
+  }
 }
 </style>
