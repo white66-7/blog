@@ -30,16 +30,15 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const saysList = [
-  { id: 1, content: '世界的慷慨常以匮乏为底色，横陈于你我眉睫之前的，其实往往两难。     ——高考结束有感', date: '2025-06-09 17:21' },
-  { id: 2, content: '终于在今天把首页的代码写完了', date: '2026-06-15 22:36' },
-  { id: 3, content: '第一篇技术性文章拖到现在也是写完了', date: '2026-06-16 23:09' },
-  { id: 4, content: '等我写完十篇文章就好好写一个文章管理仓库', date: '2026-06-20 16:56' },
-  { id: 5, content: '过完端午马上期末这个焦虑啊', date: '2026-06-22 17:50' },
-  { id: 6, content: '搬到新宿舍好累啊，明天要考近代史纲要了，紧张了有点', date: '2026-06-25 22:05' },
-  { id: 7, content: '终于考完了可以开始爽玩了', date: '2026-07-01 12:48' },
-  { id: 7, content: '参加了一趟ACM,圆了高中时候的一个梦', date: '2026-07-06 17:21' },
+  { id: 1, content: '终于在今天把首页的代码写完了', date: '2026-06-15 22:36' },
+  { id: 2, content: '第一篇文章拖到现在也是写完了', date: '2026-06-16 23:09' },
+  { id: 3, content: '等我写完十篇文章就好好写这个文章管理仓库', date: '2026-06-20 16:56' },
+  { id: 4, content: '过完端午马上期末有点焦虑啊', date: '2026-06-22 17:50' },
+  { id: 5, content: '搬宿舍好累啊', date: '2026-06-25 22:05' },
+  { id: 6, content: '终于考完了可以开始爽玩了', date: '2026-07-01 12:48' },
+  { id: 7, content: '参加了趟ACM,圆了高中时候的一个梦', date: '2026-07-06 17:21' },
   { id: 8, content: '到千灯了', date: '2026-07-07 22:06' },
-  { id: 9, content: '最近deepseek在大规模招人,让我有点想寒假去实习试试前端的想法', date: '2026-07-18 22:22' },
+  { id: 9, content: '最近在学Java', date: '2026-07-20 19:41' },
 ]
 
 const currentIndex = ref(0)
@@ -150,7 +149,7 @@ onUnmounted(() => {
 .say-header h3 {
   margin: 0;
   font-size: 25px;
-  font-family: 'ShangShouJiangHuShuFa', '优设标题黑', sans-serif;
+  font-family: 'ShangShouJiangHuShuFa';
   font-weight: 400;
   letter-spacing: 1px;
   color: #000000;

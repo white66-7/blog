@@ -73,27 +73,6 @@ body {
   font-family: var(--font-mono);
   min-height: 100vh;
 }
-@font-face {
-  font-family: 'YouSheBiaoTiHei';
-  src: url('/text/YouSheBiaoTiHei-2.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'ShangShouJiangHuShuFa';
-  src: url('/text/No.289-ShangShouJiangHuShuFaTi-2.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'WenQuanWeiMiHei';
-  src: url('/text/WenQuanWeiMiHei-1.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 #app {
   width: 100%;
 }

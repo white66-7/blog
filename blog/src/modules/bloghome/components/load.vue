@@ -195,13 +195,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-@font-face {
-  font-family: 'YouSheBiaoTiHei';
-  src: url('/text/YouSheBiaoTiHei-2.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 /* ===== 导航栏主体 ===== */
 .navbar {
   position: fixed;

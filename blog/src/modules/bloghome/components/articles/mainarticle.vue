@@ -307,8 +307,6 @@ watch(paginatedArticles, (newArticles) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Heiti SC', sans-serif;
-  font-weight: 700;
 }
 
 .fast-enter {
@@ -377,9 +375,10 @@ watch(paginatedArticles, (newArticles) => {
 }
 
 .card__date {
+  font-family: 'YouSheBiaoTiHei';
   font-size: 12px;
   color: #9CA3AF;
-  margin-bottom: 0;    /* 必须设为 0，因为父容器 info-bar 已经有下间距了 */
+  margin-bottom: 0;  
   display: flex;
   align-items: center;
 }
@@ -387,13 +386,10 @@ watch(paginatedArticles, (newArticles) => {
 .card__excerpt {
   font-family: 'WenQuanWeiMiHei';
   font-size: 15px;
-  /* 摘要稍微加大一点点 */
   font-weight: normal;
   color:#4B5563;
   line-height: 1.6;
-  /* 增加行高，阅读更舒适 */
   margin-bottom: 16px;
-  /* 【关键修改2】：只保留固定间距，不再依赖撑开 */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;

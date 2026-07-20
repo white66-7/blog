@@ -54,13 +54,6 @@ const skillGroups = [
 </script>
 
 <style scoped>
-@font-face {
-  font-family: 'YouSheBiaoTiHei';
-  src: url('/text/YouSheBiaoTiHei-2.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 .home-page {
   background: #FAF7F2;
   min-height: 100vh;
