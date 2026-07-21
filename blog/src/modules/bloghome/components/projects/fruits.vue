@@ -63,7 +63,7 @@ const projects = ref([
     id: 3,
     title: '博客后端',
     description: '基于 SpringBoot 框架开发的后端系统',
-    poster: '/project/blog.webp',
+    poster: '/project/boot.webp',
     link: 'https://github.com/white66-7/java-backend',
     tags: ['SpringBoot', 'Java', 'IDEA']
   }
