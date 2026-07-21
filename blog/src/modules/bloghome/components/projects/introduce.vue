@@ -8,14 +8,39 @@
 
     <!-- 可滚动区域 -->
     <div class="timeline-scroll-area">
-      <!-- 加载状态 -->
-      <div v-if="loading" class="loading-placeholder">
-        <span class="loading-dot"></span>
-        <span class="loading-dot"></span>
-        <span class="loading-dot"></span>
+      <!-- ===== 骨架加载图：数据未成功之前始终显示 ===== -->
+      <div v-if="loading" class="timeline skeleton-timeline">
+        <div class="timeline-line skeleton-line"></div>
+        <!-- 模拟三个年份区块 -->
+        <div v-for="n in 3" :key="'sk-year-' + n" class="year-section">
+          <h3 class="year-title skeleton-year"></h3>
+          <div
+            v-for="m in (n === 1 ? 2 : 1)"
+            :key="'sk-month-' + n + '-' + m"
+            class="month-section"
+          >
+            <div class="month-indicator">
+              <div class="month-label skeleton-month"></div>
+              <div class="event-dot skeleton-dot"></div>
+            </div>
+            <ul class="event-list">
+              <li
+                v-for="k in (m === 1 ? 3 : 2)"
+                :key="k"
+                class="event-item skeleton-event"
+              >
+                <span
+                  class="skeleton-text"
+                  :style="{ width: `${60 + k * 12}%` }"
+                ></span>
+                <span class="repo-tag skeleton-tag"></span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
-      <!-- 时间线 -->
+      <!-- 真实时间线（仅在数据获取成功且非空时显示） -->
       <div v-else-if="groupedTimeline.length" class="timeline">
         <div class="timeline-line"></div>
 
@@ -41,7 +66,11 @@
                 v-for="(event, idx) in monthGroup.events"
                 :key="`${event.timestamp}-${idx}`"
                 class="event-item"
-                :class="{ 'animate__animated animate__fadeInUp': animatedItems.has(`${event.timestamp}-${idx}`) }"
+                :class="{
+                  'animate__animated animate__fadeInUp': animatedItems.has(
+                    `${event.timestamp}-${idx}`
+                  )
+                }"
                 :data-event-id="`${event.timestamp}-${idx}`"
               >
                 <span class="commit-text">{{ event.text }}</span>
@@ -54,6 +83,7 @@
         </section>
       </div>
 
+      <!-- 仅在成功获取但数据为空时显示此提示（几乎不会出现） -->
       <p v-else class="empty-timeline">No commits found yet.</p>
     </div>
   </div>
@@ -68,7 +98,6 @@ const loading = ref(true)
 
 // 存储已触发动画的事件 ID
 const animatedItems = ref(new Set())
-
 let observer = null
 
 const getShortMonth = (monthNum) => {
@@ -98,11 +127,11 @@ const groupedTimeline = computed(() => {
   return result
 })
 
-// 获取 commits 数据
+// 获取 commits 数据（重要修改：出错时保持 loading 为 true，骨架图不消失）
 async function fetchCommitsTimeline() {
   try {
     const res = await fetch(API_URL)
-    if (!res.ok) throw new Error('Failed to fetch commits')
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`)
     const commits = await res.json()
     const events = commits.map(commit => {
       const dateObj = new Date(commit.commitDate)
@@ -117,40 +146,33 @@ async function fetchCommitsTimeline() {
       }
     })
     timeline.value = events
-  } catch (err) {
-    console.error('[GitHub Timeline] Failed:', err)
-    timeline.value = []
-  } finally {
-    loading.value = false
-    // 数据加载完后，等待 DOM 更新再启动观察器
+    loading.value = false   // 仅成功时关闭骨架图
     await nextTick()
     setupObserver()
+  } catch (err) {
+    console.error('[GitHub Timeline] 数据获取失败，将继续显示骨架图：', err)
+    // 注意：这里不改变 loading，骨架图会一直显示
+    // 如果需要定时重试，可在此添加 setInterval，但当前需求不包含
   }
 }
 
 // 创建 Intersection Observer，监听 .event-item
 function setupObserver() {
-  // 清除旧的观察器
   if (observer) observer.disconnect()
-
   const items = document.querySelectorAll('.event-item[data-event-id]')
   if (items.length === 0) return
-
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const id = entry.target.dataset.eventId
         if (id && !animatedItems.value.has(id)) {
           animatedItems.value.add(id)
-          // 触发响应式更新
           animatedItems.value = new Set(animatedItems.value)
         }
-        // 动画只触发一次，停止观察该元素
         observer.unobserve(entry.target)
       }
     })
   }, { threshold: 0.1 })
-
   items.forEach(item => observer.observe(item))
 }
 
@@ -339,9 +361,65 @@ onBeforeUnmount(() => {
   0%, 80%, 100% { transform: scale(0.4); opacity: 0.5; }
   40% { transform: scale(1); opacity: 1; }
 }
-</style>
 
-<!-- 全局引入 animate.css（非 scoped） -->
-<style>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+.skeleton-timeline {
+  pointer-events: none;
+}
+.skeleton-line {
+  background: #EAE5DE !important;
+}
+.skeleton-year {
+  background: #EAE5DE !important;
+  color: transparent !important;
+  width: 60px;
+  height: 1.2rem;
+  border-radius: 4px;
+  margin-left: 70px;
+  padding: 0 !important;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-month {
+  background: #EAE5DE;
+  color: transparent !important;
+  width: 28px;
+  height: 0.7rem;
+  border-radius: 3px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-dot {
+  background: #EAE5DE !important;
+  box-shadow: none !important;
+}
+.skeleton-event {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.skeleton-text {
+  display: inline-block;
+  height: 0.8rem;
+  background: #EAE5DE;
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-tag {
+  width: 54px;
+  height: 1.2rem;
+  background: #EAE5DE !important;
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  margin-left: 0.5rem;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+
 </style>
