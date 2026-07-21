@@ -171,7 +171,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  margin-top: 70px;
+  margin-top: 150px;
 }
 
 @media (max-width: 768px) {

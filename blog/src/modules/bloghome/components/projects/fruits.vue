@@ -8,15 +8,16 @@
       <div class="projects-count">{{ projects.length }} Projects</div>
     </div>
     <div id="project-list">
-<div
-  v-for="(project, index) in projects"
-  :key="project.id"
-  class="project-item animate__animated animate__fadeInUp animate__fast"
-  :style="{ animationDelay: `${index * 0.15}s` }"
-  @mousemove="movePreview"
-  @mouseenter="showPreview(project)"
-  @mouseleave="hidePreview"
->
+      <div
+        v-for="(project, index) in projects"
+        :key="project.id"
+        class="project-item"
+        :class="hasAnimated ? '' : 'animate__animated animate__fadeInUp animate__fast'"
+        :style="hasAnimated ? {} : { animationDelay: `${index * 0.15}s` }"
+        @mousemove="movePreview"
+        @mouseenter="showPreview(project)"
+        @mouseleave="hidePreview"
+      >
         <div class="project-num">{{ String(project.id).padStart(2, '0') }}</div>
         <div class="project-info">
           <div class="project-name">{{ project.title }}</div>
@@ -40,6 +41,7 @@
 <script setup>
 import { ref } from 'vue'
 import 'animate.css'
+
 const projects = ref([
   {
     id: 1,
@@ -66,8 +68,17 @@ const projects = ref([
     tags: ['SpringBoot', 'Java', 'IDEA']
   }
 ])
+
 const currentPoster = ref('')
 const previewImage = ref(null)
+
+// ========== 动画记忆：只在首次访问时播放 ==========
+const ANIM_KEY = 'projects-animated'
+const hasAnimated = ref(!!sessionStorage.getItem(ANIM_KEY))
+if (!hasAnimated.value) {
+  sessionStorage.setItem(ANIM_KEY, '1')
+}
+
 const movePreview = (e) => {
   if (!previewImage.value) return
   previewImage.value.style.left = e.clientX + 30 + 'px'
@@ -91,7 +102,7 @@ const hidePreview = () => {
 <style scoped>
 #projects {
   width: 100%;
-  padding: 5rem 3rem;
+  padding: 5rem 3rem 0;
   background: #FAF7F2;
 }
 
@@ -109,13 +120,9 @@ const hidePreview = () => {
   color: #0047FF;
   margin-bottom: 20px;
   text-transform: uppercase;
-  /* 强制全大写 */
   display: flex;
-  /* 让伪元素横线能对齐 */
   align-items: center;
-  /* 垂直居中 */
   gap: 12px;
-  /* 文字和横线的间距 */
 }
 
 .section-label::after {
@@ -123,9 +130,7 @@ const hidePreview = () => {
   flex: 1;
   height: 1px;
   background: #D8D2C8;
-  /* 或你喜欢的颜色，比如 #0047FF 或 #6B6560 */
   max-width: 60px;
-  /* 控制横线最长宽度 */
 }
 
 .projects-title {
