@@ -36,18 +36,26 @@ const projects = ref([
   {
     id: 1,
     title: '火影忍者',
-    description: '一款基于 C++ 开发，引入 SFML 与 Box2D 库的简陋小游戏，海报极其"照骗"',
+    description: '基于 C++ 开发，引入 SFML 与 Box2D 库的简陋小游戏，海报极其"照骗"',
     poster: '/project/vs.webp',
     link: 'https://github.com/white66-7/Naruto-battle-game',
     tags: ['C++', 'SFML', 'Box2D']
   },
   {
     id: 2,
-    title: '博客',
-    description: '基于 Vue3 前端框架开发的个人博客系统',
+    title: '博客前端',
+    description: '基于 Vue3 框架开发的前端系统',
     poster: '/project/blog.webp',
     link: 'https://github.com/white66-7/blog',
     tags: ['Vue3', 'JavaScript', 'CSS']
+  },
+    {
+    id: 3,
+    title: '博客后端',
+    description: '基于 SpringBoot 框架开发的后端系统',
+    poster: '/project/blog.webp',
+    link: 'https://github.com/white66-7/java-backend',
+    tags: ['SpringBoot', 'Java', 'IDEA']
   }
 ])
 const currentPoster = ref('')
@@ -87,7 +95,7 @@ const hidePreview = () => {
 }
 
 .section-label {
-  font-family: monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   letter-spacing: .2em;
   color: #0047FF;

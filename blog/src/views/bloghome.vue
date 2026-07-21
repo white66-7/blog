@@ -178,11 +178,9 @@ const albumImages = [
 .app-flex {
   position: relative;
   width: 100%;
-  /* 优化：移动端使用 dvh 防止底部工具栏遮挡 */
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background-color: #f0f0f0;
 }
 
 .app-flex::before,
@@ -319,7 +317,7 @@ const albumImages = [
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   /* 防止滚动链穿透到外层 */
-  background: #FAF7F2;
+  background-color: #FAF7F2;
 }
 
 .main-body {

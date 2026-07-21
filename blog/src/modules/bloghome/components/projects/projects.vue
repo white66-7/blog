@@ -2,13 +2,7 @@
   <div class="projects-page">
     <Navbar :transparent="isFirstScreen" />
      <Fruit />
-    <div class="scrollable-content animate__animated animate__bounceIn fast-enter">
-      <section class="calendar-section">
-        <!-- 日历组件 -->
-        <GitHubCalendar />
-        <!-- 水果组件放在日历下方，保持原有布局 -->
-      </section>
-    </div>
+      <GitHubCalendar />
   </div>
 </template>
 
@@ -25,9 +19,6 @@ const isFirstScreen = ref(false)
 .projects-page {
   position: relative;
   width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
   background-color: #FAF7F2;
 }
 .scrollable-content {

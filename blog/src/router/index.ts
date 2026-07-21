@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import BlogHome from '@/views/bloghome.vue'
 import PhotoShow from '@/modules/bloghome/components/photos/photo.vue'
-import Github from '@/modules/bloghome/components/projects/github.vue'
+import Github from '@/modules/bloghome/components/projects/projects.vue'
 import QqContact from '@/modules/bloghome/views/qq.vue'
 import WechatContact from '@/modules/bloghome/views/wechat.vue'
 import MusicPlayer from '@/views/music-player.vue'
