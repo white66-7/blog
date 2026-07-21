@@ -8,8 +8,15 @@
       <div class="projects-count">{{ projects.length }} Projects</div>
     </div>
     <div id="project-list">
-      <div v-for="project in projects" :key="project.id" class="project-item" @mousemove="movePreview"
-        @mouseenter="showPreview(project)" @mouseleave="hidePreview">
+<div
+  v-for="(project, index) in projects"
+  :key="project.id"
+  class="project-item animate__animated animate__fadeInUp animate__fast"
+  :style="{ animationDelay: `${index * 0.15}s` }"
+  @mousemove="movePreview"
+  @mouseenter="showPreview(project)"
+  @mouseleave="hidePreview"
+>
         <div class="project-num">{{ String(project.id).padStart(2, '0') }}</div>
         <div class="project-info">
           <div class="project-name">{{ project.title }}</div>
@@ -32,6 +39,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import 'animate.css'
 const projects = ref([
   {
     id: 1,
@@ -49,7 +57,7 @@ const projects = ref([
     link: 'https://github.com/white66-7/blog',
     tags: ['Vue3', 'JavaScript', 'CSS']
   },
-    {
+  {
     id: 3,
     title: '博客后端',
     description: '基于 SpringBoot 框架开发的后端系统',
@@ -100,17 +108,24 @@ const hidePreview = () => {
   letter-spacing: .2em;
   color: #0047FF;
   margin-bottom: 20px;
-  text-transform: uppercase;     /* 强制全大写 */
-  display: flex;                 /* 让伪元素横线能对齐 */
-  align-items: center;           /* 垂直居中 */
-  gap: 12px;                     /* 文字和横线的间距 */
+  text-transform: uppercase;
+  /* 强制全大写 */
+  display: flex;
+  /* 让伪元素横线能对齐 */
+  align-items: center;
+  /* 垂直居中 */
+  gap: 12px;
+  /* 文字和横线的间距 */
 }
+
 .section-label::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: #D8D2C8;           /* 或你喜欢的颜色，比如 #0047FF 或 #6B6560 */
-  max-width: 60px;               /* 控制横线最长宽度 */
+  background: #D8D2C8;
+  /* 或你喜欢的颜色，比如 #0047FF 或 #6B6560 */
+  max-width: 60px;
+  /* 控制横线最长宽度 */
 }
 
 .projects-title {
@@ -122,8 +137,8 @@ const hidePreview = () => {
 }
 
 .projects-title span {
-color:#8d857c;
-font-size:.75em;
+  color: #8d857c;
+  font-size: .75em;
 }
 
 .projects-count {
@@ -183,12 +198,12 @@ font-size:.75em;
 
 .tech-badge {
   padding: 5px 12px;
-  font-family: 'Inter', sans-serif; 
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
   letter-spacing: .1em;
   text-transform: uppercase;
   color: #6B6560;
-  font-weight: 500; 
+  font-weight: 500;
   border: 1px solid #D8D2C8;
 }
 
@@ -199,9 +214,9 @@ font-size:.75em;
   gap: 8px;
   color: #0047FF;
   text-transform: uppercase;
-  font-family: 'Inter', sans-serif; 
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
-  font-weight: 900; 
+  font-weight: 900;
   letter-spacing: .15em;
   text-decoration: none;
 }

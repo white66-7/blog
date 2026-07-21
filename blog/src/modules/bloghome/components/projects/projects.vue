@@ -2,7 +2,7 @@
   <div class="projects-page">
     <Navbar :transparent="isFirstScreen" />
      <Fruit />
-      <GitHubCalendar />
+    <GitHubCalendar />
   </div>
 </template>
 

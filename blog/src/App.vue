@@ -67,8 +67,7 @@ onMounted(async () => {
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none;
  scroll-snap-type: y proximity;}
 body {
-  background: var(--bg-dark);
-  color: var(--text-main);
+  background-color: #FAF7F2; 
   min-height: 100vh;
 }
 #app {
