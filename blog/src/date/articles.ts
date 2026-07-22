@@ -142,7 +142,7 @@ export const articles: Article[] = [
     readTime: '20 minutes',
     excerpt: '动态路由,makedown解析,目录导航等一系列蛮有意思的东西',
     tags: ['MarkdownIt', '前端', '动态路由'],
-    cover: '/messages/11/people.webp',
+    cover: '/messages/11/difficult.webp',
     content:md11,
   },
   {

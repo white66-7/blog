@@ -56,31 +56,41 @@ const currentSong = computed<Song | null>(() => {
 })
 
 
-function bindAudioEvent(): void{
-    const el = audioElement.value
-    if(!el) return
+function bindAudioEvent(): void {
+  const el = audioElement.value
+  if (!el) return
 
-    el.addEventListener('play',()=> {paused.value = false})
-    el.addEventListener('pause',()=> {paused.value = true})
-    el.addEventListener('timeupdate',()=> {if(audioElement.value)
-    {
-        currentTime.value = audioElement.value.currentTime
-        duration.value = audioElement.value.duration || 0
+  // ✅ 新增：元数据加载完成时立即更新 duration
+  el.addEventListener('loadedmetadata', () => {
+    if (audioElement.value) {
+      duration.value = audioElement.value.duration || 0
+      // 同步当前时间（尽管刚开始为0，但保持一致性）
+      currentTime.value = audioElement.value.currentTime
     }
-    })
-    el.addEventListener('ended', () => {
-  if (currentSong.value) {
-    libraryStore.incrementPlayCount(currentSong.value.id)
-  }
-  next()
-})
-    el.addEventListener('volumechange',()=>{
-        if(audioElement.value)
-        {
-            volume.value = audioElement.value.volume
-        }
-    })
+  })
+
+  el.addEventListener('play', () => { paused.value = false })
+  el.addEventListener('pause', () => { paused.value = true })
+  el.addEventListener('timeupdate', () => {
+    if (audioElement.value) {
+      currentTime.value = audioElement.value.currentTime
+      duration.value = audioElement.value.duration || 0
+    }
+  })
+  el.addEventListener('ended', () => {
+    if (currentSong.value) {
+      libraryStore.incrementPlayCount(currentSong.value.id)
+    }
+    next()
+  })
+  el.addEventListener('volumechange', () => {
+    if (audioElement.value) {
+      volume.value = audioElement.value.volume
+    }
+  })
 }
+
+
 function revokeCurrentUrls():void{
 if (currentAudioUrl.value && currentAudioUrl.value.startsWith('blob:')) {
     URL.revokeObjectURL(currentAudioUrl.value)

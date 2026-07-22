@@ -46,7 +46,7 @@ const projects = ref([
   {
     id: 1,
     title: '火影忍者',
-    description: '基于 C++ 开发，引入 SFML 与 Box2D 库的简陋小游戏，海报极其"照骗"',
+    description: '基于 C++ ，引入 SFML 与 Box2D 库开发的简陋小游戏',
     poster: '/project/vs.webp',
     link: 'https://github.com/white66-7/Naruto-battle-game',
     tags: ['C++', 'SFML', 'Box2D']

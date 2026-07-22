@@ -2,13 +2,13 @@
   <div class="container">
     <!-- “保持进步” 使用图片背景动画 -->
     <div class="content">
-      <span class="animated-text">保持进步</span>
+      <span class="animated-text">禅絮沾泥</span>
     </div>
 
     <!-- 三行逐行动画（下方） -->
     <h1>
-      <span>去做</span>
-      <span>你真正</span>
+      <span>做点</span>
+      <span>真正</span>
       <span>想做的</span>
     </h1>
   </div>
