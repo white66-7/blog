@@ -27,7 +27,7 @@
         </div>
 
         <!-- 正文 -->
-        <div class="markdown-body" v-html="renderedContent" @click="handleCopy"></div>
+        <div class="markdown-body" v-html="renderedContent" @click="handleMarkdownClick"></div>
       </div>
       
       <aside class="toc" v-if="headings.length">
@@ -60,6 +60,15 @@
   <div class="not-found" v-else>
     <p>文章未找到</p>
   </div>
+  <Teleport to="body">
+    <div
+      v-if="previewVisible"
+      class="lightbox-overlay"
+      @click="closePreview"
+    >
+      <img :src="previewSrc" class="lightbox-image" />
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -241,6 +250,35 @@ onMounted(async () => {
 onUnmounted(() => {
   cleanupScroll?.()
 })
+
+
+const previewVisible = ref(false)
+const previewSrc = ref('')
+
+// 图片后缀匹配规则（根据你的笔记格式调整）
+const IMAGE_EXTENSIONS = /\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i
+
+// 关闭预览
+function closePreview() {
+  previewVisible.value = false
+}
+
+// 🌟 统一的事件处理：复制代码 + 图片预览
+function handleMarkdownClick(e: MouseEvent) {
+  // 1. 首先处理复制按钮（原有逻辑）
+  handleCopy(e)
+
+  // 2. 处理图片链接点击
+  const link = (e.target as HTMLElement).closest('a')
+  if (!link) return
+
+  const href = link.getAttribute('href')
+  if (href && IMAGE_EXTENSIONS.test(href)) {
+    e.preventDefault()               // 阻止浏览器跳转
+    previewSrc.value = href
+    previewVisible.value = true
+  }
+}
 </script>
 
 <style>
@@ -692,6 +730,30 @@ main {
   transform: scale(0.96);
 }
 
+
+.lightbox-overlay {
+  /* 不设 display:none，因为由 v-if 控制显示 */
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1em;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-image {
+  /* 与用户提供的 span 表现一致：占满容器但保持比例 */
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
 @media (max-width: 1200px) {
   .toc {
     display: none;
