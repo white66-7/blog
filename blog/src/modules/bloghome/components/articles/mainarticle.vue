@@ -314,7 +314,7 @@ watch(paginatedArticles, (newArticles) => {
 }
 
 .articles-container .card {
-  height: 250px;
+  min-height: 220px;
   display: flex;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.9);
@@ -341,19 +341,19 @@ watch(paginatedArticles, (newArticles) => {
 .card.horizontal .card__img,
 .card.reverse-horizontal .card__img {
   width: 40%;
-  height: 100%;
-  object-fit: cover;
+  aspect-ratio: 16 / 9;    
+  object-fit: cover;       
+  height: auto;           
 }
-
 .placeholder-img {
   width: 40%;
+  aspect-ratio: 16 / 9;
   background: #eee;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #999;
 }
-
 /* ========= 重新调整卡片内容区 ========= */
 .card.horizontal .card__content,
 .card.reverse-horizontal .card__content {
