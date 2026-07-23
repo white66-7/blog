@@ -22,6 +22,7 @@ import md9 from './md/9.md?raw'
 import md10 from './md/10.md?raw'
 import md11 from './md/11.md?raw'
 import md12 from './md/12.md?raw'
+import md13 from './md/13.md?raw'
 
 export const articles: Article[] = [
   {
@@ -147,13 +148,24 @@ export const articles: Article[] = [
   },
   {
     id: 12,
-    title: '网页数据的存在形式和存储方式',
+    title: '网页数据的存储方式和骨架加载',
     type: '后端',
-    date: '2026-07-22',
+    date: '2026-07-20',
     readTime: '20 minutes',
-    excerpt: '对图片,字体,音频及基本数据处理方式的经验之谈',
+    excerpt: '对图片,字体,音频及基本数据处理方式的经验之谈,夹带骨架屏的加载动画实现效果',
     tags: ['数据库', '数据'],
     cover: '/messages/12/robot.webp',
     content:md12,
+  },
+  {
+    id: 13,
+    title: '论我的学生时代',
+    type: '杂谈',
+    date: '2026-07-23',
+    readTime: '10 minutes',
+    excerpt: '回想过去一直想对高中,应试,过去等等表达些什么,实际却总是沉默,感受也断断续续,还是写出来心安一些',
+    tags: ['高中', '人生','童年'],
+    cover: '/messages/13/lost.webp',
+    content:md13,
   },
 ]
