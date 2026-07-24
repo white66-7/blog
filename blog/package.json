@@ -17,6 +17,7 @@
     "buffer": "^6.0.3",
     "github-calendar": "^2.3.4",
     "gsap": "^3.15.0",
+    "markdown-it": "^14.3.0",
     "music-metadata": "^11.14.0",
     "pinia": "^3.0.4",
     "router": "^2.2.0",

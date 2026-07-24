@@ -1,8 +1,7 @@
 {
   "dependencies": {
     "gsap": "^3.15.0",
-    "highlight.js": "^11.11.1",
-    "markdown-it": "^14.2.0"
+    "highlight.js": "^11.11.1"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",
