@@ -39,10 +39,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import 'animate.css'
 
-const projects = ref([
+const rawProjects = ref([
   {
     id: 1,
     title: '火影忍者',
@@ -51,16 +51,25 @@ const projects = ref([
     link: 'https://github.com/white66-7/Naruto-battle-game',
     tags: ['C++', 'SFML', 'Box2D']
   },
-  {
+    {
     id: 2,
+    title: '音乐播放器',
+    description: '基于Electron + css + javascropt + html开发的前端程序',
+    poster: '/project/music.webp',
+    link: 'https://github.com/white66-7/music_app',
+    tags: ['javascropt', 'Electron', 'CSS','html']
+  },
+  {
+    id: 3,
     title: '博客前端',
     description: '基于 Vue3 框架开发的前端系统',
     poster: '/project/blog.webp',
     link: 'https://github.com/white66-7/blog',
     tags: ['Vue3', 'JavaScript', 'CSS']
   },
+
   {
-    id: 3,
+    id: 4,
     title: '博客后端',
     description: '基于 SpringBoot 框架开发的后端系统',
     poster: '/project/boot.webp',
@@ -68,6 +77,15 @@ const projects = ref([
     tags: ['SpringBoot', 'Java', 'IDEA']
   }
 ])
+
+const projects = computed(() => {
+    return [...rawProjects.value]
+    .reverse()
+    .map((project, index) => ({
+      ...project,
+      id: index + 1   // 按新顺序重新编号
+    }));
+})
 
 const currentPoster = ref('')
 const previewImage = ref(null)
