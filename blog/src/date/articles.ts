@@ -164,7 +164,7 @@ export const articles: Article[] = [
     date: '2026-07-23',
     readTime: '10 minutes',
     excerpt: '回想过去一直想对高中,应试,过去等等表达些什么,实际却总是沉默,感受也断断续续,还是写出来心安一些',
-    tags: ['高中', '人生','童年'],
+    tags: ['高中', '思想','加密'],
     cover: '/messages/13/lost.webp',
     content:md13,
   },
