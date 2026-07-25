@@ -1,5 +1,5 @@
 <template>
-  <div class="slider-wrapper"  @mouseenter="onMouseEnter"  @mouseleave="onMouseLeave">
+  <div class="slider-wrapper" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
     <div class="slider-viewport">
       <div
         class="slider-inner"
@@ -12,13 +12,21 @@
           :class="{ active: idx === currentIndex }"
         >
           <div class="property-card">
-            <!-- 图片区域（纯背景图） -->
-            <div
-              class="property-image"
-              :style="{ backgroundImage: `url(${image.url})` }"
-            ></div>
+            <!-- 图片区域 -->
+            <div class="property-image">
+              <!-- 骨架层：图片加载完前显示 -->
+              <div
+                :class="['skeleton-img', { 'skeleton-hidden': imageLoaded[idx] }]"
+              ></div>
+              <!-- 真实背景图层：加载完成后淡入 -->
+              <div
+                class="bg-img"
+                :style="{ backgroundImage: `url(${image.url})` }"
+                :class="{ 'bg-visible': imageLoaded[idx] }"
+              ></div>
+            </div>
 
-            <!-- 描述区域（只显示描述文本） -->
+            <!-- 描述区域 -->
             <div class="property-description">
               <p>{{ image.description }}</p>
             </div>
@@ -40,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 interface SlideImage {
   url: string
@@ -55,6 +63,24 @@ const props = defineProps<{
 const currentIndex = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
 
+// ---------- 图片预加载 & 骨架状态 ----------
+const imageLoaded = ref<boolean[]>([])
+
+const preloadImages = (images: { url: string }[]) => {
+  imageLoaded.value = new Array(images.length).fill(false)
+  images.forEach((img, idx) => {
+    const image = new Image()
+    image.onload = () => { imageLoaded.value[idx] = true }
+    image.onerror = () => { imageLoaded.value[idx] = true } // 失败也隐藏骨架
+    image.src = img.url
+  })
+}
+
+watch(() => props.images, (newImages) => {
+  preloadImages(newImages)
+}, { immediate: true })
+
+// ---------- 轮播逻辑 ----------
 const nextSlide = () => {
   currentIndex.value = (currentIndex.value + 1) % props.images.length
 }
@@ -67,7 +93,7 @@ const prevSlide = () => {
 const startAutoPlay = () => {
   if (props.images.length <= 1) return
   stopAutoPlay()
-  timer = setInterval(nextSlide,4000)
+  timer = setInterval(nextSlide, 4000)
 }
 
 const stopAutoPlay = () => {
@@ -77,7 +103,6 @@ const stopAutoPlay = () => {
   }
 }
 
-// 鼠标悬停暂停轮播
 const onMouseEnter = () => stopAutoPlay()
 const onMouseLeave = () => startAutoPlay()
 
@@ -128,20 +153,64 @@ onUnmounted(() => {
   background: #fff;
 }
 
-/* 图片区域（默认全屏） */
+/* ========= 图片区域（绝对定位） ========= */
 .property-image {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   transition: height 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
-/* 描述区域（默认高度 0 隐藏） */
+/* 真实背景图层 */
+.bg-img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.bg-visible {
+  opacity: 1;
+}
+
+/* 骨架层 */
+.skeleton-img {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f5f5f5 50%,
+    #e0e0e0 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.skeleton-hidden {
+  opacity: 0;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ========= 描述区域 ========= */
 .property-description {
   position: absolute;
   bottom: 0;
@@ -158,6 +227,7 @@ onUnmounted(() => {
   box-sizing: border-box;
   transition: height 0.4s cubic-bezier(0.645, 0.045, 0.355, 1),
               padding 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+  z-index: 1;
 }
 
 .property-description p {
@@ -183,7 +253,7 @@ onUnmounted(() => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
   border: none;
   width: 40px;
   height: 40px;

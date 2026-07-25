@@ -2,7 +2,18 @@
   <div class="info-card">
     <!-- 头像 -->
     <div class="avatar-wrapper">
-      <img class="avatar" src="@/assets/me.jpg" loading="lazy" alt="头像" />
+      <!-- 骨架层 -->
+      <div :class="['skeleton-avatar', { 'skeleton-hidden': avatarLoaded }]"></div>
+      <!-- 真实头像 -->
+      <img
+        class="avatar"
+        :class="{ 'avatar-visible': avatarLoaded }"
+        src="@/assets/me.jpg"
+        loading="lazy"
+        alt="头像"
+        @load="avatarLoaded = true"
+        @error="avatarLoaded = true"
+      />
     </div>
     <!-- 昵称 -->
     <div class="name">一路向北</div>
@@ -46,7 +57,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 
+const avatarLoaded = ref(false)
 </script>
 
 <style scoped>
@@ -69,6 +82,7 @@
 
 /* ===== 头像 ===== */
 .avatar-wrapper {
+  position: relative;               /* 为骨架层提供定位基准 */
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
@@ -79,11 +93,51 @@
   margin-bottom: 4px;
 }
 
+/* 头像骨架层 */
+.skeleton-avatar {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f5f5f5 50%,
+    #e0e0e0 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.skeleton-hidden {
+  opacity: 0;
+}
+
+/* 真实头像 */
 .avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.avatar-visible {
+  opacity: 1;
+}
+
+/* 骨架动画定义（与其他组件统一） */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ===== 昵称 ===== */

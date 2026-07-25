@@ -254,6 +254,7 @@ onUnmounted(() => {
 .card__date {
   font-size: 12px;
   color: #999;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   margin-bottom: 8px;
 }
 .card__excerpt {

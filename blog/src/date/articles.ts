@@ -23,6 +23,7 @@ import md10 from './md/10.md?raw'
 import md11 from './md/11.md?raw'
 import md12 from './md/12.md?raw'
 import md13 from './md/13.md?raw'
+import md14 from './md/14.md?raw'
 
 export const articles: Article[] = [
   {
@@ -38,7 +39,7 @@ export const articles: Article[] = [
   },
   {
     id: 2,
-    title: '论新手写的第一个网页能有多shit',
+    title: '新手村的第一个BOSS',
     type: '复盘',
     date: '2026-06-16',
     readTime: '2 minutes',
@@ -71,7 +72,7 @@ export const articles: Article[] = [
   },
     {
     id: 5,
-    title: '主页的双网页视图,深色遮罩',
+    title: '双网页视图,深色遮罩',
     type: '前端',
     date: '2026-06-27',
     readTime: '10 minutes',
@@ -82,7 +83,7 @@ export const articles: Article[] = [
   },
       {
     id: 6,
-    title: '几个悬停,入场动画效果如何实现',
+    title: '悬停,入场动画效果',
     type: '前端',
     date: '2026-06-30',
     readTime: '3 minutes',
@@ -148,24 +149,35 @@ export const articles: Article[] = [
   },
   {
     id: 12,
-    title: '网页数据的存储方式和骨架加载',
+    title: '数据的存储方式和骨架加载',
     type: '后端',
-    date: '2026-07-20',
+    date: '2026-07-18',
     readTime: '20 minutes',
     excerpt: '对图片,字体,音频及基本数据处理方式的经验之谈,夹带骨架屏的加载动画实现效果',
     tags: ['数据库', '数据'],
-    cover: '/messages/12/robot.webp',
+    cover: '/messages/12/big.webp',
     content:md12,
   },
   {
     id: 13,
+    title: '磁盘清理方法焚诀',
+    type: '杂谈',
+    date: '2026-07-22',
+    readTime: '10 minutes',
+    excerpt: '难道说你的C盘又、又、又、又爆红啦?',
+    tags: ['win11', '磁盘','焚诀'],
+    cover: '/messages/13/robot.webp',
+    content:md13,
+  },
+  {
+    id: 14,
     title: '论我的学生时代',
     type: '杂谈',
-    date: '2026-07-23',
+    date: '2026-07-26',
     readTime: '10 minutes',
-    excerpt: '回想过去一直想对高中,应试,过去等等表达些什么,实际却总是沉默,感受也断断续续,还是写出来心安一些',
-    tags: ['高中', '思想','加密'],
-    cover: '/messages/13/lost.webp',
-    content:md13,
+    excerpt: '找到逆转时间的公式,然后彻底接受失去',
+    tags: ['高中', '感想'],
+    cover: '/messages/14/figure.webp',
+    content:md14,
   },
 ]

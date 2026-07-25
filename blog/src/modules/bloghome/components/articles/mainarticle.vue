@@ -28,6 +28,8 @@ const articlesContainerRef = ref<HTMLElement | null>(null)
 const contentTopRef = ref<HTMLElement | null>(null)
 const searchKeyword = ref('')
 
+const imageLoaded = ref<Record<number, boolean>>({})
+
 // ===== 分页逻辑 =====
 const currentPage = ref(globalSavedPage)
 const pageSize = ref(6)
@@ -54,6 +56,10 @@ watch(searchKeyword, () => {
   currentPage.value = 1
   scrollToArticles()
 })
+
+const onImageLoad = (articleId: number) => {
+  imageLoaded.value[articleId] = true
+}
 
 const sortedArticles = computed(() =>
   [...allArticles].sort((a, b) => {
@@ -213,21 +219,29 @@ watch(paginatedArticles, (newArticles) => {
               index % 2 === 0 ? 'horizontal' : 'reverse-horizontal',
               { 'animate__animated animate__bounceIn fast-enter': animatedIds.has(article.id) }
             ]" :data-article-id="article.id" @click="goToArticle(article.id)">
-              <img v-if="article.cover" :src="article.cover" class="card__img" />
+              <div v-if="article.cover" class="card__img-wrapper">
+                <!-- 骨架：始终存在，通过类名控制淡出 -->
+                <div :class="['skeleton-img', { 'skeleton-hidden': imageLoaded[article.id] }]"></div>
+                <!-- 图片：始终存在，加载完成后显示 -->
+                <img :src="article.cover" class="card__img" :class="{ 'img-visible': imageLoaded[article.id] }"
+                  @load="onImageLoad(article.id)" @error="onImageLoad(article.id)" />
+              </div>
               <div v-else class="card__img placeholder-img">暂无封面</div>
               <div class="card__content">
                 <div class="card__title">{{ article.title }}</div>
-<div class="card__info-bar">
-  <div class="card__date">{{ article.date }}</div>
-  <div class="card__views">
-    <!-- 替换为您的 SVG -->
-    <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24" style="flex-shrink: 0;">
-      <path d="M0 0h24v24H0z" fill="none" />
-      <path fill="currentColor" d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5" />
-    </svg>
-    {{ articleViews[article.id] ?? 0 }}
-  </div>
-</div>
+                <div class="card__info-bar">
+                  <div class="card__date">{{ article.date }}</div>
+                  <div class="card__views">
+                    <!-- 替换为您的 SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"
+                      style="flex-shrink: 0;">
+                      <path d="M0 0h24v24H0z" fill="none" />
+                      <path fill="currentColor"
+                        d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5" />
+                    </svg>
+                    {{ articleViews[article.id] ?? 0 }}
+                  </div>
+                </div>
                 <div class="card__excerpt">{{ article.excerpt }}</div>
                 <div class="card__tags">
                   <span v-for="tag in article.tags" :key="tag" class="tag">
@@ -255,7 +269,7 @@ watch(paginatedArticles, (newArticles) => {
   </div>
 </template>
 
-<style scoped>
+<<style scoped>
 /* ========= 全局布局 ========= */
 .app-page-wrapper {
   position: relative;
@@ -338,13 +352,51 @@ watch(paginatedArticles, (newArticles) => {
   flex-direction: row-reverse;
 }
 
-.card.horizontal .card__img,
-.card.reverse-horizontal .card__img {
+/* ========= 图片包裹容器及骨架屏 ========= */
+.card.horizontal .card__img-wrapper,
+.card.reverse-horizontal .card__img-wrapper {
   width: 40%;
-  aspect-ratio: 16 / 9;    
-  object-fit: cover;       
-  height: auto;           
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background: #f0f0f0;
+  /* 图片加载前的底色 */
 }
+
+.skeleton-img {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(90deg,
+      #e0e0e0 25%,
+      #f5f5f5 50%,
+      #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 图片填满容器 */
+.card__img-wrapper .card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+/* 无封面占位 */
 .placeholder-img {
   width: 40%;
   aspect-ratio: 16 / 9;
@@ -354,7 +406,42 @@ watch(paginatedArticles, (newArticles) => {
   justify-content: center;
   color: #999;
 }
-/* ========= 重新调整卡片内容区 ========= */
+
+/* 骨架屏添加过渡 */
+.skeleton-img {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  /* 新增过渡 */
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.skeleton-hidden {
+  opacity: 0;
+  pointer-events: none;  /* 避免遮挡下方元素交互 */
+}
+
+/* 图片初始透明，加载完成后显现 */
+.card__img-wrapper .card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: relative;
+  z-index: 1;
+  /* 新增过渡 */
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.img-visible {
+  opacity: 1 !important;
+}
+/* ========= 卡片内容区 ========= */
 .card.horizontal .card__content,
 .card.reverse-horizontal .card__content {
   width: 60%;
@@ -378,7 +465,7 @@ watch(paginatedArticles, (newArticles) => {
   font-family: 'YouSheBiaoTiHei';
   font-size: 12px;
   color: #9CA3AF;
-  margin-bottom: 0;  
+  margin-bottom: 0;
   display: flex;
   align-items: center;
 }
@@ -387,7 +474,7 @@ watch(paginatedArticles, (newArticles) => {
   font-family: 'WenQuanWeiMiHei';
   font-size: 15px;
   font-weight: normal;
-  color:#4B5563;
+  color: #4B5563;
   line-height: 1.6;
   margin-bottom: 16px;
   display: -webkit-box;
@@ -427,26 +514,25 @@ watch(paginatedArticles, (newArticles) => {
   transform: scale(1.15);
 }
 
-
 .card__info-bar {
   display: flex;
   align-items: center;
-  gap: 15px;      /* 日期和浏览量之间的间距 */
-  margin-bottom: 12px; /* 原本 date 的下边距移到这里 */
+  gap: 15px;
+  margin-bottom: 12px;
 }
 
-/* 2. 修改原本的 card__views 样式 */
 .card__views {
-  margin-top: 0;   /* 清除原本的 margin-top: 8px */
+  margin-top: 0;
   font-family: 'YouSheBiaoTiHei';
-  font-size: 12px; /* 调小一点，跟日期匹配 */
-  color:#9CA3AF;
+  font-size: 12px;
+  color: #9CA3AF;
   font-weight: normal;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
+/* ========= 分页 ========= */
 .pagination {
   display: flex;
   justify-content: center;
@@ -500,9 +586,9 @@ watch(paginatedArticles, (newArticles) => {
 .scrollable-content {
   overflow-x: hidden;
   overflow-y: auto;
-
 }
 
+/* ========= 响应式 ========= */
 @media (max-width: 768px) {
   .main-body {
     padding: 80px 5% 40px 5%;
@@ -517,10 +603,15 @@ watch(paginatedArticles, (newArticles) => {
     flex-direction: column !important;
   }
 
-  .card.horizontal .card__img,
-  .card.reverse-horizontal .card__img {
+  .card.horizontal .card__img-wrapper,
+  .card.reverse-horizontal .card__img-wrapper {
     width: 100%;
     height: 160px;
+  }
+
+  .card.horizontal .card__img,
+  .card.reverse-horizontal .card__img {
+    height: 100%;
   }
 
   .card.horizontal .card__content,

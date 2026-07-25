@@ -11,25 +11,30 @@
   <div class="article-page" v-if="article">
     <main>
       <div class="content" ref="contentRef">
-        <!-- 全幅封面图（出血至屏幕边缘） -->
+        
+        <!-- 1. 封面（最大视觉） -->
         <div class="hero-image">
           <img :src="article.cover" alt="cover" />
         </div>
 
+        <!-- 2. 标题（第二视觉） -->
         <h1 class="article-title">{{ article.title }}</h1>
+        
+        <!-- 3. 日期（辅助） -->
         <div class="meta">
           <span>{{ article.date }}</span>
         </div>
 
-        <!-- 标签放在标题下方左侧 -->
+        <!-- 4. 标签 -->
         <div class="tags" v-if="article.tags.length">
           <span class="tag" v-for="tag in article.tags" :key="tag">{{ tag }}</span>
         </div>
 
-        <!-- 正文 -->
+        <!-- 5. 正文 -->
         <div class="markdown-body" v-html="renderedContent" @click="handleMarkdownClick"></div>
       </div>
       
+      <!-- 右侧悬浮目录 -->
       <aside class="toc" v-if="headings.length">
         <div class="toc__header">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 80 80">
@@ -43,16 +48,16 @@
           </svg>
           <span class="toc__title">目录</span>
         </div>
-<a v-for="(h, i) in headings" 
-   :key="i" 
-   class="toc__item" 
-   :class="{ 'toc__item--active': activeHeading === i }"  
-   :style="{ paddingLeft: (h.level - 1) * 12 + 'px',
-            fontSize: (20 - h.level * 2) + 'px'
-   }"       对应缩进和字的大小不同
-   @click.prevent="scrollToHeading(i)">
-  {{ h.text }}
-</a>
+        <a v-for="(h, i) in headings" 
+          :key="i" 
+          class="toc__item" 
+          :class="{ 'toc__item--active': activeHeading === i }"  
+          :style="{ paddingLeft: (h.level - 1) * 12 + 'px',
+                    fontSize: (20 - h.level * 2) + 'px'
+          }" 
+          @click.prevent="scrollToHeading(i)">
+          {{ h.text }}
+        </a>
       </aside>
     </main>
   </div>
@@ -60,6 +65,7 @@
   <div class="not-found" v-else>
     <p>文章未找到</p>
   </div>
+  
   <Teleport to="body">
     <div
       v-if="previewVisible"
@@ -73,7 +79,7 @@
 
 <script setup lang="ts">
 import axios from 'axios'  
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 
@@ -85,9 +91,8 @@ import type { Article } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import { articleScrollCache } from '@/router/index'
 
-
+// --- Markdown 配置保持不变 ---
 const md = new MarkdownIt({ html: true })
-
 md.renderer.rules.fence = function (tokens, idx) {
   const token = tokens[idx]
   if (!token) return ''
@@ -95,14 +100,12 @@ md.renderer.rules.fence = function (tokens, idx) {
   const code = token.content || ''
   const rawLang = (token.info || '').trim()
   
-  // 用于 UI 标题显示，保留大写（比如 C++）
   const displayLang = rawLang.toUpperCase() || 'CODE'
 
-  // 用于 Highlight.js 处理，全部转小写，并映射特殊语言名
   let hljsLang = rawLang.toLowerCase()
   if (hljsLang === 'c++') hljsLang = 'cpp'
   else if (hljsLang === 'c#') hljsLang = 'csharp'
-  else if (hljsLang === 'vue') hljsLang = 'xml' // Vue 借用 xml 渲染最好
+  else if (hljsLang === 'vue') hljsLang = 'xml' 
 
   let highlightedCode = ''
   if (hljsLang && hljs.getLanguage(hljsLang)) {
@@ -112,11 +115,9 @@ md.renderer.rules.fence = function (tokens, idx) {
       highlightedCode = md.utils.escapeHtml(code)
     }
   } else {
-    // 找不到对应语言，直接转义文本
     highlightedCode = md.utils.escapeHtml(code)
   }
 
-  // 此时使用的 class="hljs ${hljsLang}" 绝对安全，不会包含加号
   return `
     <div class="code-editor">
       <div class="header">
@@ -136,10 +137,7 @@ md.renderer.rules.fence = function (tokens, idx) {
     </div>
   `
 }
-// 🌟🌟🌟 结束 🌟🌟🌟
 
-
-// 🌟🌟🌟 剪贴板复制逻辑 🌟🌟🌟
 async function handleCopy(e: MouseEvent) {
   const target = e.target as HTMLElement
   const btn = target.closest('.copy-btn') as HTMLElement
@@ -163,7 +161,6 @@ async function handleCopy(e: MouseEvent) {
 const route = useRoute()
 const article = ref<Article | null>(null)
 
-// 🌟 纯原生正则：自动在中文和英文/数字之间加空格，永不报错！
 function addSpacing(text: string): string {
   if (!text) return ''
   return text
@@ -173,37 +170,48 @@ function addSpacing(text: string): string {
 
 const renderedContent = computed(() => {
   if (!article.value) return ''
-  // 使用纯原生正则处理文本
   const spacedContent = addSpacing(article.value.content)
   return md.render(spacedContent)
 })
+
 const contentRef = ref<HTMLElement | null>(null)
-const headings = ref<{ text: string; level: number; el: HTMLElement }[]>([])
+
+// 🌟 优化 1：去掉 DOM 对象，只存轻量级的数据用于视图渲染
+const headings = ref<{ text: string; level: number }[]>([])
+// 单独用一个普通数组存 DOM 节点，避免 Vue 响应式代理 DOM 造成的性能卡顿
+let headingElements: HTMLElement[] = []
 const activeHeading = ref(-1)
 
-function buildHeadings() {
+// 🌟 优化 2：使用 watch 监听内容变化，实现瞬间渲染
+watch(() => renderedContent.value, async (newVal) => {
+  if (!newVal) return
+  await nextTick() // 等待 v-html 将真实 DOM 渲染完毕
   if (!contentRef.value) return
-  const els = contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2,.markdown-body h3')
-  headings.value = Array.from(els).map(el => ({
-    text: (el as HTMLElement).textContent || '',
-    level: Number((el as HTMLElement).tagName.charAt(1)), //charAt是获取索引为1的元素(H1则拿1)
-    el: el as HTMLElement
+
+  const els = contentRef.value.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3')
+  headingElements = Array.from(els) as HTMLElement[]
+  
+  headings.value = headingElements.map(el => ({
+    text: el.textContent || '',
+    level: Number(el.tagName.charAt(1)) 
   }))
-}
+
+  handleScroll() // 立即初始化一下高亮状态
+}, { immediate: true })
 
 function scrollToHeading(index: number) {
-  const h = headings.value[index]
-  if (!h) return
-  const top = h.el.getBoundingClientRect().top + window.scrollY - 80
+  const el = headingElements[index] // 从普通数组取 DOM
+  if (!el) return
+  const top = el.getBoundingClientRect().top + window.scrollY - 80
   window.scrollTo({ top, behavior: 'smooth' })
 }
 
 function handleScroll() {
-  if (headings.value.length === 0) return
+  if (headingElements.length === 0) return
   const midline = window.innerHeight / 2
   let active = -1
-  headings.value.forEach((h, i) => {
-    const rect = h.el.getBoundingClientRect()
+  headingElements.forEach((el, i) => {
+    const rect = el.getBoundingClientRect()
     if (rect.top <= midline) active = i
   })
   activeHeading.value = active
@@ -217,21 +225,14 @@ onBeforeRouteLeave((to, from, next) => {
   next()
 })
 
-
-onMounted(async () => {
+onMounted(() => {
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
 
-  try {
-  await axios.post(`http://localhost:8080/api/views/${id}/increment`)
-    console.log(`✅ 文章 ${id} 浏览量 +1`)
-  } catch (err) {
+  // 🌟 优化 3：不要 await 接口请求，让它在后台异步执行，不阻塞 UI 渲染
+  axios.post(`http://localhost:8080/api/views/${id}/increment`).catch(err => {
     console.error('❌ 增加浏览量失败', err)
-  }
-
-  await nextTick()
-  buildHeadings()
-  handleScroll()
+  })
 
   window.addEventListener('scroll', handleScroll)
   cleanupScroll = () => {
@@ -246,35 +247,22 @@ onMounted(async () => {
   }
 })
 
-
 onUnmounted(() => {
   cleanupScroll?.()
 })
 
-
+// --- 图片预览逻辑保持不变 ---
 const previewVisible = ref(false)
 const previewSrc = ref('')
-
-// 图片后缀匹配规则（根据你的笔记格式调整）
 const IMAGE_EXTENSIONS = /\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i
-
-// 关闭预览
-function closePreview() {
-  previewVisible.value = false
-}
-
-// 🌟 统一的事件处理：复制代码 + 图片预览
+function closePreview() { previewVisible.value = false }
 function handleMarkdownClick(e: MouseEvent) {
-  // 1. 首先处理复制按钮（原有逻辑）
   handleCopy(e)
-
-  // 2. 处理图片链接点击
   const link = (e.target as HTMLElement).closest('a')
   if (!link) return
-
   const href = link.getAttribute('href')
   if (href && IMAGE_EXTENSIONS.test(href)) {
-    e.preventDefault()               // 阻止浏览器跳转
+    e.preventDefault()
     previewSrc.value = href
     previewVisible.value = true
   }
@@ -282,8 +270,6 @@ function handleMarkdownClick(e: MouseEvent) {
 </script>
 
 <style>
-
-/* 正文内图片居中、圆角 */
 .markdown-body img {
   display: block;
   margin: 1.5em auto;
@@ -291,7 +277,6 @@ function handleMarkdownClick(e: MouseEvent) {
   border-radius: 8px;
 }
 
-/* 覆盖导航栏背景，使其与文章详情页的新拟态风格一致 */
 .navbar {
   background: #e0e0e0 !important;
   backdrop-filter: none !important;
@@ -326,7 +311,7 @@ main {
 .content {
   margin: 0 auto 0;
   padding: 0 60px 80px;
-  max-width: 1000px;
+  max-width: 1200px;
   width: 100%;
   background: #e0e0e0;
   min-height: calc(100vh - 140px);
@@ -335,54 +320,65 @@ main {
   overflow: visible;
 }
 
-/* ---------- 全幅封面图 ---------- */
+/* ========================================================
+   🌟 精准间距与排版 (封面 -> 标题 -> 日期 -> Tag -> 正文) 
+   ======================================================== */
+
+/* 1. 封面 */
 .hero-image {
   position: relative;
-  left: 50%;
-  margin-left: -50vw;
-  width: 100vw;
-  max-height: 350px;
-  overflow: hidden;
-  margin-bottom: 2em;
-  border-radius: 0;
+  width: 100%;
+  margin-top: 40px;
+  margin-bottom: 40px; /* 距离下方标题: 40px */
+  padding: 12px;
+  background: #e0e0e0;
+  border-radius: 24px;
+  box-shadow: inset 8px 8px 16px #bebebe, inset -8px -8px 16px #ffffff;
+  height: auto; 
+  overflow: visible;
 }
 
 .hero-image img {
   width: 100%;
-  height: auto;
-  max-height: 350px;
-  object-fit: cover;
+  height: auto !important;         /* 高度自适应，不裁剪 */
+  max-height: none !important;     
+  object-fit: contain !important;  
   display: block;
+  border-radius: 12px;
+  box-shadow: 4px 4px 8px rgba(0,0,0,0.1);
 }
 
+/* 2. 标题 */
 .article-title {
   font-family: 'ShangShouJiangHuShuFa', sans-serif;
   font-size: clamp(2rem, 4vw + 1rem, 6rem);
   font-weight: normal;
   text-align: center;
-  margin: 0.5em 0 0.2em;
+  margin: 0 0 16px 0; /* 距离下方日期: 16px */
   color: #1a1a1a;
   line-height: 1.2;
   position: relative;
   z-index: 1;
 }
 
+/* 3. 日期 */
 .meta {
   color: #888;
   font-size: 14px;
-  margin-bottom: 1em;
+  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  margin: 0 0 20px 0; /* 距离下方Tag: 20px */
   display: flex;
   gap: 12px;
-  justify-content: center;
+  justify-content: center; /* 居中对齐 */
 }
 
-/* ---------- 标签 ---------- */
+/* 4. 标签 */
 .tags {
-  margin: 0 0 2em 0;
+  margin: 0 0 40px 0; /* 距离下方正文: 40px */
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center; /* 与标题/日期保持居中对齐，更和谐 */
   position: relative;
   z-index: 1;
 }
@@ -392,7 +388,7 @@ main {
   color: #000;
   padding: 4px 14px;
   border-radius: 45px;
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 500;
   font-family: 'YouSheBiaoTiHei';
   display: inline-flex;
@@ -414,6 +410,8 @@ main {
   box-shadow: inset 2px 2px 4px #bebebe, inset -2px -2px 4px #ffffff;
 }
 
+/* ======================================================== */
+
 .markdown-body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", 'WenQuanWeiMiHei', sans-serif;
   line-height: 1.8;
@@ -424,7 +422,6 @@ main {
   position: relative;
   z-index: 1;
   letter-spacing: 0.02em;
-
   text-align: justify;
   text-justify: inter-ideograph;
   word-break: break-word;
@@ -462,8 +459,7 @@ main {
 }
 
 
-/* ---------- 🌟 修复后的 Uiverse 代码块样式 🌟 ---------- */
-/* 1. 普通行内小段代码（加深背景，保持原字体） */
+/* ---------- 代码块样式 ---------- */
 .markdown-body :deep(p code),
 .markdown-body :deep(li code),
 .markdown-body :deep(h1 code),
@@ -475,17 +471,15 @@ main {
   font-size: 0.9em;
 }
 
-/* 2. 编辑器外层容器 */
 .markdown-body :deep(.code-editor) {
   max-width: 100%;
-  background-color: #1e1e1e; /* 经典 VS Code 深色底 */
+  background-color: #1e1e1e;
   box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   padding: 2px;
   margin: 1.5em 0;
 }
 
-/* 3. 顶部 Header */
 .markdown-body :deep(.code-editor .header) {
   display: flex;
   align-items: center;
@@ -493,7 +487,6 @@ main {
   margin: 8px 12px;
 }
 
-/* 4. 标题文字（JS, VUE, CSS等） */
 .markdown-body :deep(.code-editor .title) {
   font-family: Lato, 'Open Sans', sans-serif;
   font-weight: 900;
@@ -502,7 +495,6 @@ main {
   color: rgb(212, 212, 212);
 }
 
-/* 5. 复制按钮样式 */
 .markdown-body :deep(.code-editor .copy-btn) {
   position: relative;
   display: flex;
@@ -550,25 +542,21 @@ main {
   transform: translateX(0);
 }
 
-/* 6. 编辑器内容区域 */
 .markdown-body :deep(.code-editor .editor-content) {
   margin: 0 10px 10px;
 }
 
-/* 🌟 7. 彻底修复代码块字体和行距问题 🌟 */
 .markdown-body :deep(.code-editor .editor-content pre) {
   background: transparent !important;
   margin: 0;
   padding: 10px 14px;
   overflow-x: auto;
-  /* 强制使用专业等宽代码字体，拒绝中文字体干扰 */
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace !important;
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #d4d4d4; /* 匹配 vs2015 的文字亮灰色 */
+  color: #d4d4d4; 
 }
 
-/* 确保内部的高亮标签强制继承好看的代码字体 */
 .markdown-body :deep(.code-editor .editor-content pre code.hljs) {
   background: transparent !important;
   padding: 0;
@@ -732,7 +720,6 @@ main {
 
 
 .lightbox-overlay {
-  /* 不设 display:none，因为由 v-if 控制显示 */
   position: fixed;
   z-index: 999;
   top: 0;
@@ -747,19 +734,20 @@ main {
 }
 
 .lightbox-image {
-  /* 与用户提供的 span 表现一致：占满容器但保持比例 */
   max-width: 90vw;
   max-height: 90vh;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
+
 @media (max-width: 1200px) {
   .toc {
     display: none;
   }
 }
 
+/* 移动端适配 */
 @media (max-width: 768px) {
   .content {
     margin: 0 12px 20px;
@@ -768,8 +756,15 @@ main {
   }
 
   .hero-image {
-    max-height: 200px;
-    border-radius: 0;
+    margin-top: 30px;
+    padding: 8px;
+    border-radius: 16px;
+  }
+
+  .hero-image img {
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 10px;
   }
 
   .back-btn {
@@ -777,10 +772,6 @@ main {
     left: 12px;
     padding: 8px 16px;
     font-size: 13px;
-  }
-
-  .hero-image img {
-    max-height: 200px;
   }
 }
 </style>
