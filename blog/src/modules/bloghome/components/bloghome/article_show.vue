@@ -1,3 +1,33 @@
+<template>
+  <div class="articles-section">
+    <TransitionGroup
+      tag="div"
+      name="article-list"
+      class="articles-grid"
+    >
+      <div
+        v-for="(article, index) in displayArticles"
+        :key="article.id"
+        :class="['card', article.layout]"
+        @click="goToArticle(article.id)"
+        @mouseenter="index === 1 ? stopTimer2() : index === 2 ? stopTimer3() : undefined"
+        @mouseleave="index === 1 ? startTimer2() : index === 2 ? startTimer3() : undefined"
+      >
+        <img :src="article.cover" class="card__img" />
+        <div class="card__content">
+          <div class="card__title">{{ article.title }}</div>
+          <div class="card__date">{{ article.date }}</div>
+          <div class="card__excerpt">{{ article.excerpt }}</div>
+          <div class="card__tags">
+            <span v-for="tag in article.tags" :key="tag" class="tag">
+              <i class="fa fa-tag"></i> {{ tag }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </TransitionGroup>
+  </div>
+</template>
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -110,38 +140,6 @@ onUnmounted(() => {
   stopTimer3()
 })
 </script>
-
-<template>
-  <div class="articles-section">
-    <!-- 将原来的 div.articles-grid 改为 TransitionGroup，保留 grid 布局 -->
-    <TransitionGroup
-      tag="div"
-      name="article-list"
-      class="articles-grid"
-    >
-      <div
-        v-for="(article, index) in displayArticles"
-        :key="article.id"
-        :class="['card', article.layout]"
-        @click="goToArticle(article.id)"
-        @mouseenter="index === 1 ? stopTimer2() : index === 2 ? stopTimer3() : undefined"
-        @mouseleave="index === 1 ? startTimer2() : index === 2 ? startTimer3() : undefined"
-      >
-        <img :src="article.cover" class="card__img" />
-        <div class="card__content">
-          <div class="card__title">{{ article.title }}</div>
-          <div class="card__date">{{ article.date }}</div>
-          <div class="card__excerpt">{{ article.excerpt }}</div>
-          <div class="card__tags">
-            <span v-for="tag in article.tags" :key="tag" class="tag">
-              <i class="fa fa-tag"></i> {{ tag }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </TransitionGroup>
-  </div>
-</template>
 
 <style scoped>
 
