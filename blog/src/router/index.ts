@@ -35,11 +35,6 @@ const routes = [
     component: QqContact
   },
   {
-    path: '/wechat',
-    name: 'wechat-contact',
-    component: WechatContact
-  },
-  {
     path: '/player',
     component: MusicPlayer,
     children: [

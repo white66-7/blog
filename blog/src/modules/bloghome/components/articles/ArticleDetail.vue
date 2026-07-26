@@ -395,7 +395,7 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     svgHeight.value = window.innerHeight > 70 ? window.innerHeight - 70 : 800
   })
-  hintTimeoutId = setTimeout(playHintAnimation, 1500)
+  hintTimeoutId = setTimeout(playHintAnimation, 500)
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
   axios.post(`http://localhost:8080/api/views/${id}/increment`).catch(() => { })
