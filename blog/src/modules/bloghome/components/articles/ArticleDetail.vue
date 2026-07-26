@@ -1,5 +1,4 @@
 <template>
-  <!-- 引入自定义导航栏，非透明模式 -->
   <Navbar :transparent="false" />
 
   <button class="back-btn" @click="$router.back()">
@@ -13,21 +12,16 @@
   <div class="article-page" v-if="article">
     <main>
       <div class="content" ref="contentRef">
-        <!-- 1. 封面 -->
         <div class="hero-image">
           <img :src="article.cover" alt="cover" />
         </div>
-        <!-- 2. 标题 -->
         <h1 class="article-title">{{ article.title }}</h1>
-        <!-- 3. 日期 -->
         <div class="meta">
           <span>{{ article.date }}</span>
         </div>
-        <!-- 4. 标签 -->
         <div class="tags" v-if="article.tags.length">
           <span class="tag" v-for="tag in article.tags" :key="tag">{{ tag }}</span>
         </div>
-        <!-- 5. 正文 -->
         <div class="markdown-body" v-html="renderedContent" @click="handleMarkdownClick"></div>
       </div>
     </main>
@@ -36,33 +30,19 @@
     <p>文章未找到</p>
   </div>
 
-  <!-- ============================================== -->
-  <!-- 🌟 精华还原：弹性物理目录侧边栏 (固定在右侧) -->
-  <!-- ============================================== -->
   <div class="elastic-sidebar" :class="{ 'is-open': isOpen }">
-    <!-- SVG：水平镜像翻转，使得原始向右凸的曲线变为向左凸 -->
     <svg class="sidebar-svg" :viewBox="`0 0 350 ${svgHeight}`" preserveAspectRatio="none">
-      <path class="s-path" fill="#e0e0e0" :d="currentPath" @mousedown="startDrag" @touchstart="startDrag" />
+      <path class="s-path" fill="#e3e9ef" :d="currentPath" @mousedown="startDrag" @touchstart="startDrag" />
     </svg>
 
-    <!-- 闭合状态的侧边提示条（拖拽区域） -->
-    <div class="static-hint" :class="{ 'hidden': isOpen || animating }" @click="openSidebar">
-<div class="static-hint__text">
-  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-    <path d="M0 0h24v24H0z" fill="none" />
-    <path fill="currentColor"
-      d="m3.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675T.825 12t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z" />
-  </svg>
-  
-  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-    <path d="M0 0h24v24H0z" fill="none" />
-    <path fill="currentColor"
-      d="m3.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675T.825 12t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z" />
-  </svg>
-</div>
-    </div>
+    <!-- ==== 新增：提示文字 ==== -->
+<transition name="hint-fade">
+  <div class="sidebar-hint-text" v-show="showHintText">
+    目录
+  </div>
+</transition>
+    <!-- ====================================== -->
 
-    <!-- 侧边栏真实的目录内容 -->
     <div class="sidebar-content" :class="{ 'active': isOpen }">
       <div class="toc__header">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 80 80">
@@ -79,6 +59,7 @@
         </svg>
         <span class="toc__title">目录</span>
       </div>
+      
       <div class="toc-list">
         <a v-for="(h, i) in headings" :key="i" class="toc__item" :class="{ 'toc__item--active': activeHeading === i }"
           :style="{ paddingLeft: (h.level - 1) * 12 + 'px', fontSize: (20 - h.level * 2) + 'px' }"
@@ -101,18 +82,14 @@ import axios from 'axios'
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import MarkdownIt from 'markdown-it'
-
 import hljs from 'highlight.js'
 import 'highlight.js/styles/vs2015.css'
-
 import { articles } from '@/date/articles'
 import type { Article } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import { articleScrollCache } from '@/router/index'
+import 'animate.css'
 
-// ==========================================
-// 1. Markdown 配置保持不变
-// ==========================================
 const md = new MarkdownIt({ html: true })
 md.renderer.rules.fence = function (tokens, idx) {
   const token = tokens[idx]
@@ -167,9 +144,6 @@ async function handleCopy(e: MouseEvent) {
   }
 }
 
-// ==========================================
-// 2. 目录生成与滚动侦听逻辑
-// ==========================================
 const route = useRoute()
 const article = ref<Article | null>(null)
 
@@ -210,7 +184,6 @@ function scrollToHeading(index: number) {
 
 function handleTocClick(index: number) {
   scrollToHeading(index)
-  // 点击目录后，不仅要滚动，还要伴随物理回弹动画关掉侧边栏！
   if (isOpen.value) closeSidebar()
 }
 
@@ -225,14 +198,8 @@ function handleScroll() {
   activeHeading.value = active
 }
 
-// =========================================================================
-// 🌟 3. 精髓还原：Elastic Sidebar (结合物理公式的弹性侧边栏)
-// =========================================================================
-
-// 因为顶部有导航栏，我们减去导航栏的高度 (这里假设为 70px)
 const svgHeight = ref(window.innerHeight > 70 ? window.innerHeight - 70 : 800)
 
-// 纯正的原版 Easings 算法
 const easings = {
   smallElastic: function (t: number, b: number, c: number, d: number) {
     let ts = (t /= d) * t
@@ -245,28 +212,29 @@ const easings = {
   }
 }
 
-// 核心参数设定（与原版对应）
-const START_BASE = 40    // 闭合时，露在边缘的宽度
-const OPEN_BASE = 280    // 完全打开时的宽度
-const ANIM_TIME = 600    // 动画基础耗时
+const START_BASE = 40
+const OPEN_BASE = 280
+const ANIM_TIME = 1200
 const FRAME = 1000 / 60
 
-// 响应式维持 SVG Path 的物理状态
 const currentBaseX = ref(START_BASE)
 const currentArcX = ref(0)
 const currentDir = ref(1)
 
-// 实时计算 SVG 的路径
 const currentPath = computed(() => {
   const h = svgHeight.value
-  const arc = Math.abs(currentArcX.value) // 半径必须为正数
+  const arc = Math.abs(currentArcX.value) 
   return `M0,0 ${currentBaseX.value},0 a${arc},${h / 2} 0 1,${currentDir.value} 0,${h} L0,${h}`
 })
 
 let animating = ref(false)
 let isOpen = ref(false)
+let animationFrameId = 0
+let hintTimeoutId: ReturnType<typeof setTimeout> | null = null
+let stayTimeoutId: ReturnType<typeof setTimeout> | null = null // ==== 新增：用于控制停留时间的定时器 ====
+const hasInteracted = ref(false)
+const showHintText = ref(false)
 
-// 通用动画执行器（高度还原）
 function animatePath(
   targetBase: number,
   targetArc: number,
@@ -274,9 +242,9 @@ function animatePath(
   easingFunc: keyof typeof easings,
   callback?: () => void
 ) {
+  cancelAnimationFrame(animationFrameId)
   const steps = Math.floor(time / FRAME)
   let step = 0
-
   const startBase = currentBaseX.value
   const startArc = currentArcX.value
   const diffBase = targetBase - startBase
@@ -286,7 +254,6 @@ function animatePath(
     step++
     currentBaseX.value = easings[easingFunc](step, startBase, diffBase, steps)
     currentArcX.value = easings[easingFunc](step, startArc, diffArc, steps)
-    // 根据拉扯方向更新凹凸圆弧
     currentDir.value = currentArcX.value >= 0 ? 1 : 0
 
     if (step >= steps) {
@@ -294,20 +261,57 @@ function animatePath(
       currentArcX.value = targetArc
       if (callback) callback()
     } else {
-      requestAnimationFrame(tick)
+      animationFrameId = requestAnimationFrame(tick)
     }
   }
-  requestAnimationFrame(tick)
+  animationFrameId = requestAnimationFrame(tick)
 }
 
-// -- 拖拽互动部分 --
+function playHintAnimation() {
+  if (hasInteracted.value || isOpen.value) return
+  animating.value = true
+  
+  showHintText.value = true 
+
+  animatePath(65, 15, 1200, 'smallElastic', () => {
+    if (hasInteracted.value) {
+       showHintText.value = false 
+       return
+    }
+    
+    // ==== 修改：弹出动画结束后，不立刻收回，而是等待 1500 毫秒 ====
+    stayTimeoutId = setTimeout(() => {
+      // 停留期间如果用户操作了，就中断后续操作
+      if (hasInteracted.value) return 
+
+      showHintText.value = false 
+      
+      animatePath(START_BASE, 0, 1600, 'smallElastic', () => {
+        animating.value = false
+        if (!hasInteracted.value && !isOpen.value) {
+          // 收缩完毕后，等待 1500 毫秒后再次循环弹出
+          hintTimeoutId = setTimeout(playHintAnimation, 1500)
+        }
+      })
+    }, 1500) // <-- 这里的 1500 就是目录展开和文字停留在屏幕上的时间，可以根据喜好修改（比如改成 2000 即2秒）
+  })
+}
+
 let startMouseX = 0
 let diffX = 0
 
 function startDrag(e: MouseEvent | TouchEvent) {
-  if (animating.value) return
+  hasInteracted.value = true
+  showHintText.value = false 
+  
+  // ==== 修改：清除所有的定时器 ====
+  if (hintTimeoutId) clearTimeout(hintTimeoutId)
+  if (stayTimeoutId) clearTimeout(stayTimeoutId) // 清除停留定时器
+  
+  cancelAnimationFrame(animationFrameId)
+  animating.value = false
+  if (isOpen.value) return
 
-  // 更加严谨的 TS 类型收窄写法，完美解决 undefined 警告
   if ('touches' in e) {
     startMouseX = e.touches[0]?.pageX ?? 0
   } else {
@@ -322,18 +326,14 @@ function startDrag(e: MouseEvent | TouchEvent) {
 
 function onDragMove(e: MouseEvent | TouchEvent) {
   let pageX = 0
-
-  // 同样使用 'touches' in e 判断并配合可选链与空值合并
   if ('touches' in e) {
     pageX = e.touches[0]?.pageX ?? 0
   } else {
     pageX = (e as MouseEvent).pageX
   }
-
   diffX = startMouseX - pageX
   if (diffX < 0) diffX = 0
   if (diffX > 350) diffX = 350
-
   currentArcX.value = Math.floor(diffX / 2)
   currentDir.value = 1
 }
@@ -345,12 +345,9 @@ function onDragEnd() {
   document.removeEventListener('touchend', onDragEnd)
 
   if (animating.value || !diffX) return
-
-  // 如果没拉扯过界限，回弹回闭合状态
   if (diffX < 40) {
     animatePath(START_BASE, 0, ANIM_TIME, 'smallElastic')
   } else {
-    // 否则直接弹开成目录！
     openSidebar()
   }
 }
@@ -361,7 +358,6 @@ function openSidebar() {
   animatePath(OPEN_BASE, 0, ANIM_TIME, 'smallElastic', () => {
     isOpen.value = true
     animating.value = false
-    // 延迟绑定点击外部关闭事件，防止立即触发
     setTimeout(() => document.addEventListener('click', closeSidebarOutside), 100)
   })
 }
@@ -369,30 +365,24 @@ function openSidebar() {
 function closeSidebar() {
   if (animating.value || !isOpen.value) return
   animating.value = true
-  isOpen.value = false                // 触发 CSS transition 开始淡出
+  isOpen.value = false
   document.removeEventListener('click', closeSidebarOutside)
-
-  // 等待 200ms 内容过渡结束，再开始 SVG 弹性动画
   setTimeout(() => {
-    animatePath(125, -100, ANIM_TIME / 3, 'inCubic', () => {
-      animatePath(START_BASE, 0, (ANIM_TIME / 3) * 2, 'smallElastic', () => {
+    animatePath(125, -100, ANIM_TIME / 1.5, 'inCubic', () => {
+      animatePath(START_BASE, 0, ANIM_TIME * 1.33, 'smallElastic', () => {
         animating.value = false
         diffX = 0
       })
     })
-  }, 200)   // 和 CSS transition 时间一致
+  }, 200)
 }
 
 function closeSidebarOutside(e: MouseEvent) {
   const target = e.target as HTMLElement
-  // 点击弹窗内元素时不关闭
   if (target.closest('.elastic-sidebar')) return
   closeSidebar()
 }
 
-// ==========================================
-// 生命周期与基础事件
-// ==========================================
 let cleanupScroll: () => void = () => { }
 
 onBeforeRouteLeave((to, from, next) => {
@@ -405,15 +395,12 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     svgHeight.value = window.innerHeight > 70 ? window.innerHeight - 70 : 800
   })
-
+  hintTimeoutId = setTimeout(playHintAnimation, 1500)
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
-
   axios.post(`http://localhost:8080/api/views/${id}/increment`).catch(() => { })
-
   window.addEventListener('scroll', handleScroll)
   cleanupScroll = () => { window.removeEventListener('scroll', handleScroll) }
-
   const savedHeight = articleScrollCache.get(id) || 0
   if (savedHeight > 0) {
     requestAnimationFrame(() => window.scrollTo(0, savedHeight))
@@ -423,6 +410,9 @@ onMounted(() => {
 onUnmounted(() => {
   cleanupScroll?.()
   document.removeEventListener('click', closeSidebarOutside)
+  if (hintTimeoutId) clearTimeout(hintTimeoutId)
+  if (stayTimeoutId) clearTimeout(stayTimeoutId) // 清理停留定时器
+  cancelAnimationFrame(animationFrameId)
 })
 
 const previewVisible = ref(false)
@@ -449,9 +439,8 @@ function handleMarkdownClick(e: MouseEvent) {
   max-width: 100%;
   border-radius: 8px;
 }
-
 .navbar {
-  background: #e0e0e0 !important;
+  background: #ececec !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-bottom: none !important;
@@ -460,22 +449,15 @@ function handleMarkdownClick(e: MouseEvent) {
 </style>
 
 <style scoped>
-/* ==========================================================
-   🌟 最精华：弹性物理侧边栏 CSS
-   ========================================================== */
 .elastic-sidebar {
   position: fixed;
   top: 0px;
-  /* 为顶部导航栏留出空间，不会覆盖 */
   right: 0;
   width: 350px;
   height: 100vh;
   z-index: 90;
   pointer-events: none;
-  /* 让未展开区域的鼠标穿透，不影响正文阅读 */
 }
-
-/* 核心技巧：水平翻转 SVG，将本来向右凸的曲线倒转到了左侧边缘！ */
 .sidebar-svg {
   position: absolute;
   top: 0;
@@ -485,65 +467,46 @@ function handleMarkdownClick(e: MouseEvent) {
   transform: scaleX(-1);
   overflow: visible;
 }
-
 .s-path {
   cursor: grab;
   pointer-events: auto;
-  /* SVG 本身要能被拖拽 */
-  /* 加点左侧阴影区分正文，因为被 scaleX(-1) 反转过，这里用负 X 值阴影会在屏幕左侧呈现 */
+  background: #e3e9ef;
   filter: drop-shadow(-10px 0px 20px rgba(0, 0, 0, 0.15));
 }
-
 .s-path:active {
   cursor: grabbing;
 }
-
-/* 提示条（拉扯提示） */
-.static-hint {
+/* 文字的基础样式 */
+.sidebar-hint-text {
   position: absolute;
   top: 50%;
-  right: 50px;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 140px;
-  pointer-events: auto;
-  cursor: pointer;
-  transition: opacity 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.static-hint.hidden {
-  opacity: 0;
+  right: 18px; /* 距离右侧的距离 */
+  /* 显式声明 X 和 Y，防止冲突 */
+  transform: translateY(-50%) translateX(0); 
+  font-family: 'YouSheBiaoTiHei', sans-serif;
+  font-size: 16px;
+  color: #219653;
+  writing-mode: vertical-rl;
+  letter-spacing: 4px;
   pointer-events: none;
+  z-index: 10;
 }
 
-.static-hint__text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 260px; 
-  color: white;
-  font-size: 50px;
-  animation: pulseHint 2s infinite;
+/* === 自定义进出动画 === */
+/* 进场和退场的过程（时间设置为 0.8s，配合弹动曲线） */
+.hint-fade-enter-active,
+.hint-fade-leave-active {
+  /* 使用 cubic-bezier 让文字也带有一点点弹性感觉 */
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes pulseHint {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  50% {
-    transform: translateX(-5px);
-  }
-
-  /* 向左浮动提示 */
+/* 进场前 和 退场后 的状态 */
+.hint-fade-enter-from,
+.hint-fade-leave-to {
+  opacity: 0;
+  /* 保持 Y轴居中不变，X轴向右偏移 30px（藏进屏幕右侧） */
+  transform: translateY(-50%) translateX(30px);
 }
-
-/* 真实的目录内容 */
 .sidebar-content {
   position: absolute;
   top: 40px;
@@ -551,6 +514,7 @@ function handleMarkdownClick(e: MouseEvent) {
   width: 280px;
   height: 100%;
   padding: 40px 20px;
+  background: #edf2f7;
   opacity: 0;
   z-index: -1;
   overflow-y: auto;
@@ -558,21 +522,15 @@ function handleMarkdownClick(e: MouseEvent) {
   transition: opacity 200ms ease, transform 200ms ease;
   transform: translateX(20px);
 }
-
 .sidebar-content.active {
   opacity: 1;
   z-index: 2;
   transform: translateX(0);
   pointer-events: auto;
 }
-
 .sidebar-content::-webkit-scrollbar {
   display: none;
 }
-
-/* 隐藏滚动条 */
-
-/* 新拟态目录项 */
 .toc__header {
   display: flex;
   align-items: center;
@@ -581,20 +539,17 @@ function handleMarkdownClick(e: MouseEvent) {
   padding-bottom: 15px;
   border-bottom: 2px dashed #bebebe;
 }
-
 .toc__title {
   font-family: 'YouSheBiaoTiHei';
   font-size: 24px;
   color: #1a1a1a;
 }
-
 .toc-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-bottom: 50px;
 }
-
 .toc__item {
   display: block;
   color: #212121;
@@ -607,75 +562,60 @@ function handleMarkdownClick(e: MouseEvent) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* 应用和原页面一致的气泡质感 */
-  background: #e0e0e0;
+  background: #edf2f7;
   box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;
 }
-
 .toc__item:hover {
   background-color: #23c483;
-  color: #fff;
+  color: #1a1a1a;
   transform: translateX(-5px);
-  /* 悬浮时略微向外凸出 */
 }
-
 .toc__item--active {
   background-color: #23c483;
   color: #fff;
   box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15);
-  /* 内阴影按下去的感觉 */
 }
-
-
-/* ==========================================================
-   页面其他正文及返回按钮 CSS (保持你的气泡设计)
-   ========================================================== */
 .article-page {
   min-height: 100vh;
-  background: #e0e0e0;
+  background: #ececec;
   position: relative;
   z-index: 10;
   font-weight: 400;
   padding-top: 1px;
 }
-
 .article-page *,
 .content *,
 .markdown-body * {
   user-select: text !important;
   -webkit-user-select: text !important;
 }
-
 main {
   display: flex;
   position: relative;
 }
-
 .content {
   margin: 0 auto 0;
   padding: 0 60px 80px;
   max-width: 1400px;
   width: 100%;
-  background: #e0e0e0;
+  background: #fafafa;
   min-height: calc(100vh - 140px);
   border-radius: 0 0 30px 30px;
-  box-shadow: 15px 15px 30px #bebebe, -15px -15px 30px #ffffff;
+box-shadow: 0 0 30px rgba(0,0,0,0.08);
   overflow: visible;
 }
-
 .hero-image {
   position: relative;
   width: 100%;
   margin-top: 40px;
   margin-bottom: 40px;
   padding: 12px;
-  background: #e0e0e0;
+  background: #fafafa;
   border-radius: 24px;
   box-shadow: inset 8px 8px 16px #bebebe, inset -8px -8px 16px #ffffff;
   height: auto;
   overflow: visible;
 }
-
 .hero-image img {
   width: 100%;
   height: auto !important;
@@ -685,7 +625,6 @@ main {
   border-radius: 12px;
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 .article-title {
   font-family: 'ShangShouJiangHuShuFa', sans-serif;
   font-size: clamp(2rem, 4vw + 1rem, 6rem);
@@ -697,7 +636,6 @@ main {
   position: relative;
   z-index: 1;
 }
-
 .meta {
   color: #888;
   font-size: 14px;
@@ -707,7 +645,6 @@ main {
   gap: 12px;
   justify-content: center;
 }
-
 .tags {
   margin: 0 0 40px 0;
   display: flex;
@@ -717,9 +654,8 @@ main {
   position: relative;
   z-index: 1;
 }
-
 .tag {
-  background: #e0e0e0;
+  background: #ececec;
   color: #000;
   padding: 4px 14px;
   border-radius: 45px;
@@ -733,14 +669,12 @@ main {
   transition: all 0.3s ease;
   cursor: default;
 }
-
 .tag:hover {
   background-color: #23c483;
   color: #fff;
   box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
   transform: translateY(-7px);
 }
-
 .markdown-body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", 'WenQuanWeiMiHei', sans-serif;
   line-height: 1.8;
@@ -755,7 +689,6 @@ main {
   text-justify: inter-ideograph;
   word-break: break-word;
 }
-
 .markdown-body :deep(h1) {
   font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
@@ -764,7 +697,6 @@ main {
   margin: 1.5em 0 0.5em;
   line-height: 1.3;
 }
-
 .markdown-body :deep(h2) {
   font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
@@ -772,11 +704,9 @@ main {
   margin: 0.6em 0 0.5em;
   line-height: 1.3;
 }
-
 .markdown-body :deep(p) {
   margin-bottom: 1.25rem;
 }
-
 .markdown-body :deep(blockquote) {
   border-left: 4px solid #bebebe;
   padding-left: 16px;
@@ -786,7 +716,6 @@ main {
   border-radius: 0 12px 12px 0;
   padding: 12px 16px;
 }
-
 .markdown-body :deep(p code),
 .markdown-body :deep(li code),
 .markdown-body :deep(h1 code),
@@ -797,7 +726,6 @@ main {
   border-radius: 4px;
   font-size: 0.9em;
 }
-
 .markdown-body :deep(.code-editor) {
   max-width: 100%;
   background-color: #1e1e1e;
@@ -806,14 +734,12 @@ main {
   padding: 2px;
   margin: 1.5em 0;
 }
-
 .markdown-body :deep(.code-editor .header) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 8px 12px;
 }
-
 .markdown-body :deep(.code-editor .title) {
   font-family: Lato, 'Open Sans', sans-serif;
   font-weight: 900;
@@ -821,7 +747,6 @@ main {
   letter-spacing: 1.57px;
   color: rgb(212, 212, 212);
 }
-
 .markdown-body :deep(.code-editor .copy-btn) {
   position: relative;
   display: flex;
@@ -836,16 +761,13 @@ main {
   transition: all 0.2s ease;
   font-size: 20px;
 }
-
 .markdown-body :deep(.code-editor .copy-btn:hover) {
   background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
-
 .markdown-body :deep(.code-editor .copy-btn.copied svg) {
   color: #23c483;
 }
-
 .markdown-body :deep(.code-editor .copy-btn .copy-tips) {
   position: absolute;
   right: 36px;
@@ -859,12 +781,10 @@ main {
   transition: all 0.3s ease;
   pointer-events: none;
 }
-
 .markdown-body :deep(.code-editor .copy-btn.copied .copy-tips) {
   opacity: 1;
   transform: translateX(0);
 }
-
 .markdown-body :deep(.code-editor .editor-content pre) {
   background: transparent !important;
   margin: 0;
@@ -875,12 +795,10 @@ main {
   line-height: 1.6;
   color: #d4d4d4;
 }
-
 .markdown-body :deep(.code-editor .editor-content pre code.hljs) {
   background: transparent !important;
   padding: 0;
 }
-
 .markdown-body :deep(a) {
   color: #23c483;
   text-decoration: none;
@@ -889,7 +807,6 @@ main {
   padding: 0 2px;
   transition: color 0.3s ease;
 }
-
 .markdown-body :deep(a)::after {
   content: '';
   position: absolute;
@@ -903,17 +820,13 @@ main {
   transition: transform 0.3s ease-out;
   border-radius: 2px;
 }
-
 .markdown-body :deep(a):hover {
   color: #1a9f68;
 }
-
 .markdown-body :deep(a):hover::after {
   transform: scaleX(1);
   transform-origin: bottom left;
 }
-
-/* 既然侧边栏挪到了右边，后退按钮放回左侧最舒服 */
 .back-btn {
   position: fixed;
   top: 80px;
@@ -921,7 +834,7 @@ main {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #e0e0e0;
+  background: #ececec;
   color: #1a1a1a;
   border: none;
   padding: 10px 20px;
@@ -934,16 +847,13 @@ main {
   box-shadow: 6px 6px 12px #bebebe, -6px -6px 12px #ffffff;
   transition: all 0.3s ease;
 }
-
 .back-btn:hover {
   box-shadow: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
   color: #e05a5a;
 }
-
 .back-btn:active {
   transform: scale(0.96);
 }
-
 .lightbox-overlay {
   position: fixed;
   z-index: 999;
@@ -957,7 +867,6 @@ main {
   align-items: center;
   justify-content: center;
 }
-
 .lightbox-image {
   max-width: 90vw;
   max-height: 90vh;
@@ -965,37 +874,31 @@ main {
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
-
 .not-found {
   text-align: center;
   margin-top: 200px;
   color: #999;
 }
-
 @media (max-width: 768px) {
   .content {
     margin: 0 12px 20px;
     padding: 0 20px 60px;
     border-radius: 20px;
   }
-
   .hero-image {
     margin-top: 30px;
     padding: 8px;
     border-radius: 16px;
   }
-
   .hero-image img {
     border-radius: 10px;
   }
-
   .back-btn {
     top: 80px;
     left: 12px;
     padding: 8px 16px;
     font-size: 13px;
   }
-
   .elastic-sidebar {
     top: 60px;
     height: calc(100vh - 60px);
