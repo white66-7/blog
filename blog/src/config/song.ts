@@ -16,25 +16,33 @@ export const songs: PresetSong[] = [
     src: '/audio/No Bad Grades.mp3', 
     isPreset: true
   },
-  {
+        {
     id: 'preset_2',
+    name: 'coffee',
+    artist: 'Corn Wave', 
+    src: '/audio/Corn Wave - coffee.mp3', 
+    isPreset: true
+  },
+  {
+    id: 'preset_3',
     name: 'Stay Alive',
     artist: '纯音乐', 
     src: '/audio/Stay Alive.mp3', 
     isPreset: true
   },
     {
-    id: 'preset_3',
+    id: 'preset_4',
     name: 'Ahead of Us',
     artist: '小瀬村晶', 
     src: '/audio/Ahead of Us.mp3', 
     isPreset: true
   },
       {
-    id: 'preset_4',
+    id: 'preset_5',
     name: '深海',
     artist: '刘森', 
     src: '/audio/刘森 - 深海.mp3', 
     isPreset: true
   },
+
 ];
