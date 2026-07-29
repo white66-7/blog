@@ -169,6 +169,17 @@ export const articles: Article[] = [
     cover: '/messages/13/robot.webp',
     content:md13,
   },
+  {
+    id: 14,
+    title: '在笔记本上部署本地模型',
+    type: '杂谈',
+    date: '2026-07-29',
+    readTime: '10 minutes',
+    excerpt: '你难道会拒绝一个输出结果不受官方限制的本地模型?',
+    tags: ['Ollama', '大模型'],
+    cover: '/messages/14/red-eye.webp',
+    content:md14,
+  },
   // {
   //   id: 14,
   //   title: '论我的学生时代',
