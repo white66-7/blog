@@ -44,5 +44,13 @@ export const songs: PresetSong[] = [
     src: '/audio/刘森 - 深海.mp3', 
     isPreset: true
   },
+      {
+    id: 'preset_6',
+    name: '自言自语',
+    artist: '一路向北', 
+    src: '/audio/自言自语.mp3', 
+    isPreset: true
+  },
+
 
 ];
