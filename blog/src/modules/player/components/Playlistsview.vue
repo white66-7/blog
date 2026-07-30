@@ -232,7 +232,7 @@ function openPlaylist(dirId: string) {
 
 .back-btn:hover {
   background: rgba(0, 243, 255, 0.15);
-  color: var(--neon-cyan, #00f3ff);
+  color: #00f3ff;
   transform: translateX(-2px);
 }
 
@@ -289,7 +289,7 @@ function openPlaylist(dirId: string) {
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  color: var(--neon-cyan);
+  color: #00f3ff;
   border: 1px dashed rgba(0, 243, 255, .25);
   background: transparent;
 }
@@ -301,7 +301,7 @@ function openPlaylist(dirId: string) {
 
 .pl-name {
   font-size: .82rem;
-  color: var(--text-main);
+  color: #e0e0e8;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -309,7 +309,7 @@ function openPlaylist(dirId: string) {
 
 .pl-meta {
   font-size: .68rem;
-  color: var(--text-dim);
+  color: #6b6b8a;
   margin-top: 2px;
 }
 

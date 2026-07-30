@@ -129,6 +129,7 @@ import view3 from '@/assets/album/风景/home.webp'
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
 import img3 from '@/assets/album/人物/dji.webp'
+import img4 from '@/assets/classmates.webp'
 
 import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
@@ -156,8 +157,9 @@ const albumsData = [
     title: '人物',
     cover: img2,
     photos: [
-      { title: '给朋友拍的照片', url: img1 },
       { title: '研学', url: img2 },
+      { title: '高中同学们', url: img4 },
+      { title: '给朋友拍的照片', url: img1 },
       { title: '在旧宿舍的最后一晚', url: img3 },
     ]
   },
@@ -173,12 +175,12 @@ const albumsData = [
   },
   {
     id: 'holiday',
-    title: '大一的暑假',
+    title: '大一暑假',
     cover: holiday1,
     photos: [
       { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
       { title: '极其奢侈的一顿晚餐', url: holiday2 },
-      { title: '第一次自己写的skill生的图,效果一般', url: holiday3 },
+      { title: 'skill生的图,效果一般', url: holiday3 },
     ]
   }
 ]

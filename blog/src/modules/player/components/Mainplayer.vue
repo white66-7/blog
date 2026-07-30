@@ -107,7 +107,7 @@ function onSetVolume(e: MouseEvent) {
   align-items: center;
   justify-content: center;
   position: relative;
-  background-color: var(--bg-dark);
+  background-color: #07070a;
   background-image:
     linear-gradient(to bottom, rgba(7, 7, 10, 0.45), rgba(7, 7, 10, 0.75)),
     url('@/assets/2.gif');
@@ -121,7 +121,7 @@ function onSetVolume(e: MouseEvent) {
   position: absolute;
   top: 15px;
   right: 10px;
-  color: var(--text-dim);
+  color: #6b6b8a;
   letter-spacing: 1.5px;
   opacity: .8;
 }
@@ -174,18 +174,18 @@ function onSetVolume(e: MouseEvent) {
   font-size: 1.35rem;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--text-main);
+  color: #e0e0e8;
 }
 
 .info .sub {
   font-size: .8rem;
-  color: var(--text-dim);
+  color: #6b6b8a;
   margin-top: 6px;
   letter-spacing: 1.5px;
 }
 
 .info .sub i {
-  color: var(--neon-pink);
+  color: #ff00ff;
   font-style: normal;
   margin: 0 8px;
 }
@@ -220,7 +220,7 @@ function onSetVolume(e: MouseEvent) {
   width: 0%;
   border-radius: 2px;
   position: relative;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+  background: linear-gradient(90deg, #00f3ff, #ff00ff);
   box-shadow: 0 0 8px rgba(0, 243, 255, .35);
 }
 
@@ -232,8 +232,8 @@ function onSetVolume(e: MouseEvent) {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--neon-cyan);
-  box-shadow: 0 0 10px var(--neon-cyan);
+  background: #00f3ff;
+  box-shadow: 0 0 10px #00f3ff;
   opacity: 0;
   transition: .2s;
 }
@@ -252,7 +252,7 @@ function onSetVolume(e: MouseEvent) {
 .cbtn {
   background: none;
   border: none;
-  color: var(--text-dim);
+  color: #6b6b8a;
   cursor: pointer;
   font-size: 1.3rem;
   width: 44px;
@@ -264,10 +264,12 @@ function onSetVolume(e: MouseEvent) {
   transition: .2s;
   font-family: inherit;
 }
+
 .cbtn.on {
-  color: var(--neon-cyan);
+  color: #00f3ff;
   text-shadow: 0 0 8px rgba(0, 243, 255, .5);
 }
+
 .container {
   --color: white;
   --size: 45px;
@@ -280,14 +282,16 @@ function onSetVolume(e: MouseEvent) {
   cursor: pointer;
   user-select: none;
 }
+
 .container .play,
 .container .pause {
   position: absolute;
-  width: 70%;      
+  width: 70%;
   height: auto;
   fill: var(--color);
   animation: keyframes-fill 0.3s;
 }
+
 @keyframes keyframes-fill {
   0% {
     transform: scale(0);
@@ -297,6 +301,7 @@ function onSetVolume(e: MouseEvent) {
     transform: scale(1.1);
   }
 }
+
 .vol {
   display: flex;
   align-items: center;
@@ -307,7 +312,7 @@ function onSetVolume(e: MouseEvent) {
 
 .vol span {
   font-size: .75rem;
-  color: var(--text-dim);
+  color: #6b6b8a;
 }
 
 .vbar {
@@ -321,7 +326,7 @@ function onSetVolume(e: MouseEvent) {
 .vfill {
   height: 100%;
   width: 70%;
-  background-color: var(--neon-cyan);
+  background-color: #00f3ff;
   border-radius: 2px;
 }
 </style>

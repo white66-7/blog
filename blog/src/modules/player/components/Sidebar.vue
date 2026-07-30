@@ -32,12 +32,11 @@ function goBack() {
 .sidebar {
   width: 420px;
   min-width: 340px;
-  background-color: var(--bg-panel);
-  border-right: 1px solid var(--panel-border);
+  background-color: #0e0e14;
+  border-right: 1px solid rgba(0, 243, 255, 0.08);
   display: flex;
   flex-direction: column;
   padding: 22px;
   gap: 14px;
 }
-
 </style>
