@@ -64,7 +64,7 @@ defineEmits(['select-album'])
 .books-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  /* 两列 */
+  margin-top: 50px;
   gap: 40px 60px;
   max-width: 800px;
   width: 100%;
