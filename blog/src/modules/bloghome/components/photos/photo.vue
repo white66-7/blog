@@ -52,6 +52,12 @@ import AlbumShelf from './AlbumShelf.vue'
 import BookScene from './BookScene.vue'
 import PhotoLightbox from './PhotoLightbox.vue'
 
+import cover1 from '@/assets/cover/help.webp'
+import cover2 from '@/assets/cover/videos.webp'
+import cover3 from '@/assets/cover/view.webp'
+import cover4 from '@/assets/cover/friend.webp'
+
+
 import photo1 from '@/assets/album/动漫/超燃.webp'
 import photo2 from '@/assets/album/动漫/沉思.webp'
 import photo3 from '@/assets/album/动漫/黑色五叶草.webp'
@@ -81,7 +87,7 @@ const albumsData = [
   {
     id: 'custom',
     title: '动漫',
-    cover: photo6,
+    cover: cover1,
     photos: [
       { title: '沉思', url: photo2 },
       { title: '圆梦', url: photo6 },
@@ -97,7 +103,7 @@ const albumsData = [
   {
     id: 'persons',
     title: '人物',
-    cover: img2,
+    cover: cover2,
     photos: [
       { title: '研学', url: img2 },
       { title: '高中同学们', url: img4 },
@@ -108,7 +114,7 @@ const albumsData = [
   {
     id: 'views',
     title: '风景',
-    cover: view1,
+    cover: cover3,
     photos: [
       { title: '高考结束的小区门口', url: view1 },
       { title: '期末周的图书馆', url: view2 },
@@ -118,7 +124,7 @@ const albumsData = [
   {
     id: 'holiday',
     title: '大一暑假',
-    cover: holiday1,
+    cover: cover4,
     photos: [
       { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
       { title: '极其奢侈的一顿晚餐', url: holiday2 },
