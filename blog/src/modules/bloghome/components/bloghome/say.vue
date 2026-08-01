@@ -40,6 +40,7 @@ const saysList = [
   { id: 8, content: '到千灯了', date: '2026-07-07 22:06' },
   { id: 9, content: '不知道为啥,我很喜欢打雷下雨的天气,非常解压', date: '2026-07-20 19:41' },
   { id: 10, content: '我老弟竟然有秘密瞒着我', date: '2026-07-26 20:47' },
+  { id: 11, content: '感觉快要写吐了', date: '2026-08-01 17:37' },
 ]
 
 const currentIndex = ref(0)

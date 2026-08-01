@@ -147,11 +147,41 @@ async function handleCopy(e: MouseEvent) {
 const route = useRoute()
 const article = ref<Article | null>(null)
 
+
 function addSpacing(text: string): string {
   if (!text) return ''
-  return text.replace(/([\u4e00-\u9fa5])([a-zA-Z0-9])/g, '$1 $2').replace(/([a-zA-Z0-9])([\u4e00-\u9fa5])/g, '$1 $2')
-}
 
+  const placeholders: string[] = []
+  const PH = '\u0000SP\u0000'
+
+  // 保护围栏代码块、行内代码（原有逻辑，保持不变）
+  text = text.replace(/```[\s\S]*?```/g, (match) => {
+    const key = `${PH}${placeholders.length}\u0000`
+    placeholders.push(match)
+    return key
+  })
+  text = text.replace(/`[^`]*`/g, (match) => {
+    const key = `${PH}${placeholders.length}\u0000`
+    placeholders.push(match)
+    return key
+  })
+
+  // 中英文之间加空格（原有逻辑，保持不变）
+  text = text.replace(/([\u4e00-\u9fa5])(?![ \t])([a-zA-Z0-9])/g, '$1 $2')
+  text = text.replace(/([a-zA-Z0-9])(?![ \t])([\u4e00-\u9fa5])/g, '$1 $2')
+
+  // ★ 新增：Windows 路径的反斜杠后插入零宽空格（U+200B），
+  //   让 C:\Program Files\...\Translate 这类长路径可以在 \ 处断行。
+  //   只匹配 \ 后跟字母/数字的情况（路径），不会误伤 markdown 转义符（\* 等）。
+  text = text.replace(/\\(?=[A-Za-z0-9])/g, '\\\u200B')
+
+  // 还原所有被保护的内容（原有逻辑，保持不变）
+  text = text.replace(new RegExp(`${PH}(\\d+)\u0000`, 'g'), (_, idx) => {
+    return placeholders[parseInt(idx)] ?? ''
+  })
+
+  return text
+}
 const renderedContent = computed(() => {
   if (!article.value) return ''
   return md.render(addSpacing(article.value.content))
@@ -685,9 +715,12 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   position: relative;
   z-index: 1;
   letter-spacing: 0.02em;
-  text-align: justify;
-  text-justify: inter-ideograph;
-  word-break: break-word;
+  
+  /* 👇 下面是修改的部分 👇 */
+  text-align: left;             /* 改为左对齐，彻底消除字间距异常拉伸 */
+  word-break: normal;           /* 保持正常的单词完整性，不要从中截断 Extension */
+  overflow-wrap: break-word;    /* 现代标准写法：遇到超长路径/链接（如 C:\Program...）实在放不下时，才允许换行 */
+  /* 👆 上面是修改的部分 👆 */
 }
 .markdown-body :deep(h1) {
   font-family: 'ShangShouJiangHuShuFa';
@@ -880,28 +913,36 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   color: #999;
 }
 @media (max-width: 768px) {
-  .content {
-    margin: 0 12px 20px;
-    padding: 0 20px 60px;
-    border-radius: 20px;
-  }
-  .hero-image {
-    margin-top: 30px;
-    padding: 8px;
-    border-radius: 16px;
-  }
-  .hero-image img {
-    border-radius: 10px;
-  }
-  .back-btn {
-    top: 80px;
-    left: 12px;
-    padding: 8px 16px;
-    font-size: 13px;
-  }
   .elastic-sidebar {
-    top: 60px;
-    height: calc(100vh - 60px);
+    pointer-events: none; /* 让触摸事件穿透到背后文章 */
+  }
+  .s-path {
+    pointer-events: auto; /* 保留拖拽把手可操作 */
+  }
+
+  /* 侧边栏内容面板半透明 */
+  .sidebar-content {
+    background: rgba(237, 242, 247, 0.75) !important;
+    backdrop-filter: blur(10px); /* 可选：轻微毛玻璃效果，更有质感 */
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 目录条目本身也给一点半透明白底，保证文字清晰 */
+  .toc__item {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: none;
+    color: #222; /* 加深文字 */
+  }
+  .toc__item--active {
+    background: rgba(35, 196, 131, 0.8);
+    color: #fff;
+  }
+
+  /* 提示文字 “目录” 颜色加深 */
+  .sidebar-hint-text {
+    color: #1a7a3a;
+    font-weight: bold;
   }
 }
 </style>

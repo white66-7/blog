@@ -47,7 +47,6 @@
                   </div>
                   <div class="page-number">{{ index * 2 }}</div>
                 </div>
-                <div class="page-fold-right"></div>
               </div>
 
               <!-- 背面（左页） -->
@@ -75,18 +74,25 @@
             </div>
           </div>
         </div>
-
-        <!-- 左右页边厚度 -->
 <div class="page-block block-right" 
-     :class="{ 'page-block-hidden': hideRight }" 
-     :style="{ width: rightEdgeWidth + 'px' }"></div>
+     :style="{ 
+       width: rightEdgeWidth + 'px', 
+       opacity: rightEdgeProgress > 0.1 ? 0.9 : 0 
+     }"></div>
 <div class="page-block block-left"  
-     :class="{ 'page-block-hidden': hideLeft }" 
-     :style="{ width: leftEdgeWidth + 'px' }"></div>
+     :style="{ 
+       width: leftEdgeWidth + 'px', 
+       opacity: leftEdgeProgress > 0.1 ? 0.9 : 0 
+     }"></div>
       </div>
     </div>
   </div>
 </template>
+
+//const props = defineProps({
+  sheets: { type: Array, required: true },
+  cover: { type: String, default: '' }
+})
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
@@ -96,18 +102,16 @@ const props = defineProps({
   sheets: { type: Array, required: true },
   cover: { type: String, default: '' }
 })
-const emit = defineEmits(['open-photo'])
 
 const pageRefs = ref([])
 const PAGE_STEP = 6
 const flippedCount = ref(0)
-const targetFlippedCount = ref(0)
 const isAnimating = ref(false)
 const FLIP_DURATION = 1.0
 
-// 控制左右厚度块隐藏
-const hideLeft = ref(false)
-const hideRight = ref(false)
+// 【新增】：独立控制左右厚度进度的变量
+const leftEdgeProgress = ref(0)
+const rightEdgeProgress = ref(0)
 
 const maxFlipped = computed(() => props.sheets.length)
 
@@ -116,22 +120,63 @@ const totalEdgeWidth = computed(() => {
   return Math.min(8, Math.max(4, props.sheets.length * 1.5))
 })
 
-// 关键：宽度基于 flippedCount（当前真实页数），而不是 targetFlippedCount
+// 【修改】：分别基于独立的进度变量计算宽度
 const leftEdgeWidth = computed(() => {
   if (!maxFlipped.value) return 0
-  return totalEdgeWidth.value * (flippedCount.value / maxFlipped.value)
+  return totalEdgeWidth.value * (leftEdgeProgress.value / maxFlipped.value)
 })
 
 const rightEdgeWidth = computed(() => {
   if (!maxFlipped.value) return 0
-  return totalEdgeWidth.value * ((maxFlipped.value - flippedCount.value) / maxFlipped.value)
+  return totalEdgeWidth.value * (rightEdgeProgress.value / maxFlipped.value)
 })
 
 const isFrontVisible = (index) => index === flippedCount.value
 const isBackVisible = (index) => index === flippedCount.value - 1
 
+const updateEdgesByAngle = (pageIndex, rotationY) => {
+  /* ================= 🛠️ 调参控制台 🛠️ ================= */
+  // 1. 右侧厚度什么时候彻底消失？(范围 0 ~ 90，默认 85)
+  // 越接近 90，右边厚度保持的时间越长；越小，消失得越早。
+  const RIGHT_END_ANGLE = 2; 
+
+  // 2. 左侧厚度什么时候开始出现？(范围 90 ~ 180，默认 95)
+  // 越接近 90，左边厚度越早开始长出来；越接近 180，长得越晚（非要等书页拍到桌面上才出现）。
+  const LEFT_START_ANGLE = 178;
+
+  // 3. 厚度的“粘滞感/重量感” (建议取值 1 ~ 4)
+  // 1 = 匀速变化（你之前觉得快的版本）
+  // 2 = 带有一定重力感，起步慢，后期快
+  // 3 = 强烈的粘滞感，书页不翻到一大半，厚度几乎不掉
+  // 4 = 极端粘滞，像是在撕开粘着胶水的厚纸板
+  const STICKY_POWER = 2;
+  /* ==================================================== */
+  const r = Math.abs(rotationY); // 当前书页翻转的角度 (0 到 180)
+  // 【右侧计算逻辑】
+  // 计算当前角度在 (0 ~ RIGHT_END_ANGLE) 之间的进度 (0 到 1)
+  const pRight = Math.max(0, Math.min(1, r / RIGHT_END_ANGLE));
+  // 倒转进度并应用曲线公式
+  const rightContribution = 1 - Math.pow(pRight, STICKY_POWER);
+  // 【左侧计算逻辑】
+  // 计算当前角度在 (LEFT_START_ANGLE ~ 180) 之间的进度 (0 到 1)
+  const pLeft = Math.max(0, Math.min(1, (r - LEFT_START_ANGLE) / (180 - LEFT_START_ANGLE)));
+  // 应用曲线公式
+  const leftContribution = Math.pow(pLeft, STICKY_POWER);
+
+  leftEdgeProgress.value = pageIndex + leftContribution;
+  rightEdgeProgress.value = (maxFlipped.value - 1 - pageIndex) + rightContribution;
+}
+
 const initPages = () => {
+  // 【修复关键】：必须把状态初始化放在前面，防止下方 return 导致右侧厚度未赋值
+  flippedCount.value = 0
+  isAnimating.value = false
+  leftEdgeProgress.value = 0
+  // 右侧厚度初始值等于总页数
+  rightEdgeProgress.value = maxFlipped.value 
+
   const validPages = pageRefs.value.filter(el => el != null)
+  // 如果 DOM 还没渲染完，先跳过 GSAP 的 3D 设置（但上面的厚度变量已经成功赋值了）
   if (validPages.length === 0) return
 
   const total = validPages.length
@@ -144,47 +189,37 @@ const initPages = () => {
       force3D: true
     })
   })
-  flippedCount.value = 0
-  targetFlippedCount.value = 0
-  isAnimating.value = false
-  hideLeft.value = false
-  hideRight.value = false
 }
 
 const nextPage = () => {
   if (isAnimating.value || flippedCount.value >= maxFlipped.value) return
   isAnimating.value = true
 
-  targetFlippedCount.value = Math.min(maxFlipped.value, flippedCount.value + 1)
-
-  // 翻页时：隐藏右侧厚度块（正在减少的一侧），左侧保持不动
-  hideRight.value = true
-  hideLeft.value = false
-
   const index = flippedCount.value
+  const targetCount = index + 1
   const pageEl = pageRefs.value[index]
   const total = pageRefs.value.filter(Boolean).length
   if (!pageEl) { isAnimating.value = false; return; }
 
-  gsap.set(pageEl, {
-    z: total * PAGE_STEP,
-    zIndex: total + 1
-  })
+  gsap.set(pageEl, { z: total * PAGE_STEP, zIndex: total + 1 })
 
+  // 翻页动画，基于真实角度同步厚度
   gsap.to(pageEl, {
     rotationY: -180,
     duration: FLIP_DURATION,
     ease: 'power2.inOut',
+    onUpdate: function() {
+      // 实时获取当前这一帧的 3D 角度
+      const currentRot = gsap.getProperty(pageEl, "rotationY")
+      updateEdgesByAngle(index, currentRot)
+    },
     onComplete: () => {
-      gsap.set(pageEl, {
-        z: (index + 1) * PAGE_STEP,
-        zIndex: index + 1
-      })
-      flippedCount.value = targetFlippedCount.value
+      gsap.set(pageEl, { z: (index + 1) * PAGE_STEP, zIndex: index + 1 })
+      flippedCount.value = targetCount
+      // 强制对齐最终状态，防止浮点误差
+      leftEdgeProgress.value = flippedCount.value
+      rightEdgeProgress.value = maxFlipped.value - flippedCount.value
       isAnimating.value = false
-
-      // 翻页结束：恢复右侧厚度块显示（此时宽度已更新）
-      hideRight.value = false
     }
   })
 }
@@ -193,40 +228,34 @@ const prevPage = () => {
   if (isAnimating.value || flippedCount.value <= 0) return
   isAnimating.value = true
 
-  targetFlippedCount.value = Math.max(0, flippedCount.value - 1)
-
-  // 翻页时：隐藏左侧厚度块（正在减少的一侧），右侧保持不动
-  hideLeft.value = true
-  hideRight.value = false
-
-  const index = flippedCount.value - 1
+  const targetCount = flippedCount.value - 1
+  const index = targetCount
   const pageEl = pageRefs.value[index]
   const total = pageRefs.value.filter(Boolean).length
   if (!pageEl) { isAnimating.value = false; return; }
 
-  gsap.set(pageEl, {
-    z: total * PAGE_STEP,
-    zIndex: total + 1
-  })
+  gsap.set(pageEl, { z: total * PAGE_STEP, zIndex: total + 1 })
 
+  // 往回翻动画，同样基于真实角度同步
   gsap.to(pageEl, {
     rotationY: 0,
     duration: FLIP_DURATION,
     ease: 'power2.inOut',
+    onUpdate: function() {
+      // 实时获取往回翻时的角度 (从 -180 逐渐变回 0)
+      const currentRot = gsap.getProperty(pageEl, "rotationY")
+      updateEdgesByAngle(index, currentRot)
+    },
     onComplete: () => {
-      gsap.set(pageEl, {
-        z: (total - index) * PAGE_STEP,
-        zIndex: total - index
-      })
-      flippedCount.value = targetFlippedCount.value
+      gsap.set(pageEl, { z: (total - index) * PAGE_STEP, zIndex: total - index })
+      flippedCount.value = targetCount
+      // 强制对齐最终状态，防止浮点误差
+      leftEdgeProgress.value = flippedCount.value
+      rightEdgeProgress.value = maxFlipped.value - flippedCount.value
       isAnimating.value = false
-
-      // 翻页结束：恢复左侧厚度块显示
-      hideLeft.value = false
     }
   })
 }
-
 let lastLength = -1
 
 watch(() => props.sheets, (newSheets) => {
@@ -234,6 +263,11 @@ watch(() => props.sheets, (newSheets) => {
   lastLength = newSheets.length
 
   pageRefs.value = []
+  
+  // 在 DOM 更新前先同步一次状态，确保右侧厚度马上出来
+  leftEdgeProgress.value = 0
+  rightEdgeProgress.value = newSheets.length
+
   nextTick(() => { initPages() })
 }, { immediate: true })
 </script>

@@ -68,6 +68,8 @@ import img4 from '@/assets/classmates.webp'
 import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
 import holiday3 from '@/assets/album/暑假/jpg.webp'
+import holiday4 from '@/assets/album/暑假/failure man.webp'
+
 // ========== 2. 手动构建相册数据 ==========
 const albumsData = [
   {
@@ -114,7 +116,8 @@ const albumsData = [
     photos: [
       { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
       { title: '极其奢侈的一顿晚餐', url: holiday2 },
-      { title: 'skill生的图,效果一般', url: holiday3 },
+      // { title: 'skill生的图,效果一般', url: holiday3 },
+      { title: '暑假和朋友一起去看的电影', url: holiday4 }
     ]
   }
 ]
