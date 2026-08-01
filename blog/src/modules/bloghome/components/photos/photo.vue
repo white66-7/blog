@@ -4,13 +4,11 @@
 
     <!-- 全局返回按钮 (进入相册内部时显示) -->
     <transition name="fade">
-      <button 
-        v-if="currentAlbum" 
-        class="fixed-back-btn" 
-        @click="returnToShelf"
-      >
+      <button v-if="currentAlbum" class="fixed-back-btn" @click="returnToShelf">
         <svg height="16" width="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-          <path d="M874.690416 495.52477c0 11.2973-9.168824 20.466124-20.466124 20.466124l-604.773963 0 188.083679 188.083679c7.992021 7.992021 7.992021 20.947078 0 28.939099-4.001127 3.990894-9.240455 5.996574-14.46955 5.996574-5.239328 0-10.478655-1.995447-14.479783-5.996574l-223.00912-223.00912c-3.837398-3.837398-5.996574-9.046027-5.996574-14.46955 0-5.433756 2.159176-10.632151 5.996574-14.46955l223.019353-223.029586c7.992021-7.992021 20.957311-7.992021 28.949332 0 7.992021 8.002254 7.992021 20.957311 0 28.949332l-188.073446 188.073446 604.753497 0C865.521592 475.058646 874.690416 484.217237 874.690416 495.52477z"></path>
+          <path
+            d="M874.690416 495.52477c0 11.2973-9.168824 20.466124-20.466124 20.466124l-604.773963 0 188.083679 188.083679c7.992021 7.992021 7.992021 20.947078 0 28.939099-4.001127 3.990894-9.240455 5.996574-14.46955 5.996574-5.239328 0-10.478655-1.995447-14.479783-5.996574l-223.00912-223.00912c-3.837398-3.837398-5.996574-9.046027-5.996574-14.46955 0-5.433756 2.159176-10.632151 5.996574-14.46955l223.019353-223.029586c7.992021-7.992021 20.957311-7.992021 28.949332 0 7.992021 8.002254 7.992021 20.957311 0 28.949332l-188.073446 188.073446 604.753497 0C865.521592 475.058646 874.690416 484.217237 874.690416 495.52477z">
+          </path>
         </svg>
         <span>返回书架</span>
       </button>
@@ -18,29 +16,17 @@
 
     <!-- ================= 视口切换区 ================= -->
     <div class="view-container">
-      
+
       <!-- 视图 A：相册书架 (没有选中相册时显示) -->
-      <AlbumShelf 
-        v-if="!currentAlbum" 
-        :albums="albumsData" 
-        @select-album="handleSelectAlbum" 
-      />
+      <AlbumShelf v-if="!currentAlbum" :albums="albumsData" @select-album="handleSelectAlbum" />
 
       <!-- 视图 B：原版 3D 翻页书本 (选中相册时显示该相册的相片) -->
-      <BookScene 
-        v-else 
-        :sheets="sheets" 
-        @open-photo="handleOpenPhoto" 
-      />
+      <BookScene v-else :sheets="sheets" :cover="currentAlbum.cover" @open-photo="handleOpenPhoto" />
 
     </div>
 
     <!-- ================= 照片详情独立弹窗 ================= -->
-    <PhotoLightbox 
-      v-if="selectedPhoto" 
-      :photo="selectedPhoto" 
-      @close="selectedPhoto = null" 
-    />
+    <PhotoLightbox v-if="selectedPhoto" :photo="selectedPhoto" @close="selectedPhoto = null" />
   </div>
 </template>
 
@@ -133,26 +119,26 @@ const albumsData = [
   }
 ]
 const isFirstScreen = ref(false)
-const currentAlbum = ref(null)      
-const selectedPhoto = ref(null)     
+const currentAlbum = ref(null)
+const selectedPhoto = ref(null)
 
 // 将选中的相册内的照片，转化为双页书本的数据结构
 const sheets = computed(() => {
   if (!currentAlbum.value) return []
-  
+
   const photos = currentAlbum.value.photos
   // 每页放 2 张照片
   const pages = []
   for (let i = 0; i < photos.length; i += 2) {
     pages.push({ type: 'grid-list', items: photos.slice(i, i + 2) })
   }
-  
+
   // 每 2 页合并为一张纸 (front, back)
   const result = []
   for (let i = 0; i < pages.length; i += 2) {
     result.push({
       front: pages[i],
-      back: pages[i + 1] || { type: 'blank' } 
+      back: pages[i + 1] || { type: 'blank' }
     })
   }
   return result
@@ -173,21 +159,60 @@ const handleOpenPhoto = (photo) => {
 
 <style scoped>
 .album-page-wrapper {
-  position: relative; width: 100%; min-height: 100vh; background-color: #ecf0f1; 
-  overflow: hidden; /* 翻书时避免出现滚动条 */
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ecf0f1;
+  overflow: hidden;
+  /* 翻书时避免出现滚动条 */
 }
-.view-container { width: 100%; height: 100%; }
+
+.view-container {
+  width: 100%;
+  height: 100%;
+}
 
 .fixed-back-btn {
-  position: fixed; top: 90px; left: 40px; width: 120px; height: 3em; 
-  display: flex; align-items: center; justify-content: center;
-  background-color: #fff; border-radius: 4px; border: none; z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s;
-  font-weight: bold; color: #333;
+  position: fixed;
+  top: 90px;
+  left: 40px;
+  width: 120px;
+  height: 3em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 4px;
+  border: none;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+  color: #333;
 }
-.fixed-back-btn svg { margin-right: 5px; transition: transform 0.3s; }
-.fixed-back-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
-.fixed-back-btn:hover svg { transform: translateX(-4px); }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.fixed-back-btn svg {
+  margin-right: 5px;
+  transition: transform 0.3s;
+}
+
+.fixed-back-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.fixed-back-btn:hover svg {
+  transform: translateX(-4px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

@@ -1,32 +1,47 @@
 <template>
   <div class="album-shelf-container">
-
     <div class="books-grid">
       <div v-for="(album, index) in albums" :key="album.id" class="book-item" :class="'book-position-' + index">
-        <!-- 点击整本书触发事件 -->
-        <figure class='book' @click="$emit('select-album', album)">
-          <!-- Front Cover -->
-          <ul class='hardcover_front'>
+        <figure class="book" @click="$emit('select-album', album)">
+          <!-- ==================== 封面 ==================== -->
+          <ul class="hardcover_front">
+            <!-- 外侧：封面图 -->
+<li>
+  <img :src="album.cover" alt="" width="100%" height="100%">
+  <!-- 新增：竖排标题 -->
+  <div class="vertical-title">
+    <span 
+      v-for="(part, i) in splitIntoColumns(album.title, 2)" 
+      :key="i"
+      class="title-column"
+    >{{ part }}</span>
+  </div>
+</li>
+            <!-- 内侧：翻开后的左侧页，骨架屏 -->
             <li>
-              <img :src="album.cover" alt="" width="100%" height="100%">
+              <!-- <div class="skeleton-wrapper">
+                <div class="skeleton-block"></div>
+                <div class="skeleton-block"></div>
+              </div> -->
             </li>
+          </ul>
+
+          <!-- ==================== 内页（五页全部加骨架屏） ==================== -->
+          <ul class="page">
+            <li v-for="n in 5" :key="n">
+              <div class="skeleton-wrapper">
+                <div class="skeleton-block"></div>
+                <div class="skeleton-block"></div>
+              </div>
+            </li>
+          </ul>
+
+          <!-- ==================== 封底 + 书脊 ==================== -->
+          <ul class="hardcover_back">
+            <li></li>
             <li></li>
           </ul>
-          <!-- Pages (移除了按钮，保留书页结构) -->
-          <ul class='page'>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-          </ul>
-          <!-- Back Cover -->
-          <ul class='hardcover_back'>
-            <li></li>
-            <li></li>
-          </ul>
-          <!-- Spine -->
-          <ul class='book_spine'>
+          <ul class="book_spine">
             <li></li>
             <li></li>
           </ul>
@@ -40,27 +55,33 @@
 defineProps({
   albums: {
     type: Array,
-    required: true
+    required: true,
+  },
+});
+defineEmits(['select-album']);
+
+// 将字符串按每列字符数分割成数组
+function splitIntoColumns(str, colSize = 2) {
+  const result = [];
+  for (let i = 0; i < str.length; i += colSize) {
+    result.push(str.slice(i, i + colSize));
   }
-})
-defineEmits(['select-album'])
+  return result;
+}
 </script>
 
 <style scoped>
-/* ==================== 基础与排版 ==================== */
 .album-shelf-container {
   width: 100%;
   min-height: 100vh;
   padding-top: 60px;
   overflow-y: auto;
   overflow-x: hidden;
-  font-family: 'Lato', 'Microsoft YaHei', sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* 网格容器 */
 .books-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -71,7 +92,6 @@ defineEmits(['select-album'])
   padding: 0 20px;
 }
 
-/* 每个书本项 */
 .book-item {
   display: flex;
   justify-content: center;
@@ -79,26 +99,21 @@ defineEmits(['select-album'])
   position: relative;
 }
 
-/* 手动控制位置，实现错落感 */
 .book-position-0 {
   grid-column: 1;
-  /* 第一个放左列 */
 }
 
 .book-position-1 {
   grid-column: 2;
-  /* 第二个放右列 */
 }
 
 .book-position-2 {
   grid-column: 1 / -1;
-  /* 第三个占满整行，居中 */
   justify-self: center;
 }
 
 .book-position-3 {
   grid-column: 1;
-  /* 第四个放左列 */
 }
 
 /* ==================== 3D 书本核心样式 ==================== */
@@ -109,7 +124,6 @@ defineEmits(['select-album'])
   perspective: 1000px;
   transform-style: preserve-3d;
   cursor: pointer;
-  /* 鼠标变为手型，暗示可点击 */
 }
 
 ul {
@@ -117,14 +131,6 @@ ul {
   padding: 0;
   list-style: none;
 }
-
-a {
-  color: #2c3e50;
-  text-decoration: none;
-}
-
-/* 移除原来的按钮样式，不再需要 */
-/* .btn 相关样式已删除 */
 
 .hardcover_front li:first-child {
   background-color: #eee;
@@ -168,7 +174,9 @@ a {
 
 .page>li {
   background: linear-gradient(to right, #e1ddd8 0%, #fffbf6 100%);
-  box-shadow: inset 0px -1px 2px rgba(50, 50, 50, 0.1), inset -1px 0px 1px rgba(150, 150, 150, 0.2);
+  box-shadow:
+    inset 0px -1px 2px rgba(50, 50, 50, 0.1),
+    inset -1px 0px 1px rgba(150, 150, 150, 0.2);
   border-radius: 0px 5px 5px 0px;
 }
 
@@ -224,7 +232,6 @@ a {
   transition: all 0.8s ease, z-index 0.6s;
 }
 
-/* 覆盖原本的 default 光标，保持 pointer */
 .hardcover_front li:first-child {
   cursor: pointer;
   user-select: none;
@@ -243,23 +250,7 @@ a {
   transform: translateZ(-2px);
 }
 
-.hardcover_front li:first-child:after,
-.hardcover_front li:first-child:before,
-.hardcover_front li:last-child:after,
-.hardcover_front li:last-child:before,
-.hardcover_back li:first-child:after,
-.hardcover_back li:first-child:before,
-.hardcover_back li:last-child:after,
-.hardcover_back li:last-child:before,
-.book_spine li:first-child:after,
-.book_spine li:first-child:before,
-.book_spine li:last-child:after,
-.book_spine li:last-child:before {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
+/* 书边厚度装饰 */
 .hardcover_front li:first-child:after,
 .hardcover_front li:first-child:before {
   width: 4px;
@@ -374,7 +365,7 @@ a {
   height: 98%;
   top: 1%;
   left: 3%;
-  z-index: 10;
+  z-index: 200;
 }
 
 .page>li {
@@ -383,6 +374,17 @@ a {
   transform-origin: left center;
   transition-property: transform;
   transition-timing-function: ease;
+}
+
+/* 所有包含内容的页面元素开启 flex 布局 */
+.hardcover_front li:last-child,
+.page>li {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 10px;
+  box-sizing: border-box;
 }
 
 .page>li:nth-child(1) {
@@ -405,7 +407,7 @@ a {
   transition-duration: 0.6s;
 }
 
-/* 悬浮打开动画 */
+/* ==================== 书本翻开动画 ==================== */
 .book:hover>.hardcover_front {
   transform: rotateY(-145deg) translateZ(0);
   z-index: 0;
@@ -436,22 +438,155 @@ a {
   transition-duration: 1.2s;
 }
 
-/* ==================== 响应式 ==================== */
+/* ==================== 骨架屏（全局） ==================== */
+.skeleton-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* hover 书本时，所有页面的骨架屏都显示 */
+.book:hover .skeleton-wrapper {
+  opacity: 1;
+  transition-delay: 0.15s;
+}
+
+.skeleton-block {
+  width: 95px;
+  height: 75px;
+  border-radius: 8px;
+  background: #e4e0d8;
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes shimmer {
+  0% {
+    background: linear-gradient(110deg,
+        #e4e0d8 25%,
+        #e4e0d8 37%,
+        #f7f4ee 45%,
+        #fcfaf6 50%,
+        #f7f4ee 55%,
+        #e4e0d8 63%,
+        #e4e0d8 75%);
+    background-size: 200% 100%;
+    background-position: 150% 0;
+  }
+
+  100% {
+    background: linear-gradient(110deg,
+        #e4e0d8 25%,
+        #e4e0d8 37%,
+        #f7f4ee 45%,
+        #fcfaf6 50%,
+        #f7f4ee 55%,
+        #e4e0d8 63%,
+        #e4e0d8 75%);
+    background-size: 200% 100%;
+    background-position: -50% 0;
+  }
+}
+
+/* 给不同位置的骨架块设置波浪延迟（共 6 页 × 2 = 12 个块） */
+.hardcover_front li:last-child .skeleton-block:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.hardcover_front li:last-child .skeleton-block:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.page>li:nth-child(1) .skeleton-block:nth-child(1) {
+  animation-delay: 0.4s;
+}
+
+.page>li:nth-child(1) .skeleton-block:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.page>li:nth-child(2) .skeleton-block:nth-child(1) {
+  animation-delay: 0.8s;
+}
+
+.page>li:nth-child(2) .skeleton-block:nth-child(2) {
+  animation-delay: 1.0s;
+}
+
+.page>li:nth-child(3) .skeleton-block:nth-child(1) {
+  animation-delay: 1.2s;
+}
+
+.page>li:nth-child(3) .skeleton-block:nth-child(2) {
+  animation-delay: 1.4s;
+}
+
+.page>li:nth-child(4) .skeleton-block:nth-child(1) {
+  animation-delay: 1.6s;
+}
+
+.page>li:nth-child(4) .skeleton-block:nth-child(2) {
+  animation-delay: 1.8s;
+}
+
+.page>li:nth-child(5) .skeleton-block:nth-child(1) {
+  animation-delay: 2.0s;
+}
+
+.page>li:nth-child(5) .skeleton-block:nth-child(2) {
+  animation-delay: 2.2s;
+}
+
+/* ========== 封面左上角竖排标题 ========== */
+.vertical-title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;               /* 横向排列各列 */
+  gap: 2px;                    /* 列间距 */
+  pointer-events: none;        /* 不阻挡点击 */
+  z-index: 5;
+}
+
+.title-column {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  font-size: 15px;
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: 2px;
+  color: black;                            /* 白色文字 */
+  white-space: nowrap;
+}
+
+/* 响应式 */
 @media screen and (max-width: 600px) {
   .books-grid {
     grid-template-columns: 1fr;
     gap: 30px;
     max-width: 300px;
   }
-
+  
+    .title-column {
+    font-size: 10px;
+    padding: 2px 1px;
+  }
   .book-position-2 {
     grid-column: 1;
     justify-self: center;
   }
 
-  .shelf-title {
-    font-size: 2.2rem;
-    margin-bottom: 40px;
+  .skeleton-block {
+    width: 75px;
+    height: 60px;
   }
 }
 </style>
