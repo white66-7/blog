@@ -1,28 +1,31 @@
 <template>
   <div class="album-shelf-container">
     <div class="books-grid">
-      <div v-for="(album, index) in albums" :key="album.id" class="book-item" :class="'book-position-' + index">
+      <div
+        v-for="(album, index) in albums"
+        :key="album.id"
+        class="book-item"
+        :class="[
+          'book-position-' + index,
+          'animate__animated',       // ← 启动 animate.css 动画
+          'animate__flipInX'       // ← 从下方滑入
+        ]"
+        :style="{ animationDelay: index * 0.2 + 's' }"  
+      >
         <figure class="book" @click="$emit('select-album', album)">
           <!-- ==================== 封面 ==================== -->
           <ul class="hardcover_front">
             <!-- 外侧：封面图 -->
-<li>
-  <img :src="album.cover" alt="" width="100%" height="100%">
-  <!-- 新增：竖排标题 -->
-  <div class="vertical-title">
-    <span 
-      v-for="(part, i) in splitIntoColumns(album.title, 2)" 
-      :key="i"
-      class="title-column"
-    >{{ part }}</span>
-  </div>
-</li>
+            <li>
+              <img :src="album.cover" alt="" width="100%" height="100%">
+              <!-- 新增：竖排标题 -->
+              <div class="vertical-title">
+                <span v-for="(part, i) in splitIntoColumns(album.title, 2)" :key="i" class="title-column">{{ part
+                  }}</span>
+              </div>
+            </li>
             <!-- 内侧：翻开后的左侧页，骨架屏 -->
             <li>
-              <!-- <div class="skeleton-wrapper">
-                <div class="skeleton-block"></div>
-                <div class="skeleton-block"></div>
-              </div> -->
             </li>
           </ul>
 
@@ -548,9 +551,12 @@ ul {
   position: absolute;
   top: 20px;
   left: 20px;
-  display: flex;               /* 横向排列各列 */
-  gap: 2px;                    /* 列间距 */
-  pointer-events: none;        /* 不阻挡点击 */
+  display: flex;
+  /* 横向排列各列 */
+  gap: 2px;
+  /* 列间距 */
+  pointer-events: none;
+  /* 不阻挡点击 */
   z-index: 5;
 }
 
@@ -563,7 +569,8 @@ ul {
   font-weight: normal;
   line-height: 1;
   letter-spacing: 2px;
-  color: black;                            /* 白色文字 */
+  color: black;
+  /* 白色文字 */
   white-space: nowrap;
 }
 
@@ -574,11 +581,12 @@ ul {
     gap: 30px;
     max-width: 300px;
   }
-  
-    .title-column {
+
+  .title-column {
     font-size: 10px;
     padding: 2px 1px;
   }
+
   .book-position-2 {
     grid-column: 1;
     justify-self: center;

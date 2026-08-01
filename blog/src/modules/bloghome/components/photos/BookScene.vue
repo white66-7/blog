@@ -1,6 +1,8 @@
 <template>
-  <div class="book-scene-container">
-    
+<div 
+  class="book-scene-container animate__animated animate__fadeIn"
+  style="animation-delay: 0.3s; animation-duration: 1.5s;"
+>
     <!-- 左翻页按钮 -->
     <button class="nav-btn prev-btn" @click.stop="prevPage" :class="{ 'hidden': flippedCount === 0 }">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>

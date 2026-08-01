@@ -162,9 +162,8 @@ const handleOpenPhoto = (photo) => {
   position: relative;
   width: 100%;
   min-height: 100vh;
-  background-color: #ecf0f1;
+  background-color: #FAF7F2;
   overflow: hidden;
-  /* 翻书时避免出现滚动条 */
 }
 
 .view-container {
