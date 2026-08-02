@@ -93,7 +93,6 @@ import { articles } from '@/date/articles'
 const playAnimation = ref(!headerHasAnimated)
 
 onMounted(() => {
-  // 💡 核心修改：不但要拦截下次，还要在本次播放完毕后(3秒后)把 class 扒掉
   if (!headerHasAnimated) {
     headerHasAnimated = true // 标记已经播过
     setTimeout(() => {

@@ -21,7 +21,7 @@
 
       <!-- 圆形头像 -->
       <div class="avatar-wrapper gsap-pop float-slow">
-        <img src="@/assets/me.jpg" alt="头像" />
+        <img src="@/assets/me.webp" alt="头像" />
       </div>
 
       <!-- 1号卫星：正上方 (例如 CSS3) -->
@@ -209,7 +209,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 1. 最外层卡片：彻底放弃固定宽度，改为自适应 */
 .graphic-card {
   width: 100%; 
   max-width: 860px; /* PC 端最大宽度 */

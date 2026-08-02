@@ -5,7 +5,7 @@
       <!-- 骨架层 -->
       <div :class="['skeleton-avatar', { 'skeleton-hidden': avatarLoaded }]"></div>
       <!-- 真实头像 -->
-      <img class="avatar" :class="{ 'avatar-visible': avatarLoaded }" src="@/assets/me.jpg" loading="lazy" alt="头像"
+      <img class="avatar" :class="{ 'avatar-visible': avatarLoaded }" src="@/assets/me.webp" loading="lazy" alt="头像"
         @load="avatarLoaded = true" @error="avatarLoaded = true" />
     </div>
     <!-- 昵称 -->

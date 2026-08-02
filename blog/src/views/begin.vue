@@ -31,20 +31,76 @@
       <div class="newtons-cradle__dot"></div>
     </div>
 
-    <!-- 手写加载文案 -->
-    <p class="loading-text">{{ loadingText }}</p>
+    <!-- 启动日志列表 -->
+    <div class="loading-log">
+      <TransitionGroup tag="div" name="log" class="log-list">
+        <div v-for="(line, i) in loadingLogs" :key="i" class="log-line" :class="{ 'log-line--active': i === loadingLogs.length - 1 }">{{ line }}</div>
+      </TransitionGroup>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+import MYimage from '@/assets/me.webp'
+// 导入你需要预加载的图片
+
+import image from '/covers/game.webp'
 import bgImage from '@/assets/木叶创立.webp'
+import img1 from '@/assets/think.webp'
+import img2 from '@/assets/play.webp'
+
+
+import photo1 from '@/assets/album/动漫/超燃.webp'
+import photo3 from '@/assets/album/动漫/黑色五叶草.webp'
+import photo5 from '@/assets/album/动漫/来自深渊.webp'
+import photo9 from '@/assets/album/动漫/video.webp'
+
+// import otherImage from '@/assets/xxx.png' 
 
 const router = useRouter()
 const emit = defineEmits<{ (e: 'finish'): void }>()
 const isExiting = ref(false)
-const loadingText = ref('正在加载风景…')
+const isLeaving = ref(false)
+
+// 初始日志
+const loadingLogs = ref<string[]>(['网页开始加载...'])
+
+// 日志队列：逐条慢速展示，避免一拥而上
+const pendingLogs: string[] = []
+const LOG_INTERVAL = 450
+let logTimer: ReturnType<typeof setTimeout> | null = null
+
+const pushLog = (text: string) => {
+  if (isLeaving.value) return
+  pendingLogs.push(text)
+  scheduleNextLog()
+}
+
+const scheduleNextLog = () => {
+  if (logTimer) return
+  logTimer = setTimeout(flushOneLog, LOG_INTERVAL)
+}
+
+const flushOneLog = () => {
+  logTimer = null
+  if (isLeaving.value) return
+  if (pendingLogs.length === 0) return
+  loadingLogs.value.push(pendingLogs.shift()!)
+  scheduleNextLog()
+}
+
+const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
+
+// 等队列里的日志全部展示完（带超时保护）
+const drainLogs = async (timeout = 4000) => {
+  const t0 = Date.now()
+  while ((pendingLogs.length > 0 || logTimer) && Date.now() - t0 < timeout) {
+    await sleep(100)
+  }
+}
 
 // 保证加载屏至少显示 2.5 秒，让动画能播完
 const MIN_DISPLAY_TIME = 2500 
@@ -52,53 +108,103 @@ const MIN_DISPLAY_TIME = 2500
 onMounted(() => {
   const startTime = Date.now()
 
-  // 1. 等待图片
-  const loadBgImage = new Promise((resolve) => {
-    const img = new Image()
-    img.src = bgImage
-    img.onload = img.onerror = resolve
+  // ==========================================
+  // 必须等待的阻塞任务 (路由、图片、字体)
+  // ==========================================
+
+  // 1. 路由加载
+  const routerPromise = router.isReady().then(() => {
+    pushLog('路由加载完成...')
   })
 
-  const loadRouter = router.isReady()
+  // 2. 图片预加载
+  const imagesToLoad = [
+    MYimage,
+    bgImage,
+    img1,
+    img2,
+    photo1,
+    photo3,
+    photo5,
+    photo9,
+    image,
+  ]
+  const imagePromise = Promise.all(
+    imagesToLoad.map(url => new Promise((resolve) => {
+      const img = new Image()
+      img.src = url
+      img.onload = resolve
+      img.onerror = resolve // 失败也放行
+    }))
+  ).then(() => {
+    pushLog('图片加载完成...')
+  })
 
-  // 3. 等待 SpringBoot 数据（之后写在这里）
-  const fetchBackendData = async () => {
+  // 3. 字体预加载
+  const fontPromise = (async () => {
     try {
-      // 模拟后端请求 500ms
-      loadingText.value = '正在加载内容…'
-      await new Promise(resolve => setTimeout(resolve, 500)) 
+      if (document.fonts) {
+        await document.fonts.load('20px "ShangShouJiangHuShuFa"', '禅絮沾泥做点真正想做的认准的方向就坚定走下去动漫人物风景暑假')
+        await document.fonts.load('20px ZiTiGuanJiaKaiTi')
+        pushLog('字体加载完成...')
+      }
     } catch (error) {
-      console.error(error)
+      pushLog('字体加载超时，已降级处理...')
+      console.warn('字体预加载失败', error)
+    }
+  })()
+  // 无需等待的非阻塞任务 (后端状态查询)
+  const fetchBackendStatus = async () => {
+    const API_URL = 'http://localhost:8080/api/commits-timeline'
+    try {
+      pushLog('向SpringBoot发送请求...')
+      
+      // 发送真实请求，设置较短的超时机制(可选)，这里直接 fetch
+      const response = await fetch(API_URL, { 
+        method: 'GET' 
+      })
+
+      if (response.ok) {
+        // const data = await response.json() // 如果你需要存数据可以解开这个
+        pushLog('SpringBoot状态获取')
+      } else {
+        pushLog(`服务器异常(${response.status})`)
+      }
+    } catch (error) {
+      pushLog('SpringBoot无响应')
+      console.warn('后端连接失败', error)
     }
   }
 
-  // 所有的资源慢慢加载，互不干扰
+  // 立刻触发后端查询，但不放入 Promise.all
+  fetchBackendStatus()
+
+  // ==========================================
+  // 统筹结算
+  // ==========================================
   Promise.all([
-    loadBgImage,
-    loadRouter,
-    fetchBackendData()
-  ]).then(() => {
-    // 资源加载完了！看看花了几秒？
+    imagePromise,
+    fontPromise,
+    routerPromise
+  ]).then(async () => {
     const elapsed = Date.now() - startTime
-    
-    // 如果还没到 2.5 秒，就补齐剩下的时间；如果已经超过 2.5 秒，delay 就是 0，立刻退场。
     const delay = Math.max(MIN_DISPLAY_TIME - elapsed, 0)
-    
-    setTimeout(() => {
-      exitSplash()
-    }, delay)
+
+    await sleep(delay)
+    await drainLogs()
+    await sleep(LOG_INTERVAL)
+    exitSplash()
   })
 })
 
 const exitSplash = () => {
+  isLeaving.value = true
   isExiting.value = true
   setTimeout(() => {
     emit('finish')
   }, 1200) 
 }
 </script>
-
-
 <style scoped>
 /* ========== 加载屏基础容器 ========== */
 .t1 {
@@ -250,19 +356,46 @@ const exitSplash = () => {
   }
 }
 
-/* ========== 手写加载文案 ========== */
-.loading-text {
-  font-family: 'ShangShouJiangHuShuFa', 'ZiTiGuanJiaKaiTi', cursive;
-  font-size: 20px;
-  letter-spacing: 4px;
-  color: rgba(44, 44, 44, 0.62);
+/* ========== 启动日志列表 ========== */
+.loading-log {
+  width: 100%;
+  max-width: 440px;
+  height: 100px;
   margin-top: 22px;
-  animation: textFade 1.2s ease forwards;
+  overflow: hidden;
 }
 
-@keyframes textFade {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+.log-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+}
+
+.log-line {
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  line-height: 1.9;
+  color: rgba(44, 44, 44, 0.38);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.log-line--active {
+  color: rgba(44, 44, 44, 0.85);
+}
+
+.log-enter-active {
+  transition: all 0.4s ease;
+}
+.log-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.log-move {
+  transition: transform 0.4s ease;
 }
 
 /* ========== 飘落木叶 ========== */
@@ -319,16 +452,16 @@ const exitSplash = () => {
 @media (prefers-reduced-motion: reduce) {
   .animated-text,
   .newtons-cradle,
-  .leaf,
-  .loading-text {
+  .leaf {
     animation: none !important;
+  }
+  .log-enter-active,
+  .log-move {
+    transition: none !important;
   }
   .animated-text {
     stroke-dashoffset: 0;
     fill: rgba(44, 44, 44, 1);
-  }
-  .loading-text {
-    opacity: 1;
   }
   .leaf {
     display: none;

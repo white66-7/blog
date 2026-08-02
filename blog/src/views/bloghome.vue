@@ -329,16 +329,19 @@ const albumImages = [
 
 .main-body {
   display: block;
-  padding: 40px 5% 60px 5%;
+  padding: 20px 5% 60px 5%;
   box-sizing: border-box;
 }
 
+/* 1. 让整体双列布局完美包裹内容，并在大屏居中 */
 .two-columns {
   display: flex;
-  gap: 40px;
-  max-width: 1320px;
+  justify-content: center; /* 增加这个，让整体内容在父盒子中居中 */
+  gap: 32px;
+  max-width: 1148px; /* 从 1320px 改为 1148px，完美贴合内容的实际总宽度 */
   margin: 0 auto;
 }
+
 
 /* 左侧粘性栏 */
 .left-column {
@@ -349,15 +352,17 @@ const albumImages = [
   gap: 20px;
 }
 
-/* 右侧内容区：统一纵向间距节奏 */
+
+/* 2. 右侧列恢复原样，靠自身内容撑开即可 */
 .right-column {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
+/* 3. 顶部行和子元素恢复你的原始设定，保持你想要的尺寸 */
 .top-row {
   display: flex;
   gap: 16px;
@@ -365,17 +370,16 @@ const albumImages = [
 }
 
 .album-container {
-  width: 500px;
+  width: 500px; /* 保持你觉得舒服的大小 */
   max-width: 100%;
   flex-shrink: 0;
 }
 
 .weather-card-comp {
   width: 280px;
-  flex: 0 0 auto;
+  flex: 0 0 280px;
   align-self: stretch;
 }
-
 .articles-section {
   width: 100%;
 }

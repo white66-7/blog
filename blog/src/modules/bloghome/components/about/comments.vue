@@ -16,7 +16,7 @@
 
 <script>
 // 子组件：点赞功能
-import img1 from '@/assets/me.jpg'
+import img1 from '@/assets/me.webp'
 const Like = {
   template: `
     <div class="like-data">

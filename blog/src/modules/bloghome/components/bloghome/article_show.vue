@@ -154,7 +154,7 @@ onUnmounted(() => {
   grid-template-columns: repeat(3, 256px);
   grid-auto-rows: 196px;
   gap: 16px;
-  justify-content: start;
+  justify-content: center;
   position: relative; /* 为绝对定位的离开卡片提供定位上下文 */
 }
 
@@ -179,8 +179,8 @@ onUnmounted(() => {
 /* ---------- 横向卡片 (第一篇) ---------- */
 .card.horizontal {
   flex-direction: row;
-  grid-row: span 1;
-  grid-column: span 2;
+  grid-column: 1 / 3;
+  grid-row: 1;
 }
 .card.horizontal .card__img {
   width: 50%;
@@ -195,8 +195,8 @@ onUnmounted(() => {
 /* ---------- 纵向卡片 (第二篇) ---------- */
 .card.vertical {
   flex-direction: column;
-  grid-row: span 2;
-  grid-column: span 1;
+  grid-column: 3;
+  grid-row: 1 / 3;
 }
 .card.vertical .card__img {
   width: 100%;
@@ -214,8 +214,8 @@ onUnmounted(() => {
 /* ---------- 反向横向卡片 (第三篇) ---------- */
 .card.reverse-horizontal {
   flex-direction: row-reverse;
-  grid-row: span 1;
-  grid-column: span 2;
+  grid-column: 1 / 3;
+  grid-row: 2;
 }
 .card.reverse-horizontal .card__img {
   width: 50%;
