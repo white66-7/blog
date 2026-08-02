@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import BlogHome from '@/views/bloghome.vue'
 import PhotoShow from '@/modules/bloghome/components/photos/photo.vue'
 import Github from '@/modules/bloghome/components/projects/projects.vue'
-import QqContact from '@/modules/bloghome/views/qq.vue'
 import MusicPlayer from '@/views/music-player.vue'
 import SongsView from '@/modules/player/components/songsview.vue'
 import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
@@ -27,11 +26,6 @@ const routes = [
     path:'/projects',
     name: 'github',
     component: Github
-  },
-  {
-    path: '/qq',
-    name: 'qq-contact',
-    component: QqContact
   },
   {
     path: '/player',

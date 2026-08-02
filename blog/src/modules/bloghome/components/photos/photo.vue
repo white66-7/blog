@@ -53,12 +53,18 @@ import photo6 from '@/assets/album/动漫/圆梦.webp'
 import photo7 from '@/assets/album/动漫/佐助与鼬.webp'
 import photo8 from '@/assets/album/动漫/eye.webp'
 import photo9 from '@/assets/album/动漫/video.webp'
+import photo10 from '@/assets/album/动漫/pair.webp'
+import photo11 from '@/assets/album/动漫/阿玛天纳斯.webp'
+import photo12 from '@/assets/album/动漫/向日葵.webp'
 
 
 import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
 import view2 from '@/assets/album/风景/library.webp'
 import view3 from '@/assets/album/风景/home.webp'
-
+import view4 from '@/assets/album/风景/十字路口.webp'
+import view5 from '@/assets/album/风景/星空.webp'
+import view6 from '@/assets/album/风景/破晓.webp'
+// import view7 from '@/assets/album/风景/'
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
@@ -67,7 +73,7 @@ import img4 from '@/assets/classmates.webp'
 
 import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
-import holiday3 from '@/assets/album/暑假/jpg.webp'
+// import holiday3 from '@/assets/album/暑假/'
 import holiday4 from '@/assets/album/暑假/failure man.webp'
 
 // ========== 2. 手动构建相册数据 ==========
@@ -77,15 +83,18 @@ const albumsData = [
     title: '动漫',
     cover: cover1,
     photos: [
-      { title: '沉思', url: photo2 },
-      { title: '圆梦', url: photo6 },
+      { title: '鹿丸', url: photo2 },
+      { title: '这算圆梦吧', url: photo6 },
       { title: '佐助与鼬', url: photo7 },
-      { title: '黑色五叶草-一部非常惊艳的战斗番', url: photo3 },
+      { title: '黑色五叶草-战斗番', url: photo3 },
       { title: '进击的巨人', url: photo4 },
       { title: '燃到起鸡皮疙瘩', url: photo1 },
       { title: '来自深渊-黄金乡', url: photo5 },
-      { title: '一双全是你的眼睛', url: photo8 },
-      { title: '慢节奏的异世界好番', url: photo9 },
+      { title: 'RE0', url: photo8 },
+      { title: '慢节奏的异世界番', url: photo9 },
+      { title: '相反的你和我', url: photo10 },
+      { title: '中二病也要谈恋爱', url: photo11 },
+      { title: '通往夏天的隧道', url: photo12 },
     ]
   },
   {
@@ -106,7 +115,10 @@ const albumsData = [
     photos: [
       { title: '高考结束的小区门口', url: view1 },
       { title: '期末周的图书馆', url: view2 },
-      { title: '我的老家', url: view3 },
+      { title: '乡村风光', url: view3 },
+      { title: '风起云涌', url: view4 },
+      { title: '少见的星空', url: view5 },
+      { title: '清晨的破晓', url: view6 },
     ]
   },
   {
