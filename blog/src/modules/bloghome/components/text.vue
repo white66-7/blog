@@ -44,21 +44,21 @@ $tertiary-color: #ffffff;
   padding: 0.25em 0 0.325em;
   display: block;
   margin: 0 auto;
-  text-shadow: 0 0 80px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45), 0 0 80px rgba(255, 255, 255, 0.5);
 
-  /* 使用图片背景 */
-  background: url(https://i.ibb.co/RDTnNrT/animated-text-fill.png) repeat-y;
+  /* 使用本地图片背景 */
+  background: url(/text/animated-text-fill.webp) repeat-y;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  /* ✅ 改为 80s，与原示例一致 */
-  -webkit-animation: aitf 80s linear infinite;
-  -webkit-transform: translate3d(0, 0, 0);
-  -webkit-backface-visibility: hidden;
+  /* 80s 缓慢位移 */
+  animation: aitf 80s linear infinite;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
-@-webkit-keyframes aitf {
+@keyframes aitf {
   0%   { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
 }
@@ -73,15 +73,15 @@ h1 {
   font-weight: normal;
 
   span {
+    display: block;
     width: 100%;
-    float: left;
     color: $tertiary-color;
     -webkit-clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 80%);
     clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 80%);
     transform: translateY(-50px);
     opacity: 0;
     animation-timing-function: ease;
-    animation-duration: 6.8s;
+    animation-duration: 8s;
     animation-iteration-count: infinite;
     animation-fill-mode: forwards;
 
@@ -113,6 +113,23 @@ h1 span:nth-child(3) { animation-name: w3; }
   26%       { transform: translateY(0); opacity: 1; clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 15%); }
   59%       { transform: translateY(0); opacity: 1; clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 15%); }
   71%, 100% { transform: translateY(50px); opacity: 0; clip-path: polygon(100% 0, 100% -0%, 0 100%, 0 100%); }
+}
+
+/* 系统开启「减弱动效」时直接显示静态文字 */
+@media (prefers-reduced-motion: reduce) {
+  .animated-text,
+  h1 span {
+    animation: none !important;
+  }
+  .animated-text {
+    transform: none;
+    backface-visibility: visible;
+  }
+  h1 span {
+    transform: none;
+    opacity: 1;
+    clip-path: none;
+  }
 }
 
 /* 响应式 */

@@ -144,7 +144,7 @@ onUnmounted(() => {
 <style scoped>
 
 .articles-section {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 /* ---------- Grid 基础 ---------- */
@@ -164,7 +164,7 @@ onUnmounted(() => {
   height: 100%;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;

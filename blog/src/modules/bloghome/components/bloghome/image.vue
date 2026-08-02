@@ -124,7 +124,7 @@ onUnmounted(() => {
   overflow: hidden;
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  background: #f2f2f2;
+  background: #FAF7F2;
 }
 
 .slider-viewport {

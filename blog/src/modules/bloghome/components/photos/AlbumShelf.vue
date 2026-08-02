@@ -77,7 +77,8 @@ function splitIntoColumns(str, colSize = 2) {
 .album-shelf-container {
   width: 100%;
   min-height: 100vh;
-  padding-top: 60px;
+  padding-top: 44px;
+  padding-bottom: 64px;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
@@ -89,8 +90,8 @@ function splitIntoColumns(str, colSize = 2) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   margin-top: 50px;
-  gap: 40px 60px;
-  max-width: 800px;
+  gap: 30px 44px;
+  max-width: 720px;
   width: 100%;
   padding: 0 20px;
 }
@@ -100,6 +101,24 @@ function splitIntoColumns(str, colSize = 2) {
   justify-content: center;
   align-items: center;
   position: relative;
+}
+
+/* 书本落地阴影 */
+.book-item::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  width: 70%;
+  height: 14px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.16), transparent 70%);
+  filter: blur(2px);
+  transition: all 0.4s ease;
+}
+
+.book-item:hover::after {
+  width: 60%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.24), transparent 70%);
+  filter: blur(3px);
 }
 
 .book-position-0 {
@@ -578,8 +597,8 @@ ul {
 @media screen and (max-width: 600px) {
   .books-grid {
     grid-template-columns: 1fr;
-    gap: 30px;
-    max-width: 300px;
+    gap: 24px;
+    max-width: 280px;
   }
 
   .title-column {

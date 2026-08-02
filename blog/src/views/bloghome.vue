@@ -86,13 +86,8 @@ import img2 from '@/assets/play.webp'
 
 
 import photo1 from '@/assets/album/动漫/超燃.webp'
-import photo2 from '@/assets/album/动漫/沉思.webp'
 import photo3 from '@/assets/album/动漫/黑色五叶草.webp'
-import photo4 from '@/assets/album/动漫/进击的巨人.webp'
 import photo5 from '@/assets/album/动漫/来自深渊.webp'
-import photo6 from '@/assets/album/动漫/圆梦.webp'
-import photo7 from '@/assets/album/动漫/佐助与鼬.webp'
-import photo8 from '@/assets/album/动漫/eye.webp'
 import photo9 from '@/assets/album/动漫/video.webp'
 
 
@@ -334,14 +329,14 @@ const albumImages = [
 
 .main-body {
   display: block;
-  padding: 20px 5% 60px 270px;
+  padding: 40px 5% 60px 5%;
   box-sizing: border-box;
 }
 
 .two-columns {
   display: flex;
   gap: 40px;
-  max-width: 1400px;
+  max-width: 1320px;
   margin: 0 auto;
 }
 
@@ -354,17 +349,19 @@ const albumImages = [
   gap: 20px;
 }
 
-/* 右侧内容区 */
+/* 右侧内容区：统一纵向间距节奏 */
 .right-column {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .top-row {
   display: flex;
   gap: 16px;
   align-items: stretch;
-  margin-bottom: 48px;
 }
 
 .album-container {

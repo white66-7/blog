@@ -1,18 +1,6 @@
 <template>
   <div class="site-age-box">
-    <!-- 星空背景层 -->
-    <div class="stars-container">
-      <div class="stars"></div>
-    </div>
-    <!-- 发光光晕 -->
-    <div class="glow">
-      <div class="circle"></div>
-      <div class="circle"></div>
-    </div>
-    <!-- 文字内容 -->
-    <span class="text" v-for="(char, index) in chars" :key="index"
-      :style="{ animationDelay: `${index * 0.08}s` }"
-    >{{ char }}</span>
+    <span class="text" v-for="(char, index) in chars" :key="index">{{ char }}</span>
   </div>
 </template>
 
@@ -36,183 +24,51 @@ const chars = computed(() => text.value.split(''))
   justify-content: center;
   align-items: center;
   position: relative;
-  margin: 25px auto 10px 0; 
-  padding: 0 1.5rem;
-  height: 6rem;
-  width: fit-content;          
-  min-width: 50rem;            
+  margin: 0 auto;
+  padding: 0 2rem;
+  height: 4.5rem;
+  width: fit-content;
+  min-width: 40rem;
   border-radius: 5rem;
-  background-image: linear-gradient(#212121, #212121),
-    linear-gradient(
-      137.48deg,
-      #ffdb3b 10%,
-      #fe53bb 45%,
-      #8f51ea 67%,
-      #0044ff 87%
-    );
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  border: double 4px transparent;
+  background-color: #FFFDF6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.08'/%3E%3C/svg%3E");
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   cursor: default;
-  backdrop-filter: blur(1rem);
-  animation: gradient_301 5s ease infinite;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.site-age-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .text {
   z-index: 2;
-  font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
-  font-size: 40px;
-  font-weight: 600;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-size: 32px;
+  font-weight: normal;
   letter-spacing: 1px;
-  color: #ffffff;
-  text-shadow: 0 0 4px white;
-  white-space: pre;  /* 保留空格 */
+  color: #2C2C2C;
+  white-space: pre;
 }
 
-/* 星空背景容器 */
-.stars-container {
-  position: absolute;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  backdrop-filter: blur(1rem);
-  border-radius: 5rem;
-  transition: 0.5s;
-}
-
-.site-age-box:hover .stars-container {
-  z-index: 1;
-  background-color: #212121;
-}
-
-/* 星空粒子动画 */
-.stars {
-  position: relative;
-  background: transparent;
-  width: 200rem;
-  height: 200rem;
-}
-.stars::after {
-  content: "";
-  position: absolute;
-  top: -10rem;
-  left: -100rem;
-  width: 100%;
-  height: 100%;
-  animation: animStarRotate 90s linear infinite;
-  background-image: radial-gradient(#ffffff 1px, transparent 1%);
-  background-size: 50px 50px;
-}
-.stars::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -50%;
-  width: 170%;
-  height: 500%;
-  animation: animStar 60s linear infinite;
-  background-image: radial-gradient(#ffffff 1px, transparent 1%);
-  background-size: 50px 50px;
-  opacity: 0.5;
-}
-
-/* 光晕效果 */
-.glow {
-  position: absolute;
-  display: flex;
-  width: 12rem;
-}
-.circle {
-  width: 100%;
-  height: 30px;
-  filter: blur(2rem);
-  animation: pulse_3011 4s infinite;
-  z-index: -1;
-}
-.circle:nth-of-type(1) {
-  background: rgba(254, 83, 186, 0.636);
-}
-.circle:nth-of-type(2) {
-  background: rgba(142, 81, 234, 0.704);
-}
-
-/* 边框渐变移动 */
-@keyframes gradient_301 {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* 脉冲 */
-@keyframes pulse_3011 {
-  0% {
-    transform: scale(0.75);
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
-  }
-  100% {
-    transform: scale(0.75);
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-  }
-}
-
-/* 星空移动 */
-@keyframes animStar {
-  from { transform: translateY(0); }
-  to { transform: translateY(-135rem); }
-}
-@keyframes animStarRotate {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0); }
-}
 @media (max-width: 768px) {
   .site-age-box {
-    min-width: unset;                
-    max-width: 92vw;              
-    height: auto;                    /* 高度随内容变化 */
-    padding: 0.6rem 1rem;          
-    margin: 20px auto 10px;          
-    border-radius: 3rem;             
+    min-width: unset;
+    max-width: 92vw;
+    height: auto;
+    padding: 0.7rem 1.2rem;
+    margin: 0 auto;
+    border-radius: 3rem;
   }
 
   .text {
-    font-size: 22px;                 /* 缩小字体，保证在 375px 宽度下正常显示 */
+    font-size: 22px;
     letter-spacing: 0.5px;
-    white-space: pre-wrap;           /* 允许文字换行，避免溢出 */
+    white-space: pre-wrap;
     line-height: 1.3;
-  }
-
-  /* 星空粒子缩小尺寸，减少渲染开销 */
-  .stars {
-    width: 100rem;
-    height: 100rem;
-  }
-  .stars::after,
-  .stars::before {
-    background-size: 30px 30px;
-  }
-  .stars::after {
-    top: -5rem;
-    left: -50rem;
-  }
-  .stars::before {
-    left: -25%;
-    width: 150%;
-    height: 300%;
-  }
-
-  /* 光晕缩小 */
-  .glow {
-    width: 8rem;
-  }
-  .circle {
-    height: 20px;
   }
 }
 </style>

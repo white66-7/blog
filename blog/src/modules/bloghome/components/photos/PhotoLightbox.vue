@@ -41,33 +41,45 @@ defineEmits(['close'])
 
 /* ==================== 遮罩层 ==================== */
 .lightbox {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100vw; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.85); 
+  background:
+    radial-gradient(ellipse at center, rgba(255, 240, 220, 0.06), rgba(0, 0, 0, 0) 55%),
+    rgba(0, 0, 0, 0.82);
   backdrop-filter: blur(5px);
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  z-index: 9999; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
   cursor: zoom-out !important; /* 鼠标变成缩小放大镜 */
 }
 
-.lightbox-close { 
-  position: absolute; 
-  top: 30px; 
-  right: 40px; 
-  background: none; 
-  border: none; 
-  color: white; 
-  font-size: 40px; 
-  cursor: pointer !important; 
-  transition: transform 0.3s;
+.lightbox-close {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  color: white;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer !important;
+  transition: all 0.35s ease;
 }
 .lightbox-close:hover {
-  transform: scale(1.2);
+  transform: rotate(90deg);
+  background: #fff;
+  color: #333;
+  border-color: #fff;
 }
 
 /* ==================== 拍立得相纸样式 (还原原版) ==================== */
@@ -76,8 +88,8 @@ defineEmits(['close'])
   width: auto; 
   max-width: 95vw; 
   /* 上左右留窄边，底部留宽边写字 */
-  padding: 15px 15px 40px 15px; 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  padding: 15px 15px 40px 15px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
   border-radius: 2px;
   cursor: default; 
 }
@@ -137,9 +149,11 @@ defineEmits(['close'])
 }
 
 /* ==================== 弹窗缩放动画 ==================== */
-.zoom-enter-active,
+.zoom-enter-active {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
 .zoom-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 .zoom-enter-from,
 .zoom-leave-to {

@@ -1,6 +1,17 @@
 <template>
   <!-- 黑色加载屏，通过 isExiting 触发退场动画 -->
   <div class="t1" :class="{ 'slide-up-exit': isExiting }">
+    <!-- 飘落木叶装饰 -->
+    <div class="falling-leaves" aria-hidden="true">
+      <span class="leaf leaf--1"></span>
+      <span class="leaf leaf--2"></span>
+      <span class="leaf leaf--3"></span>
+      <span class="leaf leaf--4"></span>
+      <span class="leaf leaf--5"></span>
+      <span class="leaf leaf--6"></span>
+      <span class="leaf leaf--7"></span>
+      <span class="leaf leaf--8"></span>
+    </div>
     <!-- 手写文字 SVG 动画 -->
     <div class="wrapperON">
       <svg width="100%" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
@@ -19,6 +30,9 @@
       <div class="newtons-cradle__dot"></div>
       <div class="newtons-cradle__dot"></div>
     </div>
+
+    <!-- 手写加载文案 -->
+    <p class="loading-text">{{ loadingText }}</p>
   </div>
 </template>
 
@@ -30,6 +44,7 @@ import bgImage from '@/assets/木叶创立.webp'
 const router = useRouter()
 const emit = defineEmits<{ (e: 'finish'): void }>()
 const isExiting = ref(false)
+const loadingText = ref('正在加载风景…')
 
 // 保证加载屏至少显示 2.5 秒，让动画能播完
 const MIN_DISPLAY_TIME = 2500 
@@ -50,6 +65,7 @@ onMounted(() => {
   const fetchBackendData = async () => {
     try {
       // 模拟后端请求 500ms
+      loadingText.value = '正在加载内容…'
       await new Promise(resolve => setTimeout(resolve, 500)) 
     } catch (error) {
       console.error(error)
@@ -95,11 +111,31 @@ const exitSplash = () => {
   margin: 0;
   position: fixed;
   inset: 0;
-  background-color: #000;
+  background-color: #FAF7F2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.12'/%3E%3C/svg%3E");
   overflow: hidden;
   z-index: 9999;
   /* 向上滑出 + 淡出的过渡动画 */
   transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), opacity 1s ease;
+}
+
+/* 顶部暖光晕 */
+.t1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 62vh;
+  background: radial-gradient(ellipse at 50% -10%, rgba(255, 244, 224, 0.65), transparent 62%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 内容在光晕之上 */
+.t1 > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* 退场状态：整体上移并透明 */
@@ -119,7 +155,7 @@ const exitSplash = () => {
 
 /* ========== 手写中文动画 ========== */
 .animated-text {
-  stroke: #ffffff;
+  stroke: #2C2C2C;
   stroke-width: 1.5px;
   fill: transparent;
 
@@ -141,7 +177,7 @@ const exitSplash = () => {
   }
   100% {
     stroke-dashoffset: 0;
-    fill: rgba(255, 255, 255, 1); /* 最后会停在这个白底状态 */
+    fill: rgba(44, 44, 44, 1); /* 最后会停在这个深墨色填充状态 */
   }
 }
 
@@ -149,7 +185,7 @@ const exitSplash = () => {
 .newtons-cradle {
   --uib-size: 50px;
   --uib-speed: 1.2s;
-  --uib-color: #ffffff;
+  --uib-color: #2C2C2C;
   position: relative;
   display: flex;
   align-items: center;
@@ -211,6 +247,91 @@ const exitSplash = () => {
   75% {
     transform: rotate(-70deg);
     animation-timing-function: ease-in;
+  }
+}
+
+/* ========== 手写加载文案 ========== */
+.loading-text {
+  font-family: 'ShangShouJiangHuShuFa', 'ZiTiGuanJiaKaiTi', cursive;
+  font-size: 20px;
+  letter-spacing: 4px;
+  color: rgba(44, 44, 44, 0.62);
+  margin-top: 22px;
+  animation: textFade 1.2s ease forwards;
+}
+
+@keyframes textFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== 飘落木叶 ========== */
+.falling-leaves {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.leaf {
+  position: absolute;
+  top: -40px;
+  width: 26px;
+  height: 20px;
+  background: radial-gradient(ellipse at 30% 40%, #b08968, #8a6a52);
+  border-radius: 100% 0 100% 0;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: leafFall var(--dur, 9s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.leaf::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: rgba(60, 40, 25, 0.35);
+}
+
+/* 8 片叶子差异化：位置、大小、时长、起始延迟（负值让加载屏一出现就有叶子在飘） */
+.leaf--1 { --dur: 10s;  --delay: -1s;   left: 5%;  width: 24px; height: 18px; }
+.leaf--2 { --dur: 8s;   --delay: -3s;   left: 17%; width: 20px; height: 15px; }
+.leaf--3 { --dur: 12s;  --delay: -5.5s; left: 29%; width: 30px; height: 23px; }
+.leaf--4 { --dur: 9s;   --delay: -2s;   left: 42%; width: 18px; height: 14px; }
+.leaf--5 { --dur: 11s;  --delay: -6.5s; left: 54%; width: 26px; height: 20px; }
+.leaf--6 { --dur: 8.5s; --delay: -4s;   left: 66%; width: 22px; height: 17px; }
+.leaf--7 { --dur: 13s;  --delay: -7s;   left: 78%; width: 30px; height: 23px; }
+.leaf--8 { --dur: 9.5s; --delay: -2.5s; left: 91%; width: 19px; height: 15px; }
+
+@keyframes leafFall {
+  0%   { transform: translate3d(0, -40px, 0) rotate(30deg); opacity: 0; }
+  8%   { opacity: 0.6; }
+  25%  { transform: translate3d(-22px, 27vh, 0) rotate(120deg); }
+  50%  { transform: translate3d(18px, 54vh, 0) rotate(210deg); }
+  75%  { transform: translate3d(-14px, 81vh, 0) rotate(300deg); opacity: 0.4; }
+  100% { transform: translate3d(10px, 108vh, 0) rotate(400deg); opacity: 0; }
+}
+
+/* ========== 减弱动效 ========== */
+@media (prefers-reduced-motion: reduce) {
+  .animated-text,
+  .newtons-cradle,
+  .leaf,
+  .loading-text {
+    animation: none !important;
+  }
+  .animated-text {
+    stroke-dashoffset: 0;
+    fill: rgba(44, 44, 44, 1);
+  }
+  .loading-text {
+    opacity: 1;
+  }
+  .leaf {
+    display: none;
   }
 }
 </style>

@@ -287,7 +287,7 @@ watch(() => props.sheets, (newSheets) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: radial-gradient(ellipse at 50% 42%, rgba(255, 246, 226, 0.55), rgba(255, 255, 255, 0.06) 60%, transparent 75%);
 }
 
 /* ==========================================
@@ -300,9 +300,10 @@ watch(() => props.sheets, (newSheets) => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.08'/%3E%3C/svg%3E");
+  background-color: rgba(255, 252, 243, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -313,9 +314,9 @@ watch(() => props.sheets, (newSheets) => {
 }
 
 .nav-btn:hover {
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  transform: translateY(-50%) scale(1.1);
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.1) rotate(2deg);
 }
 
 .nav-btn svg {
@@ -354,9 +355,25 @@ watch(() => props.sheets, (newSheets) => {
    书本 3D 场景
 ========================================== */
 .book-scene {
+  position: relative;
   perspective: clamp(800px, calc(var(--book-w) * 1.8), 1600px);
   width: calc(var(--book-w) * 2);
   height: var(--book-h);
+}
+
+/* 书本落地阴影 */
+.book-scene::after {
+  content: '';
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72%;
+  height: 16px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.18), transparent 70%);
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .book-wrapper {

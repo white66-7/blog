@@ -170,16 +170,17 @@ onMounted(async () => {
 
 <style scoped>
 .main-music-card {
-  width: 100%; 
+  width: 100%;
   padding: 18px;
-  border-radius: 35px;
-  background: #1a1a1a;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  background: #FFFDF6;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 14px;
-  font-family: -apple-system, system-ui, sans-serif;
-  color: white;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  color: #2C2C2C;
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -187,9 +188,9 @@ onMounted(async () => {
 .album-art {
   width: 64px;
   height: 64px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f5d9b8, #e8c39a);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
   flex-shrink: 0;
   transition: transform 0.3s ease;
   overflow: hidden;
@@ -218,7 +219,7 @@ onMounted(async () => {
 }
 .volume-bars .bar {
   width: 3px;
-  background: linear-gradient(180deg, #00c6ff, #0072ff);
+  background: linear-gradient(180deg, #d4a373, #8a6a52);
   border-radius: 2px;
   animation: bounce 0.8s infinite ease-in-out;
   animation-delay: var(--delay);
@@ -252,7 +253,7 @@ onMounted(async () => {
 
 .artist-name {
   font-size: 0.9em;
-  color: #d1d1d6;
+  color: #8a8178;
   margin-top: 2px;
 }
 
@@ -260,14 +261,14 @@ onMounted(async () => {
 .progress-bar {
   width: 100%;
   height: 4px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.08);
   border-radius: 2px;
   position: relative;
   cursor: pointer;
 }
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  background: linear-gradient(90deg, #d4a373, #8a6a52);
   border-radius: 2px;
   position: absolute;
   left: 0;
@@ -280,9 +281,9 @@ onMounted(async () => {
   transform: translate(-50%, -50%);
   width: 10px;
   height: 10px;
-  background-color: white;
+  background-color: #2C2C2C;
   border-radius: 50%;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
   pointer-events: none;
 }
 
@@ -290,7 +291,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   font-size: 0.8em;
-  color: #8e8e93;
+  color: #a08d7a;
 }
 .button-row {
   display: flex;
@@ -310,11 +311,11 @@ onMounted(async () => {
   transition:
     background 0.2s,
     transform 0.2s;
-  color: #fff;
+  color: #2C2C2C;
 }
 .control-button.play-pause-button:hover,
 .control-button.d:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.06);
   transform: scale(1.05);
 }
 .main-control-btns {
@@ -325,7 +326,6 @@ onMounted(async () => {
   gap: 20%;
 }
 .control-button.active {
-  color: #00c6ff;
-  text-shadow: 0 0 5px #00c6ff;
+  color: #d4a373;
 }
 </style>

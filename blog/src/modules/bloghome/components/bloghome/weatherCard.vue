@@ -415,7 +415,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   min-height: 300px;
-  border-radius: 5px;
+  border-radius: 16px;
   overflow: auto;
   position: relative;
   box-shadow: 9px 7px 40px -6px rgba(0,0,0,0.25);
@@ -444,8 +444,8 @@ onUnmounted(() => {
 
 .details {
   position: absolute;
-  top: 0; 
-  left: 0; 
+  top: 0;
+  left: 0;
   right: 0;
   padding: 16px 20px;
   color: #888;
