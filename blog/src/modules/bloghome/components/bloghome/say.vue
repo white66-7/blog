@@ -83,14 +83,14 @@ onUnmounted(() => {
 <style scoped>
 /* ----- 堆叠卡片容器 ----- */
 .stack {
-  width: 90%;
+  width: 100%;
   max-width: 420px;
   margin: 0 auto;
   transition: 0.25s ease;
 }
 
 .stack:hover {
-  transform: rotate(5deg);
+  transform: rotate(4deg);
 }
 .stack:hover .card:before {
   transform: translatey(-2%) rotate(-4deg);
@@ -101,8 +101,9 @@ onUnmounted(() => {
 
 /* ----- 卡片本体 ----- */
 .card {
-  aspect-ratio: 3 / 2;
-  border: 3px solid #333;
+  height: 160px; 
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 16px;
   background-color: #fff;
   position: relative;
   padding: 5% 5% 15% 5%;
@@ -110,7 +111,7 @@ onUnmounted(() => {
   flex-direction: column;
   transition: 0.15s ease;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   color: #1a1a1a;
 }
 
@@ -122,7 +123,8 @@ onUnmounted(() => {
   position: absolute;
   height: 100%;
   width: 100%;
-  border: 3px solid #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
   background-color: #fff;
   transform-origin: center center;
   z-index: -1;
@@ -155,11 +157,11 @@ onUnmounted(() => {
   font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
   letter-spacing: 1px;
-  color: #000000;
+  color: #2C2C2C;
 }
 
 .say-header svg {
-  color: #23c483;
+  color: #d4a373;
   flex-shrink: 0;
 }
 
@@ -207,22 +209,41 @@ onUnmounted(() => {
 
 .date-text {
   font-size: 12px;
-  font-family: monospace, sans-serif;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   color: #555;
 }
 
-/* 切换动画保持不变 */
+/* 切换动画 */
 .slide-fade-enter-active {
-  transition: all 0.4s ease-out;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+  transition: all 0.3s ease;
 }
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(10px);
   opacity: 0;
+}
+
+/* 减弱动效 */
+@media (prefers-reduced-motion: reduce) {
+  .stack,
+  .card,
+  .card:before,
+  .card:after {
+    transition: none !important;
+    transform: none !important;
+  }
+  .slide-fade-enter-active,
+  .slide-fade-leave-active {
+    transition: none !important;
+  }
+  .slide-fade-enter-from,
+  .slide-fade-leave-to {
+    transform: none;
+  }
 }
 </style>
