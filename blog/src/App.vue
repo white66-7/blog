@@ -54,16 +54,6 @@ onMounted(async () => {
 })
 </script>
 <style>
-/* :root {
-  --neon-cyan: #00f3ff;
-  --neon-pink: #ff00ff;
-  --neon-purple: #bc13fe;
-  --bg-dark: #07070a;
-  --bg-panel: #0e0e14;
-  --panel-border: rgba(0, 243, 255, 0.08);
-  --text-main: #e0e0e8;
-  --text-dim: #6b6b8a;
-} */
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none;
  scroll-snap-type: y proximity;}
 body {

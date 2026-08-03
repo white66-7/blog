@@ -24,6 +24,7 @@ import md11 from './md/11.md?raw'
 import md12 from './md/12.md?raw'
 import md13 from './md/13.md?raw'
 import md14 from './md/14.md?raw'
+import md15 from './md/15.md?raw'
 
 export const articles: Article[] = [
   {
@@ -179,6 +180,17 @@ export const articles: Article[] = [
     tags: ['Ollama', '大模型'],
     cover: '/messages/14/red-eye.webp',
     content:md14,
+  },
+  {
+    id: 15,
+    title: '加载屏实现逻辑',
+    type: '前端',
+    date: '2026-08-03',
+    readTime: '10 minutes',
+    excerpt: '加载屏如何实现后台加载和实时更新？',
+    tags: ['前端', 'Typescript','多屏逻辑'],
+    cover: '/messages/15/load.webp',
+    content:md15,
   },
   // {
   //   id: 14,

@@ -64,6 +64,7 @@ import view3 from '@/assets/album/风景/home.webp'
 import view4 from '@/assets/album/风景/十字路口.webp'
 import view5 from '@/assets/album/风景/星空.webp'
 import view6 from '@/assets/album/风景/破晓.webp'
+import view7 from '@/assets/album/风景/经典构图.webp'
 // import view7 from '@/assets/album/风景/'
 
 import img1 from '@/assets/album/人物/朋友.webp'
@@ -73,7 +74,7 @@ import img4 from '@/assets/classmates.webp'
 
 import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
-// import holiday3 from '@/assets/album/暑假/'
+import holiday3 from '@/assets/album/暑假/初中吃到现在的羊肉面.webp'
 import holiday4 from '@/assets/album/暑假/failure man.webp'
 
 // ========== 2. 手动构建相册数据 ==========
@@ -119,6 +120,7 @@ const albumsData = [
       { title: '风起云涌', url: view4 },
       { title: '少见的星空', url: view5 },
       { title: '清晨的破晓', url: view6 },
+      { title: '这构图思路还真行', url: view7 },
     ]
   },
   {
@@ -128,7 +130,7 @@ const albumsData = [
     photos: [
       { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
       { title: '极其奢侈的一顿晚餐', url: holiday2 },
-      // { title: 'skill生的图,效果一般', url: holiday3 },
+      { title: '初中吃到现在的羊肉面', url: holiday3 },
       { title: '暑假和朋友一起去看的电影', url: holiday4 }
     ]
   }
