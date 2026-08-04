@@ -34,8 +34,7 @@
 
           <!-- 副标题 -->
           <span :class="['r-sub', playAnimation ? 'animate__animated animate__fadeIn' : '']" style="animation-delay: 0.9s"
-            >对于真正的学习,我仍抱有敬畏之心</span
-          >
+            >或许我们只是在演绎我们的人生</span>
         </h1>
         <div :class="['hero-meta', playAnimation ? 'animate__animated animate__fadeIn' : '']" style="animation-delay:1.2s">
           <div class="meta-divider"></div>
