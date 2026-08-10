@@ -54,27 +54,34 @@ const rawProjects = ref([
     {
     id: 2,
     title: '音乐播放器',
-    description: '基于Electron + css + javascropt + html开发的前端程序',
+    description: '基于css + javascropt + html开发,Electron打包的图形化程序',
     poster: '/project/music.webp',
     link: 'https://github.com/white66-7/music_app',
     tags: ['javascropt', 'Electron', 'CSS','html']
   },
   {
     id: 3,
-    title: '博客前端',
-    description: '基于 Vue3 框架开发的前端系统',
+    title: '博客-前端',
+    description: '基于 Vue3 框架开发的前端',
     poster: '/project/blog.webp',
     link: 'https://github.com/white66-7/blog',
     tags: ['Vue3', 'JavaScript', 'CSS']
   },
-
   {
     id: 4,
-    title: '博客后端',
-    description: '基于 SpringBoot 框架开发的后端系统',
+    title: '博客-后端',
+    description: '基于 SpringBoot 框架开发的后端',
     poster: '/project/boot.webp',
     link: 'https://github.com/white66-7/java-backend',
     tags: ['SpringBoot', 'Java', 'IDEA']
+  },
+  {
+    id: 5,
+    title: '桌面美化工具',
+    description: '一个鼠标左键双击后隐藏桌面快捷图标工具',
+    poster: '/project/click.webp',
+    link: 'https://github.com/white66-7/apps-organizationd',
+    tags: ['Python', 'tkinter', 'pynput','pystray']
   }
 ])
 

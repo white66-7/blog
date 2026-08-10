@@ -42,6 +42,7 @@ const saysList = [
   { id: 10, content: '我老弟竟然有秘密瞒着我', date: '2026-07-26 20:47' },
   { id: 11, content: '感觉快要写吐了', date: '2026-08-01 17:37' },
   { id: 12, content: '火影退游了', date: '2026-08-02 13:41' },
+  { id: 13, content: '看着一闪一闪的星星想东想西,很有意境', date: '2026-08-9 21:45' },
 ]
 
 const currentIndex = ref(0)
