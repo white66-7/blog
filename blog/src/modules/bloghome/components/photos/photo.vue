@@ -65,7 +65,7 @@ import view4 from '@/assets/album/风景/十字路口.webp'
 import view5 from '@/assets/album/风景/星空.webp'
 import view6 from '@/assets/album/风景/破晓.webp'
 import view7 from '@/assets/album/风景/经典构图.webp'
-// import view7 from '@/assets/album/风景/'
+import view8 from '@/assets/album/风景/mountain.webp'
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
@@ -116,11 +116,12 @@ const albumsData = [
     photos: [
       { title: '高考结束的小区门口', url: view1 },
       { title: '期末周的图书馆', url: view2 },
-      { title: '乡村风光', url: view3 },
+      { title: '乡村', url: view3 },
       { title: '风起云涌', url: view4 },
       { title: '少见的星空', url: view5 },
       { title: '清晨的破晓', url: view6 },
       { title: '这构图思路还真行', url: view7 },
+      { title: 'NO SEVICE', url: view8 },
     ]
   },
   {

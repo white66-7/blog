@@ -178,7 +178,7 @@ export const articles: Article[] = [
     readTime: '10 minutes',
     excerpt: '你难道会拒绝一个输出结果不受官方限制的本地模型?',
     tags: ['Ollama', '大模型'],
-    cover: '/messages/14/red-eye.webp',
+    cover: '/messages/14/space.webp',
     content:md14,
   },
   {
@@ -189,7 +189,7 @@ export const articles: Article[] = [
     readTime: '10 minutes',
     excerpt: '加载屏如何实现后台加载和实时更新？',
     tags: ['前端', 'Typescript','多屏逻辑'],
-    cover: '/messages/15/load.webp',
+    cover: '/messages/15/stay.gif',
     content:md15,
   },
   // {
