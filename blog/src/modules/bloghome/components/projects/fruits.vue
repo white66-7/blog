@@ -80,7 +80,7 @@ const rawProjects = ref([
     title: '桌面美化工具',
     description: '一个鼠标左键双击后隐藏桌面快捷图标工具',
     poster: '/project/click.webp',
-    link: 'https://github.com/white66-7/apps-organizationd',
+    link: 'https://github.com/white66-7/DesktopHelper42',
     tags: ['Python', 'tkinter', 'pynput','pystray']
   }
 ])

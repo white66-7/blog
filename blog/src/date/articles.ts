@@ -90,7 +90,7 @@ export const articles: Article[] = [
     readTime: '3 minutes',
     excerpt: '记录几个悬停效果和入场动画,适合用在按钮亦或是装饰性的元素上',
     tags: ['css', 'animation','动画'],
-    cover: '/covers/like.webp',
+    cover: '/messages/6/rest.gif',
     content:md6,
   },
   {
@@ -178,7 +178,7 @@ export const articles: Article[] = [
     readTime: '10 minutes',
     excerpt: '你难道会拒绝一个输出结果不受官方限制的本地模型?',
     tags: ['Ollama', '大模型'],
-    cover: '/messages/14/space.webp',
+    cover: '/messages/14/universe.webp',
     content:md14,
   },
   {
