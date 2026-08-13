@@ -66,6 +66,8 @@ import view5 from '@/assets/album/风景/星空.webp'
 import view6 from '@/assets/album/风景/破晓.webp'
 import view7 from '@/assets/album/风景/经典构图.webp'
 import view8 from '@/assets/album/风景/mountain.webp'
+import view9 from '@/assets/album/风景/真心好看.webp'
+import view10 from '@/assets/album/风景/云.webp'
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
@@ -76,6 +78,9 @@ import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
 import holiday3 from '@/assets/album/暑假/初中吃到现在的羊肉面.webp'
 import holiday4 from '@/assets/album/暑假/failure man.webp'
+import holiday5 from '@/assets/album/暑假/足节虫.webp'
+import holiday6 from '@/assets/album/暑假/蜻蜓.webp'
+// import holiday6 from '@/assets/album/暑假'
 
 // ========== 2. 手动构建相册数据 ==========
 const albumsData = [
@@ -120,8 +125,10 @@ const albumsData = [
       { title: '风起云涌', url: view4 },
       { title: '少见的星空', url: view5 },
       { title: '清晨的破晓', url: view6 },
-      { title: '这构图思路还真行', url: view7 },
+      { title: '这构图蛮舒服', url: view7 },
       { title: 'NO SEVICE', url: view8 },
+      { title: '这我真心觉得特别好看', url: view9 },
+      { title: '这云神似Deepseek', url: view10 },
     ]
   },
   {
@@ -132,7 +139,9 @@ const albumsData = [
       { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
       { title: '极其奢侈的一顿晚餐', url: holiday2 },
       { title: '初中吃到现在的羊肉面', url: holiday3 },
-      { title: '暑假和朋友一起去看的电影', url: holiday4 }
+      { title: '暑假和朋友一起去看的电影', url: holiday4 },
+      { title: '好细长的足节虫', url: holiday5 },
+      { title: '蜻蜓特写', url: holiday6 }
     ]
   }
 ]
