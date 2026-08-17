@@ -1,54 +1,126 @@
 <template>
-  <div class="stack" @mouseenter="stopAutoPlay" @mouseleave="startAutoPlay">
-    <div class="card">
-      <!-- 聊天气泡图标 + 标题 -->
-      <div class="say-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 512 512">
-          <path d="M0 0h512v512H0z" fill="none" />
-          <path fill="currentColor" d="M254.156 56.938c-64.144 0-122.393 19.17-165.03 50.718c-42.64 31.547-69.845 76.01-69.845 125.5c0 49.492 27.207 93.952 69.845 125.5c6.388 4.727 13.13 9.164 20.188 13.313l-12.657 95.905l90.594-65.75c21.226 4.708 43.67 7.25 66.906 7.25c64.144 0 122.362-19.17 165-50.72C461.794 327.11 489 282.65 489 233.156c0-49.49-27.206-93.95-69.844-125.5c-42.638-31.546-100.856-50.718-165-50.718M157 274.438c12.69 0 23 10.276 23 22.968c0 12.69-10.31 23-23 23s-22.97-10.31-22.97-23s10.28-22.97 22.97-22.97zm96.844 0c12.69 0 22.97 10.276 22.97 22.968c-.002 12.69-10.28 23-22.97 23s-23-10.31-23-23s10.31-22.97 23-22.97zm99.844 0c12.69 0 22.968 10.276 22.968 22.968c0 12.69-10.278 23-22.97 23c-12.69 0-22.998-10.31-22.998-23s10.31-22.97 23-22.97z" />
-        </svg>
-        <h3>随心一说</h3>
-      </div>
+  <div>
+    <!-- 堆叠卡片主体：点击打开时间线弹窗 -->
+    <div
+      class="stack"
+      @mouseenter="stopAutoPlay"
+      @mouseleave="startAutoPlay"
+      @click="openModal"
+    >
+      <div class="card">
+        <!-- 聊天气泡图标 + 标题 -->
+        <div class="say-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 512 512">
+            <path d="M0 0h512v512H0z" fill="none" />
+            <path
+              fill="currentColor"
+              d="M254.156 56.938c-64.144 0-122.393 19.17-165.03 50.718c-42.64 31.547-69.845 76.01-69.845 125.5c0 49.492 27.207 93.952 69.845 125.5c6.388 4.727 13.13 9.164 20.188 13.313l-12.657 95.905l90.594-65.75c21.226 4.708 43.67 7.25 66.906 7.25c64.144 0 122.362-19.17 165-50.72C461.794 327.11 489 282.65 489 233.156c0-49.49-27.206-93.95-69.844-125.5c-42.638-31.546-100.856-50.718-165-50.718M157 274.438c12.69 0 23 10.276 23 22.968c0 12.69-10.31 23-23 23s-22.97-10.31-22.97-23s10.28-22.97 22.97-22.97zm96.844 0c12.69 0 22.97 10.276 22.97 22.968c-.002 12.69-10.28 23-22.97 23s-23-10.31-23-23s10.31-22.97 23-22.97zm99.844 0c12.69 0 22.968 10.276 22.968 22.968c0 12.69-10.278 23-22.97 23c-12.69 0-22.998-10.31-22.998-23s10.31-22.97 23-22.97z"
+            />
+          </svg>
+          <h3>随心一说</h3>
+          <span class="click-tip">点击查看全部</span>
+        </div>
 
-      <!-- 说说内容区（保留过渡动画） -->
-      <div class="say-content-wrapper">
-        <Transition name="slide-fade" mode="out-in">
-          <div :key="currentIndex" class="say-body">
-            <p class="content">“{{ currentSay?.content ?? '' }}”</p>
-            <div class="date-container">
-              <span class="date-line"></span>
-              <span class="date-text">{{ currentSay?.date ?? '' }}</span>
+        <!-- 说说内容区 -->
+        <div class="say-content-wrapper">
+          <Transition name="slide-fade" mode="out-in">
+            <div :key="currentIndex" class="say-body">
+              <p class="content">“{{ currentSay?.content ?? '' }}”</p>
+              <div class="date-container">
+                <span class="date-line"></span>
+                <span class="date-text">{{ currentSay?.date ?? '' }}</span>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弹窗：使用 Teleport 挂载到 body -->
+    <Teleport to="body">
+      <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
+        <!-- 核心：直接调用 animate.css 的 bounceIn / bounceOut -->
+        <Transition
+          appear
+          enter-active-class="animate__animated animate__bounceIn"
+          leave-active-class="animate__animated animate__bounceOut"
+        >
+          <div v-if="isModalOpen" class="modal-window">
+            <!-- 弹窗顶部栏 -->
+            <div class="modal-header">
+              <div class="modal-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 512 512">
+                  <path fill="currentColor" d="M254.156 56.938c-64.144 0-122.393 19.17-165.03 50.718c-42.64 31.547-69.845 76.01-69.845 125.5c0 49.492 27.207 93.952 69.845 125.5c6.388 4.727 13.13 9.164 20.188 13.313l-12.657 95.905l90.594-65.75c21.226 4.708 43.67 7.25 66.906 7.25c64.144 0 122.362-19.17 165-50.72C461.794 327.11 489 282.65 489 233.156c0-49.49-27.206-93.95-69.844-125.5c-42.638-31.546-100.856-50.718-165-50.718M157 274.438c12.69 0 23 10.276 23 22.968c0 12.69-10.31 23-23 23s-22.97-10.31-22.97-23s10.28-22.97 22.97-22.97zm96.844 0c12.69 0 22.97 10.276 22.97 22.968c-.002 12.69-10.28 23-22.97 23s-23-10.31-23-23s10.31-22.97 23-22.97zm99.844 0c12.69 0 22.968 10.276 22.968 22.968c0 12.69-10.278 23-22.97 23c-12.69 0-22.998-10.31-22.998-23s10.31-22.97 23-22.97z" />
+                </svg>
+                <h2>随心一说</h2>
+                <span class="count-badge">共 {{ timelineSays.length }} 条</span>
+              </div>
+              <button class="close-btn" @click="closeModal" aria-label="关闭">✕</button>
+            </div>
+
+            <!-- 时间线内容滚动区域 -->
+            <div class="modal-body" ref="modalBodyRef">
+              <div class="timeline">
+                <div
+                  v-for="(say, index) in timelineSays"
+                  :key="say.id"
+                  class="timeline-item"
+                  :ref="(el) => setItemRef(el, index)"
+                >
+                  <div class="timeline-axis">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                  </div>
+
+                  <div class="timeline-card">
+                    <div class="timeline-header">
+                      <span class="timeline-date">{{ say.date }}</span>
+                    </div>
+                    <p class="timeline-text">{{ say.content }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </Transition>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+// 核心：在组件内部直接引入 animate.css，保证 class 能被识别
+import 'animate.css'
 
 const saysList = [
-  { id: 1, content: '终于在今天把首页的代码写完了,网页上线了', date: '2026-06-14 22:36' },
-  { id: 2, content: '第一篇文章拖到现在也是写完了', date: '2026-06-16 23:09' },
-  { id: 3, content: '等我写完十篇文章就好好写个文章详细界面', date: '2026-06-20 16:56' },
-  { id: 4, content: '过完端午马上期末有点焦虑啊', date: '2026-06-22 17:50' },
+  { id: 1, content: '终于在今天把首页的代码写完了', date: '2026-06-14 22:36' },
+  { id: 2, content: '第一篇文章,也是写完了,虽说是拖到现在', date: '2026-06-16 23:09' },
+  { id: 3, content: '等我写完十篇文章就好好写个文章详细界面🫡', date: '2026-06-20 16:56' },
+  { id: 4, content: '过完端午马上期末有点焦虑啊😶‍🌫️', date: '2026-06-22 17:50' },
   { id: 5, content: '搬宿舍好累啊', date: '2026-06-25 22:05' },
-  { id: 6, content: '终于考完了可以开始爽玩了', date: '2026-07-01 12:48' },
+  { id: 6, content: '终于考完了可以开始爽玩了🥳', date: '2026-07-01 12:48' },
   { id: 7, content: '参加了趟ACM,圆了高中时候的一个梦', date: '2026-07-06 17:21' },
   { id: 8, content: '到千灯了', date: '2026-07-07 22:06' },
-  { id: 9, content: '不知道为啥,我很喜欢打雷下雨的天气,非常解压', date: '2026-07-20 19:41' },
-  { id: 10, content: '我老弟竟然有秘密瞒着我', date: '2026-07-26 20:47' },
-  { id: 11, content: '感觉快要写吐了', date: '2026-08-01 17:37' },
-  { id: 12, content: '火影退游了', date: '2026-08-02 13:41' },
-  { id: 13, content: '看着一闪一闪的星星想东想西,很有意境', date: '2026-08-9 21:45' },
+  { id: 9, content: '我很喜欢打雷下雨的天气写代码或是打游戏,感觉被充能了一般', date: '2026-07-20 19:41' },
+  { id: 13, content: '看着一闪一闪的星星想东想西,颇有些意境', date: '2026-08-09 21:45' },
+  { id: 14, content: '这似乎是我人生最后一个能完整享受的暑期了🥲', date: '2026-08-17 19:32' },
 ]
+
+const timelineSays = computed(() => [...saysList].reverse())
 
 const currentIndex = ref(0)
 const currentSay = computed(() => saysList[currentIndex.value] ?? saysList[0])
+const isModalOpen = ref(false)
+const modalBodyRef = ref<HTMLElement | null>(null)
+
+const itemRefs = ref<HTMLElement[]>([])
+const setItemRef = (el: any, index: number) => {
+  if (el) itemRefs.value[index] = el
+}
 
 let timer: number | null = null
+let observer: IntersectionObserver | null = null
 
 const pickRandomSay = () => {
   if (saysList.length <= 1) return
@@ -72,12 +144,51 @@ const stopAutoPlay = () => {
   }
 }
 
+const openModal = async () => {
+  stopAutoPlay()
+  isModalOpen.value = true
+  itemRefs.value = []
+
+  await nextTick()
+
+  if (modalBodyRef.value) {
+    observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible')
+          }
+        })
+      },
+      {
+        root: modalBodyRef.value,
+        threshold: 0.1,
+        rootMargin: '0px 0px -30px 0px',
+      }
+    )
+
+    itemRefs.value.forEach((el) => {
+      if (el) observer?.observe(el)
+    })
+  }
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+  startAutoPlay()
+}
+
 onMounted(() => {
   startAutoPlay()
 })
 
 onUnmounted(() => {
   stopAutoPlay()
+  if (observer) observer.disconnect()
 })
 </script>
 
@@ -94,15 +205,15 @@ onUnmounted(() => {
   transform: rotate(4deg);
 }
 .stack:hover .card:before {
-  transform: translatey(-2%) rotate(-4deg);
+  transform: translateY(-2%) rotate(-4deg);
 }
 .stack:hover .card:after {
-  transform: translatey(2%) rotate(4deg);
+  transform: translateY(2%) rotate(4deg);
 }
 
 /* ----- 卡片本体 ----- */
 .card {
-  height: 160px; 
+  height: 160px;
   border: 1px solid rgba(0, 0, 0, 0.14);
   border-radius: 16px;
   background-color: #fff;
@@ -116,10 +227,9 @@ onUnmounted(() => {
   color: #1a1a1a;
 }
 
-/* 卡片背后两层重叠效果 */
 .card:before,
 .card:after {
-  content: "";
+  content: '';
   display: block;
   position: absolute;
   height: 100%;
@@ -135,11 +245,11 @@ onUnmounted(() => {
 }
 
 .card:before {
-  transform: translatey(-2%) rotate(-6deg);
+  transform: translateY(-2%) rotate(-6deg);
 }
 
 .card:after {
-  transform: translatey(2%) rotate(6deg);
+  transform: translateY(2%) rotate(6deg);
 }
 
 /* ----- 内部元素 ----- */
@@ -158,12 +268,20 @@ onUnmounted(() => {
   font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
   letter-spacing: 1px;
-  color: #2C2C2C;
+  color: #2c2c2c;
 }
 
 .say-header svg {
   color: #d4a373;
   flex-shrink: 0;
+}
+
+.click-tip {
+  margin-left: auto;
+  font-size: 12px;
+  color: #999;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  opacity: 0.7;
 }
 
 .say-content-wrapper {
@@ -214,37 +332,224 @@ onUnmounted(() => {
   color: #555;
 }
 
-/* 切换动画 */
+/* 卡片轮播切换动画 */
 .slide-fade-enter-active {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 .slide-fade-leave-active {
   transition: all 0.3s ease;
 }
-
 .slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(10px);
   opacity: 0;
 }
 
-/* 减弱动效 */
-@media (prefers-reduced-motion: reduce) {
-  .stack,
-  .card,
-  .card:before,
-  .card:after {
-    transition: none !important;
-    transform: none !important;
+/* ================== 弹窗全屏与时间线样式 ================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: rgba(20, 20, 20, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal-window {
+  background: #faf7f2;
+  width: 100%;
+  max-width: 620px;
+  height: 82vh;
+  border-radius: 20px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-title svg {
+  color: #d4a373;
+}
+
+.modal-title h2 {
+  margin: 0;
+  font-size: 20px;
+  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  font-weight: normal;
+  color: #2c2c2c;
+  letter-spacing: 1px;
+}
+
+.count-badge {
+  font-size: 12px;
+  background: #f0e6dc;
+  color: #8c6a4e;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #888;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #f0f0f0;
+  color: #222;
+}
+
+/* 时间线滚动内容区 */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 4px;
+}
+
+/* 时间线主体容器 */
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 时间线单项：下滑隐入效果 */
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(28px) scale(0.98);
+  transition: opacity 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.timeline-item.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 轴线与节点圆圈 */
+.timeline-axis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 16px;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #d4a373;
+  box-shadow: 0 0 0 2px rgba(212, 163, 115, 0.2);
+  margin-top: 4px;
+  z-index: 2;
+}
+
+.timeline-line {
+  flex: 1;
+  width: 2px;
+  background: rgba(212, 163, 115, 0.28);
+  margin: 4px 0;
+}
+
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+
+/* 时间线单卡片 */
+.timeline-card {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timeline-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.timeline-header {
+  margin-bottom: 6px;
+}
+
+.timeline-date {
+  font-size: 12px;
+  color: #8c8c8c;
+  font-family: 'YouSheBiaoTiHei', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.timeline-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333333;
+  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+}
+
+/* 适配移动端 */
+@media (max-width: 600px) {
+  .modal-window {
+    height: 90vh;
+    border-radius: 16px;
   }
-  .slide-fade-enter-active,
-  .slide-fade-leave-active {
-    transition: none !important;
+
+  .modal-body {
+    padding: 20px 14px;
   }
-  .slide-fade-enter-from,
-  .slide-fade-leave-to {
-    transform: none;
+
+  .timeline-card {
+    padding: 12px 14px;
   }
 }
 </style>

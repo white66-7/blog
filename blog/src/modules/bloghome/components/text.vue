@@ -8,7 +8,7 @@
       <span>想做的</span>
     </h1>
 
-    <!-- 装饰动画：光速飞船（改造自 uiverse.io anand_4957 的 loader） -->
+    <!-- 装饰动画：光速飞船 -->
     <div class="hero-loader" aria-hidden="true">
       <div class="speeder">
         <span><span></span><span></span><span></span><span></span></span>
