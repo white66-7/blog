@@ -39,7 +39,27 @@
                     @click.stop="isFrontVisible(index) ? $emit('open-photo', photo) : null"
                   >
                     <div class="photo">
-                      <img :src="photo.url" class="real-image" />
+                      <!-- 视频：默认暂停展示第一帧 -->
+                      <video
+                        v-if="isVideo(photo)"
+                        :src="photo.url"
+                        class="real-image"
+                        preload="metadata"
+                        playsinline
+                        muted
+                        @loadedmetadata="setMiddleFrame"
+                      ></video>
+                      <!-- 图片 -->
+                      <img v-else :src="photo.url" class="real-image" />
+
+                      <!-- 视频专属：左下角胶片图标 -->
+                      <div v-if="isVideo(photo)" class="video-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                          <path d="M0 0h24v24H0z" fill="none" />
+                          <path fill="currentColor" d="M20 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm-9.66 4.638a1.235 1.235 0 0 0-1.715.992a29 29 0 0 0-.176 3.264c0 1.55.112 2.719.176 3.264c.097.82.952 1.319 1.715.991a28 28 0 0 0 2.915-1.481a28 28 0 0 0 2.742-1.784a1.234 1.234 0 0 0 0-1.98a28 28 0 0 0-2.741-1.786a28 28 0 0 0-2.916-1.48" />
+                        </svg>
+                      </div>
+
                       <div class="dust"></div>
                       <div class="scratches"></div>
                     </div>
@@ -61,7 +81,27 @@
                     @click.stop="isBackVisible(index) ? $emit('open-photo', photo) : null"
                   >
                     <div class="photo">
-                      <img :src="photo.url" class="real-image" />
+                      <!-- 视频：默认暂停展示第一帧 -->
+                      <video
+                        v-if="isVideo(photo)"
+                        :src="photo.url"
+                        class="real-image"
+                        preload="metadata"
+                        playsinline
+                        muted
+                        @loadedmetadata="setMiddleFrame"
+                      ></video>
+                      <!-- 图片 -->
+                      <img v-else :src="photo.url" class="real-image" />
+
+                      <!-- 视频专属：左下角胶片图标 -->
+                      <div v-if="isVideo(photo)" class="video-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                          <path d="M0 0h24v24H0z" fill="none" />
+                          <path fill="currentColor" d="M20 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm-9.66 4.638a1.235 1.235 0 0 0-1.715.992a29 29 0 0 0-.176 3.264c0 1.55.112 2.719.176 3.264c.097.82.952 1.319 1.715.991a28 28 0 0 0 2.915-1.481a28 28 0 0 0 2.742-1.784a1.234 1.234 0 0 0 0-1.98a28 28 0 0 0-2.741-1.786a28 28 0 0 0-2.916-1.48" />
+                        </svg>
+                      </div>
+
                       <div class="dust"></div>
                       <div class="scratches"></div>
                     </div>
@@ -74,25 +114,20 @@
             </div>
           </div>
         </div>
-<div class="page-block block-right" 
-     :style="{ 
-       width: rightEdgeWidth + 'px', 
-       opacity: rightEdgeProgress > 0.1 ? 0.9 : 0 
-     }"></div>
-<div class="page-block block-left"  
-     :style="{ 
-       width: leftEdgeWidth + 'px', 
-       opacity: leftEdgeProgress > 0.1 ? 0.9 : 0 
-     }"></div>
+        <div class="page-block block-right" 
+             :style="{ 
+               width: rightEdgeWidth + 'px', 
+               opacity: rightEdgeProgress > 0.1 ? 0.9 : 0 
+             }"></div>
+        <div class="page-block block-left"  
+             :style="{ 
+               width: leftEdgeWidth + 'px', 
+               opacity: leftEdgeProgress > 0.1 ? 0.9 : 0 
+             }"></div>
       </div>
     </div>
   </div>
 </template>
-
-//const props = defineProps({
-  sheets: { type: Array, required: true },
-  cover: { type: String, default: '' }
-})
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
@@ -103,13 +138,31 @@ const props = defineProps({
   cover: { type: String, default: '' }
 })
 
+defineEmits(['open-photo'])
+
+// 判断是否为视频
+const isVideo = (item) => {
+  if (!item) return false
+  if (item.type === 'video') return true
+  if (typeof item.url === 'string') {
+    return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(item.url)
+  }
+  return false
+}
+
+const setMiddleFrame = (e) => {
+  const video = e.target;
+  if (video.duration) {
+    video.currentTime = video.duration / 2;
+  }
+}
+
 const pageRefs = ref([])
 const PAGE_STEP = 6
 const flippedCount = ref(0)
 const isAnimating = ref(false)
 const FLIP_DURATION = 1.0
 
-// 【新增】：独立控制左右厚度进度的变量
 const leftEdgeProgress = ref(0)
 const rightEdgeProgress = ref(0)
 
@@ -120,7 +173,6 @@ const totalEdgeWidth = computed(() => {
   return Math.min(8, Math.max(4, props.sheets.length * 1.5))
 })
 
-// 【修改】：分别基于独立的进度变量计算宽度
 const leftEdgeWidth = computed(() => {
   if (!maxFlipped.value) return 0
   return totalEdgeWidth.value * (leftEdgeProgress.value / maxFlipped.value)
@@ -135,32 +187,15 @@ const isFrontVisible = (index) => index === flippedCount.value
 const isBackVisible = (index) => index === flippedCount.value - 1
 
 const updateEdgesByAngle = (pageIndex, rotationY) => {
-  /* ================= 🛠️ 调参控制台 🛠️ ================= */
-  // 1. 右侧厚度什么时候彻底消失？(范围 0 ~ 90，默认 85)
-  // 越接近 90，右边厚度保持的时间越长；越小，消失得越早。
   const RIGHT_END_ANGLE = 2; 
-
-  // 2. 左侧厚度什么时候开始出现？(范围 90 ~ 180，默认 95)
-  // 越接近 90，左边厚度越早开始长出来；越接近 180，长得越晚（非要等书页拍到桌面上才出现）。
   const LEFT_START_ANGLE = 178;
-
-  // 3. 厚度的“粘滞感/重量感” (建议取值 1 ~ 4)
-  // 1 = 匀速变化（你之前觉得快的版本）
-  // 2 = 带有一定重力感，起步慢，后期快
-  // 3 = 强烈的粘滞感，书页不翻到一大半，厚度几乎不掉
-  // 4 = 极端粘滞，像是在撕开粘着胶水的厚纸板
   const STICKY_POWER = 2;
-  /* ==================================================== */
-  const r = Math.abs(rotationY); // 当前书页翻转的角度 (0 到 180)
-  // 【右侧计算逻辑】
-  // 计算当前角度在 (0 ~ RIGHT_END_ANGLE) 之间的进度 (0 到 1)
+
+  const r = Math.abs(rotationY);
   const pRight = Math.max(0, Math.min(1, r / RIGHT_END_ANGLE));
-  // 倒转进度并应用曲线公式
   const rightContribution = 1 - Math.pow(pRight, STICKY_POWER);
-  // 【左侧计算逻辑】
-  // 计算当前角度在 (LEFT_START_ANGLE ~ 180) 之间的进度 (0 到 1)
+
   const pLeft = Math.max(0, Math.min(1, (r - LEFT_START_ANGLE) / (180 - LEFT_START_ANGLE)));
-  // 应用曲线公式
   const leftContribution = Math.pow(pLeft, STICKY_POWER);
 
   leftEdgeProgress.value = pageIndex + leftContribution;
@@ -168,15 +203,12 @@ const updateEdgesByAngle = (pageIndex, rotationY) => {
 }
 
 const initPages = () => {
-  // 【修复关键】：必须把状态初始化放在前面，防止下方 return 导致右侧厚度未赋值
   flippedCount.value = 0
   isAnimating.value = false
   leftEdgeProgress.value = 0
-  // 右侧厚度初始值等于总页数
   rightEdgeProgress.value = maxFlipped.value 
 
   const validPages = pageRefs.value.filter(el => el != null)
-  // 如果 DOM 还没渲染完，先跳过 GSAP 的 3D 设置（但上面的厚度变量已经成功赋值了）
   if (validPages.length === 0) return
 
   const total = validPages.length
@@ -203,20 +235,17 @@ const nextPage = () => {
 
   gsap.set(pageEl, { z: total * PAGE_STEP, zIndex: total + 1 })
 
-  // 翻页动画，基于真实角度同步厚度
   gsap.to(pageEl, {
     rotationY: -180,
     duration: FLIP_DURATION,
     ease: 'power2.inOut',
     onUpdate: function() {
-      // 实时获取当前这一帧的 3D 角度
       const currentRot = gsap.getProperty(pageEl, "rotationY")
       updateEdgesByAngle(index, currentRot)
     },
     onComplete: () => {
       gsap.set(pageEl, { z: (index + 1) * PAGE_STEP, zIndex: index + 1 })
       flippedCount.value = targetCount
-      // 强制对齐最终状态，防止浮点误差
       leftEdgeProgress.value = flippedCount.value
       rightEdgeProgress.value = maxFlipped.value - flippedCount.value
       isAnimating.value = false
@@ -236,26 +265,24 @@ const prevPage = () => {
 
   gsap.set(pageEl, { z: total * PAGE_STEP, zIndex: total + 1 })
 
-  // 往回翻动画，同样基于真实角度同步
   gsap.to(pageEl, {
     rotationY: 0,
     duration: FLIP_DURATION,
     ease: 'power2.inOut',
     onUpdate: function() {
-      // 实时获取往回翻时的角度 (从 -180 逐渐变回 0)
       const currentRot = gsap.getProperty(pageEl, "rotationY")
       updateEdgesByAngle(index, currentRot)
     },
     onComplete: () => {
       gsap.set(pageEl, { z: (total - index) * PAGE_STEP, zIndex: total - index })
       flippedCount.value = targetCount
-      // 强制对齐最终状态，防止浮点误差
       leftEdgeProgress.value = flippedCount.value
       rightEdgeProgress.value = maxFlipped.value - flippedCount.value
       isAnimating.value = false
     }
   })
 }
+
 let lastLength = -1
 
 watch(() => props.sheets, (newSheets) => {
@@ -263,8 +290,6 @@ watch(() => props.sheets, (newSheets) => {
   lastLength = newSheets.length
 
   pageRefs.value = []
-  
-  // 在 DOM 更新前先同步一次状态，确保右侧厚度马上出来
   leftEdgeProgress.value = 0
   rightEdgeProgress.value = newSheets.length
 
@@ -361,7 +386,6 @@ watch(() => props.sheets, (newSheets) => {
   height: var(--book-h);
 }
 
-/* 书本落地阴影 */
 .book-scene::after {
   content: '';
   position: absolute;
@@ -406,15 +430,15 @@ watch(() => props.sheets, (newSheets) => {
   background-blend-mode: multiply;
 }
 
-/* ================= 书脊阴影（贴合书页高度） ================= */
+/* ================= 书脊阴影 ================= */
 .book-wrapper::after {
   content: '';
   position: absolute;
-  top: 0;                         /* 对齐书页上边 */
-  bottom: 3.5px;                      /* 对齐书页下边 */
+  top: 0;
+  bottom: 3.5px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(60px, calc(var(--book-w) * 0.15));  /* 随书宽自适应 */
+  width: min(60px, calc(var(--book-w) * 0.15));
   background: linear-gradient(to right,
       transparent 0%,
       rgba(0, 0, 0, 0.2) 42%,
@@ -447,9 +471,7 @@ watch(() => props.sheets, (newSheets) => {
   transform-origin: left center;
 }
 
-/* ==========================================
-   书页纸面
-========================================== */
+/* ================= 书页纸面 ================= */
 .page-face {
   position: absolute;
   top: 0;
@@ -480,25 +502,6 @@ watch(() => props.sheets, (newSheets) => {
   background: linear-gradient(180deg, #fbf8f1 0%, #f5f0e4 100%);
 }
 
-/* 页面折痕 */
-.page-fold-right {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-left: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  box-shadow: -5px 5px 10px rgba(221, 221, 221, 0.6);
-  pointer-events: none;
-}
-
-.page-block-hidden {
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s;
-}
-
 .page-fold-left {
   position: absolute;
   top: 0;
@@ -511,9 +514,7 @@ watch(() => props.sheets, (newSheets) => {
   pointer-events: none;
 }
 
-/* ==========================================
-   内容区域
-========================================== */
+/* ================= 内容区域 ================= */
 .page-content {
   width: 100%;
   height: 100%;
@@ -532,9 +533,7 @@ watch(() => props.sheets, (newSheets) => {
   padding: 20px;
 }
 
-/* ==========================================
-   页边厚度块
-========================================== */
+/* ================= 页边厚度块 ================= */
 .page-block {
   position: absolute;
   top: 2px;
@@ -567,9 +566,7 @@ watch(() => props.sheets, (newSheets) => {
   );
 }
 
-/* ==========================================
-   宝丽来相纸
-========================================== */
+/* ================= 宝丽来相纸 ================= */
 .polaroid-in-book {
   position: relative;
   width: 75%;
@@ -611,6 +608,30 @@ watch(() => props.sheets, (newSheets) => {
   pointer-events: none;
 }
 
+/* ================= 视频左下角图标 ================= */
+.video-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 6;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  border-radius: 4px;
+  color: #ffffff;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.video-badge svg {
+  width: 30px;
+  height: 30px;
+}
+
 .caption-handwritten {
   font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'KaiTi', cursive;
   text-align: center;
@@ -637,42 +658,14 @@ watch(() => props.sheets, (newSheets) => {
   left: 30px;
 }
 
-/* ==========================================
-   照片效果
-========================================== */
+/* ================= 照片 / 视频通用效果 ================= */
 .real-image {
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: cover;
   filter: contrast(1.1) sepia(0.15);
   pointer-events: none;
-}
-
-.photo::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(120deg,
-      rgba(255, 255, 255, 0) 30%,
-      rgba(255, 255, 255, 0.4) 32%,
-      rgba(255, 255, 255, 0) 35%);
-  animation: shine 4s infinite;
-  z-index: 2;
-  pointer-events: none;
-}
-
-@keyframes shine {
-  0% {
-    transform: translateX(-100%) rotate(120deg);
-  }
-
-  20%,
-  100% {
-    transform: translateX(100%) rotate(120deg);
-  }
 }
 
 .dust {
@@ -706,9 +699,7 @@ watch(() => props.sheets, (newSheets) => {
   pointer-events: none;
 }
 
-/* ==========================================
-   移动端适配
-========================================== */
+/* ================= 移动端适配 ================= */
 @media (max-width: 768px) {
   .book-scene-container {
     --book-w: min(45vw, calc((100vh - 160px) / 1.4));

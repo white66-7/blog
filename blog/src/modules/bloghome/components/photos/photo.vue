@@ -68,6 +68,8 @@ import view7 from '@/assets/album/风景/经典构图.webp'
 import view8 from '@/assets/album/风景/mountain.webp'
 import view9 from '@/assets/album/风景/真心好看.webp'
 import view10 from '@/assets/album/风景/云.webp'
+import view11 from '@/assets/album/风景/上海.mp4'
+import view12 from '@/assets/album/风景/孤独的树.mp4'
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
@@ -129,6 +131,8 @@ const albumsData = [
       { title: 'NO SEVICE', url: view8 },
       { title: '这我真心觉得特别好看', url: view9 },
       { title: '这云神似Deepseek', url: view10 },
+      { title: '不愧是上海', url: view11 },
+      { title: '孤独的一颗树', url: view12 },
     ]
   },
   {

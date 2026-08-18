@@ -10,9 +10,20 @@
         <!-- 核心：拍立得大相片框 -->
         <div class="polaroid large-polaroid">
           <div class="photo large-photo">
+            <!-- 视频播放器：支持播放控制条、自动播放与循环 -->
+            <video
+              v-if="isVideo(photo)"
+              :src="photo.url"
+              class="real-image-large"
+              controls
+              autoplay
+              playsinline
+            ></video>
+
             <!-- 真实图片 -->
-            <img :src="photo.url" class="real-image-large" />
-            <!-- 老照片特效图层：灰尘与划痕 -->
+            <img v-else :src="photo.url" class="real-image-large" />
+
+            <!-- 老照片特效图层：灰尘与划痕（已设置 pointer-events: none 不会遮挡视频控制栏） -->
             <div class="dust"></div>
             <div class="scratches"></div>
           </div>
@@ -26,13 +37,23 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   photo: {
     type: Object,
     required: true
   }
 })
 defineEmits(['close'])
+
+// 判断是否为视频
+const isVideo = (item) => {
+  if (!item) return false
+  if (item.type === 'video') return true
+  if (typeof item.url === 'string') {
+    return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(item.url)
+  }
+  return false
+}
 </script>
 
 <style scoped>
@@ -74,6 +95,7 @@ defineEmits(['close'])
   line-height: 1;
   cursor: pointer !important;
   transition: all 0.35s ease;
+  z-index: 10;
 }
 .lightbox-close:hover {
   transform: rotate(90deg);
@@ -82,13 +104,13 @@ defineEmits(['close'])
   border-color: #fff;
 }
 
-/* ==================== 拍立得相纸样式 (还原原版) ==================== */
+/* ==================== 拍立得相纸样式 ==================== */
 .large-polaroid { 
   background: white;
   width: auto; 
-  max-width: 95vw; 
+  max-width: 90vw; 
   /* 上左右留窄边，底部留宽边写字 */
-  padding: 15px 15px 40px 15px;
+  padding: 15px 15px 25px 15px;
   box-shadow: 0 18px 40px rgba(0,0,0,0.55);
   border-radius: 2px;
   cursor: default; 
@@ -99,15 +121,20 @@ defineEmits(['close'])
   background: #1a1a1a; 
   position: relative; 
   overflow: hidden; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* 兼容图片与视频共用尺寸与质感滤镜 */
 .real-image-large { 
   display: block;
-  max-width: 100%; 
-  max-height: 85vh; 
+  max-width: 85vw; 
+  max-height: 75vh; /* 留出底部文字和相框边距空间，防止超出屏幕 */
   object-fit: contain; 
   /* 偏黄复古滤镜 */
-  filter: contrast(1.1) sepia(0.15); 
+  filter: contrast(1.05) sepia(0.12); 
+  outline: none;
 }
 
 /* ==================== 手写标题 ==================== */
@@ -131,7 +158,7 @@ defineEmits(['close'])
   background-position: 0 0, 25px 25px; 
   opacity: 0.05; 
   z-index: 3; 
-  pointer-events: none; 
+  pointer-events: none; /* 保证能穿透点击视频播放器控制条 */
 }
 
 .scratches { 
@@ -143,7 +170,7 @@ defineEmits(['close'])
   background: linear-gradient(45deg, transparent 45%, rgba(0,0,0,0.05) 46%, transparent 47%), 
               linear-gradient(-45deg, transparent 45%, rgba(0,0,0,0.05) 46%, transparent 47%); 
   background-size: 200px 200px; 
-  opacity: 0.5; 
+  opacity: 0.4; 
   z-index: 3; 
   pointer-events: none; 
 }
