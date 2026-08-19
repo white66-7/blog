@@ -57,9 +57,6 @@ const isVideo = (item) => {
 </script>
 
 <style scoped>
-/* 引入手写字体 */
-@import url(https://fonts.googleapis.com/css?family=Rock+Salt:400);
-
 /* ==================== 遮罩层 ==================== */
 .lightbox {
   position: fixed;
@@ -139,7 +136,7 @@ const isVideo = (item) => {
 
 /* ==================== 手写标题 ==================== */
 .caption { 
-  font-family: 'Rock Salt', cursive, 'Microsoft YaHei'; 
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bradley Hand', 'Segoe Script', cursive, 'Microsoft YaHei';
   text-align: center; 
   margin-top: 15px; 
   font-size: 18px; 
