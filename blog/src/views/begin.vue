@@ -60,8 +60,11 @@ const router = useRouter()
 const emit = defineEmits<{ (e: 'finish'): void }>()
 const isExiting = ref(false)
 
-// 保证加载屏至少展示 2.5 秒，确保毛笔字和印章盖下动效完整展现
-const MIN_DISPLAY_TIME = 2600
+const isFastMode = sessionStorage.getItem('splash_shown') !== null
+sessionStorage.setItem('splash_shown', 'true')
+
+const MIN_DISPLAY_TIME = isFastMode ? 300 : 2600
+
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
 
 onMounted(() => {
@@ -87,7 +90,7 @@ onMounted(() => {
       const img = new Image()
       img.src = url
       img.onload = resolve
-      img.onerror = resolve // 失败也继续放行
+      img.onerror = resolve 
     }))
   )
 
@@ -103,13 +106,11 @@ onMounted(() => {
     }
   })()
 
-  // 4. 后端接口预查询 (非阻塞式静默触发)
   const API_URL = 'http://localhost:8080/api/commits-timeline'
   fetch(API_URL, { method: 'GET' }).catch(err => {
     console.warn('后端静默查询未响应', err)
   })
 
-  // 统筹完成结算
   Promise.all([
     imagePromise,
     fontPromise,
@@ -131,8 +132,8 @@ const exitSplash = () => {
 }
 </script>
 
+
 <style scoped>
-/* ========== 1. 加载屏容器（宣纸质感底色） ========== */
 .t1 {
   display: flex;
   flex-direction: column;

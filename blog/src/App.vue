@@ -21,7 +21,6 @@ import { useAudioStore } from '@/stores/audioStore'
 
 const showGlobalSplash = ref(true)
 
-// 🌟 1. 新增：在这里定义 audioRef，它会自动和下面的 <audio ref="audioRef"> 绑定
 const audioRef = ref<HTMLAudioElement | null>(null)
 
 const onSplashFinish = () => {
@@ -32,12 +31,9 @@ onMounted(async () => {
   const libraryStore = useLibraryStore()
   const audioStore = useAudioStore()
   
-  // 🌟 2. 新增：将这个全局真实的 audio 标签，注入到全局 Store 中！(必须放在最前面)
   if (audioRef.value) {
     audioStore.setAudioElement(audioRef.value)
   }
-  
-  // ----- 下面的代码保持你原来的不变 -----
   await libraryStore.loadDate()
   audioStore.restoreFromLocalStorage()
   
