@@ -25,6 +25,7 @@ import md12 from './md/12.md?raw'
 import md13 from './md/13.md?raw'
 import md14 from './md/14.md?raw'
 import md15 from './md/15.md?raw'
+import md16 from './md/16.md?raw'
 
 export const articles: Article[] = [
   {
@@ -51,7 +52,7 @@ export const articles: Article[] = [
   },
   {
     id: 3,
-    title: '实时天气动画组件设计',
+    title: '实战记录:实时天气动画组件设计',
     type: '前端',
     date: '2026-06-17',
     readTime: '5 minute',
@@ -62,7 +63,7 @@ export const articles: Article[] = [
   },
   {
     id: 4,
-    title: '相册组件设计',
+    title: '实战记录:相册组件设计',
     type: '前端',
     date: '2026-06-19',
     readTime: '5 minutes',
@@ -73,7 +74,7 @@ export const articles: Article[] = [
   },
     {
     id: 5,
-    title: '双网页视图,深色遮罩',
+    title: '实战记录:双网页视图与深色遮罩',
     type: '前端',
     date: '2026-06-27',
     readTime: '10 minutes',
@@ -84,7 +85,7 @@ export const articles: Article[] = [
   },
       {
     id: 6,
-    title: '悬停,入场动画效果',
+    title: '实战记录:悬停与入场动画效果',
     type: '前端',
     date: '2026-06-30',
     readTime: '3 minutes',
@@ -95,29 +96,29 @@ export const articles: Article[] = [
   },
   {
     id: 7,
-    title: 're0第四季十一集',
+    title: 'Re:从零开始的异世界生活-11集',
     type: '杂谈',
     date: '2026-06-20',
     readTime: '2 minutes',
-    excerpt: '攒了好久了re0第四季前半部看完了,确实不负期待',
+    excerpt: '攒了好久了re0第四季前半部看完了,有点感概',
     tags: ['动漫', 're0'],
     cover: '/messages/7/re0.webp',
     content:md7,
   },
   {
     id: 8,
-    title: '期末复习笔记',
+    title: '期末自救笔记',
     type: '大学',
     date: '2026-07-01',
     readTime: '2 minutes',
-    excerpt: '复习整理一下一些学科知识点应付期末考试',
+    excerpt: '稍微复习整理一下,一些基本的学科知识点来应付期末考试',
     tags: ['大学', '数据结构','应试'],
     cover: '/messages/8/tired.webp',
     content:md8,
   },
   {
     id: 9,
-    title: '算法的基本知识',
+    title: '对算法的初级理解',
     type: '算法',
     date: '2026-07-03',
     readTime: '20 minutes',
@@ -139,22 +140,22 @@ export const articles: Article[] = [
   },
   {
     id: 11,
-    title: '文章主界面的逻辑与样式',
+    title: '博客文章主界面渲染逻辑',
     type: '前端',
     date: '2026-07-12',
     readTime: '20 minutes',
-    excerpt: '动态路由,makedown解析,目录导航等一系列蛮有意思的东西',
+    excerpt: '动态路由,makedown解析,目录导航等一系列蛮有意思的东西。',
     tags: ['MarkdownIt', '前端', '动态路由'],
     cover: '/messages/11/difficult.webp',
     content:md11,
   },
   {
     id: 12,
-    title: '数据的存储方式和骨架屏',
+    title: '前端资源数据处理与骨架屏加载',
     type: '后端',
     date: '2026-07-18',
     readTime: '20 minutes',
-    excerpt: '对图片,字体,音频及基本数据处理方式,夹带骨架屏加载动画实现效果',
+    excerpt: '对图片,字体,音频及基本数据处理方式,夹带骨架屏加载动画实现效果。',
     tags: ['数据库', '数据'],
     cover: '/messages/12/big.webp',
     content:md12,
@@ -172,7 +173,7 @@ export const articles: Article[] = [
   },
   {
     id: 14,
-    title: '在笔记本上部署本地模型',
+    title: '告别限制:在笔记本上部署本地模型',
     type: '杂谈',
     date: '2026-07-29',
     readTime: '10 minutes',
@@ -191,6 +192,17 @@ export const articles: Article[] = [
     tags: ['前端', 'Typescript','多屏逻辑'],
     cover: '/messages/15/stay.gif',
     content:md15,
+  },
+  {
+    id: 16,
+    title: '用python实现简单的桌面工具开发',
+    type: '后端',
+    date: '2026-08-20',
+    readTime: '10 minutes',
+    excerpt: '或许只有用过,才能真正理解何谓  "Life is short, I use Python."',
+    tags: ['Python', 'tkinter','pystray'],
+    cover: '/messages/16/法环.gif',
+    content:md16,
   },
   // {
   //   id: 14,

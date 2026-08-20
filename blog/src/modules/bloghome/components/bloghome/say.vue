@@ -90,7 +90,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-// 核心：在组件内部直接引入 animate.css，保证 class 能被识别
 import 'animate.css'
 
 const saysList = [
@@ -103,8 +102,10 @@ const saysList = [
   { id: 7, content: '参加了趟ACM,差一点拿到省级赛的资格', date: '2026-07-06 17:21' },
   { id: 8, content: '到千灯了', date: '2026-07-07 22:06' },
   { id: 9, content: '在打雷下雨的天气写代码或是打游戏,让我感觉像是被充能了', date: '2026-07-20 19:41' },
-  { id: 13, content: '拍摄星轨的时候看着一闪一闪的星星想东想西', date: '2026-08-09 21:45' },
-  { id: 14, content: '这似乎是我人生最后一个能完整享受的暑期了🥲', date: '2026-08-17 19:32' },
+  { id: 10, content: '小的时候玩4399游戏时,当加载进度条一出来我会假装去干别的事情,又或是挡住进度条等到色块慢慢越过我遮住的区域,那时候我或许以为,不在意或许会加载得快一些,用手遮住有一丝莫名的掌控感(今天真的想了很多,我可能该睡了)', date: '2026-07-25 03:42' },
+  { id: 11, content: '拍摄星轨的时候看着一闪一闪的星星想东想西', date: '2026-08-09 21:45' },
+  { id: 12, content: '这似乎是我人生最后一个能完整享受的暑期了🥲', date: '2026-08-17 19:32' },
+  { id: 13, content: '因为豪哥,梦想哭了这个博主去看了《局外人》,现在看完前面一小部分，印象中却只有模糊的剧情,不太恰当的"可爱"描述,摸乳房,裸色海报的描写。我可能腐朽的很严重了', date: '2026-08-20 22:58' },
 ]
 
 const timelineSays = computed(() => [...saysList].reverse())
@@ -215,10 +216,11 @@ onUnmounted(() => {
 .card {
   height: 160px;
   border: 1px solid rgba(0, 0, 0, 0.14);
+  box-sizing: border-box;
   border-radius: 16px;
   background-color: #fff;
   position: relative;
-  padding: 5% 5% 15% 5%;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   transition: 0.15s ease;
@@ -306,7 +308,7 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
   color: #333;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-clamp: 4;

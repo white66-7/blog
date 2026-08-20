@@ -478,6 +478,7 @@ watch(paginatedArticles, (newArticles) => {
   line-height: 1.6;
   margin-bottom: 16px;
   display: -webkit-box;
+  white-space: pre-wrap;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
