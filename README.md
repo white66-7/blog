@@ -1,28 +1,20 @@
 # 一路向北的站点 — 个人博客
 
-> 从零开始的个人博客 SPA，** Vue 3 + Spring Boot **实现。
+> 从零开始的个人博客 SPA，** Vue 3 + Spring Boot **实现。<br>
 > 包含音乐播放、文章、照片、GitHub 展示等模块。
 
 ---
 
 ## 项目架构
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                   Vue 3 前端（SPA）                          │
-│                                                             │
-│  /                    → BlogHome  博客首页                    │
-│  /photos              → photo     照片展示                    │
-│  /projects            → projects  GitHub 项目展示              │
-│  /articles            → mainarticle  文章列表                  │
-│  /article/:id         → ArticleDetail 文章详情                │
-│                         (markdown-it + highlight.js)        │
-│  /player              → MusicPlayer（嵌套路由）                │
-│   ├── /player/songs       → 歌曲列表                          │
-│   └── /player/playlists   → 播放列表（默认跳转）                │
-│  /about               → About  关于页面                        │
-└─────────────────────────────────────────────────────────────┘
-```
+- **/** → BlogHome 博客首页
+- **/photos** → photo 照片展示
+- **/projects** → projects GitHub 项目展示
+- **/articles** → mainarticle 文章列表
+- **/article/:id** → ArticleDetail 文章详情（markdown-it + highlight.js）
+- **/player** → MusicPlayer（嵌套路由）
+  - **/player/songs** → 歌曲列表
+  - **/player/playlists** → 播放列表
+- **/about** → About 关于页面
 ---
 ## 功能特性
 
@@ -31,7 +23,7 @@
 - GitHub 展示：贡献日历（自绘绿墙）+ 用户统计（公开仓库数）
 - 动画交互：GSAP 驱动的页面动效 + SnapSVG 图形绘制
 - 照片/相册：相册书架 + 灯箱浏览 + 视频兼容
-- 加载屏：手写书法 SVG 开场动画（含朱砂印章 + 菊花 Loader）
+- 加载屏：手写书法 SVG 开场动画
 - 趣味组件：短暂番茄钟等其他小功能
 - 响应式设计：适配不同屏幕尺寸
 - SPA 路由：Vue Router + keep-alive 页面缓存（首页/播放器/文章列表）

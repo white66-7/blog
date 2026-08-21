@@ -29,42 +29,54 @@
   <div class="not-found" v-else>
     <p>文章未找到</p>
   </div>
-
   <div class="elastic-sidebar" :class="{ 'is-open': isOpen }">
     <svg class="sidebar-svg" :viewBox="`0 0 350 ${svgHeight}`" preserveAspectRatio="none">
-      <path class="s-path" fill="#e3e9ef" :d="currentPath" @mousedown="startDrag" @touchstart="startDrag" />
+<path 
+  class="s-path" 
+  fill="rgba(243, 245, 248, 0.94)" 
+  :d="currentPath" 
+  @mousedown="startDrag" 
+  @touchstart="startDrag" 
+/>
     </svg>
 
     <!-- ==== 新增：提示文字 ==== -->
-<transition name="hint-fade">
-  <div class="sidebar-hint-text" v-show="showHintText">
-    目录
-  </div>
-</transition>
+    <transition name="hint-fade">
+      <div class="sidebar-hint-text" v-show="showHintText">
+        目录
+      </div>
+    </transition>
     <!-- ====================================== -->
 
     <div class="sidebar-content" :class="{ 'active': isOpen }">
+      <!-- 头部：更轻巧现代的排版 -->
       <div class="toc__header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 80 80">
-          <path d="M0 0h80v80H0z" fill="none" />
-          <g fill="none" fill-rule="evenodd" clip-rule="evenodd">
-            <path fill="#219653"
-              d="M48.56 20.477A19.402 19.402 0 0 1 74.97 34.4h-9.6l-4.4-4.4l-4.402 4.401H44.775A66 66 0 0 0 42.279 26h-1.215a19.4 19.4 0 0 1 7.496-5.523" />
-            <path fill="#f2994a" d="M35.622 34.66A65.54 65.54 0 0 1 29 68h14.618a66.18 66.18 0 0 0-.812-40.525z" />
-            <path fill="#219653"
-              d="M31.41 13.477A19.402 19.402 0 0 0 5 27.4h9.599L19 23l3.738 3.738a19.41 19.41 0 0 1 17.03-1.068a19.4 19.4 0 0 1 3.17 1.672l-.059.06h.09a19.4 19.4 0 0 0-11.56-13.925" />
-            <path fill="#219653"
-              d="M14.419 36.17a19.4 19.4 0 0 1 28.52-8.828L29.102 41.179h-6.224v6.224L16.09 54.19a19.4 19.4 0 0 1-1.672-18.02" />
-          </g>
-        </svg>
-        <span class="toc__title">目录</span>
+        <div class="toc__icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </div>
+        <div class="toc__title-group">
+          <span class="toc__title">目录</span>
+          <span class="toc__subtitle">CONTENTS</span>
+        </div>
       </div>
-      
+
+      <!-- 目录列表：轨道树结构 -->
       <div class="toc-list">
-        <a v-for="(h, i) in headings" :key="i" class="toc__item" :class="{ 'toc__item--active': activeHeading === i }"
-          :style="{ paddingLeft: (h.level - 1) * 12 + 'px', fontSize: (20 - h.level * 2) + 'px' }"
-          @click.prevent="handleTocClick(i)">
-          {{ h.text }}
+        <a v-for="(h, i) in headings" :key="i" class="toc__item" :class="[
+          `toc__item--h${h.level}`,
+          { 'toc__item--active': activeHeading === i }
+        ]" :style="{ paddingLeft: `${16 + (h.level - 1) * 14}px` }" @click.prevent="handleTocClick(i)">
+          <!-- 果冻小露珠节点 -->
+          <span class="toc__dot"></span>
+          <span class="toc__text">{{ h.text }}</span>
         </a>
       </div>
     </div>
@@ -253,7 +265,7 @@ const currentDir = ref(1)
 
 const currentPath = computed(() => {
   const h = svgHeight.value
-  const arc = Math.abs(currentArcX.value) 
+  const arc = Math.abs(currentArcX.value)
   return `M0,0 ${currentBaseX.value},0 a${arc},${h / 2} 0 1,${currentDir.value} 0,${h} L0,${h}`
 })
 
@@ -300,22 +312,22 @@ function animatePath(
 function playHintAnimation() {
   if (hasInteracted.value || isOpen.value) return
   animating.value = true
-  
-  showHintText.value = true 
+
+  showHintText.value = true
 
   animatePath(65, 15, 1200, 'smallElastic', () => {
     if (hasInteracted.value) {
-       showHintText.value = false 
-       return
+      showHintText.value = false
+      return
     }
-    
+
     // ==== 修改：弹出动画结束后，不立刻收回，而是等待 1500 毫秒 ====
     stayTimeoutId = setTimeout(() => {
       // 停留期间如果用户操作了，就中断后续操作
-      if (hasInteracted.value) return 
+      if (hasInteracted.value) return
 
-      showHintText.value = false 
-      
+      showHintText.value = false
+
       animatePath(START_BASE, 0, 1600, 'smallElastic', () => {
         animating.value = false
         if (!hasInteracted.value && !isOpen.value) {
@@ -332,12 +344,12 @@ let diffX = 0
 
 function startDrag(e: MouseEvent | TouchEvent) {
   hasInteracted.value = true
-  showHintText.value = false 
-  
+  showHintText.value = false
+
   // ==== 修改：清除所有的定时器 ====
   if (hintTimeoutId) clearTimeout(hintTimeoutId)
   if (stayTimeoutId) clearTimeout(stayTimeoutId) // 清除停留定时器
-  
+
   cancelAnimationFrame(animationFrameId)
   animating.value = false
   if (isOpen.value) return
@@ -469,6 +481,7 @@ function handleMarkdownClick(e: MouseEvent) {
   max-width: 100%;
   border-radius: 8px;
 }
+
 .navbar {
   background: #ececec !important;
   backdrop-filter: none !important;
@@ -488,6 +501,7 @@ function handleMarkdownClick(e: MouseEvent) {
   z-index: 90;
   pointer-events: none;
 }
+
 .sidebar-svg {
   position: absolute;
   top: 0;
@@ -497,30 +511,33 @@ function handleMarkdownClick(e: MouseEvent) {
   transform: scaleX(-1);
   overflow: visible;
 }
+
 .s-path {
   cursor: grab;
   pointer-events: auto;
-  background: #e3e9ef;
-  filter: drop-shadow(-10px 0px 20px rgba(0, 0, 0, 0.15));
+  /* 柔和的中性阴影，消除突兀感 */
+  filter: drop-shadow(-8px 0px 18px rgba(0, 0, 0, 0.07));
 }
 .s-path:active {
   cursor: grabbing;
 }
-/* 文字的基础样式 */
+
+/* 提示文字：改为雅致的深灰墨色 */
 .sidebar-hint-text {
   position: absolute;
   top: 50%;
-  right: 18px; /* 距离右侧的距离 */
-  /* 显式声明 X 和 Y，防止冲突 */
+  right: 18px;
   transform: translateY(-50%) translateX(0); 
   font-family: 'YouSheBiaoTiHei', sans-serif;
   font-size: 16px;
-  color: #219653;
+  color: #4b5563; /* 优雅的石板灰 */
   writing-mode: vertical-rl;
   letter-spacing: 4px;
   pointer-events: none;
   z-index: 10;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
 }
+
 
 /* === 自定义进出动画 === */
 /* 进场和退场的过程（时间设置为 0.8s，配合弹动曲线） */
@@ -537,74 +554,205 @@ function handleMarkdownClick(e: MouseEvent) {
   /* 保持 Y轴居中不变，X轴向右偏移 30px（藏进屏幕右侧） */
   transform: translateY(-50%) translateX(30px);
 }
+
+/* ================= 极简果冻轨道目录 ================= */
+
+/* 侧边栏面板容器：轻盈磨砂亚克力板 */
 .sidebar-content {
   position: absolute;
-  top: 40px;
+  top: 30px;
   right: 0;
-  width: 280px;
-  height: 100%;
-  padding: 40px 20px;
-  background: #edf2f7;
+  width: 290px;
+  height: calc(100% - 60px);
+  padding: 50px 20px 40px 16px;
+  /* 微微泛灰的高级磨砂白 */
+  background: rgba(245, 247, 250, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   opacity: 0;
   z-index: -1;
   overflow-y: auto;
   pointer-events: none;
-  transition: opacity 200ms ease, transform 200ms ease;
-  transform: translateX(20px);
+  border-radius: 24px 0 0 24px;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.03);
+  transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(30px);
 }
+
 .sidebar-content.active {
   opacity: 1;
   z-index: 2;
   transform: translateX(0);
   pointer-events: auto;
 }
+
 .sidebar-content::-webkit-scrollbar {
   display: none;
 }
+
+/* 头部排版 */
 .toc__header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px dashed #bebebe;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-left: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
-.toc__title {
-  font-family: 'YouSheBiaoTiHei';
-  font-size: 24px;
-  color: #1a1a1a;
+
+.toc__icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
-.toc-list {
+
+.toc__title-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-bottom: 50px;
 }
+
+.toc__title {
+  font-family: 'YouSheBiaoTiHei', sans-serif;
+  font-size: 18px;
+  color: #1f2937;
+  letter-spacing: 1px;
+}
+
+.toc__subtitle {
+  font-size: 9px;
+  color: #9ca3af;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+/* 轨道线：中性淡灰色轨道 */
+.toc-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 6px;
+}
+
+.toc-list::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 20px;
+  left: 12px;
+  width: 2px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+}
+
+/* 目录项 */
 .toc__item {
-  display: block;
-  color: #212121;
+  position: relative;
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  padding: 12px 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-right: 12px;
   border-radius: 12px;
-  font-family: 'YouSheBiaoTiHei';
-  transition: all 0.3s ease;
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: #4b5563;
+}
+
+.toc__text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: #edf2f7;
-  box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;
+  transition: all 0.2s ease;
 }
+
+.toc__item--h1 .toc__text {
+  font-weight: 600;
+  font-size: 14.5px;
+  color: #1f2937;
+}
+
+.toc__item--h2 .toc__text {
+  font-size: 13.5px;
+  color: #4b5563;
+}
+
+.toc__item--h3 .toc__text {
+  font-size: 12.5px;
+  color: #6b7280;
+}
+
+/* 小水滴节点（默认态：柔和浅灰白） */
+.toc__dot {
+  position: absolute;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: 1.5px solid #f5f7fa;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
+}
+
+.toc__item--h1 .toc__dot {
+  width: 7px;
+  height: 7px;
+  left: 2.5px;
+}
+
+/* 悬停态：微透白胶囊背景 + 微平移 */
 .toc__item:hover {
-  background-color: #23c483;
-  color: #1a1a1a;
-  transform: translateX(-5px);
+  background: rgba(255, 255, 255, 0.6);
+  transform: translateX(4px);
 }
+
+.toc__item:hover .toc__text {
+  color: #111827;
+}
+
+.toc__item:hover .toc__dot {
+  background: #94a3b8;
+  transform: scale(1.3);
+}
+
+/* 激活态（选中的项）：通透乳白质感 + 顶部高光 */
 .toc__item--active {
-  background-color: #23c483;
-  color: #fff;
-  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
+  transform: translateX(4px);
 }
+
+.toc__item--active .toc__text {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* 激活态水滴：点亮为精致的小黑珍珠/深墨灰，呼应整站现代感 */
+.toc__item--active .toc__dot {
+  width: 8px;
+  height: 8px;
+  left: 2px;
+  background: #1f2937;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+}
+
 .article-page {
   min-height: 100vh;
   background: #ececec;
@@ -613,16 +761,19 @@ function handleMarkdownClick(e: MouseEvent) {
   font-weight: 400;
   padding-top: 1px;
 }
+
 .article-page *,
 .content *,
 .markdown-body * {
   user-select: text !important;
   -webkit-user-select: text !important;
 }
+
 main {
   display: flex;
   position: relative;
 }
+
 .content {
   margin: 0 auto 0;
   padding: 0 60px 80px;
@@ -631,9 +782,10 @@ main {
   background: #fafafa;
   min-height: calc(100vh - 140px);
   border-radius: 0 0 30px 30px;
-box-shadow: 0 0 30px rgba(0,0,0,0.08);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
   overflow: visible;
 }
+
 .hero-image {
   position: relative;
   width: 100%;
@@ -646,6 +798,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   height: auto;
   overflow: visible;
 }
+
 .hero-image img {
   width: 100%;
   height: auto !important;
@@ -655,6 +808,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   border-radius: 12px;
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
 }
+
 .article-title {
   font-family: 'ShangShouJiangHuShuFa', sans-serif;
   font-size: clamp(2rem, 4vw + 1rem, 6rem);
@@ -666,6 +820,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   position: relative;
   z-index: 1;
 }
+
 .meta {
   color: #888;
   font-size: 14px;
@@ -675,6 +830,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   gap: 12px;
   justify-content: center;
 }
+
 .tags {
   margin: 0 0 40px 0;
   display: flex;
@@ -684,6 +840,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   position: relative;
   z-index: 1;
 }
+
 .tag {
   background: #ececec;
   color: #000;
@@ -699,12 +856,14 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
   cursor: default;
 }
+
 .tag:hover {
   background-color: #23c483;
   color: #fff;
   box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
   transform: translateY(-7px);
 }
+
 .markdown-body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", 'WenQuanWeiMiHei', sans-serif;
   line-height: 1.8;
@@ -715,13 +874,17 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   position: relative;
   z-index: 1;
   letter-spacing: 0.02em;
-  
+
   /* 👇 下面是修改的部分 👇 */
-  text-align: left;             /* 改为左对齐，彻底消除字间距异常拉伸 */
-  word-break: normal;           /* 保持正常的单词完整性，不要从中截断 Extension */
-  overflow-wrap: break-word;    /* 现代标准写法：遇到超长路径/链接（如 C:\Program...）实在放不下时，才允许换行 */
+  text-align: left;
+  /* 改为左对齐，彻底消除字间距异常拉伸 */
+  word-break: normal;
+  /* 保持正常的单词完整性，不要从中截断 Extension */
+  overflow-wrap: break-word;
+  /* 现代标准写法：遇到超长路径/链接（如 C:\Program...）实在放不下时，才允许换行 */
   /* 👆 上面是修改的部分 👆 */
 }
+
 .markdown-body :deep(h1) {
   font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
@@ -730,6 +893,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   margin: 1.5em 0 0.5em;
   line-height: 1.3;
 }
+
 .markdown-body :deep(h2) {
   font-family: 'ShangShouJiangHuShuFa';
   font-weight: normal;
@@ -737,9 +901,11 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   margin: 0.6em 0 0.5em;
   line-height: 1.3;
 }
+
 .markdown-body :deep(p) {
   margin-bottom: 1.25rem;
 }
+
 .markdown-body :deep(blockquote) {
   border-left: 4px solid #bebebe;
   padding-left: 16px;
@@ -749,6 +915,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   border-radius: 0 12px 12px 0;
   padding: 12px 16px;
 }
+
 .markdown-body :deep(p code),
 .markdown-body :deep(li code),
 .markdown-body :deep(h1 code),
@@ -759,6 +926,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   border-radius: 4px;
   font-size: 0.9em;
 }
+
 .markdown-body :deep(.code-editor) {
   max-width: 100%;
   background-color: #1e1e1e;
@@ -767,12 +935,14 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   padding: 2px;
   margin: 1.5em 0;
 }
+
 .markdown-body :deep(.code-editor .header) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 8px 12px;
 }
+
 .markdown-body :deep(.code-editor .title) {
   font-family: Lato, 'Open Sans', sans-serif;
   font-weight: 900;
@@ -780,6 +950,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   letter-spacing: 1.57px;
   color: rgb(212, 212, 212);
 }
+
 .markdown-body :deep(.code-editor .copy-btn) {
   position: relative;
   display: flex;
@@ -794,13 +965,16 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   transition: all 0.2s ease;
   font-size: 20px;
 }
+
 .markdown-body :deep(.code-editor .copy-btn:hover) {
   background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
+
 .markdown-body :deep(.code-editor .copy-btn.copied svg) {
   color: #23c483;
 }
+
 .markdown-body :deep(.code-editor .copy-btn .copy-tips) {
   position: absolute;
   right: 36px;
@@ -814,10 +988,12 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
   pointer-events: none;
 }
+
 .markdown-body :deep(.code-editor .copy-btn.copied .copy-tips) {
   opacity: 1;
   transform: translateX(0);
 }
+
 .markdown-body :deep(.code-editor .editor-content pre) {
   background: transparent !important;
   margin: 0;
@@ -828,10 +1004,12 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   line-height: 1.6;
   color: #d4d4d4;
 }
+
 .markdown-body :deep(.code-editor .editor-content pre code.hljs) {
   background: transparent !important;
   padding: 0;
 }
+
 .markdown-body :deep(a) {
   color: #23c483;
   text-decoration: none;
@@ -840,6 +1018,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   padding: 0 2px;
   transition: color 0.3s ease;
 }
+
 .markdown-body :deep(a)::after {
   content: '';
   position: absolute;
@@ -853,13 +1032,16 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   transition: transform 0.3s ease-out;
   border-radius: 2px;
 }
+
 .markdown-body :deep(a):hover {
   color: #1a9f68;
 }
+
 .markdown-body :deep(a):hover::after {
   transform: scaleX(1);
   transform-origin: bottom left;
 }
+
 .back-btn {
   position: fixed;
   top: 80px;
@@ -880,13 +1062,16 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   box-shadow: 6px 6px 12px #bebebe, -6px -6px 12px #ffffff;
   transition: all 0.3s ease;
 }
+
 .back-btn:hover {
   box-shadow: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
   color: #e05a5a;
 }
+
 .back-btn:active {
   transform: scale(0.96);
 }
+
 .lightbox-overlay {
   position: fixed;
   z-index: 999;
@@ -900,6 +1085,7 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   align-items: center;
   justify-content: center;
 }
+
 .lightbox-image {
   max-width: 90vw;
   max-height: 90vh;
@@ -907,23 +1093,29 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
+
 .not-found {
   text-align: center;
   margin-top: 200px;
   color: #999;
 }
+
 @media (max-width: 768px) {
   .elastic-sidebar {
-    pointer-events: none; /* 让触摸事件穿透到背后文章 */
+    pointer-events: none;
+    /* 让触摸事件穿透到背后文章 */
   }
+
   .s-path {
-    pointer-events: auto; /* 保留拖拽把手可操作 */
+    pointer-events: auto;
+    /* 保留拖拽把手可操作 */
   }
 
   /* 侧边栏内容面板半透明 */
   .sidebar-content {
     background: rgba(237, 242, 247, 0.75) !important;
-    backdrop-filter: blur(10px); /* 可选：轻微毛玻璃效果，更有质感 */
+    backdrop-filter: blur(10px);
+    /* 可选：轻微毛玻璃效果，更有质感 */
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   }
@@ -932,8 +1124,10 @@ box-shadow: 0 0 30px rgba(0,0,0,0.08);
   .toc__item {
     background: rgba(255, 255, 255, 0.6);
     box-shadow: none;
-    color: #222; /* 加深文字 */
+    color: #222;
+    /* 加深文字 */
   }
+
   .toc__item--active {
     background: rgba(35, 196, 131, 0.8);
     color: #fff;

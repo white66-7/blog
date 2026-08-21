@@ -199,7 +199,7 @@ export const articles: Article[] = [
     type: '后端',
     date: '2026-08-20',
     readTime: '10 minutes',
-    excerpt: '或许只有用过,才能真正理解何谓  "Life is short, I use Python."',
+    excerpt: '或许用过之后,才能理解何谓  "Life is short, I use Python."',
     tags: ['Python', 'tkinter','pystray'],
     cover: '/messages/16/法环.gif',
     content:md16,
