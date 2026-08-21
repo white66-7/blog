@@ -18,7 +18,7 @@
 import Navbar from '@/modules/bloghome/components/load.vue'
 import TechStackCard from '@/modules/bloghome/components/about/info.vue'
 import SkillGroup from '@/modules/bloghome/components/about/skills.vue'
-import Clock from '@/modules/bloghome/components/about/Clock.vue'
+import Clock from '@/modules/bloghome/components/about/clock.vue'
 
 const skillGroups = [
   {

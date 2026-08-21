@@ -1,275 +1,121 @@
-# 个人博客网站（全栈）
+# 一路向北的站点 — 个人博客
 
-> 从零开始手搓的个人博客网站，**Vue 3 前端** + **Spring Boot 后端**。  
-> 前端集成了音乐、文章、项目等等模块；后端提供 GitHub 数据 API 支持。  
-> 代码还在完善中
+> 从零开始的个人博客 SPA，** Vue 3 + Spring Boot **实现。
+> 包含音乐播放、文章、照片、GitHub 展示等模块。
 
 ---
-## 🏗️ 项目架构
+
+## 项目架构
+
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            Vue 3 前端（SPA）                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │                      页面路由结构 (Vue Router)                      │    │
-│  ├─────────────────────────────────────────────────────────────────────┤    │
-│  │                                                                     │    │
-│  │  /                   → BlogHome (博客首页)                         │    │
-│  │   ├── 贡献日历 + 个人简介                                          │    │
-│  │   └── 文章列表预览                                                 │    │
-│  │                                                                     │    │
-│  │  /photos            → PhotoShow (照片展示)                         │    │
-│  │                                                                     │    │
-│  │  /projects          → Github (GitHub 项目展示)                    │    │
-│  │                                                                     │    │
-│  │  /articles          → MainArticle (文章列表)                       │    │
-│  │                                                                     │    │
-│  │  /article/:id       → ArticleDetail (文章详情)                     │    │
-│  │   └── markdown-it + highlight.js 渲染                              │    │
-│  │                                                                     │    │
-│  │  /player            → MusicPlayer (音乐播放器 - 嵌套路由)          │    │
-│  │   ├── /player/songs      → SongsView (歌曲列表)                    │    │
-│  │   └── /player/playlists  → PlaylistsView (播放列表)               │    │
-│  │                                                                     │    │
-│  │  /about             → About (关于页面)                             │    │
-│  │                                                                     │    │
-│  │  /qq                → QqContact (QQ 联系方式)                      │    │
-│  │  /wechat            → WechatContact (微信联系方式)                 │    │
-│  │                                                                     │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │                       状态管理 (Pinia)                             │    │
-│  │  userStore / musicStore / articleStore                             │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │                      HTTP 请求层 (Axios)                           │    │
-│  │  ├── /api/contributions   → 贡献日历数据                           │    │
-│  │  ├── /api/user-stats      → 用户统计信息                           │    │
-│  │  └── /api/commits-timeline → 提交记录时间线                        │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Spring Boot 后端（REST API）                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │                    Controller 层（接收请求）                        │    │
-│  │  ContributionController                                             │    │
-│  │  ├── GET /api/contributions      → 贡献日历                        │    │
-│  │  ├── GET /api/user-stats         → 用户统计                        │    │
-│  │  └── GET /api/commits-timeline   → 提交记录时间线                   │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                      │                                     │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │                    Service 层（业务逻辑）                           │    │
-│  │  GitHubService                                                      │    │
-│  │  ├── fetchContributions()  → 调用 GitHub GraphQL API              │    │
-│  │  ├── fetchUserStats()      → 调用 GitHub REST API                │    │
-│  │  └── saveCommits()         → 持久化到 H2 数据库                   │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                      │                                     │
-│          ┌───────────────────────────┼───────────────────────────┐         │
-│          ▼                           ▼                           ▼         │
-│  ┌───────────────┐           ┌───────────────┐           ┌───────────────┐ │
-│  │  Repository   │           │  RestTemplate │           │  H2 数据库    │ │
-│  │  (JPA操作)    │           │  (GitHub API) │           │  (本地文件)   │ │
-│  └───────────────┘           └───────────────┘           └───────────────┘ │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-                          ┌───────────────────────┐
-                          │   GitHub REST /       │
-                          │   GraphQL API         │
-                          └───────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   Vue 3 前端（SPA）                          │
+│                                                             │
+│  /                    → BlogHome  博客首页                    │
+│  /photos              → photo     照片展示                    │
+│  /projects            → projects  GitHub 项目展示              │
+│  /articles            → mainarticle  文章列表                  │
+│  /article/:id         → ArticleDetail 文章详情                │
+│                         (markdown-it + highlight.js)        │
+│  /player              → MusicPlayer（嵌套路由）                │
+│   ├── /player/songs       → 歌曲列表                          │
+│   └── /player/playlists   → 播放列表（默认跳转）                │
+│  /about               → About  关于页面                        │
+└─────────────────────────────────────────────────────────────┘
 ```
+---
+## 功能特性
+
+- 文章展示：Markdown 渲染（markdown-it）+ 代码高亮（highlight.js），支持阅读位置记忆（滚动缓存）
+- 音乐播放器：基于 music-metadata 解析音频元数据与封面，支持列表/随机/循环模式、音量、进度、本地存储回放
+- GitHub 展示：贡献日历（自绘绿墙）+ 用户统计（公开仓库数）
+- 动画交互：GSAP 驱动的页面动效 + SnapSVG 图形绘制
+- 照片/相册：相册书架 + 灯箱浏览 + 视频兼容
+- 加载屏：手写书法 SVG 开场动画（含朱砂印章 + 菊花 Loader）
+- 趣味组件：短暂番茄钟等其他小功能
+- 响应式设计：适配不同屏幕尺寸
+- SPA 路由：Vue Router + keep-alive 页面缓存（首页/播放器/文章列表）
 
 ---
 
-## ✨ 功能特性
+## 技术栈
 
-### 前端（Vue 3）
-
-- 📝 **文章展示**：支持 Markdown 渲染 + 代码高亮
-- 🎵 **音乐播放器**：基于 `music-metadata` 解析音频文件
-- 📊 **GitHub 贡献日历**：从后端 API 获取数据并展示绿墙
-- 🎨 **动画交互**：GSAP 驱动的页面动效
-- 🖼️ **轮播展示**：Swiper 实现的图片/内容轮播
-- 📱 **响应式设计**：适配不同屏幕尺寸
-- 🔗 **路由管理**：Vue Router 实现 SPA 导航
-
-### 后端（Spring Boot）
-
-- 📅 **贡献日历 API**：获取 GitHub 用户贡献热力图数据
-- 📊 **用户统计 API**：查询公开仓库数、粉丝数、账号创建时间
-- 💾 **提交记录持久化**：将 Commit 数据存入 H2 数据库，支持时间线查询
-- 🗄️ **H2 文件数据库**：数据持久化到本地，重启不丢失
-
----
-
-## 🛠️ 技术栈
-
-### 前端
-
-| 类别 | 技术 |
-|------|------|
-| **框架** | Vue 3.5.32 |
-| **构建工具** | Vite 8.0.8 |
-| **语言** | TypeScript 6.0.0 |
-| **状态管理** | Pinia 3.0.4 |
-| **路由** | Vue Router 5.1.0 |
-| **HTTP 请求** | Axios 1.18.1 |
-| **CSS 框架** | Animate.css + Sass |
-| **Markdown 渲染** | markdown-it + highlight.js |
-| **动画引擎** | GSAP 3.15.0 |
-| **轮播组件** | Swiper 12.2.0 |
-| **音乐元数据** | music-metadata 11.14.0 |
-| **贡献日历** | github-calendar 2.3.4 |
-
-### 后端
-
-| 组件 | 说明 |
-|------|------|
-| **框架** | Spring Boot 4.1.0 |
-| **语言** | Java 17 |
-| **构建工具** | Maven |
-| **Web 层** | Spring MVC |
-| **HTTP 客户端** | RestTemplate + WebFlux |
-| **ORM** | Spring Data JPA |
-| **数据库** | H2（文件模式：`./data/blog`） |
+| 类别 | 技术 | 版本 |
+|------|------|------|
+| 框架 | Vue 3 | ^3.5.32 |
+| 构建工具 | Vite | ^8.0.8 |
+| 语言 | TypeScript | ~6.0.0 |
+| 状态管理 | Pinia | ^3.0.4 |
+| 路由 | Vue Router | ^5.1.0 |
+| HTTP 请求 | Axios | ^1.18.1 |
+| CSS | Sass (sass-embedded) + animate.css | ^1.100.0 |
+| Markdown 渲染 | markdown-it | ^14.3.0 |
+| 代码高亮 | highlight.js | ^11.11.1 |
+| 动画引擎 | GSAP | ^3.15.0 |
+| 图形绘制 | SnapSVG (snapsvg-cjs) | ^0.0.6 |
+| 轮播组件 | Swiper | ^12.2.0 |
+| 音乐元数据 | music-metadata | ^11.14.0 |
 
 ---
 
-## 📦 核心依赖
+## 项目结构
 
-### 前端（`blog/package.json`）
-
-| 依赖 | 用途 |
-|------|------|
-| `vue` | 前端核心框架 |
-| `vite` | 极速构建工具 |
-| `pinia` | 轻量状态管理 |
-| `vue-router` | 页面路由导航 |
-| `axios` | API 请求（调用后端） |
-| `markdown-it` | Markdown → HTML 解析 |
-| `highlight.js` | 代码语法高亮 |
-| `gsap` | 高级动画效果 |
-| `swiper` | 触摸滑动轮播 |
-| `music-metadata` | 音频文件元数据读取 |
-| `github-calendar` | GitHub 贡献日历组件 |
-
-### 后端（`demo/pom.xml`）
-
-| 依赖 | 用途 |
-|------|------|
-| `spring-boot-starter-web` | Web 应用核心 |
-| `spring-boot-starter-data-jpa` | JPA / Hibernate 持久化 |
-| `spring-boot-starter-webflux` | 响应式支持（WebClient） |
-| `h2` | H2 文件数据库 |
-
----
-
-## 📁 项目结构
 ```text
-project/
-├── blog/                                    # Vue 3 前端
-│   ├── src/
-│   │   ├── api/
-│   │   │   └── github.ts                    # 后端 API 调用
-│   │   ├── assets/                          # 静态资源
-│   │   │   ├── fonts/                       # 字体文件
-│   │   │   ├── images/                      # 图片资源
-│   │   │   └── styles/                      # 全局样式
-│   │   ├── components/                      # 公共组件
-│   │   ├── modules/                         # 业务模块
-│   │   │   ├── bloghome/                    # 博客首页模块
-│   │   │   │   ├── components/
-│   │   │   │   │   ├── articles/
-│   │   │   │   │   │   ├── mainarticle.vue     # /articles
-│   │   │   │   │   │   └── ArticleDetail.vue   # /article/:id
-│   │   │   │   │   ├── photos/
-│   │   │   │   │   │   └── photo.vue           # /photos
-│   │   │   │   │   ├── projects/
-│   │   │   │   │   │   └── projects.vue        # /projects
-│   │   │   │   │   └── about/
-│   │   │   │   │       └── about.vue           # /about
-│   │   │   │   └── views/
-│   │   │   │       ├── bloghome.vue            # /
-│   │   │   │       ├── qq.vue                  # /qq
-│   │   │   │       └── wechat.vue              # /wechat
-│   │   │   └── player/                      # 音乐播放器模块
-│   │   │       ├── components/
-│   │   │       │   ├── songsview.vue           # /player/songs
-│   │   │       │   └── Playlistsview.vue       # /player/playlists
-│   │   │       └── views/
-│   │   │           └── music-player.vue        # /player (父路由)
-│   │   ├── router/
-│   │   │   └── index.ts                     # 路由配置（已提供）
-│   │   ├── stores/                          # Pinia 状态管理
-│   │   │   ├── userStore.ts
-│   │   │   ├── musicStore.ts
-│   │   │   └── articleStore.ts
-│   │   ├── types/                           # TypeScript 类型定义
-│   │   ├── App.vue
-│   │   └── main.ts
-│   ├── public/
-│   ├── .env.development
-│   ├── .env.production
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tsconfig.json
-│
-├── demo/                                    # Spring Boot 后端
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   │   └── com/example/demo/
-│   │   │   │       ├── DemoApplication.java
-│   │   │   │       ├── controller/
-│   │   │   │       │   └── ContributionController.java
-│   │   │   │       ├── service/
-│   │   │   │       │   └── GitHubService.java
-│   │   │   │       ├── repository/
-│   │   │   │       │   └── GithubCommitRepository.java
-│   │   │   │       ├── entity/
-│   │   │   │       │   └── GithubCommit.java
-│   │   │   │       └── model/
-│   │   │   │           └── ContributionCalendar.java
-│   │   │   └── resources/
-│   │   │       └── application.properties
-│   │   └── test/
-│   ├── data/
-│   │   └── blog.mv.db
-│   └── pom.xml
-│
-├── .github/workflows/
-│   └── deploy.yml
-├── .gitignore
-└── README.md
-```
-🚀 本地开发
-1. 启动后端（Spring Boot）
-```bash
-cd demo
-mvn spring-boot:run
+vue-frontend/
+└── blog/                         # Vue 3 前端
+    ├── src/
+    │   ├── assets/               # 图片、相册、字体等静态资源
+    │   ├── config/song.ts        # 歌曲配置
+    │   ├── date/                 # 文章数据（md/*.md + articles.ts）
+    │   ├── modules/              # 业务模块
+    │   │   ├── bloghome/         # 首页模块（文章/照片/项目/关于）
+    │   │   │   └── components/
+    │   │   │       ├── articles/ # 文章列表 + 详情 + 搜索
+    │   │   │       ├── photos/   # 相册书架 + 灯箱
+    │   │   │       ├── projects/ # GitHub 贡献墙 + 统计
+    │   │   │       └── about/    # 关于页（技能/时钟/信息）
+    │   │   └── player/           # 音乐播放器模块
+    │   │       ├── components/   # 播放器界面 / 侧边栏 / 歌曲 / 播放列表
+    │   │       └── utils/        # 封面提取 / 本地数据库 / 格式化
+    │   ├── router/index.ts       # 路由配置
+    │   ├── stores/               # Pinia store（audio / library）
+    │   ├── views/                # 顶层视图（首页 / 播放器 / 加载屏）
+    │   ├── App.vue
+    │   └── main.ts
+    ├── index.html
+    ├── vite.config.ts
+    ├── tsconfig.json
+    └── package.json
 ```
 
-2. 启动前端（Vue 3）
+---
+
+## 本地开发
+
 ```bash
 cd blog
 npm install
-npm run dev
+npm run dev        # 开发服务器
+npm run build      # 生产构建 → dist/
+npm run preview    # 预览构建产物
+npm run type-check # vue-tsc 类型检查
 ```
 
-目前仅向服务器推送前端代码，网页呈现骨架屏
-## 🤖 自动化部署
-本项目已配置 GitHub Actions 持续集成/部署（CI/CD）工作流，推送代码后自动完成构建并同步至服务器。
+---
 
-配置文件位于 `.github/workflows/deploy.yml`：
+## 自动化部署（GitHub Actions）
+
+推送 main 分支后自动构建 blog/，并通过 SSH 将 blog/dist/ 同步到宝塔服务器、修正权限：
+
+- actions/checkout@v4、actions/setup-node@v4（Node 20）
+- 构建：npm install && npm run build
+- 部署：easingthemes/ssh-deploy@main 同步到 SERVER_PATH
+- 权限：appleboy/ssh-action@v1 设置 www:www 及 755/644 权限
+
+所需 Secrets：SSH_PRIVATE_KEY、SERVER_IP、SERVER_USER、SERVER_PATH
+
+---
+
+## License
+
+MIT License
