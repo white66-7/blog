@@ -45,25 +45,22 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
     <div class="top-nav">
       <!-- 返回按钮 -->
       <button class="back-btn" @click="goBack" title="返回">
-        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
 
       <!-- 动效搜索框 (融入了你提供的结构，并绑定了 v-model) -->
       <div class="search-container">
-        <input 
-          type="text" 
-          v-model="libraryStore.kw" 
-          class="search-input" 
-          required 
-          placeholder=""
-        >
+        <input type="text" v-model="libraryStore.kw" class="search-input" required placeholder="">
         <div class="search-icon">
           <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
             <title>Search</title>
-            <path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path>
-            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M338.29 338.29L448 448"></path>
+            <path d="M221.09 64a157.09 157.09 0 10157.09 157.09A157.1 157.1 0 00221.09 64z" fill="none"
+              stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path>
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32"
+              d="M338.29 338.29L448 448"></path>
           </svg>
         </div>
       </div>
@@ -71,7 +68,7 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
 
     <!-- 滚动区域 (包含歌单信息和歌曲列表) -->
     <div class="scroll-content">
-      
+
       <!-- 2. 歌单展示区 (左侧封面，右侧信息) -->
       <div class="playlist-banner">
         <div class="banner-cover">
@@ -87,31 +84,34 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
           </div>
         </div>
       </div>
-
       <!-- 3. 歌曲列表区 -->
       <div class="sv-list">
         <div v-if="!libraryStore.filteredList.length" class="sv-empty">
           {{ libraryStore.kw ? '没有找到匹配的信号' : '该歌单下无神经信号' }}
         </div>
-        
-        <div
-          v-for="(s, idx) in libraryStore.filteredList"
-          :key="s.id"
-          class="sv-row"
-          :class="{ on: s._globalIdx === audioStore.curIdx }"
-          @click="playSong(s._globalIdx)"
-        >
+
+        <div v-for="(s, idx) in libraryStore.filteredList" :key="s.id" class="sv-row"
+          :class="{ on: s._globalIdx === audioStore.curIdx }" @click="playSong(s._globalIdx)">
           <div class="sv-num">{{ idx + 1 }}</div>
           <div class="sv-info">
             <div class="sv-name">{{ s.name }}</div>
             <div class="sv-artist">{{ s.artist }}</div>
           </div>
+
+          <!-- 🌟 原版便签：斜右上方悬浮 -->
+          <div v-if="s.describe" class="sv-tooltip">
+            <div class="tooltip-header">
+              <span class="tooltip-dot"></span>
+              <span class="tooltip-tag">留言</span>
+            </div>
+            <div class="tooltip-body">{{ s.describe }}</div>
+          </div>
+
           <div class="sv-acts">
             <button class="sv-rm" @click.stop="removeSong(s.id)" title="删除">🗑</button>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -160,7 +160,8 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
 /* 动效搜索框 (适配版) */
 .search-container {
   position: relative;
-  --size-button: 36px; /* 略微调小一点适应导航栏高度 */
+  --size-button: 36px;
+  /* 略微调小一点适应导航栏高度 */
   color: white;
 }
 
@@ -181,13 +182,14 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
 
 .search-input:focus,
 .search-input:not(:invalid) {
-  width: 200px; /* 展开后的宽度 */
+  width: 200px;
+  /* 展开后的宽度 */
   cursor: text;
   box-shadow: 0px 0px 0px #0e0e0e, 0px 0px 0px rgb(95 94 94 / 25%), inset 1.5px 1.5px 3px #0e0e0e, inset -1.5px -1.5px 3px #5f5e5e;
 }
 
-.search-input:focus + .search-icon,
-.search-input:not(:invalid) + .search-icon {
+.search-input:focus+.search-icon,
+.search-input:not(:invalid)+.search-icon {
   pointer-events: all;
   cursor: pointer;
 }
@@ -262,7 +264,7 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
   font-weight: bold;
   color: #fff;
   margin: 0 0 12px 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   display: -webkit-box;
   line-clamp: 2;
   -webkit-line-clamp: 2;
@@ -313,8 +315,15 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
   background: rgba(0, 243, 255, .08);
 }
 
-.sv-row.on .sv-num { color: var(--neon-cyan, #00f3ff); text-shadow: 0 0 8px rgba(0, 243, 255, .4); }
-.sv-row.on .sv-name { color: var(--neon-cyan, #00f3ff); font-weight: bold; }
+.sv-row.on .sv-num {
+  color: var(--neon-cyan, #00f3ff);
+  text-shadow: 0 0 8px rgba(0, 243, 255, .4);
+}
+
+.sv-row.on .sv-name {
+  color: var(--neon-cyan, #00f3ff);
+  font-weight: bold;
+}
 
 .sv-num {
   width: 24px;
@@ -350,13 +359,16 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
 }
 
 .sv-acts {
-  opacity: 0; /* 默认隐藏删除按钮，防误触 */
+  opacity: 0;
+  /* 默认隐藏删除按钮，防误触 */
   gap: 6px;
   margin-left: 6px;
   transition: opacity 0.2s;
 }
 
-.sv-row:hover .sv-acts { opacity: 1; }
+.sv-row:hover .sv-acts {
+  opacity: 1;
+}
 
 .sv-rm {
   background: none;
@@ -369,8 +381,115 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
   transition: .15s;
 }
 
-.sv-rm:hover { 
-  color: #ff4545; 
+.sv-rm:hover {
+  color: #ff4545;
   background: rgba(255, 69, 69, 0.1);
+}
+
+/* ================= 歌曲行 & 斜右上悬浮便签 (防遮挡优化版) ================= */
+.sv-row {
+  position: relative;
+  /* 解决自身层级问题 */
+  z-index: 1;
+}
+
+/* 鼠标移入时，把整行的层级提到最高（z-index: 99），绝不会被其他行盖住 */
+.sv-row:hover {
+  background: rgba(0, 243, 255, .04);
+  border-color: rgba(0, 243, 255, .08);
+  z-index: 99;
+}
+
+
+.sv-tooltip {
+  position: absolute;
+  left: auto;
+  right: 10px;                  /* 贴向行尾空白处，避开左侧歌名 */
+  bottom: calc(100% + 12px);    /* 完全浮出行外，与行顶保持 12px 间隙 */
+  width: max-content;
+  max-width: 190px;             /* 控制宽度，减小盖住上一行歌名的范围 */
+  min-width: 180px;
+  max-height: 150px;            /* 过长内容内部滚动，防止向上盖住多行 */
+  padding: 8px 12px;
+  background: rgba(16, 20, 30, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 243, 255, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(10px, 10px) scale(0.95);  /* 从斜右下方入场 */
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  /* 提高层级，确保不被播放器覆盖（若播放器 z-index 更高可继续调大） */
+  z-index: 100;
+}
+
+/* 🌟 指示小箭头：落在便签右下角，指向下方悬停行行尾 */
+.sv-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 10%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0 6px;
+  border-style: solid;
+  border-color: rgba(0, 243, 255, 0.35) transparent transparent transparent;
+}
+
+/* 悬停展开 */
+.sv-row:hover .sv-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, 0) scale(1);
+  transition-delay: 0.12s;
+}
+
+/* 顶部标签栏 */
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.tooltip-dot {
+  width: 5px;
+  height: 5px;
+  background-color: var(--neon-cyan, #00f3ff);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--neon-cyan, #00f3ff);
+  animation: pulse-dot 1.6s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.tooltip-tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  color: var(--neon-cyan, #00f3ff);
+  text-transform: uppercase;
+}
+
+/* 描述文本 */
+.tooltip-body {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+  word-break: break-word;
+  white-space: normal;
+  /* 允许正常换行，不横向撑爆容器 */
 }
 </style>

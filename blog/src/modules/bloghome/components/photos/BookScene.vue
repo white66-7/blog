@@ -129,7 +129,7 @@
         </svg>
       </button>
 
-      <!-- 进度指示条 / 圆点（绑定 activePageIndex，零延迟响应） -->
+      <!-- 进度指示条 / 圆点 -->
       <div class="dots-wrapper">
         <div
           v-for="(_, i) in (maxFlipped + 1)"
@@ -187,7 +187,7 @@ const setMiddleFrame = (e) => {
 const pageRefs = ref([])
 const PAGE_STEP = 6
 const flippedCount = ref(0)
-const activePageIndex = ref(0) // 专用于底部圆点和按钮即时响应
+const activePageIndex = ref(0)
 const isAnimating = ref(false)
 
 const leftEdgeProgress = ref(0)
@@ -251,12 +251,11 @@ const initPages = () => {
   })
 }
 
-// 核心跳转函数：点击瞬间圆点立即展开，同时执行书页 3D 翻转动画
+// 核心跳转函数
 const goToPage = (targetIndex) => {
   if (isAnimating.value || targetIndex === flippedCount.value) return
   if (targetIndex < 0 || targetIndex > maxFlipped.value) return
 
-  // 1. 立即更新圆点指示器，实现零延迟反馈
   activePageIndex.value = targetIndex
   isAnimating.value = true
 
@@ -266,14 +265,12 @@ const goToPage = (targetIndex) => {
   const isForward = toIndex > fromIndex
   const numPages = Math.abs(toIndex - fromIndex)
 
-  // 翻页时间与交错时间自适应：多页连续刷过
   const totalDuration = numPages === 1 ? 0.85 : Math.min(1.3, 0.4 + numPages * 0.12)
   const staggerDelay = numPages === 1 ? 0 : (totalDuration * 0.35) / numPages
   const pageDuration = numPages === 1 ? totalDuration : totalDuration - (numPages - 1) * staggerDelay
 
   const tl = gsap.timeline({
     onComplete: () => {
-      // 动画完成后同步校准层级与书页角度
       for (let i = 0; i < total; i++) {
         const el = pageRefs.value[i]
         if (!el) continue
@@ -300,7 +297,6 @@ const goToPage = (targetIndex) => {
   })
 
   if (isForward) {
-    // 向右翻页
     for (let step = 0; step < numPages; step++) {
       const i = fromIndex + step
       const el = pageRefs.value[i]
@@ -321,7 +317,6 @@ const goToPage = (targetIndex) => {
       }, startTime)
     }
   } else {
-    // 向左翻页
     for (let step = 0; step < numPages; step++) {
       const i = fromIndex - 1 - step
       const el = pageRefs.value[i]
@@ -467,7 +462,7 @@ watch(() => props.sheets, (newSheets) => {
   height: 30px;
 }
 
-/* 指示点 (零延迟平滑展开) */
+/* 指示点 */
 .dot-indicator {
   position: relative;
   height: 8px;
@@ -478,7 +473,6 @@ watch(() => props.sheets, (newSheets) => {
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* 扩展判定热区 */
 .dot-indicator::after {
   content: '';
   position: absolute;
@@ -488,14 +482,12 @@ watch(() => props.sheets, (newSheets) => {
   right: -4px;
 }
 
-/* 悬停反馈 */
 .dot-indicator:hover:not(.active) {
   background-color: rgba(74, 69, 62, 0.7);
   transform: scale(1.4);
   box-shadow: 0 0 8px rgba(74, 69, 62, 0.35);
 }
 
-/* 激活状态 */
 .dot-indicator.active {
   width: 28px;
   background-color: #38322a;
@@ -574,7 +566,7 @@ watch(() => props.sheets, (newSheets) => {
   background-blend-mode: multiply;
 }
 
-/* ================= 书脊阴影 ================= */
+/* ================= 书脊底层接缝（优化为自然微缝，层级置底不遮挡翻页） ================= */
 .book-wrapper::after {
   content: '';
   position: absolute;
@@ -582,17 +574,16 @@ watch(() => props.sheets, (newSheets) => {
   bottom: 3.5px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(60px, calc(var(--book-w) * 0.15));
+  width: 16px;
   background: linear-gradient(to right,
       transparent 0%,
-      rgba(0, 0, 0, 0.2) 42%,
-      rgba(0, 0, 0, 0.35) 49%,
-      rgba(0, 0, 0, 0.4) 50%,
-      rgba(0, 0, 0, 0.35) 51%,
-      rgba(0, 0, 0, 0.2) 58%,
+      rgba(60, 45, 30, 0.08) 35%,
+      rgba(60, 45, 30, 0.22) 50%,
+      rgba(60, 45, 30, 0.08) 65%,
       transparent 100%);
-  z-index: 100;
+  z-index: 2;
   pointer-events: none;
+  mix-blend-mode: multiply;
 }
 
 /* ================= 页面结构 ================= */
@@ -631,15 +622,43 @@ watch(() => props.sheets, (newSheets) => {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.1'/%3E%3C/svg%3E");
 }
 
+/* 右页（Front）：随 3D 纸张运动的书脊侧自然凹陷光影 */
 .front {
   border-radius: 0 4px 4px 0;
-  box-shadow: inset 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.04);
 }
 
+.front::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(42px, 16%);
+  background: linear-gradient(to right, rgba(50, 35, 20, 0.16) 0%, rgba(50, 35, 20, 0.04) 55%, transparent 100%);
+  pointer-events: none;
+  z-index: 15;
+  mix-blend-mode: multiply;
+}
+
+/* 左页（Back）：随 3D 纸张运动的书脊侧自然凹陷光影 */
 .back {
   transform: rotateY(180deg);
   border-radius: 4px 0 0 4px;
-  box-shadow: inset -2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.04);
+}
+
+.back::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: min(42px, 16%);
+  background: linear-gradient(to left, rgba(50, 35, 20, 0.16) 0%, rgba(50, 35, 20, 0.04) 55%, transparent 100%);
+  pointer-events: none;
+  z-index: 15;
+  mix-blend-mode: multiply;
 }
 
 .blank-content {

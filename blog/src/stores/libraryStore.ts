@@ -12,6 +12,7 @@ export interface Song {
   signature?: string 
   originalFileName?: string 
   file?: File 
+  describe?: string 
   src?: string 
   isPreset?: boolean
 }
