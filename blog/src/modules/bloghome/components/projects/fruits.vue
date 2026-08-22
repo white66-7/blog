@@ -7,14 +7,13 @@
       </div>
       <div class="projects-count">{{ projects.length }} Projects</div>
     </div>
-    <div id="project-list">
+    <div id="project-list" @mousemove="movePreview">
       <div
         v-for="(project, index) in projects"
         :key="project.id"
         class="project-item"
         :class="hasAnimated ? '' : 'animate__animated animate__fadeInUp animate__fast'"
         :style="hasAnimated ? {} : { animationDelay: `${index * 0.15}s` }"
-        @mousemove="movePreview"
         @mouseenter="showPreview(project)"
         @mouseleave="hidePreview"
       >
@@ -34,12 +33,26 @@
         </a>
       </div>
     </div>
-    <img ref="previewImage" class="project-preview" :src="currentPoster" />
+
+    <!-- 悬浮预览容器：拆分为定位层与动画层，零延迟跟手 -->
+    <div
+      class="project-preview-wrapper"
+      :style="{
+        transform: `translate3d(${mousePos.x}px, ${mousePos.y}px, 0)`
+      }"
+    >
+      <img
+        class="project-preview-img"
+        :class="{ 'is-active': isPreviewActive }"
+        :src="currentPoster"
+        alt="Preview Poster"
+      />
+    </div>
   </section>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import 'animate.css'
 
 const rawProjects = ref([
@@ -51,13 +64,13 @@ const rawProjects = ref([
     link: 'https://github.com/white66-7/Naruto-battle-game',
     tags: ['C++', 'SFML', 'Box2D']
   },
-    {
+  {
     id: 2,
     title: '音乐播放器',
-    description: '基于css + javascropt + html开发,Electron打包的图形化程序',
+    description: '基于css + javascript + html开发,Electron打包的图形化程序',
     poster: '/project/music.webp',
     link: 'https://github.com/white66-7/music_app',
-    tags: ['javascropt', 'Electron', 'CSS','html']
+    tags: ['JavaScript', 'Electron', 'CSS', 'HTML']
   },
   {
     id: 3,
@@ -81,23 +94,35 @@ const rawProjects = ref([
     description: '一个鼠标左键双击后隐藏桌面快捷图标工具',
     poster: '/project/click.webp',
     link: 'https://github.com/white66-7/DesktopHelper42',
-    tags: ['Python', 'tkinter', 'pynput','pystray']
+    tags: ['Python', 'tkinter', 'pynput', 'pystray']
   }
 ])
 
 const projects = computed(() => {
-    return [...rawProjects.value]
+  return [...rawProjects.value]
     .reverse()
     .map((project, index) => ({
       ...project,
-      id: index + 1   // 按新顺序重新编号
-    }));
+      id: index + 1
+    }))
 })
 
-const currentPoster = ref('')
-const previewImage = ref(null)
+// ========== 1. 图片预加载：解决弱网海报显示延迟/错位 ==========
+onMounted(() => {
+  rawProjects.value.forEach((item) => {
+    if (item.poster) {
+      const img = new Image()
+      img.src = item.poster
+    }
+  })
+})
 
-// ========== 动画记忆：只在首次访问时播放 ==========
+// ========== 2. 悬浮与坐标跟踪 ==========
+const currentPoster = ref('')
+const isPreviewActive = ref(false)
+const mousePos = ref({ x: 0, y: 0 })
+
+// 动画记忆
 const ANIM_KEY = 'projects-animated'
 const hasAnimated = ref(!!sessionStorage.getItem(ANIM_KEY))
 if (!hasAnimated.value) {
@@ -105,22 +130,32 @@ if (!hasAnimated.value) {
 }
 
 const movePreview = (e) => {
-  if (!previewImage.value) return
-  previewImage.value.style.left = e.clientX + 30 + 'px'
-  previewImage.value.style.top = e.clientY + 30 + 'px'
+  const previewWidth = 260
+  const previewHeight = 160
+  const offsetX = 25
+  const offsetY = 25
+
+  let targetX = e.clientX + offsetX
+  let targetY = e.clientY + offsetY
+
+  // 边界防溢出检测：防止窗口靠近屏幕右侧或下侧时图片被切断
+  if (targetX + previewWidth > window.innerWidth) {
+    targetX = e.clientX - previewWidth - 15
+  }
+  if (targetY + previewHeight > window.innerHeight) {
+    targetY = e.clientY - previewHeight - 15
+  }
+
+  mousePos.value = { x: targetX, y: targetY }
 }
+
 const showPreview = (project) => {
   currentPoster.value = project.poster
-  if (previewImage.value) {
-    previewImage.value.style.opacity = 1
-    previewImage.value.style.transform = 'scale(1)'
-  }
+  isPreviewActive.value = true
 }
+
 const hidePreview = () => {
-  if (previewImage.value) {
-    previewImage.value.style.opacity = 0
-    previewImage.value.style.transform = 'scale(.9)'
-  }
+  isPreviewActive.value = false
 }
 </script>
 
@@ -190,7 +225,7 @@ const hidePreview = () => {
   margin: 0 -2rem;
   border-bottom: 1px solid #D8D2C8;
   position: relative;
-  transition: .3s;
+  transition: background .3s ease;
 }
 
 .project-item:hover {
@@ -213,7 +248,7 @@ const hidePreview = () => {
 
 .project-desc {
   max-width: 420px;
-  font-weight: 600px;
+  font-weight: 600;
   font-family: 'WenQuanWeiMiHei';
   font-size: 12px;
   line-height: 1.8;
@@ -255,19 +290,33 @@ const hidePreview = () => {
   color: #1A1814;
 }
 
-.project-preview {
+/* ========== 预览框样式优化 ========== */
+/* 容器只负责定位：开启 GPU 硬件加速，绝对无延时跟随 */
+.project-preview-wrapper {
   position: fixed;
-  left: 0;
   top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+}
+
+/* 图片内部负责淡入淡出与缩放，与位移解耦 */
+.project-preview-img {
   width: 260px;
   height: 160px;
   object-fit: cover;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 9999;
-  transform: scale(.9);
-  transition: opacity .25s ease, transform .25s ease;
   border: 1px solid #D8D2C8;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.project-preview-img.is-active {
+  opacity: 1;
+  transform: scale(1);
 }
 
 @media (max-width: 768px) {
@@ -290,7 +339,7 @@ const hidePreview = () => {
     display: none;
   }
 
-  .project-preview {
+  .project-preview-wrapper {
     display: none;
   }
 

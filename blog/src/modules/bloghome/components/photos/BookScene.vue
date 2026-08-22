@@ -3,20 +3,7 @@
     class="book-scene-container animate__animated animate__fadeIn"
     style="animation-delay: 0.3s; animation-duration: 1.5s;"
   >
-    <!-- 左翻页按钮 -->
-    <button class="nav-btn prev-btn" @click.stop="prevPage" :class="{ 'hidden': flippedCount === 0 }">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"></polyline>
-      </svg>
-    </button>
-
-    <!-- 右翻页按钮 -->
-    <button class="nav-btn next-btn" @click.stop="nextPage" :class="{ 'hidden': flippedCount >= maxFlipped }">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="9 18 15 12 9 6"></polyline>
-      </svg>
-    </button>
-
+    <!-- 3D 书本场景 -->
     <div class="book-scene">
       <div class="book-wrapper">
         <div class="book bound">
@@ -35,8 +22,8 @@
                     v-for="(photo, i) in sheet.front.items"
                     :key="i"
                     class="polaroid-in-book"
-                    :class="{ 'clickable': isFrontVisible(index) }"
-                    @click.stop="isFrontVisible(index) ? $emit('open-photo', photo) : null"
+                    :class="{ 'clickable': isFrontVisible(index) && !isAnimating }"
+                    @click.stop="isFrontVisible(index) && !isAnimating ? $emit('open-photo', photo) : null"
                   >
                     <div class="photo">
                       <!-- 视频：默认暂停展示第一帧 -->
@@ -77,8 +64,8 @@
                     v-for="(photo, i) in sheet.back.items"
                     :key="i"
                     class="polaroid-in-book"
-                    :class="{ 'clickable': isBackVisible(index) }"
-                    @click.stop="isBackVisible(index) ? $emit('open-photo', photo) : null"
+                    :class="{ 'clickable': isBackVisible(index) && !isAnimating }"
+                    @click.stop="isBackVisible(index) && !isAnimating ? $emit('open-photo', photo) : null"
                   >
                     <div class="photo">
                       <!-- 视频：默认暂停展示第一帧 -->
@@ -126,6 +113,46 @@
              }"></div>
       </div>
     </div>
+
+    <!-- 底部悬浮控制条 (Controls Capsule) -->
+    <div class="controls-bar">
+      <!-- 上一页按钮 -->
+      <button 
+        class="ctrl-btn" 
+        :class="{ 'disabled': activePageIndex === 0 || isAnimating }" 
+        :disabled="activePageIndex === 0 || isAnimating"
+        @click.stop="prevPage"
+        aria-label="Previous Page"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- 进度指示条 / 圆点（绑定 activePageIndex，零延迟响应） -->
+      <div class="dots-wrapper">
+        <div
+          v-for="(_, i) in (maxFlipped + 1)"
+          :key="i"
+          class="dot-indicator"
+          :class="{ 'active': activePageIndex === i }"
+          @click.stop="goToPage(i)"
+        ></div>
+      </div>
+
+      <!-- 下一页按钮 -->
+      <button 
+        class="ctrl-btn" 
+        :class="{ 'disabled': activePageIndex >= maxFlipped || isAnimating }" 
+        :disabled="activePageIndex >= maxFlipped || isAnimating"
+        @click.stop="nextPage"
+        aria-label="Next Page"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -160,8 +187,8 @@ const setMiddleFrame = (e) => {
 const pageRefs = ref([])
 const PAGE_STEP = 6
 const flippedCount = ref(0)
+const activePageIndex = ref(0) // 专用于底部圆点和按钮即时响应
 const isAnimating = ref(false)
-const FLIP_DURATION = 1.0
 
 const leftEdgeProgress = ref(0)
 const rightEdgeProgress = ref(0)
@@ -204,6 +231,7 @@ const updateEdgesByAngle = (pageIndex, rotationY) => {
 
 const initPages = () => {
   flippedCount.value = 0
+  activePageIndex.value = 0
   isAnimating.value = false
   leftEdgeProgress.value = 0
   rightEdgeProgress.value = maxFlipped.value 
@@ -223,64 +251,105 @@ const initPages = () => {
   })
 }
 
-const nextPage = () => {
-  if (isAnimating.value || flippedCount.value >= maxFlipped.value) return
+// 核心跳转函数：点击瞬间圆点立即展开，同时执行书页 3D 翻转动画
+const goToPage = (targetIndex) => {
+  if (isAnimating.value || targetIndex === flippedCount.value) return
+  if (targetIndex < 0 || targetIndex > maxFlipped.value) return
+
+  // 1. 立即更新圆点指示器，实现零延迟反馈
+  activePageIndex.value = targetIndex
   isAnimating.value = true
 
-  const index = flippedCount.value
-  const targetCount = index + 1
-  const pageEl = pageRefs.value[index]
   const total = pageRefs.value.filter(Boolean).length
-  if (!pageEl) { isAnimating.value = false; return; }
+  const fromIndex = flippedCount.value
+  const toIndex = targetIndex
+  const isForward = toIndex > fromIndex
+  const numPages = Math.abs(toIndex - fromIndex)
 
-  gsap.set(pageEl, { z: total * PAGE_STEP, zIndex: total + 1 })
+  // 翻页时间与交错时间自适应：多页连续刷过
+  const totalDuration = numPages === 1 ? 0.85 : Math.min(1.3, 0.4 + numPages * 0.12)
+  const staggerDelay = numPages === 1 ? 0 : (totalDuration * 0.35) / numPages
+  const pageDuration = numPages === 1 ? totalDuration : totalDuration - (numPages - 1) * staggerDelay
 
-  gsap.to(pageEl, {
-    rotationY: -180,
-    duration: FLIP_DURATION,
-    ease: 'power2.inOut',
-    onUpdate: function() {
-      const currentRot = gsap.getProperty(pageEl, "rotationY")
-      updateEdgesByAngle(index, currentRot)
-    },
+  const tl = gsap.timeline({
     onComplete: () => {
-      gsap.set(pageEl, { z: (index + 1) * PAGE_STEP, zIndex: index + 1 })
-      flippedCount.value = targetCount
-      leftEdgeProgress.value = flippedCount.value
-      rightEdgeProgress.value = maxFlipped.value - flippedCount.value
+      // 动画完成后同步校准层级与书页角度
+      for (let i = 0; i < total; i++) {
+        const el = pageRefs.value[i]
+        if (!el) continue
+        if (i < toIndex) {
+          gsap.set(el, {
+            rotationY: -180,
+            z: (i + 1) * PAGE_STEP,
+            zIndex: i + 1
+          })
+        } else {
+          gsap.set(el, {
+            rotationY: 0,
+            z: (total - i) * PAGE_STEP,
+            zIndex: total - i
+          })
+        }
+      }
+
+      flippedCount.value = toIndex
+      leftEdgeProgress.value = toIndex
+      rightEdgeProgress.value = maxFlipped.value - toIndex
       isAnimating.value = false
     }
   })
+
+  if (isForward) {
+    // 向右翻页
+    for (let step = 0; step < numPages; step++) {
+      const i = fromIndex + step
+      const el = pageRefs.value[i]
+      if (!el) continue
+
+      const startTime = step * staggerDelay
+      tl.set(el, { z: (total + step + 1) * PAGE_STEP, zIndex: total + step + 1 }, startTime)
+      tl.to(el, {
+        rotationY: -180,
+        duration: pageDuration,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          if (step === numPages - 1) {
+            const r = gsap.getProperty(el, "rotationY")
+            updateEdgesByAngle(i, r)
+          }
+        }
+      }, startTime)
+    }
+  } else {
+    // 向左翻页
+    for (let step = 0; step < numPages; step++) {
+      const i = fromIndex - 1 - step
+      const el = pageRefs.value[i]
+      if (!el) continue
+
+      const startTime = step * staggerDelay
+      tl.set(el, { z: (total + step + 1) * PAGE_STEP, zIndex: total + step + 1 }, startTime)
+      tl.to(el, {
+        rotationY: 0,
+        duration: pageDuration,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          if (step === numPages - 1) {
+            const r = gsap.getProperty(el, "rotationY")
+            updateEdgesByAngle(i, r)
+          }
+        }
+      }, startTime)
+    }
+  }
+}
+
+const nextPage = () => {
+  goToPage(activePageIndex.value + 1)
 }
 
 const prevPage = () => {
-  if (isAnimating.value || flippedCount.value <= 0) return
-  isAnimating.value = true
-
-  const targetCount = flippedCount.value - 1
-  const index = targetCount
-  const pageEl = pageRefs.value[index]
-  const total = pageRefs.value.filter(Boolean).length
-  if (!pageEl) { isAnimating.value = false; return; }
-
-  gsap.set(pageEl, { z: total * PAGE_STEP, zIndex: total + 1 })
-
-  gsap.to(pageEl, {
-    rotationY: 0,
-    duration: FLIP_DURATION,
-    ease: 'power2.inOut',
-    onUpdate: function() {
-      const currentRot = gsap.getProperty(pageEl, "rotationY")
-      updateEdgesByAngle(index, currentRot)
-    },
-    onComplete: () => {
-      gsap.set(pageEl, { z: (total - index) * PAGE_STEP, zIndex: total - index })
-      flippedCount.value = targetCount
-      leftEdgeProgress.value = flippedCount.value
-      rightEdgeProgress.value = maxFlipped.value - flippedCount.value
-      isAnimating.value = false
-    }
-  })
+  goToPage(activePageIndex.value - 1)
 }
 
 let lastLength = -1
@@ -302,12 +371,12 @@ watch(() => props.sheets, (newSheets) => {
    全局变量 & 容器
 ========================================== */
 .book-scene-container {
-  --book-w: min(36vw, calc((100vh - 180px) / 1.35));
+  --book-w: min(32vw, calc((100vh - 220px) / 1.35));
   --book-h: calc(var(--book-w) * 1.35);
   position: relative;
   z-index: 2;
   height: 100vh;
-  padding-top: 60px;
+  padding-top: 40px;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -316,51 +385,126 @@ watch(() => props.sheets, (newSheets) => {
 }
 
 /* ==========================================
-   翻页按钮
+   底部悬浮控制条
 ========================================== */
-.nav-btn {
-  position: absolute;
-  top: calc(50% + 30px);
-  transform: translateY(-50%);
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.08'/%3E%3C/svg%3E");
-  background-color: rgba(255, 252, 243, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+.controls-bar {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  cursor: pointer;
+  gap: 14px;
+  padding: 8px 18px;
+  background-color: rgba(255, 252, 243, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(220, 210, 190, 0.85);
+  border-radius: 9999px;
+  box-shadow: 
+    0 10px 30px -4px rgba(0, 0, 0, 0.12),
+    0 4px 12px -2px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  z-index: 100;
+  user-select: none;
   transition: all 0.3s ease;
-  color: #333;
 }
 
-.nav-btn:hover {
-  background-color: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  transform: translateY(-50%) scale(1.1) rotate(2deg);
+.controls-bar:hover {
+  background-color: rgba(255, 253, 246, 0.95);
+  box-shadow: 
+    0 14px 36px -4px rgba(0, 0, 0, 0.16),
+    0 6px 16px -2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-.nav-btn svg {
-  width: 30px;
+/* 翻页按钮 */
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #4a453e;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ctrl-btn svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s ease;
+}
+
+.ctrl-btn:hover:not(.disabled) {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #1a1a1a;
+  transform: scale(1.12);
+}
+
+.ctrl-btn:active:not(.disabled) {
+  transform: scale(0.92);
+}
+
+.ctrl-btn.disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 指示器轨道 */
+.dots-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 90px;
+  padding: 0 6px;
   height: 30px;
 }
 
-.prev-btn {
-  left: calc(50% - var(--book-w) - 60px);
+/* 指示点 (零延迟平滑展开) */
+.dot-indicator {
+  position: relative;
+  height: 8px;
+  width: 8px;
+  border-radius: 9999px;
+  background-color: rgba(74, 69, 62, 0.28);
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.next-btn {
-  right: calc(50% - var(--book-w) - 60px);
+/* 扩展判定热区 */
+.dot-indicator::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: -4px;
+  right: -4px;
 }
 
-.nav-btn.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-50%) scale(0.8);
+/* 悬停反馈 */
+.dot-indicator:hover:not(.active) {
+  background-color: rgba(74, 69, 62, 0.7);
+  transform: scale(1.4);
+  box-shadow: 0 0 8px rgba(74, 69, 62, 0.35);
+}
+
+/* 激活状态 */
+.dot-indicator.active {
+  width: 28px;
+  background-color: #38322a;
+  box-shadow: 0 2px 6px rgba(56, 50, 42, 0.25);
+}
+
+.dot-indicator.active:hover {
+  transform: scale(1.06);
+  background-color: #1a1815;
 }
 
 /* ==========================================
@@ -702,28 +846,29 @@ watch(() => props.sheets, (newSheets) => {
 /* ================= 移动端适配 ================= */
 @media (max-width: 768px) {
   .book-scene-container {
-    --book-w: min(45vw, calc((100vh - 160px) / 1.4));
+    --book-w: min(42vw, calc((100vh - 180px) / 1.4));
     --book-h: calc(var(--book-w) * 1.4);
-    padding-top: 50px;
+    padding-top: 30px;
   }
 
-  .nav-btn {
-    width: 40px;
-    height: 40px;
-    top: calc(50% + 25px);
+  .controls-bar {
+    bottom: 20px;
+    padding: 6px 14px;
+    gap: 10px;
   }
 
-  .nav-btn svg {
+  .ctrl-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ctrl-btn svg {
     width: 20px;
     height: 20px;
   }
 
-  .prev-btn {
-    left: 4px;
-  }
-
-  .next-btn {
-    right: 4px;
+  .dot-indicator.active {
+    width: 20px;
   }
 
   .polaroid-in-book {
