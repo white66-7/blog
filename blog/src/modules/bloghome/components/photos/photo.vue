@@ -51,7 +51,7 @@ import photo9 from '@/assets/album/动漫/video.webp'
 import photo10 from '@/assets/album/动漫/pair.webp'
 import photo11 from '@/assets/album/动漫/阿玛天纳斯.webp'
 import photo12 from '@/assets/album/动漫/向日葵.webp'
-
+import photo13 from '@/assets/album/动漫/战败.webp'
 
 import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
 import view2 from '@/assets/album/风景/library.webp'
@@ -65,11 +65,16 @@ import view9 from '@/assets/album/风景/真心好看.webp'
 import view10 from '@/assets/album/风景/云.webp'
 import view11 from '@/assets/album/风景/上海.mp4'
 import view12 from '@/assets/album/风景/孤独的树.mp4'
+import view13 from '@/assets/album/风景/彩虹.webp'
+// import view14 from '@/assets/album/风景'
 
 import img1 from '@/assets/album/人物/朋友.webp'
 import img2 from '@/assets/album/人物/研学.webp'
 import img3 from '@/assets/album/人物/dji.webp'
 import img4 from '@/assets/classmates.webp'
+import img5 from '@/assets/album/人物/student.webp'
+import img6 from '@/assets/album/人物/adult.webp'
+
 
 import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
@@ -77,6 +82,8 @@ import holiday3 from '@/assets/album/暑假/初中吃到现在的羊肉面.webp'
 import holiday4 from '@/assets/album/暑假/failure man.webp'
 import holiday5 from '@/assets/album/暑假/足节虫.webp'
 import holiday6 from '@/assets/album/暑假/蜻蜓.webp'
+import holiday7 from '@/assets/album/暑假/图书馆.webp'
+import holiday8 from '@/assets/album/暑假/篮球.webp'
 // import holiday6 from '@/assets/album/暑假'
 
 // ========== 2. 手动构建相册数据 ==========
@@ -98,6 +105,7 @@ const albumsData = [
       { title: '相反的你和我', url: photo10 },
       { title: '中二病也要谈恋爱', url: photo11 },
       { title: '通往夏天的隧道', url: photo12 },
+      { title: '败了', url: photo13 },
     ]
   },
   {
@@ -109,6 +117,8 @@ const albumsData = [
       { title: '高中同学们', url: img4 },
       { title: '给朋友拍的照片', url: img1 },
       { title: '在旧宿舍的最后一晚', url: img3 },
+      { title: '过去', url: img5},
+      { title: '或许是未来', url: img6},
     ]
   },
   {
@@ -128,6 +138,7 @@ const albumsData = [
       { title: '这云神似Deepseek', url: view10 },
       { title: '不愧是上海', url: view11 },
       { title: '孤独的一颗树', url: view12 },
+      { title: '拍到彩虹了', url: view13 },
     ]
   },
   {
@@ -139,8 +150,10 @@ const albumsData = [
       { title: '极其奢侈的一顿晚餐', url: holiday2 },
       { title: '初中吃到现在的羊肉面', url: holiday3 },
       { title: '暑假和朋友一起去看的电影', url: holiday4 },
-      { title: '好细长的足节虫', url: holiday5 },
-      { title: '蜻蜓特写', url: holiday6 }
+      { title: '细长的足节虫', url: holiday5 },
+      { title: '特写：蜻蜓', url: holiday6 },
+      { title: '上海教堂旁的图书馆', url: holiday7 },
+      { title: '早有耳闻的徐家汇篮球场', url: holiday8 },
     ]
   }
 ]

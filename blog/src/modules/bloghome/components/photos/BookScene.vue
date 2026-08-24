@@ -16,6 +16,7 @@
             >
               <!-- 正面（右页） -->
               <div class="page-face front" :class="{ 'face-active': isFrontVisible(index) }">
+                <div class="dynamic-shadow shadow-front"></div>
                 <div v-if="sheet.front.type === 'blank'" class="page-content blank-content"></div>
                 <div v-else class="page-content grid-page">
                   <div
@@ -58,6 +59,7 @@
 
               <!-- 背面（左页） -->
               <div class="page-face back" :class="{ 'face-active': isBackVisible(index) }">
+                <div class="dynamic-shadow shadow-back"></div>
                 <div v-if="sheet.back.type === 'blank'" class="page-content blank-content"></div>
                 <div v-else class="page-content grid-page">
                   <div
@@ -167,7 +169,6 @@ const props = defineProps({
 
 defineEmits(['open-photo'])
 
-// 判断是否为视频
 const isVideo = (item) => {
   if (!item) return false
   if (item.type === 'video') return true
@@ -178,14 +179,14 @@ const isVideo = (item) => {
 }
 
 const setMiddleFrame = (e) => {
-  const video = e.target;
+  const video = e.target
   if (video.duration) {
-    video.currentTime = video.duration / 2;
+    video.currentTime = video.duration / 2
   }
 }
 
 const pageRefs = ref([])
-const PAGE_STEP = 6
+const PAGE_STEP = 4 // 优化页厚层叠步长，使书堆更紧凑平整
 const flippedCount = ref(0)
 const activePageIndex = ref(0)
 const isAnimating = ref(false)
@@ -197,7 +198,7 @@ const maxFlipped = computed(() => props.sheets.length)
 
 const totalEdgeWidth = computed(() => {
   if (!props.sheets.length) return 0
-  return Math.min(8, Math.max(4, props.sheets.length * 1.5))
+  return Math.min(8, Math.max(4, props.sheets.length * 1.2))
 })
 
 const leftEdgeWidth = computed(() => {
@@ -214,19 +215,19 @@ const isFrontVisible = (index) => index === flippedCount.value
 const isBackVisible = (index) => index === flippedCount.value - 1
 
 const updateEdgesByAngle = (pageIndex, rotationY) => {
-  const RIGHT_END_ANGLE = 2; 
-  const LEFT_START_ANGLE = 178;
-  const STICKY_POWER = 2;
+  const RIGHT_END_ANGLE = 4
+  const LEFT_START_ANGLE = 176
+  const STICKY_POWER = 2
 
-  const r = Math.abs(rotationY);
-  const pRight = Math.max(0, Math.min(1, r / RIGHT_END_ANGLE));
-  const rightContribution = 1 - Math.pow(pRight, STICKY_POWER);
+  const r = Math.abs(rotationY)
+  const pRight = Math.max(0, Math.min(1, r / RIGHT_END_ANGLE))
+  const rightContribution = 1 - Math.pow(pRight, STICKY_POWER)
 
-  const pLeft = Math.max(0, Math.min(1, (r - LEFT_START_ANGLE) / (180 - LEFT_START_ANGLE)));
-  const leftContribution = Math.pow(pLeft, STICKY_POWER);
+  const pLeft = Math.max(0, Math.min(1, (r - LEFT_START_ANGLE) / (180 - LEFT_START_ANGLE)))
+  const leftContribution = Math.pow(pLeft, STICKY_POWER)
 
-  leftEdgeProgress.value = pageIndex + leftContribution;
-  rightEdgeProgress.value = (maxFlipped.value - 1 - pageIndex) + rightContribution;
+  leftEdgeProgress.value = pageIndex + leftContribution
+  rightEdgeProgress.value = (maxFlipped.value - 1 - pageIndex) + rightContribution
 }
 
 const initPages = () => {
@@ -242,16 +243,24 @@ const initPages = () => {
   const total = validPages.length
   validPages.forEach((pageEl, index) => {
     gsap.killTweensOf(pageEl)
+    const shadowFront = pageEl.querySelector('.shadow-front')
+    const shadowBack = pageEl.querySelector('.shadow-back')
+    if (shadowFront) gsap.set(shadowFront, { opacity: 0 })
+    if (shadowBack) gsap.set(shadowBack, { opacity: 0 })
+
     gsap.set(pageEl, {
       rotationY: 0,
+      rotationX: 0,
+      rotationZ: 0,
       z: (total - index) * PAGE_STEP,
       zIndex: total - index,
+      transformOrigin: "left center", // 牢牢锁死左侧中线为旋转轴心
       force3D: true
     })
   })
 }
 
-// 核心跳转函数
+// 核心翻页物理引擎
 const goToPage = (targetIndex) => {
   if (isAnimating.value || targetIndex === flippedCount.value) return
   if (targetIndex < 0 || targetIndex > maxFlipped.value) return
@@ -265,30 +274,24 @@ const goToPage = (targetIndex) => {
   const isForward = toIndex > fromIndex
   const numPages = Math.abs(toIndex - fromIndex)
 
-  const totalDuration = numPages === 1 ? 0.85 : Math.min(1.3, 0.4 + numPages * 0.12)
-  const staggerDelay = numPages === 1 ? 0 : (totalDuration * 0.35) / numPages
-  const pageDuration = numPages === 1 ? totalDuration : totalDuration - (numPages - 1) * staggerDelay
+  // 1. 动态自适应节奏：单页细腻顺滑，多页快速扇形刷页（Riffle Wave）
+  const isSingle = numPages === 1
+  const pageDuration = isSingle ? 0.9 : Math.max(0.38, 0.65 - numPages * 0.03)
+  const staggerDelay = isSingle ? 0 : Math.max(0.045, 0.38 / numPages)
 
   const tl = gsap.timeline({
     onComplete: () => {
+      // 最终精确沉降到目标堆叠高度
       for (let i = 0; i < total; i++) {
         const el = pageRefs.value[i]
         if (!el) continue
-        if (i < toIndex) {
-          gsap.set(el, {
-            rotationY: -180,
-            z: (i + 1) * PAGE_STEP,
-            zIndex: i + 1
-          })
-        } else {
-          gsap.set(el, {
-            rotationY: 0,
-            z: (total - i) * PAGE_STEP,
-            zIndex: total - i
-          })
-        }
+        const isFlipped = i < toIndex
+        gsap.set(el, {
+          rotationY: isFlipped ? -180 : 0,
+          z: isFlipped ? (i + 1) * PAGE_STEP : (total - i) * PAGE_STEP,
+          zIndex: isFlipped ? i + 1 : total - i
+        })
       }
-
       flippedCount.value = toIndex
       leftEdgeProgress.value = toIndex
       rightEdgeProgress.value = maxFlipped.value - toIndex
@@ -296,56 +299,79 @@ const goToPage = (targetIndex) => {
     }
   })
 
-  if (isForward) {
-    for (let step = 0; step < numPages; step++) {
-      const i = fromIndex + step
-      const el = pageRefs.value[i]
-      if (!el) continue
+  // 2. 编排每一页
+  for (let step = 0; step < numPages; step++) {
+    const i = isForward ? fromIndex + step : fromIndex - 1 - step
+    const el = pageRefs.value[i]
+    if (!el) continue
 
-      const startTime = step * staggerDelay
-      tl.set(el, { z: (total + step + 1) * PAGE_STEP, zIndex: total + step + 1 }, startTime)
-      tl.to(el, {
-        rotationY: -180,
-        duration: pageDuration,
-        ease: 'power2.inOut',
-        onUpdate: () => {
-          if (step === numPages - 1) {
-            const r = gsap.getProperty(el, "rotationY")
-            updateEdgesByAngle(i, r)
-          }
-        }
-      }, startTime)
-    }
-  } else {
-    for (let step = 0; step < numPages; step++) {
-      const i = fromIndex - 1 - step
-      const el = pageRefs.value[i]
-      if (!el) continue
+    const startTime = step * staggerDelay
+    const shadowFront = el.querySelector('.shadow-front')
+    const shadowBack = el.querySelector('.shadow-back')
 
-      const startTime = step * staggerDelay
-      tl.set(el, { z: (total + step + 1) * PAGE_STEP, zIndex: total + step + 1 }, startTime)
-      tl.to(el, {
-        rotationY: 0,
-        duration: pageDuration,
-        ease: 'power2.inOut',
-        onUpdate: () => {
-          if (step === numPages - 1) {
-            const r = gsap.getProperty(el, "rotationY")
-            updateEdgesByAngle(i, r)
-          }
+    const startZ = isForward ? (total - i) * PAGE_STEP : (i + 1) * PAGE_STEP
+    const endZ = isForward ? (i + 1) * PAGE_STEP : (total - i) * PAGE_STEP
+
+    // 动态层级提升：翻动中的书页处于绝对顶层，避免穿插闪烁
+    tl.set(el, { zIndex: total + 50 + step }, startTime)
+
+    // A. 严格沿书脊旋转（书脊 X=0, Y=0 完全贴合不动）
+    tl.to(el, {
+      rotationY: isForward ? -180 : 0,
+      duration: pageDuration,
+      ease: isSingle ? "power2.inOut" : "power1.inOut",
+      onUpdate: () => {
+        if (step === numPages - 1) {
+          const r = gsap.getProperty(el, "rotationY")
+          updateEdgesByAngle(i, r)
         }
-      }, startTime)
+      }
+    }, startTime)
+
+    // B. 厚度平滑过渡（从右页堆叠深度平移到左页堆叠深度，杜绝突兀抬升）
+    tl.to(el, {
+      z: endZ,
+      duration: pageDuration,
+      ease: "linear"
+    }, startTime)
+
+    // C. 动态扫掠光影（模拟纸张翻起时的背光与落下的反光，产生纸张弯折柔韧感）
+    if (shadowFront && shadowBack) {
+      if (isForward) {
+        // 前页立起时产生渐变暗光，翻过 90° 后背面柔和淡出
+        tl.fromTo(shadowFront, 
+          { opacity: 0 }, 
+          { opacity: 0.4, duration: pageDuration * 0.45, ease: "power1.in" }, 
+          startTime
+        )
+        tl.to(shadowFront, { opacity: 0, duration: 0.05 }, startTime + pageDuration * 0.45)
+        
+        tl.fromTo(shadowBack, 
+          { opacity: 0.4 }, 
+          { opacity: 0, duration: pageDuration * 0.55, ease: "power1.out" }, 
+          startTime + pageDuration * 0.45
+        )
+      } else {
+        // 反向翻页光影
+        tl.fromTo(shadowBack, 
+          { opacity: 0 }, 
+          { opacity: 0.4, duration: pageDuration * 0.45, ease: "power1.in" }, 
+          startTime
+        )
+        tl.to(shadowBack, { opacity: 0, duration: 0.05 }, startTime + pageDuration * 0.45)
+        
+        tl.fromTo(shadowFront, 
+          { opacity: 0.4 }, 
+          { opacity: 0, duration: pageDuration * 0.55, ease: "power1.out" }, 
+          startTime + pageDuration * 0.45
+        )
+      }
     }
   }
 }
 
-const nextPage = () => {
-  goToPage(activePageIndex.value + 1)
-}
-
-const prevPage = () => {
-  goToPage(activePageIndex.value - 1)
-}
+const nextPage = () => goToPage(activePageIndex.value + 1)
+const prevPage = () => goToPage(activePageIndex.value - 1)
 
 let lastLength = -1
 
@@ -603,7 +629,39 @@ watch(() => props.sheets, (newSheets) => {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transform-origin: left center;
+  transform-origin: 0% 50% 0px !important; /* 强制以左边缘为基准轴心，绝不产生角偏移 */
+  will-change: transform;
+}
+
+/* ================= 动态扫掠光影层 ================= */
+.dynamic-shadow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0;
+  border-radius: inherit;
+  mix-blend-mode: multiply;
+}
+
+/* 正面暗光：靠近书脊侧稍深，外边缘稍浅 */
+.shadow-front {
+  background: linear-gradient(
+    to right,
+    rgba(40, 30, 20, 0.45) 0%,
+    rgba(60, 45, 30, 0.15) 40%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+/* 背面暗光：翻落时书脊侧呈现落合阴影 */
+.shadow-back {
+  background: linear-gradient(
+    to left,
+    rgba(40, 30, 20, 0.45) 0%,
+    rgba(60, 45, 30, 0.15) 40%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
 }
 
 /* ================= 书页纸面 ================= */
