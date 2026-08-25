@@ -20,11 +20,11 @@ export const songs: PresetSong[] = [
   },
   {
     id: 'preset_2',
-    name: 'coffee',
-    artist: 'Corn Wave', 
-    src: '/audio/Corn Wave - coffee.mp3', 
+    name: '好きだから',
+    artist: '『ユイカ』', 
+    src: '/audio/『ユイカ』.mp3', 
     isPreset: true,
-    describe: '建议带上耳机体会开始的左右单声道'
+    describe: '为了这首歌专门加了歌词功能'
   },
   {
     id: 'preset_3',
@@ -32,7 +32,7 @@ export const songs: PresetSong[] = [
     artist: '纯音乐', 
     src: '/audio/Stay Alive.mp3', 
     isPreset: true,
-    describe: '浓厚的情绪递进'
+    describe: '明显的情绪递进'
   },
   {
     id: 'preset_4',
@@ -44,6 +44,14 @@ export const songs: PresetSong[] = [
   },
   {
     id: 'preset_5',
+    name: 'regret',
+    artist: 'chypy', 
+    src: '/audio/chypy - regret (我在未来等你).mp3', 
+    isPreset: true,
+    describe: '未来,尽在掌握'
+  },
+  {
+    id: 'preset_6',
     name: '自言自语',
     artist: '一路向北', 
     src: '/audio/自言自语.mp3', 

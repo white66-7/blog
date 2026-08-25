@@ -3,18 +3,21 @@ import { ref, computed,reactive} from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import { loadSongs, saveSong, saveDirSong, loadDirSongs, delDirSong, delDirSongsByDir, loadDirs, saveDirs, delSong } from '@/modules/player/utils/db'
 import { parseName } from '@/modules/player/utils/format'
+import { decodeLrc } from '@/modules/player/utils/lrc'
 import { songs as presetSongs } from '@/config/song'
 
 export interface Song {
   id: string
   name: string
   artist: string
-  signature?: string 
-  originalFileName?: string 
-  file?: File 
-  describe?: string 
-  src?: string 
+  signature?: string
+  originalFileName?: string
+  file?: File
+  describe?: string
+  src?: string
   isPreset?: boolean
+  lrc?: string
+  lrcFileName?: string
 }
 export interface Dir {
   id: string
@@ -77,7 +80,19 @@ export const useLibraryStore = defineStore('library', () => {
 
   //library增添方法
   async function addSongs(files:File[] | FileList) {
-    const valid = Array.from(files).filter(f => f.type.includes('audio') || /\.(mp3|flac|wav|aac|ogg)$/i.test(f.name))
+    const all = Array.from(files)
+
+    // 收集同批里所有 .lrc 歌词文件：<去掉扩展名的文件名> -> 歌词文本
+    const lrcMap = new Map<string, string>()
+    const lrcReads: Promise<void>[] = []
+    for (const f of all) {
+      if (/\.lrc$/i.test(f.name)) {
+        lrcReads.push(f.arrayBuffer().then(b => { lrcMap.set(f.name.replace(/\.lrc$/i, ''), decodeLrc(b)) }))
+      }
+    }
+    await Promise.all(lrcReads)
+
+    const valid = all.filter(f => f.type.includes('audio') || /\.(mp3|flac|wav|aac|ogg)$/i.test(f.name))
     const target = curDir.value === 'all' ? 'default' : curDir.value
     for(const file of valid){
       const sign = `${file.name}_${file.size}`
@@ -94,6 +109,7 @@ export const useLibraryStore = defineStore('library', () => {
       }
 
       const {artist,title} = parseName(file.name)
+      const lrc = lrcMap.get(file.name.replace(/\.(mp3|flac|wav|aac|ogg)$/i, ''))
       const song: Song= {
         id: String(Date.now() + Math.random()),
         signature: sign,
@@ -101,6 +117,7 @@ export const useLibraryStore = defineStore('library', () => {
         artist:artist,
         file,
         originalFileName: file.name,
+        ...(lrc ? { lrc, lrcFileName: file.name.replace(/\.(mp3|flac|wav|aac|ogg)$/i, '') + '.lrc' } : {}),
       }
       library.value.push(song)
       await saveSong(song as any)

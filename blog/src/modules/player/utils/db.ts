@@ -10,6 +10,8 @@ interface SongRecord {
     artist: string;
     originalFileName: string;
     file: File;
+    lrc?: string;
+    lrcFileName?: string;
 }
 interface DirRecord {
     id: string;
@@ -49,6 +51,7 @@ function openDB(): Promise<IDBDatabase>{
         };
     }
     )
+    return dbPromise
 }
 export async function saveSong(s: SongRecord): Promise<void>{
     const db = await openDB();
@@ -60,7 +63,9 @@ export async function saveSong(s: SongRecord): Promise<void>{
             name: s.name,
             artist: s.artist,
             originalFileName: s.originalFileName,
-            file: s.file
+            file: s.file,
+            lrc: s.lrc,
+            lrcFileName: s.lrcFileName
         })
         t.oncomplete = () => resolve();
         t.onerror = (e: Event) => reject((e.target as IDBOpenDBRequest).error);
@@ -78,7 +83,9 @@ export async function loadSongs(): Promise<SongRecord[]>{
                 name: item.name,
                 artist: item.artist,
                 originalFileName: item.originalFileName,
-                file: item.file
+                file: item.file,
+                lrc: item.lrc,
+                lrcFileName: item.lrcFileName
             }));
             resolve(out);
         };

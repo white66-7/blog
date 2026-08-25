@@ -87,7 +87,7 @@ function openPlaylist(dirId: string) {
         </svg>
       </button>
     </div>
-    <input type="file" ref="addFileInput" accept="audio/*" multiple webkitdirectory style="display:none"
+    <input type="file" ref="addFileInput" accept="audio/*,.lrc" multiple webkitdirectory style="display:none"
       @change="onAddFiles" />
     <sleepcat />
     <div class="pl-list">

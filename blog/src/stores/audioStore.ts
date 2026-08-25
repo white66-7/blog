@@ -3,6 +3,7 @@ import {defineStore} from 'pinia'
 import type { ComputedRef } from 'vue'
 import type {Song} from './libraryStore'
 import { extractCover,extractCoverFromUrl } from '@/modules/player/utils/cover'
+import { decodeLrc } from '@/modules/player/utils/lrc'
 import { useLibraryStore } from './libraryStore'
 import { delSong } from '@/modules/player/utils/db'
 
@@ -102,6 +103,30 @@ if (currentAudioUrl.value && currentAudioUrl.value.startsWith('blob:')) {
   }
   currentCoverUrl.value = null
 }
+
+// ── 预设歌曲歌词：从 public/audio 加载同名 .lrc，带缓存避免重复请求 ──
+const presetLrcCache = new Map<string, string>()
+
+async function loadPresetLrc(song: Song): Promise<void> {
+  if (song.lrc || !song.src) return
+  const base = song.src.replace(/\.(mp3|flac|wav|aac|ogg)$/i, '')
+  if (presetLrcCache.has(base)) {
+    song.lrc = presetLrcCache.get(base) || undefined
+    return
+  }
+  try {
+    const res = await fetch(base + '.lrc')
+    if (res.ok) {
+      const text = decodeLrc(await res.arrayBuffer())
+      presetLrcCache.set(base, text)
+      song.lrc = text
+    } else {
+      presetLrcCache.set(base, '')
+    }
+  } catch {
+    presetLrcCache.set(base, '')
+  }
+}
 //核心函数
 async function loadSongByIndex(index: number): Promise<void> {
   if (index < 0 || index >= libraryStore.library.length) return
@@ -115,8 +140,9 @@ async function loadSongByIndex(index: number): Promise<void> {
     if (audioElement.value) {
       audioElement.value.src = song.src
     }
-    const coverUrl = await extractCoverFromUrl(song.src)
-    currentCoverUrl.value = coverUrl
+    // 封面提取与预设歌词异步加载，不阻塞播放（避免点击后等待）
+    extractCoverFromUrl(song.src).then(u => { currentCoverUrl.value = u }).catch(() => {})
+    loadPresetLrc(song)
 
   } else if (song.file) {
     const audioUrl = URL.createObjectURL(song.file)
@@ -125,8 +151,7 @@ async function loadSongByIndex(index: number): Promise<void> {
     if (audioElement.value) {
       audioElement.value.src = audioUrl
     }
-    const coverUrl = await extractCover(song.file)
-    currentCoverUrl.value = coverUrl
+    extractCover(song.file).then(u => { currentCoverUrl.value = u }).catch(() => {})
   }
 
   curIdx.value = index
@@ -344,7 +369,11 @@ function syncToElement(): void {
       
       // 在确保 metadata 加载且时间设置完毕后，再检查是否需要播放
       if (!paused.value) {
-        el.play().catch(e => console.warn('自动播放失败', e));
+        el.play().catch(e => {
+          console.warn('自动播放失败', e);
+          // 自动播放被浏览器策略拦截时，把界面状态同步为暂停，避免假播放
+          paused.value = true;
+        });
       }
     }, { once: true });
     
@@ -366,7 +395,10 @@ function syncToElement(): void {
 
   // 4. 同步播放状态 (仅处理源未改变的情况)
   if (!paused.value && el.paused && el.readyState >= 1) {
-    el.play().catch(e => console.warn('自动播放失败', e));
+    el.play().catch(e => {
+      console.warn('自动播放失败', e);
+      paused.value = true;
+    });
   } else if (paused.value && !el.paused) {
     el.pause();
   }

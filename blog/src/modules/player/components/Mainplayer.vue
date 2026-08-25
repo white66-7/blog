@@ -2,77 +2,95 @@
   <div class="main">
     <div class="sys-line">SYNTHWAVE</div>
 
-    <div class="disc-box">
-      <img
-        class="disc"
-        :class="{ spin: !audioStore.paused }"
-        :src="audioStore.currentCoverUrl || defaultCover"
-        alt="cover"
-      />
-      <div class="disc-ring"></div>
-    </div>
+    <div class="content">
+      <div class="left-col">
+        <div class="disc-box">
+          <img
+            class="disc"
+            :class="{ spin: !audioStore.paused }"
+            :src="audioStore.currentCoverUrl || defaultCover"
+            alt="cover"
+          />
+          <div class="disc-ring"></div>
+        </div>
+      </div>
 
-    <div class="info">
-      <div class="h">{{ audioStore.currentSong?.name || 'NO SIGNAL' }}</div>
-      <div class="sub">
-        <span>{{ audioStore.currentSong?.artist || 'System Idle' }}</span>
+      <div class="right-col">
+        <LyricView />
       </div>
     </div>
 
-    <div class="prog">
-      <span class="tm">{{ fmt(audioStore.currentTime) }}</span>
-      <div class="bar-wrap" @click="onSeek">
-        <div class="bar-fill" :style="{ width: audioStore.progressPercent + '%' }"></div>
+    <div class="bottom-bar">
+      <div class="bb-now">
+        <div class="bb-name">{{ audioStore.currentSong?.name || 'NO SIGNAL' }}</div>
+        <div class="bb-artist">{{ audioStore.currentSong?.artist || 'System Idle' }}</div>
       </div>
-      <span class="tm">{{ fmt(audioStore.duration) }}</span>
-    </div>
 
-    <div class="ctrls">
-      <button class="cbtn" :class="{ on: audioStore.isShuffle }" @click="audioStore.toggleMode('shuffle')">⇄</button>
-      <button class="cbtn" @click="audioStore.prev()">◄◄</button>
-      <button class="cbtn" @click="audioStore.togglePlay()">
-  <div class="container">
-    <svg
-      v-if="audioStore.paused"
-      class="play"
-      xmlns="http://www.w3.org/2000/svg"
-      height="1em"
-      viewBox="0 0 384 512"
-    >
-      <path
-        d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"
-      />
-    </svg>
-    <svg
-      v-else
-      class="pause"
-      xmlns="http://www.w3.org/2000/svg"
-      height="1em"
-      viewBox="0 0 320 512"
-    >
-      <path
-        d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"
-      />
-    </svg>
-  </div>
-</button>
-      <button class="cbtn" @click="audioStore.next()">►►</button>
-      <button class="cbtn" :class="{ on: audioStore.isLoop }" @click="audioStore.toggleMode('loop')">↻</button>
-    </div>
+      <div class="bb-center">
+        <div class="ctrls">
+          <button class="cbtn" :class="{ on: audioStore.isShuffle }" @click="audioStore.toggleMode('shuffle')">⇄</button>
+          <button class="cbtn" @click="audioStore.prev()">◄◄</button>
+          <button class="cbtn" @click="audioStore.togglePlay()">
+            <div class="container">
+              <svg
+                v-if="audioStore.paused"
+                class="play"
+                xmlns="http://www.w3.org/2000/svg"
+                height="1em"
+                viewBox="0 0 384 512"
+              >
+                <path
+                  d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"
+                />
+              </svg>
+              <svg
+                v-else
+                class="pause"
+                xmlns="http://www.w3.org/2000/svg"
+                height="1em"
+                viewBox="0 0 320 512"
+              >
+                <path
+                  d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button class="cbtn" @click="audioStore.next()">►►</button>
+          <button class="cbtn" :class="{ on: audioStore.isLoop }" @click="audioStore.toggleMode('loop')">↻</button>
+        </div>
 
-    <div class="vol">
-      <span>◖</span>
-      <div class="vbar" @click="onSetVolume">
-        <div class="vfill" :style="{ width: audioStore.volume * 100 + '%' }"></div>
+        <div class="prog">
+          <span class="tm">{{ fmt(audioStore.currentTime) }}</span>
+          <div
+            class="bar-wrap"
+            :class="{ dragging }"
+            @pointerdown="onSeekStart"
+          >
+            <div class="bar-fill" :style="{ width: displayPercent + '%' }"></div>
+          </div>
+          <span class="tm">{{ fmt(audioStore.duration) }}</span>
+        </div>
       </div>
-      <span>◗</span>
+
+      <div class="bb-right">
+        <div class="vol">
+          <span>◖</span>
+          <div class="vbar" @click="onSetVolume">
+            <div class="vfill" :style="{ width: audioStore.volume * 100 + '%' }"></div>
+          </div>
+          <span>◗</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useAudioStore } from '@/stores/audioStore'
 import defaultCoverImg from '@/assets/music.png'
+import LyricView from './LyricView.vue'
 
 const audioStore = useAudioStore()
 const defaultCover = defaultCoverImg
@@ -84,10 +102,38 @@ function fmt(t: number): string {
   return `${m}:${s < 10 ? '0' : ''}${s}`
 }
 
-function onSeek(e: MouseEvent) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-  const pct = (e.clientX - rect.left) / rect.width
-  audioStore.seek(pct)
+// ── 进度条拖动：拖动中只预览，松手才真正 seek，避免音频频繁跳变 ──
+const dragging = ref(false)
+const dragPercent = ref(0)
+
+const displayPercent = computed(() =>
+  dragging.value ? dragPercent.value : audioStore.progressPercent
+)
+
+function pctFromEvent(e: PointerEvent, el: HTMLElement): number {
+  const rect = el.getBoundingClientRect()
+  return Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
+}
+
+function onSeekStart(e: PointerEvent) {
+  const wrap = e.currentTarget as HTMLElement
+  dragPercent.value = pctFromEvent(e, wrap) * 100
+  dragging.value = true
+  wrap.setPointerCapture(e.pointerId)
+
+  const onMove = (ev: PointerEvent) => {
+    dragPercent.value = pctFromEvent(ev, wrap) * 100
+  }
+  const onUp = () => {
+    dragging.value = false
+    audioStore.seek(dragPercent.value / 100)
+    wrap.removeEventListener('pointermove', onMove)
+    wrap.removeEventListener('pointerup', onUp)
+    wrap.removeEventListener('pointercancel', onUp)
+  }
+  wrap.addEventListener('pointermove', onMove)
+  wrap.addEventListener('pointerup', onUp)
+  wrap.addEventListener('pointercancel', onUp)
 }
 
 function onSetVolume(e: MouseEvent) {
@@ -103,9 +149,7 @@ function onSetVolume(e: MouseEvent) {
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 30px;
-  align-items: center;
-  justify-content: center;
+  padding: 0;
   position: relative;
   background-color: #07070a;
   background-image:
@@ -117,6 +161,88 @@ function onSetVolume(e: MouseEvent) {
   box-shadow: inset 0 0 150px rgba(7, 7, 10, 0.9);
 }
 
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 56px;
+  padding: 30px 56px;
+}
+
+.left-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.right-col {
+  flex: 1;
+  min-width: 0;
+  max-width: 520px;
+  display: flex;
+}
+
+.bottom-bar {
+  height: 84px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 28px;
+  background: rgba(14, 14, 20, 0.88);
+  border-top: 1px solid rgba(0, 243, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
+}
+
+.bb-now {
+  width: 200px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bb-name {
+  font-size: .8rem;
+  color: #e0e0e8;
+  letter-spacing: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bb-artist {
+  font-size: .7rem;
+  color: #6b6b8a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bb-center {
+  flex: 1;
+  max-width: 620px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.bb-right {
+  width: 200px;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .sys-line {
   position: absolute;
   top: 15px;
@@ -124,13 +250,13 @@ function onSetVolume(e: MouseEvent) {
   color: #6b6b8a;
   letter-spacing: 1.5px;
   opacity: .8;
+  z-index: 2;
 }
 
 .disc-box {
   position: relative;
   width: 300px;
   height: 300px;
-  margin-bottom: 36px;
 }
 
 .disc {
@@ -165,38 +291,11 @@ function onSetVolume(e: MouseEvent) {
   pointer-events: none;
 }
 
-.info {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.info .h {
-  font-size: 1.35rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #e0e0e8;
-}
-
-.info .sub {
-  font-size: .8rem;
-  color: #6b6b8a;
-  margin-top: 6px;
-  letter-spacing: 1.5px;
-}
-
-.info .sub i {
-  color: #ff00ff;
-  font-style: normal;
-  margin: 0 8px;
-}
-
 .prog {
   width: 100%;
-  max-width: 520px;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
 }
 
 .prog .tm {
@@ -213,6 +312,10 @@ function onSetVolume(e: MouseEvent) {
   border-radius: 2px;
   position: relative;
   cursor: pointer;
+  touch-action: none; /* 拖动时禁止触摸滚动，保证手指能平滑拖进度条 */
+}
+.bar-wrap.dragging {
+  cursor: grabbing;
 }
 
 .bar-fill {
@@ -238,15 +341,15 @@ function onSetVolume(e: MouseEvent) {
   transition: .2s;
 }
 
-.bar-wrap:hover .bar-fill::after {
+.bar-wrap:hover .bar-fill::after,
+.bar-wrap.dragging .bar-fill::after {
   opacity: 1;
 }
 
 .ctrls {
   display: flex;
   align-items: center;
-  gap: 22px;
-  margin-bottom: 18px;
+  gap: 18px;
 }
 
 .cbtn {
@@ -268,6 +371,18 @@ function onSetVolume(e: MouseEvent) {
 .cbtn.on {
   color: #00f3ff;
   text-shadow: 0 0 8px rgba(0, 243, 255, .5);
+}
+
+/* 底部播放条内：按钮更紧凑 */
+.bottom-bar .cbtn {
+  width: 42px;
+  height: 42px;
+  font-size: 1.2rem;
+  border-radius: 999px; /* 全圆角：正方形下等价于正圆，改为胶囊形时可直接用此值 */
+}
+
+.bottom-bar .container {
+  --size: 42px;
 }
 
 .container {
@@ -307,7 +422,7 @@ function onSetVolume(e: MouseEvent) {
   align-items: center;
   gap: 10px;
   width: 100%;
-  max-width: 260px;
+  max-width: 160px;
 }
 
 .vol span {
