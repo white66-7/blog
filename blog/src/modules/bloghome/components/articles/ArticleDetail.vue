@@ -440,7 +440,7 @@ onMounted(() => {
   hintTimeoutId = setTimeout(playHintAnimation, 500)
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
-  axios.post(`http://localhost:8080/api/views/${id}/increment`).catch(() => { })
+  axios.post(`https://white66-backend.onrender.com/api/views/${id}/increment`).catch(() => { })
   window.addEventListener('scroll', handleScroll)
   cleanupScroll = () => { window.removeEventListener('scroll', handleScroll) }
   const savedHeight = articleScrollCache.get(id) || 0

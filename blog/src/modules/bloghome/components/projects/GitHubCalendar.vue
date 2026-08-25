@@ -72,7 +72,7 @@ interface ContributionWeek {
   contributionDays: ContributionDay[];
 }
 
-const API_URL = 'http://localhost:8080/api/contributions'
+const API_URL = 'https://white66-backend.onrender.com/api/contributions'
 const GITHUB_USERNAME = 'white66-7'
 const WEEKS_TO_SHOW = 30
 

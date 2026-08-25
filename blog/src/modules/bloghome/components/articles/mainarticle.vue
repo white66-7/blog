@@ -191,6 +191,8 @@ onMounted(async () => {
   }
 })
 
+const API_BASE_URL = 'https://white66-backend.onrender.com'
+
 //后端联动
 const articleViews = ref<Record<number, number>>({})
 
@@ -198,7 +200,7 @@ const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) =
   if (!articles.length) return
   // 并发请求所有文章的浏览量
   const promises = articles.map(article =>
-    axios.get(`http://localhost:8080/api/views/${article.id}`)
+    axios.get(`${API_BASE_URL}/api/views/${article.id}`)
       .then(res => ({ id: article.id, views: res.data.views }))
       .catch(() => ({ id: article.id, views: 0 })) // 请求失败时默认为0
   )
