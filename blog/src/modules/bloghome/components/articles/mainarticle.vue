@@ -18,6 +18,7 @@ import { articles as allArticles } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import SearchRecentCard from '@/modules/bloghome/components/articles/search_article.vue'
 import PageHeader from '@/modules/bloghome/components/articles/PageHeader.vue'
+import { preloadImages as cachePreload, isImageLoaded, markImageLoaded } from '@/modules/bloghome/utils/imageCache'
 
 import 'animate.css'
 
@@ -37,6 +38,20 @@ const pageSize = ref(6)
 // 判断是否要播放搜索框进入动画
 const playSearchAnimation = ref(!globalSearchAnimated)
 
+// 预加载当前页文章封面：命中会话缓存的直接亮图，未命中的后台预载
+// （imageLoaded 以 article.id 为 key，不能用数组整体覆盖）
+const preloadCovers = (articles: { id: number; cover?: string }[]) => {
+  const withCover = articles.filter(a => a.cover)
+  withCover.forEach(a => {
+    if (isImageLoaded(a.cover!)) imageLoaded.value[a.id] = true
+  })
+  cachePreload(withCover.map(a => a.cover!)).then(done => {
+    withCover.forEach((a, idx) => { imageLoaded.value[a.id] = true })
+  })
+}
+
+
+
 watch(currentPage, (newPage) => {
   globalSavedPage = newPage
 })
@@ -46,7 +61,6 @@ const scrollToArticles = async () => {
   await nextTick() // 等待 Vue 把新一页的数据渲染完
   if (scrollRef.value && contentTopRef.value) {
     const targetTop = contentTopRef.value.offsetTop - 80
-    // 使用 'auto' 替代 'smooth'，瞬间完成跳转，不产生滚动过程！
     scrollRef.value.scrollTo({ top: targetTop, behavior: 'auto' })
   }
 }
@@ -59,6 +73,9 @@ watch(searchKeyword, () => {
 
 const onImageLoad = (articleId: number) => {
   imageLoaded.value[articleId] = true
+  // 记录到会话缓存，下次进路由不再闪骨架
+  const article = paginatedArticles.value.find(a => a.id === articleId)
+  if (article?.cover) markImageLoaded(article.cover)
 }
 
 const sortedArticles = computed(() =>
@@ -84,6 +101,9 @@ const paginatedArticles = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   return filteredArticles.value.slice(start, start + pageSize.value)
 })
+
+// 列表变化时预载当前页封面
+watch(paginatedArticles, () => preloadCovers(paginatedArticles.value), { immediate: true })
 
 const totalPages = computed(() => Math.ceil(filteredArticles.value.length / pageSize.value) || 1)
 
@@ -146,7 +166,6 @@ watch(paginatedArticles, initCardsObserver, { immediate: true })
 onActivated(async () => {
   console.log('✅ MainArticle 从缓存恢复')
   await initCardsObserver()
-  // 🆕 重新获取当前页文章的浏览量（从详情页返回时更新）
   await fetchViewsForArticles(paginatedArticles.value)
 })
 onDeactivated(() => {

@@ -60,20 +60,50 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import IntroSection from './introduce.vue'
 import 'animate.css';
+interface ContributionDay {
+  contributionCount: number;
+}
+
+interface ContributionWeek {
+  contributionDays: ContributionDay[];
+}
 
 const API_URL = 'http://localhost:8080/api/contributions'
 const GITHUB_USERNAME = 'white66-7'
 const WEEKS_TO_SHOW = 30
 
-const weeksData = ref([])
-const publicRepos = ref(0)
-const loadingContrib = ref(true)
-const loadingStats = ref(true)
-let refreshTimer = null
+// ── GitHub 数据 24h 缓存（避免频繁请求 / rate limit） ──
+const CONTRIB_CACHE_KEY = 'cyber_github_contrib'
+const USER_CACHE_KEY = 'cyber_github_user'
+const CACHE_TTL = 24 * 60 * 60 * 1000
+
+function readCache(key: string, ttl: number): any | null {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (!data || typeof data.savedAt !== 'number') return null
+    if (Date.now() - data.savedAt > ttl) return null
+    return data.payload
+  } catch {
+    return null
+  }
+}
+function writeCache(key: string, payload: any): void {
+  try {
+    localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), payload }))
+  } catch { /* 缓存满时忽略 */ }
+}
+
+const weeksData = ref<ContributionWeek[]>([]);
+const publicRepos = ref<number>(0);
+const loadingContrib = ref<boolean>(true);
+const loadingStats = ref<boolean>(true);
+let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
 const hasData = computed(() => weeksData.value.length > 0)
 
@@ -90,33 +120,43 @@ const totalContributions = computed(() => {
 
 const recentWeeks = computed(() => weeksData.value.slice(-WEEKS_TO_SHOW))
 
-const contributionGrid = computed(() => {
-  const weeks = recentWeeks.value
-  if (!weeks.length) return []
-  const rows = Array.from({ length: 7 }, () => [])
-  weeks.forEach(week => {
-    week.contributionDays.forEach((day, idx) => {
-      if (idx < 7) rows[idx].push(day.contributionCount)
-    })
-  })
-  return rows
-})
+const contributionGrid = computed<number[][]>(() => {
+  const weeks = recentWeeks.value;
+  if (!weeks.length) return [];
+  const rows: number[][] = Array.from({ length: 7 }, () => []);
+  weeks.forEach((week: ContributionWeek) => {
+    week.contributionDays.forEach((day: ContributionDay, idx: number) => {
+      if (idx < 7) {
+        rows[idx]!.push(day.contributionCount); 
+      }
+    });
+  });
+  return rows;
+});
 
-function getLevelClass(count) {
-  if (count === 0) return ''
-  if (count <= 3) return 'l1'
-  if (count <= 6) return 'l2'
-  if (count <= 9) return 'l3'
-  return 'l4'
+function getLevelClass(count: number): string {
+  if (count === 0) return '';
+  if (count <= 3) return 'l1';
+  if (count <= 6) return 'l2';
+  if (count <= 9) return 'l3';
+  return 'l4';
 }
 
 async function fetchContributions() {
+  // 命中 24h 缓存则直接用，避免频繁请求
+  const cached = readCache(CONTRIB_CACHE_KEY, CACHE_TTL)
+  if (cached && Array.isArray(cached.weeks)) {
+    weeksData.value = cached.weeks
+    loadingContrib.value = false
+    return
+  }
   try {
     const res = await fetch(API_URL)
     if (!res.ok) throw new Error(`Server responded with ${res.status}`)
     const data = await res.json()
     if (!data.weeks || !Array.isArray(data.weeks)) throw new Error('Invalid data format')
     weeksData.value = data.weeks
+    writeCache(CONTRIB_CACHE_KEY, { weeks: data.weeks })
     loadingContrib.value = false   // 数据获取成功后关闭加载状态
   } catch (err) {
     if (!hasData.value) console.error('[Contribution Wall] Failed:', err)
@@ -124,11 +164,19 @@ async function fetchContributions() {
 }
 
 async function fetchUserStats() {
+  // 命中 24h 缓存则直接用
+  const cached = readCache(USER_CACHE_KEY, CACHE_TTL)
+  if (cached && typeof cached.publicRepos === 'number') {
+    publicRepos.value = cached.publicRepos
+    loadingStats.value = false
+    return
+  }
   try {
     const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`)
     if (!res.ok) throw new Error('Failed to fetch user stats')
     const data = await res.json()
     publicRepos.value = data.public_repos ?? 0
+    writeCache(USER_CACHE_KEY, { publicRepos: publicRepos.value })
   } catch (err) {
     console.error('[GitHub Stats] Failed:', err)
     publicRepos.value = 0

@@ -257,30 +257,73 @@ async function prev(): Promise<void>{
     }
   }
 
+  // ── 播放状态持久化：整合为单个 JSON key，含续播进度与暂停状态 ──
+  const PLAYER_STATE_KEY = 'cyber_player_state'
+  let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+  function parsePlayerState(): Record<string, any> {
+    try {
+      const raw = localStorage.getItem(PLAYER_STATE_KEY)
+      if (raw) return JSON.parse(raw)
+    } catch { /* 忽略损坏数据 */ }
+    // 兼容旧版三个散 key：首次升级时迁移一次并清理
+    const oldMode = localStorage.getItem('cyber_mode')
+    const oldIdx = localStorage.getItem('cyber_idx')
+    const oldVol = localStorage.getItem('cyber_vol')
+    if (oldMode !== null || oldIdx !== null || oldVol !== null) {
+      const migrated = {
+        mode: oldMode || 'list',
+        idx: oldIdx ? parseInt(oldIdx) : -1,
+        volume: oldVol ? parseFloat(oldVol) : 0.7,
+        currentTime: 0,
+        paused: true,
+      }
+      try { localStorage.setItem(PLAYER_STATE_KEY, JSON.stringify(migrated)) } catch {}
+      localStorage.removeItem('cyber_mode')
+      localStorage.removeItem('cyber_idx')
+      localStorage.removeItem('cyber_vol')
+      return migrated
+    }
+    return { mode: 'list', idx: -1, volume: 0.7, currentTime: 0, paused: true }
+  }
+
   function restoreFromLocalStorage(): void {
-    const savedMode = localStorage.getItem('cyber_mode')
-    if (savedMode === 'random' || savedMode === 'loop') {
-      mode.value = savedMode
+    const state = parsePlayerState()
+    if (state.mode === 'random' || state.mode === 'loop') {
+      mode.value = state.mode
     } else {
       mode.value = 'list'
     }
 
-    const savedIdx = parseInt(localStorage.getItem('cyber_idx') || '-1')
-    if (!isNaN(savedIdx) && savedIdx >= 0 && savedIdx < libraryStore.library.length) {
-      curIdx.value = savedIdx
+    const savedVol = parseFloat(state.volume)
+    if (!isNaN(savedVol)) {
+      volume.value = Math.min(1, Math.max(0, savedVol))
+      if (audioElement.value) audioElement.value.volume = volume.value
     }
 
-    const savedVol = parseFloat(localStorage.getItem('cyber_vol') || '0.7')
-    if (!isNaN(savedVol)) {
-      volume.value = savedVol
-      if (audioElement.value) audioElement.value.volume = savedVol
+    const savedIdx = parseInt(state.idx)
+    if (!isNaN(savedIdx) && savedIdx >= 0 && savedIdx < libraryStore.library.length) {
+      curIdx.value = savedIdx
+      currentTime.value = typeof state.currentTime === 'number' ? state.currentTime : 0
+      paused.value = state.paused !== false
+      // 预加载当前歌曲，让续播进度在音频元素就绪后自动恢复（不自动播放）
+      loadSongByIndex(savedIdx).then(() => syncToElement()).catch(() => {})
     }
   }
 
   function saveState(): void {
-    localStorage.setItem('cyber_mode', mode.value)
-    localStorage.setItem('cyber_idx', String(curIdx.value))
-    localStorage.setItem('cyber_vol', String(volume.value))
+    if (saveTimer) clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(PLAYER_STATE_KEY, JSON.stringify({
+          mode: mode.value,
+          idx: curIdx.value,
+          volume: volume.value,
+          currentTime: currentTime.value,
+          paused: paused.value,
+        }))
+      } catch { /* localStorage 满等异常忽略 */ }
+    }, 300)
   }
 
 function syncToElement(): void {
@@ -329,7 +372,7 @@ function syncToElement(): void {
   }
 }
 
-  watch([mode, curIdx, volume], () => { saveState() })
+  watch([mode, curIdx, volume, paused, currentTime], () => { saveState() })
 
   return {
     curIdx, mode, volume, currentTime, duration, paused,

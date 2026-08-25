@@ -49,6 +49,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { preloadImages as cachePreload, isImageLoaded } from '@/modules/bloghome/utils/imageCache'
 
 interface SlideImage {
   url: string
@@ -67,12 +68,9 @@ let timer: ReturnType<typeof setInterval> | null = null
 const imageLoaded = ref<boolean[]>([])
 
 const preloadImages = (images: { url: string }[]) => {
-  imageLoaded.value = new Array(images.length).fill(false)
-  images.forEach((img, idx) => {
-    const image = new Image()
-    image.onload = () => { imageLoaded.value[idx] = true }
-    image.onerror = () => { imageLoaded.value[idx] = true } // 失败也隐藏骨架
-    image.src = img.url
+  imageLoaded.value = images.map(img => isImageLoaded(img.url))
+  cachePreload(images.map(img => img.url)).then(done => {
+    done.forEach((ok, idx) => { imageLoaded.value[idx] = true })
   })
 }
 

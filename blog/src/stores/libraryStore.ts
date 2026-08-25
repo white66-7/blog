@@ -113,10 +113,30 @@ export const useLibraryStore = defineStore('library', () => {
   }
 
 
-  const playCounts = reactive<Record<string, number>>({})
+  // ── 播放次数持久化：初始化读取，变更时 debounce 写回，刷新不丢 ──
+  const PLAY_COUNT_KEY = 'cyber_play_counts'
+  function loadPlayCounts(): Record<string, number> {
+    try {
+      const raw = localStorage.getItem(PLAY_COUNT_KEY)
+      if (!raw) return {}
+      const parsed = JSON.parse(raw)
+      return parsed && typeof parsed === 'object' ? parsed : {}
+    } catch {
+      return {}
+    }
+  }
+  const playCounts = reactive<Record<string, number>>(loadPlayCounts())
+  let playCountTimer: ReturnType<typeof setTimeout> | null = null
+  function persistPlayCounts(): void {
+    if (playCountTimer) clearTimeout(playCountTimer)
+    playCountTimer = setTimeout(() => {
+      try { localStorage.setItem(PLAY_COUNT_KEY, JSON.stringify(playCounts)) } catch { /* 忽略 */ }
+    }, 500)
+  }
 
   function incrementPlayCount(songId: string) {
-  playCounts[songId] = (playCounts[songId] || 0) + 1
+    playCounts[songId] = (playCounts[songId] || 0) + 1
+    persistPlayCounts()
   }
 
   function getTotalPlayCount(): number {

@@ -21,8 +21,11 @@ interface DirSongRecord {
     dirId: string;
     songId: string;
 }
+// 缓存连接 Promise，避免每次调用都重新 open（IDB 连接可跨事务复用，只 open 一次）
+let dbPromise: Promise<IDBDatabase> | null = null
 function openDB(): Promise<IDBDatabase>{
-    return new Promise((resolve, reject) => {
+    if (dbPromise) return dbPromise
+    dbPromise = new Promise((resolve, reject) => {
         const r = indexedDB.open(DB_NAME, DB_VER);
         r.onupgradeneeded = (e: IDBVersionChangeEvent) => {
             const db = (e.target as IDBOpenDBRequest).result;
@@ -39,7 +42,11 @@ function openDB(): Promise<IDBDatabase>{
                 }
             }
         r.onsuccess = (e : Event) => resolve((e.target as IDBOpenDBRequest).result);
-        r.onerror = (e: Event) => reject((e.target as IDBOpenDBRequest).result);
+        r.onerror = (e: Event) => {
+            // 打开失败时重置缓存，允许下次重试
+            dbPromise = null
+            reject((e.target as IDBOpenDBRequest).result);
+        };
     }
     )
 }

@@ -86,8 +86,44 @@ const weatherNames: Record<string, string> = {
   sun: 'Sunny', wind: 'Windy', rain: 'Rain', thunder: 'Storms', snow: 'Snow'
 }
 
+//天气缓存30 分钟 TTL
+const CACHE_KEY = 'cyber_weather'
+const CACHE_TTL = 30 * 60 * 1000
+
+function loadWeatherFromCache(): boolean {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return false
+    const cached = JSON.parse(raw)
+    if (!cached || typeof cached.fetchedAt !== 'number') return false
+    if (Date.now() - cached.fetchedAt > CACHE_TTL) return false
+    temp.value = cached.temp
+    weatherDesc.value = cached.desc
+    weatherType.value = cached.type
+    formattedDate.value = cached.date
+    changeWeather(cached.type)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function saveWeatherToCache(): void {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      fetchedAt: Date.now(),
+      temp: temp.value,
+      desc: weatherDesc.value,
+      type: weatherType.value,
+      date: formattedDate.value,
+    }))
+  } catch { /* 缓存满时忽略 */ }
+}
+
 // ── 获取武汉天气 ──
 async function fetchWeather() {
+  // 命中 30 分钟内缓存则直接用，不再发请求
+  if (loadWeatherFromCache()) return
   try {
     const url = 'https://wttr.in/32.32,120.87?format=j1';
     //千灯 32.32 120.87
@@ -97,7 +133,7 @@ async function fetchWeather() {
     const current = data.current_condition[0];
     temp.value = String(Math.round(parseFloat(current.temp_C)));
 
-    const descEn = current.weatherDesc[0].value; 
+    const descEn = current.weatherDesc[0].value;
     let type = 'wind';
     if (descEn.includes('Sunny') || descEn.includes('Clear')) type = 'sun';
     else if (descEn.includes('Rain')) type = 'rain';
@@ -110,6 +146,7 @@ async function fetchWeather() {
       weekday: 'long', day: 'numeric', month: 'long'
     });
     changeWeather(type);
+    saveWeatherToCache();
   } catch (err) {
     console.error('获取天气失败', err);
     weatherDesc.value = 'Error';
