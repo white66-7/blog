@@ -1,52 +1,83 @@
-# 一路向北的站点 — 个人博客
+<div align="center">
 
-> 从零开始的个人博客 SPA，** Vue 3 + Spring Boot **实现。<br>
-> 包含音乐播放、文章、照片、GitHub 展示等模块。
+# 一路向北 (To The North)
+
+**基于 Vue 3 + TypeScript 构建的沉浸式个人博客单页应用 (SPA)**
+
+[![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D.svg?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.0-646CFF.svg?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Pinia](https://img.shields.io/badge/Pinia-3.0-FFD859.svg?style=flat-square&logo=pinia&logoColor=black)](https://pinia.vuejs.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+
+<p align="center">
+  <a href="#项目概述">项目概述</a> •
+  <a href="#功能特性">功能特性</a> •
+  <a href="#路由架构">路由架构</a> •
+  <a href="#技术栈">技术栈</a> •
+  <a href="#本地开发">本地开发</a> •
+  <a href="#持续集成与部署">持续集成</a>
+</p>
 
 ---
 
-## 项目架构
-- **/** → BlogHome 博客首页
-- **/photos** → photo 照片展示
-- **/projects** → projects GitHub 项目展示
-- **/articles** → mainarticle 文章列表
-- **/article/:id** → ArticleDetail 文章详情（markdown-it + highlight.js）
-- **/player** → MusicPlayer（嵌套路由）
-  - **/player/songs** → 歌曲列表
-  - **/player/playlists** → 播放列表
-- **/about** → About 关于页面
+</div>
+
+## 项目概述
+
+本项目是一个集文章阅读、多媒体播放、摄影集展示与开源数据分析于一体的现代化单页博客系统。前端基于 Vue 3 全家桶与 Vite 构建，搭配 GSAP 动画库实现流畅的微交互，通过 GitHub Actions 实现代码提交后的全自动构建与服务器部署。
+
 ---
+
 ## 功能特性
 
-- 文章展示：Markdown 渲染（markdown-it）+ 代码高亮（highlight.js），支持阅读位置记忆（滚动缓存）
-- 音乐播放器：基于 music-metadata 解析音频元数据与封面，支持列表/随机/循环模式、音量、进度、本地存储回放
-- GitHub 展示：贡献日历（自绘绿墙）+ 用户统计（公开仓库数）
-- 动画交互：GSAP 驱动的页面动效 + SnapSVG 图形绘制
-- 照片/相册：相册书架 + 灯箱浏览 + 视频兼容
-- 加载屏：手写书法 SVG 开场动画
-- 趣味组件：短暂番茄钟等其他小功能
-- 响应式设计：适配不同屏幕尺寸
-- SPA 路由：Vue Router + keep-alive 页面缓存（首页/播放器/文章列表）
+### 内容与阅读
+- **Markdown 引擎**：基于 `markdown-it` 解析排版，搭配 `highlight.js` 实现代码语法高亮。
+- **阅读记忆**：自动缓存长文章的滚动浏览进度，返回时无缝定位。
+
+### 独立音乐播放系统
+- **元数据解析**：利用 `music-metadata` 自动提取音频文件的 ID3 标签与高清封面图。
+- **完整播放控制**：支持顺序、循环、随机播放模式，具备进度拖拽、音量调节及本地历史回放能力。
+
+### 视觉动效与展示
+- **SVG 开场动画**：定制手写书法风 SVG 加载过渡。
+- **流畅动效**：基于 GSAP 与 SnapSVG 驱动页面切换及图形动态绘制。
+- **相册与灯箱**：网格式相册书架展示，支持图片全屏灯箱浏览与视频格式兼容播放。
+- **GitHub 生态联动**：自绘贡献日历热力墙，并动态拉取展示公开仓库与开发统计。
+
+### 架构与体验
+- **状态与缓存**：结合 Pinia 状态管理与 `keep-alive` 实现核心视图（首页、播放器、文章列表）的状态留存。
+- **自适应设计**：完备的响应式布局，保证桌面端与移动端的视觉一致性。
+
+---
+
+## 路由架构
+
+| 路由路径 | 对应组件 | 功能说明 |
+| :--- | :--- | :--- |
+| `/` | `BlogHome` | 博客主门户 |
+| `/articles` | `MainArticle` | 文章索引列表 |
+| `/article/:id` | `ArticleDetail` | 文章内容阅读页（含目录与高亮） |
+| `/photos` | `Photo` | 摄影作品集与媒体画廊 |
+| `/projects` | `Projects` | GitHub 开源项目与贡献热力展示 |
+| `/player` | `MusicPlayer` | 音乐播放器主界面（嵌套子路由） |
+| `/player/songs` | `SongList` | 歌曲曲库列表 |
+| `/player/playlists` | `Playlist` | 播放歌单管理 |
+| `/about` | `About` | 个人介绍、技能看板与小工具 |
 
 ---
 
 ## 技术栈
 
-| 类别 | 技术 | 版本 |
-|------|------|------|
-| 框架 | Vue 3 | ^3.5.32 |
-| 构建工具 | Vite | ^8.0.8 |
-| 语言 | TypeScript | ~6.0.0 |
-| 状态管理 | Pinia | ^3.0.4 |
-| 路由 | Vue Router | ^5.1.0 |
-| HTTP 请求 | Axios | ^1.18.1 |
-| CSS | Sass (sass-embedded) + animate.css | ^1.100.0 |
-| Markdown 渲染 | markdown-it | ^14.3.0 |
-| 代码高亮 | highlight.js | ^11.11.1 |
-| 动画引擎 | GSAP | ^3.15.0 |
-| 图形绘制 | SnapSVG (snapsvg-cjs) | ^0.0.6 |
-| 轮播组件 | Swiper | ^12.2.0 |
-| 音乐元数据 | music-metadata | ^11.14.0 |
+| 分类 | 核心技术 / 依赖 | 说明 |
+| :--- | :--- | :--- |
+| **核心框架** | Vue 3 + TypeScript | 组合式 API (Composition API) 开发架构 |
+| **构建工具** | Vite | 极速冷启动与生产构建 |
+| **状态与路由** | Pinia + Vue Router | 集中状态管理与路由守卫 / 缓存控制 |
+| **网络请求** | Axios | RESTful API 交互与拦截处理 |
+| **样式与动效** | Sass + Animate.css + GSAP | 样式预处理与高性能补间动画 |
+| **图形与媒体** | SnapSVG + Swiper + Music-Metadata | 矢量绘图、滑动视差与音频解析 |
+| **内容解析** | Markdown-it + Highlight.js | 文档渲染与多语言语法高亮 |
 
 ---
 
@@ -54,29 +85,28 @@
 
 ```text
 vue-frontend/
-└── blog/                         # Vue 3 前端
+└── blog/
     ├── src/
-    │   ├── assets/               # 图片、相册、字体等静态资源
-    │   ├── config/song.ts        # 歌曲配置
-    │   ├── date/                 # 文章数据（md/*.md + articles.ts）
-    │   ├── modules/              # 业务模块
-    │   │   ├── bloghome/         # 首页模块（文章/照片/项目/关于）
+    │   ├── assets/               # 静态资源（字体、图标、全局图片）
+    │   ├── config/               # 媒体与全局配置文件
+    │   ├── date/                 # 文章 Markdown 源文件与元数据
+    │   ├── modules/              # 业务领域模块
+    │   │   ├── bloghome/         # 首页模块（文章、相册、开源、关于）
     │   │   │   └── components/
-    │   │   │       ├── articles/ # 文章列表 + 详情 + 搜索
-    │   │   │       ├── photos/   # 相册书架 + 灯箱
-    │   │   │       ├── projects/ # GitHub 贡献墙 + 统计
-    │   │   │       └── about/    # 关于页（技能/时钟/信息）
-    │   │   └── player/           # 音乐播放器模块
-    │   │       ├── components/   # 播放器界面 / 侧边栏 / 歌曲 / 播放列表
-    │   │       └── utils/        # 封面提取 / 本地数据库 / 格式化
-    │   ├── router/index.ts       # 路由配置
-    │   ├── stores/               # Pinia store（audio / library）
-    │   ├── views/                # 顶层视图（首页 / 播放器 / 加载屏）
-    │   ├── App.vue
-    │   └── main.ts
-    ├── index.html
-    ├── vite.config.ts
-    ├── tsconfig.json
+    │   │   │       ├── articles/ # 文章列表 / 详情 / 检索组件
+    │   │   │       ├── photos/   # 画廊展示 / 灯箱预览组件
+    │   │   │       ├── projects/ # 贡献热力图 / 数据统计组件
+    │   │   │       └── about/    # 技能展示 / 独立时钟挂件
+    │   │   └── player/           # 独立音乐播放器模块
+    │   │       ├── components/   # 播放控制器 / 列表 / 侧栏
+    │   │       └── utils/        # 封面解码 / 本地存储 / 格式化工具
+    │   ├── router/               # 路由定义与导航拦截
+    │   ├── stores/               # 全局 Pinia Store (Audio / Library)
+    │   ├── views/                # 顶层视口与加载过渡页
+    │   ├── App.vue               # 根组件
+    │   └── main.ts               # 入口引导文件
+    ├── vite.config.ts            # Vite 构建配置
+    ├── tsconfig.json             # TypeScript 类型检查配置
     └── package.json
 ```
 
@@ -84,30 +114,33 @@ vue-frontend/
 
 ## 本地开发
 
+### 环境准备
+- Node.js 20+
+- npm 或 pnpm
+
+### 常用命令
+
 ```bash
+# 进入前端项目目录
 cd blog
+
+# 安装依赖
 npm install
-npm run dev        # 开发服务器
-npm run build      # 生产构建 → dist/
-npm run preview    # 预览构建产物
-npm run type-check # vue-tsc 类型检查
+
+# 启动本地开发服务（热重载）
+npm run dev
+
+# 执行 TypeScript 类型检查
+npm run type-check
+
+# 构建生产产物（输出至 dist 目录）
+npm run build
+
+# 本地预览生产构建产物
+npm run preview
 ```
-
 ---
 
-## 自动化部署（GitHub Actions）
+## 开源协议
 
-推送 main 分支后自动构建 blog/，并通过 SSH 将 blog/dist/ 同步到宝塔服务器、修正权限：
-
-- actions/checkout@v4、actions/setup-node@v4（Node 20）
-- 构建：npm install && npm run build
-- 部署：easingthemes/ssh-deploy@main 同步到 SERVER_PATH
-- 权限：appleboy/ssh-action@v1 设置 www:www 及 755/644 权限
-
-所需 Secrets：SSH_PRIVATE_KEY、SERVER_IP、SERVER_USER、SERVER_PATH
-
----
-
-## License
-
-MIT License
+本项目采用 [MIT License](LICENSE) 协议开源。
