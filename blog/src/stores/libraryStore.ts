@@ -161,7 +161,7 @@ async function removeSong(id: string) {
 async function loadDate(): Promise<void> {
     const loadedDirs = await loadDirs()
     dirs.value = [
-      { id: 'preset_dir_1', name: '一路向北', cover: '' },
+      { id: 'preset_dir_1', name: '一路向北', cover: '/covers/songs.webp' },
       ...loadedDirs.filter(d => d.id !== 'default' && d.id !== 'preset_dir_1')
     ]
 
