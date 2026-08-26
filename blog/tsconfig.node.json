@@ -6,7 +6,8 @@
     "vitest.config.*",
     "cypress.config.*",
     "playwright.config.*",
-    "eslint.config.*"
+    "eslint.config.*",
+    "api/**/*"  // 👈 添加这一行，将你的后端接口目录纳入 Node.js 编译环境
   ],
   "compilerOptions": {
     // Most tools use transpilation instead of Node.js's native type-stripping.

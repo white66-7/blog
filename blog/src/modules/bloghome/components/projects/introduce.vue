@@ -92,7 +92,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
 
-const API_URL = 'https://white66-backend.onrender.com/api/commits-timeline'
+const API_URL = '/api/commits-timeline'
 const timeline = ref([])
 const loading = ref(true)
 

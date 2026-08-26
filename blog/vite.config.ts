@@ -1,11 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path' 
+import path from 'path'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -17,4 +15,11 @@ export default defineConfig({
       'react-native-fs': path.resolve(__dirname, 'react-native-fs-shim.js')
     },
   },
+  optimizeDeps: {
+    exclude: ['mongodb', '@vercel/node']
+  },
+  server: {
+    port: process.env.PORT ? Number(process.env.PORT) : 5173,
+    host: true
+  }
 })
