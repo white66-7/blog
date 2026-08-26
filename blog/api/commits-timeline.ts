@@ -4,7 +4,6 @@ import process from 'node:process'
 
 const GITHUB_USERNAME = 'white66-7'
 
-// ==================== 1. MongoDB 连接复用 ====================
 const uri = process.env.MONGODB_URI || ''
 let cachedClient: MongoClient | null = null
 let cachedDb: Db | null = null
@@ -25,130 +24,56 @@ async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
   return { client, db }
 }
 
-// ==================== 2. GitHub 实时拉取并回填数据库 ====================
-async function fetchAndSaveGithubCommits(db: Db | null, token?: string) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+  if (req.method === 'OPTIONS') return res.status(200).end()
+
+  const token = process.env.GITHUB_TOKEN
   const headers: Record<string, string> = {
-    'User-Agent': 'Vercel-Timeline-Sync',
+    'User-Agent': 'Vercel-Timeline',
     'Accept': 'application/vnd.github.v3+json',
     ...(token ? { Authorization: `Bearer ${token}` } : {})
   }
 
-  const commitsList: Array<{ sha: string; repoName: string; message: string; commitDate: string; url: string }> = []
-
   try {
-    // 1. 获取最近活跃的公开仓库
-    const reposRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=pushed&per_page=15`, {
-      headers,
-      signal: AbortSignal.timeout(5000)
-    })
+    const { db } = await connectToDatabase()
+    const collection = db.collection('github_commits')
 
-    if (reposRes.ok) {
-      const repos = (await reposRes.json()) as any[]
-      if (Array.isArray(repos)) {
-        // 并发拉取前 6 个仓库的 Commits
-        const repoPromises = repos.slice(0, 6).map(async (repo) => {
-          try {
-            const cRes = await fetch(
-              `https://api.github.com/repos/${GITHUB_USERNAME}/${repo.name}/commits?author=${GITHUB_USERNAME}&per_page=30`,
-              { headers, signal: AbortSignal.timeout(5000) }
-            )
-            if (!cRes.ok) return []
-            const cJson = (await cRes.json()) as any[]
-            return Array.isArray(cJson)
-              ? cJson.map(c => ({
-                  sha: c.sha,
-                  repoName: repo.name,
-                  message: c.commit?.message?.split('\n')[0] || 'Update code',
-                  commitDate: c.commit?.author?.date || c.commit?.committer?.date || new Date().toISOString(),
-                  url: c.html_url || ''
-                }))
-              : []
-          } catch {
-            return []
-          }
-        })
+    // 💡 1. 查询数据库中所有历史提交（上限提升至 1000 条）
+    const dbCommits = await collection.find({}).sort({ commitDate: -1 }).limit(1000).toArray()
 
-        const nested = await Promise.all(repoPromises)
-        for (const list of nested) {
-          commitsList.push(...list)
-        }
-      }
-    }
-
-    // 2. ✅ 修复：必须 await bulkWrite，确保云函数返回前数据已真正写入 MongoDB
-    if (commitsList.length > 0 && db) {
-      const collection = db.collection('github_commits')
-      const operations = commitsList.map(item => ({
-        updateOne: {
-          filter: { sha: item.sha },
-          update: {
-            $set: {
-              sha: item.sha,
-              repoName: item.repoName,
-              message: item.message,
-              commitDate: new Date(item.commitDate),
-              url: item.url
-            }
-          },
-          upsert: true
-        }
+    if (dbCommits && dbCommits.length > 0) {
+      const result = dbCommits.map(item => ({
+        commitDate: item.commitDate ? new Date(item.commitDate).toISOString() : new Date().toISOString(),
+        message: item.message || 'Update code',
+        repoName: item.repoName || 'repo',
+        url: item.url || ''
       }))
-      await collection.bulkWrite(operations, { ordered: false })
+      return res.status(200).json(result)
     }
-  } catch (err: any) {
-    console.error('自动抓取/回填 GitHub Commits 失败:', err.message)
-  }
 
-  return commitsList
-}
+    // 💡 2. 数据库若为空，走全局 Commit 搜索兜底
+    const searchRes = await fetch(
+      `https://api.github.com/search/commits?q=author:${GITHUB_USERNAME}&sort=author-date&order=desc&per_page=100`,
+      { headers: { ...headers, Accept: 'application/vnd.github.cloak-preview+json' } }
+    )
 
-// ==================== 3. 主 Handler ====================
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  // 开启 Vercel CDN 边缘缓存 60 秒（极速秒开）
-  res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
-  if (req.method === 'OPTIONS') return res.status(200).end()
-
-  const token = process.env.GITHUB_TOKEN
-  let db: Db | null = null
-
-  try {
-    const conn = await connectToDatabase()
-    db = conn.db
-  } catch (err: any) {
-    console.warn('[Timeline] MongoDB 连接暂不可用，将尝试直接拉取 GitHub API:', err.message)
-  }
-
-  try {
-    // 步骤 1：优先从 MongoDB 毫秒级返回
-    if (db) {
-      const collection = db.collection('github_commits')
-      const dbCommits = await collection.find({}).sort({ commitDate: -1 }).limit(120).toArray()
-
-      if (dbCommits && dbCommits.length > 0) {
-        const result = dbCommits.map(item => ({
-          commitDate: item.commitDate ? new Date(item.commitDate).toISOString() : new Date().toISOString(),
-          message: item.message || 'Update code',
-          repoName: item.repoName || 'repo',
-          url: item.url || ''
+    if (searchRes.ok) {
+      const sJson = (await searchRes.json()) as any
+      if (Array.isArray(sJson.items) && sJson.items.length > 0) {
+        const list = sJson.items.map((item: any) => ({
+          commitDate: item.commit?.author?.date || item.commit?.committer?.date || new Date().toISOString(),
+          message: item.commit?.message?.split('\n')[0] || 'Update code',
+          repoName: item.repository?.name || 'repo',
+          url: item.html_url || ''
         }))
-        return res.status(200).json(result)
+        return res.status(200).json(list)
       }
     }
 
-    // 步骤 2：如果数据库为空（冷启动），自动拉取并回填
-    const liveCommits = await fetchAndSaveGithubCommits(db, token)
-    liveCommits.sort((a, b) => new Date(b.commitDate).getTime() - new Date(a.commitDate).getTime())
-
-    const finalResult = liveCommits.map(c => ({
-      commitDate: c.commitDate,
-      message: c.message,
-      repoName: c.repoName,
-      url: c.url
-    }))
-
-    return res.status(200).json(finalResult)
+    return res.status(200).json([])
   } catch (error: any) {
     console.error('[Timeline Handler Error]:', error.message)
     return res.status(200).json([])
