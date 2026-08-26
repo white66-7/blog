@@ -1,11 +1,9 @@
 import {ref,computed,watch} from 'vue'
 import {defineStore} from 'pinia'
-import type { ComputedRef } from 'vue'
 import type {Song} from './libraryStore'
-import { extractCover,extractCoverFromUrl } from '@/modules/player/utils/cover'
+import { extractCover} from '@/modules/player/utils/cover'
 import { decodeLrc } from '@/modules/player/utils/lrc'
 import { useLibraryStore } from './libraryStore'
-import { delSong } from '@/modules/player/utils/db'
 
 
 export interface AudioState{
@@ -140,8 +138,10 @@ async function loadSongByIndex(index: number): Promise<void> {
     if (audioElement.value) {
       audioElement.value.src = song.src
     }
-    // 封面提取与预设歌词异步加载，不阻塞播放（避免点击后等待）
-    extractCoverFromUrl(song.src).then(u => { currentCoverUrl.value = u }).catch(() => {})
+
+    currentCoverUrl.value = song.cover || null
+
+    // 预设歌词异步加载
     loadPresetLrc(song)
 
   } else if (song.file) {
@@ -151,7 +151,16 @@ async function loadSongByIndex(index: number): Promise<void> {
     if (audioElement.value) {
       audioElement.value.src = audioUrl
     }
-    extractCover(song.file).then(u => { currentCoverUrl.value = u }).catch(() => {})
+
+    // 本地上传的文件，从本地 File 提取封面（本地 Blob 读取非常快）
+    if (song.cover) {
+      currentCoverUrl.value = song.cover
+    } else {
+      extractCover(song.file).then(u => {
+        currentCoverUrl.value = u
+        song.cover = u || undefined
+      }).catch(() => {})
+    }
   }
 
   curIdx.value = index

@@ -104,7 +104,7 @@ let isSliding = false
 
 defineOptions({ name: 'BlogHome' })
 
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave((to, from) => {
   if (swiperInstance.value) {
     savedSlideIndex.value = swiperInstance.value.activeIndex
   }
@@ -112,7 +112,7 @@ onBeforeRouteLeave((to, from, next) => {
   if (container) {
     savedScrollTop.value = container.scrollTop
   }
-  next()
+  // 无需调用 next()，正常执行完毕即代表放行路由
 })
 
 onActivated(async () => {

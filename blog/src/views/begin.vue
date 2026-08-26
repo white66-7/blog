@@ -44,6 +44,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { articles } from '@/date/articles' // 引入文章数据以获取第一页文章的 ID
 
 // 导入需要预加载的图片
 import MYimage from '@/assets/me.webp'
@@ -63,7 +65,7 @@ const isExiting = ref(false)
 const isFastMode = sessionStorage.getItem('splash_shown') !== null
 sessionStorage.setItem('splash_shown', 'true')
 
-const MIN_DISPLAY_TIME = isFastMode ? 300 : 2600
+const MIN_DISPLAY_TIME = isFastMode ? 300 : 2200
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
 
@@ -106,15 +108,31 @@ onMounted(() => {
     }
   })()
 
-  const API_URL = 'http://localhost:8080/api/commits-timeline'
-  fetch(API_URL, { method: 'GET' }).catch(err => {
-    console.warn('后端静默查询未响应', err)
-  })
+  // 4. ✅ 核心：文章阅读量预加载（加入 Promise 队列，且设置 3.5s 超时熔断以防卡死）
+  const viewsPromise = (async () => {
+    try {
+      // 提取前 6 篇文章（第一页）的 ID 发送批量请求
+      const firstPageIds = articles.slice(0, 6).map(a => a.id).join(',')
+      const res = await axios.get(`/api/views?ids=${firstPageIds}`, {
+        timeout: 3500 // 最多等待 3.5 秒，超时自动放行
+      })
+      if (res.data?.views) {
+        sessionStorage.setItem('preloaded_views', JSON.stringify(res.data.views))
+      }
+    } catch (err) {
+      console.warn('[Splash] 阅读量预加载跳过/降级:', err)
+    }
+  })()
 
+  // 5. 顺带预热时间线接口（将之前的 localhost 修复为相对路径）
+  fetch('/api/commits-timeline').catch(() => {})
+
+  // 等待：图片 + 字体 + 路由 + 阅读量 全部就绪
   Promise.all([
     imagePromise,
     fontPromise,
-    routerPromise
+    routerPromise,
+    viewsPromise // 👈 必须等待阅读量返回
   ]).then(async () => {
     const elapsed = Date.now() - startTime
     const delay = Math.max(MIN_DISPLAY_TIME - elapsed, 0)

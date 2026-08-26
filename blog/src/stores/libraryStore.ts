@@ -10,6 +10,7 @@ export interface Song {
   id: string
   name: string
   artist: string
+  cover?: string // 👈 补上这个字段
   signature?: string
   originalFileName?: string
   file?: File

@@ -39,26 +39,23 @@ const pageSize = ref(6)
 const playSearchAnimation = ref(!globalSearchAnimated)
 
 // 预加载当前页文章封面：命中会话缓存的直接亮图，未命中的后台预载
-// （imageLoaded 以 article.id 为 key，不能用数组整体覆盖）
 const preloadCovers = (articles: { id: number; cover?: string }[]) => {
   const withCover = articles.filter(a => a.cover)
   withCover.forEach(a => {
     if (isImageLoaded(a.cover!)) imageLoaded.value[a.id] = true
   })
-  cachePreload(withCover.map(a => a.cover!)).then(done => {
-    withCover.forEach((a, idx) => { imageLoaded.value[a.id] = true })
+  cachePreload(withCover.map(a => a.cover!)).then(() => {
+    withCover.forEach(a => { imageLoaded.value[a.id] = true })
   })
 }
-
-
 
 watch(currentPage, (newPage) => {
   globalSavedPage = newPage
 })
 
-// 💡 核心优化：取消平滑滚动，瞬间跳到文章列表顶部
+// 核心优化：取消平滑滚动，瞬间跳到文章列表顶部
 const scrollToArticles = async () => {
-  await nextTick() // 等待 Vue 把新一页的数据渲染完
+  await nextTick()
   if (scrollRef.value && contentTopRef.value) {
     const targetTop = contentTopRef.value.offsetTop - 80
     scrollRef.value.scrollTo({ top: targetTop, behavior: 'auto' })
@@ -73,7 +70,6 @@ watch(searchKeyword, () => {
 
 const onImageLoad = (articleId: number) => {
   imageLoaded.value[articleId] = true
-  // 记录到会话缓存，下次进路由不再闪骨架
   const article = paginatedArticles.value.find(a => a.id === articleId)
   if (article?.cover) markImageLoaded(article.cover)
 }
@@ -132,7 +128,6 @@ const goToArticle = (id: number) => {
 const animatedIds = ref(new Set<number>())
 let observer: IntersectionObserver | null = null
 
-// 因为是瞬间跳转，不用担心半路触发的问题，逻辑恢复到最简单的状态
 const initCardsObserver = async () => {
   animatedIds.value.clear()
   await nextTick()
@@ -160,14 +155,61 @@ const initCardsObserver = async () => {
   cards.forEach(card => observer!.observe(card))
 }
 
-// 每次列表数据变化（翻页/搜索），重新初始化监听器
 watch(paginatedArticles, initCardsObserver, { immediate: true })
 
+// ==================== 浏览量加载与缓存体系 ====================
+const getPreloadedViews = (): Record<number, number> => {
+  try {
+    const raw = sessionStorage.getItem('preloaded_views')
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+// 记录浏览量：如果对应 ID 的值为 undefined，代表尚未加载完成，展示骨架动效
+const articleViews = ref<Record<number, number | undefined>>(getPreloadedViews())
+
+const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) => {
+  if (!articles || articles.length === 0) return
+
+  // 找出需要查询的文章 ID
+  const ids = articles.map(a => a.id).join(',')
+  try {
+    const res = await axios.get(`/api/views?ids=${ids}`)
+    const remoteViews = res.data.views || {}
+
+    // 平滑写入，触发渐显
+    articles.forEach(a => {
+      articleViews.value[a.id] = remoteViews[a.id] ?? remoteViews[String(a.id)] ?? 0
+    })
+  } catch (err) {
+    console.warn('[Views] 获取阅读量失败:', err)
+    // 降级为 0
+    articles.forEach(a => {
+      if (articleViews.value[a.id] === undefined) {
+        articleViews.value[a.id] = 0
+      }
+    })
+  }
+}
+
+// 翻页时自动拉取新页的浏览量
+watch(paginatedArticles, (newArticles) => {
+  fetchViewsForArticles(newArticles)
+}, { immediate: false })
+
+// 路由生命周期
 onActivated(async () => {
   console.log('✅ MainArticle 从缓存恢复')
   await initCardsObserver()
-  await fetchViewsForArticles(paginatedArticles.value)
+  // 仅在尚未获取过时再拉取一次
+  const missing = paginatedArticles.value.some(a => articleViews.value[a.id] === undefined)
+  if (missing) {
+    await fetchViewsForArticles(paginatedArticles.value)
+  }
 })
+
 onDeactivated(() => {
   console.log('📦 MainArticle 被缓存，离开页面')
 })
@@ -189,50 +231,10 @@ onMounted(async () => {
   if (scrollRef.value && globalSavedScroll > 0) {
     scrollRef.value.scrollTop = globalSavedScroll
   }
+
+  // 首屏若有未预载到的文章，发起补齐查询
+  fetchViewsForArticles(paginatedArticles.value)
 })
-
-// 声明列表阅读量状态
-const articleViews = ref<Record<number, number>>({})
-let isFetchingViews = false
-
-const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) => {
-  if (!articles || articles.length === 0 || isFetchingViews) return
-  isFetchingViews = true
-
-  const ids = articles.map(a => a.id).join(',')
-  try {
-    const res = await axios.get(`/api/views?ids=${ids}`)
-    const remoteViews = res.data.views || {}
-
-    // 一次性更新所有卡片的阅读量
-    articles.forEach(a => {
-      articleViews.value[a.id] = remoteViews[a.id] ?? remoteViews[String(a.id)] ?? 0
-    })
-  } catch (err) {
-    console.warn('[Views] 获取阅读量失败:', err)
-  } finally {
-    isFetchingViews = false
-  }
-}
-
-// 仅保留分页变化监听（进入页面时 immediate 会自动执行一次，无需在 onActivated 额外重复调用）
-watch(paginatedArticles, (newArticles) => {
-  fetchViewsForArticles(newArticles)
-}, { immediate: true })
-
-onActivated(async () => {
-  await initCardsObserver()
-  // 恢复页面时只在没有数据时才刷新，避免重复请求
-  if (Object.keys(articleViews.value).length === 0) {
-    await fetchViewsForArticles(paginatedArticles.value)
-  }
-})
-
-// 监听当前分页变化，触发单次批量请求
-watch(paginatedArticles, (newArticles) => {
-  fetchViewsForArticles(newArticles)
-}, { immediate: true })
-
 </script>
 
 <template>
@@ -269,15 +271,23 @@ watch(paginatedArticles, (newArticles) => {
                 <div class="card__title">{{ article.title }}</div>
                 <div class="card__info-bar">
                   <div class="card__date">{{ article.date }}</div>
+
+                  <!-- 💡 阅读量展示区域：带微型骨架流光与渐入动效 -->
                   <div class="card__views">
-                    <!-- 替换为您的 SVG -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"
-                      style="flex-shrink: 0;">
+                      class="view-icon">
                       <path d="M0 0h24v24H0z" fill="none" />
                       <path fill="currentColor"
                         d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5" />
                     </svg>
-                    {{ articleViews[article.id] ?? 0 }}
+
+                    <!-- 1. 加载中：微型流光胶囊骨架 -->
+                    <span v-if="articleViews[article.id] === undefined" class="skeleton-views-pill"></span>
+
+                    <!-- 2. 加载完毕：数字平滑淡入 -->
+                    <span v-else class="views-num-text">
+                      {{ articleViews[article.id] }}
+                    </span>
                   </div>
                 </div>
                 <div class="card__excerpt">{{ article.excerpt }}</div>
@@ -307,7 +317,7 @@ watch(paginatedArticles, (newArticles) => {
   </div>
 </template>
 
-<<style scoped>
+<style scoped>
 /* ========= 全局布局 ========= */
 .app-page-wrapper {
   position: relative;
@@ -399,7 +409,6 @@ watch(paginatedArticles, (newArticles) => {
   position: relative;
   overflow: hidden;
   background: #f0f0f0;
-  /* 图片加载前的底色 */
 }
 
 .skeleton-img {
@@ -412,19 +421,24 @@ watch(paginatedArticles, (newArticles) => {
       #e0e0e0 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.skeleton-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 @keyframes skeleton-shimmer {
   0% {
     background-position: 200% 0;
   }
-
   100% {
     background-position: -200% 0;
   }
 }
 
-/* 图片填满容器 */
 .card__img-wrapper .card__img {
   width: 100%;
   height: 100%;
@@ -432,9 +446,14 @@ watch(paginatedArticles, (newArticles) => {
   display: block;
   position: relative;
   z-index: 1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
-/* 无封面占位 */
+.img-visible {
+  opacity: 1 !important;
+}
+
 .placeholder-img {
   width: 40%;
   aspect-ratio: 16 / 9;
@@ -445,40 +464,6 @@ watch(paginatedArticles, (newArticles) => {
   color: #999;
 }
 
-/* 骨架屏添加过渡 */
-.skeleton-img {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s infinite;
-  /* 新增过渡 */
-  opacity: 1;
-  transition: opacity 0.4s ease;
-}
-
-.skeleton-hidden {
-  opacity: 0;
-  pointer-events: none;  /* 避免遮挡下方元素交互 */
-}
-
-/* 图片初始透明，加载完成后显现 */
-.card__img-wrapper .card__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  position: relative;
-  z-index: 1;
-  /* 新增过渡 */
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.img-visible {
-  opacity: 1 !important;
-}
 /* ========= 卡片内容区 ========= */
 .card.horizontal .card__content,
 .card.reverse-horizontal .card__content {
@@ -499,6 +484,13 @@ watch(paginatedArticles, (newArticles) => {
   line-height: 1.3;
 }
 
+.card__info-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
 .card__date {
   font-family: 'YouSheBiaoTiHei';
   font-size: 12px;
@@ -506,6 +498,66 @@ watch(paginatedArticles, (newArticles) => {
   margin-bottom: 0;
   display: flex;
   align-items: center;
+}
+
+/* 浏览量容器 */
+.card__views {
+  margin-top: 0;
+  font-family: 'YouSheBiaoTiHei';
+  font-size: 12px;
+  color: #9CA3AF;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 16px;
+}
+
+.view-icon {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .view-icon {
+  transform: scale(1.15);
+  color: #23c483;
+}
+
+/* 💡 浏览量微型骨架流光胶囊 */
+.skeleton-views-pill {
+  display: inline-block;
+  width: 26px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: views-shimmer 1.2s infinite linear;
+}
+
+@keyframes views-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 💡 浏览量数字平滑渐显动画 */
+.views-num-text {
+  display: inline-block;
+  animation: numFadeIn 0.35s ease-out forwards;
+}
+
+@keyframes numFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .card__excerpt {
@@ -551,24 +603,6 @@ watch(paginatedArticles, (newArticles) => {
   color: #fff;
   box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
   transform: scale(1.15);
-}
-
-.card__info-bar {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 12px;
-}
-
-.card__views {
-  margin-top: 0;
-  font-family: 'YouSheBiaoTiHei';
-  font-size: 12px;
-  color: #9CA3AF;
-  font-weight: normal;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 /* ========= 分页 ========= */
