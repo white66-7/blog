@@ -433,7 +433,7 @@ onMounted(() => {
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
 
-  // ✅ 2. 修复阅读量递增接口：直接使用相对路径请求当前 Vercel Serverless Function
+  // ✅ 发送 POST 异步记录，失败自动忽略
   axios.post(`/api/views?id=${id}`).catch(() => { })
 
   window.addEventListener('scroll', handleScroll)
@@ -443,7 +443,6 @@ onMounted(() => {
     requestAnimationFrame(() => window.scrollTo(0, savedHeight))
   }
 })
-
 onUnmounted(() => {
   cleanupScroll?.()
   document.removeEventListener('click', closeSidebarOutside)

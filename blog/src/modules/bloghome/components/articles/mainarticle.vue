@@ -191,36 +191,42 @@ onMounted(async () => {
   }
 })
 
-// 💡 全局内存缓存（切页或从详情页返回时 0 毫秒展示，不再重复请求）
-const globalViewsCache = new Map<number, number>()
+// 声明列表阅读量状态
 const articleViews = ref<Record<number, number>>({})
+let isFetchingViews = false
 
 const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) => {
-  if (!articles || articles.length === 0) return
+  if (!articles || articles.length === 0 || isFetchingViews) return
+  isFetchingViews = true
 
-  // 1. 先用本地内存缓存立刻渲染，页面完全不卡顿
-  articles.forEach(a => {
-    if (globalViewsCache.has(a.id)) {
-      articleViews.value[a.id] = globalViewsCache.get(a.id)!
-    }
-  })
-
-  // 2. 找出当前页中所有文章 ID，一次性发送 1 个批量请求
   const ids = articles.map(a => a.id).join(',')
   try {
     const res = await axios.get(`/api/views?ids=${ids}`)
     const remoteViews = res.data.views || {}
 
-    // 3. 更新响应式数据与全局缓存
+    // 一次性更新所有卡片的阅读量
     articles.forEach(a => {
-      const count = remoteViews[a.id] ?? remoteViews[String(a.id)] ?? 0
-      articleViews.value[a.id] = count
-      globalViewsCache.set(a.id, count)
+      articleViews.value[a.id] = remoteViews[a.id] ?? remoteViews[String(a.id)] ?? 0
     })
   } catch (err) {
-    console.warn('[Views] 批量获取阅读量失败:', err)
+    console.warn('[Views] 获取阅读量失败:', err)
+  } finally {
+    isFetchingViews = false
   }
 }
+
+// 仅保留分页变化监听（进入页面时 immediate 会自动执行一次，无需在 onActivated 额外重复调用）
+watch(paginatedArticles, (newArticles) => {
+  fetchViewsForArticles(newArticles)
+}, { immediate: true })
+
+onActivated(async () => {
+  await initCardsObserver()
+  // 恢复页面时只在没有数据时才刷新，避免重复请求
+  if (Object.keys(articleViews.value).length === 0) {
+    await fetchViewsForArticles(paginatedArticles.value)
+  }
+})
 
 // 监听当前分页变化，触发单次批量请求
 watch(paginatedArticles, (newArticles) => {
