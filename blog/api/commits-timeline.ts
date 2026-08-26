@@ -1,81 +1,67 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { MongoClient, Db } from 'mongodb'
 import process from 'node:process'
 
-const GITHUB_USERNAME = 'white66-7'
+// ==================== 1. 复用 MongoDB 连接池 ====================
+const uri = process.env.MONGODB_URI || ''
+let cachedClient: MongoClient | null = null
+let cachedDb: Db | null = null
 
+async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb }
+  }
+
+  if (!uri) {
+    throw new Error('未配置 MONGODB_URI 环境变量')
+  }
+
+  const client = new MongoClient(uri, {
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 5000,
+  })
+
+  await client.connect()
+  const db = client.db()
+
+  cachedClient = client
+  cachedDb = db
+  return { client, db }
+}
+
+// ==================== 2. 云函数 Handler ====================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
   if (req.method === 'OPTIONS') return res.status(200).end()
 
-  const token = process.env.GITHUB_TOKEN
-  // 如果有 token 则使用带权限的动态接口，否则只读 public 事件
-  const apiUrl = token
-    ? `https://api.github.com/users/${GITHUB_USERNAME}/events?per_page=100`
-    : `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=100`
-
   try {
-    const response = await fetch(apiUrl, {
-      headers: {
-        'User-Agent': 'Vercel-Serverless-Timeline',
-        'Accept': 'application/vnd.github.v3+json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
-      signal: AbortSignal.timeout(8000)
-    })
+    const { db } = await connectToDatabase()
+    
+    // 对应 Spring Boot 实体类的 MongoDB 集合名
+    // 如果你在实体类上使用了 @Document(collection = "xxx")，这里填对应的集合名
+    // Spring Boot 默认集合名一般是 githubCommit 或 github_commits
+    const collection = db.collection('github_commits')
 
-    if (!response.ok) {
-      throw new Error(`GitHub API HTTP ${response.status}: ${response.statusText}`)
-    }
+    // 从数据库中按 commitDate 倒序查询最近的 150 条 commit
+    const commitsFromDb = await collection
+      .find({})
+      .sort({ commitDate: -1 })
+      .limit(150)
+      .toArray()
 
-    const events = await response.json()
-    const commits: Array<{ commitDate: string; message: string; repoName: string }> = []
+    // 格式化为前端 timeline 组件需要的数据格式
+    const result = commitsFromDb.map(item => ({
+      commitDate: item.commitDate ? new Date(item.commitDate).toISOString() : new Date().toISOString(),
+      message: item.message || 'Update code',
+      repoName: item.repoName || 'repository',
+      url: item.url || ''
+    }))
 
-    if (Array.isArray(events)) {
-      for (const event of events) {
-        const repoName = event.repo?.name?.replace(`${GITHUB_USERNAME}/`, '') || 'project'
-
-        // 1. PushEvent（提交记录）
-        if (event.type === 'PushEvent' && event.payload?.commits?.length) {
-          for (const c of event.payload.commits) {
-            commits.push({
-              commitDate: event.created_at,
-              message: c.message?.trim() || 'Update code',
-              repoName
-            })
-          }
-        }
-        // 2. CreateEvent（创建分支/标签/仓库）
-        else if (event.type === 'CreateEvent') {
-          commits.push({
-            commitDate: event.created_at,
-            message: `Created ${event.payload?.ref_type || 'repository'} ${event.payload?.ref || ''}`.trim(),
-            repoName
-          })
-        }
-        // 3. PullRequestEvent / IssuesEvent / WatchEvent（增加时间线饱满度）
-        else if (event.type === 'PullRequestEvent') {
-          commits.push({
-            commitDate: event.created_at,
-            message: `${event.payload?.action} pull request: ${event.payload?.pull_request?.title || ''}`.trim(),
-            repoName
-          })
-        }
-      }
-    }
-
-    // 💡 测试兜底：如果最近 90 天 GitHub 没有任何活动，返回保底历史数据供测试
-    if (commits.length === 0) {
-      commits.push(
-        { commitDate: new Date().toISOString(), message: 'Refactored timeline & views system', repoName: 'blog-v2' },
-        { commitDate: new Date(Date.now() - 86400000 * 5).toISOString(), message: 'Fix MongoDB upsert and CORS config', repoName: 'blog-v2' },
-        { commitDate: new Date(Date.now() - 86400000 * 20).toISOString(), message: 'Initial project setup & CI/CD', repoName: 'white66-7.github.io' }
-      )
-    }
-
-    return res.status(200).json(commits)
+    return res.status(200).json(result)
   } catch (error: any) {
-    console.error('[Timeline API Error]:', error.message)
+    console.error('[Timeline Mongo Error]:', error.message)
+    // 数据库若异常返回空数组，避免前端崩溃
     return res.status(200).json([])
   }
 }
