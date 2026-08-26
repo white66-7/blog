@@ -118,8 +118,6 @@ interface YearGroup {
 }
 
 const API_URL = '/api/commits-timeline'
-const TIMELINE_CACHE_KEY = 'cyber_github_timeline'
-const CACHE_TTL = 60 * 60 * 1000 // 缓存 1 小时，切页面秒开无需等待
 
 const timeline = ref<TimelineEvent[]>([])
 const loading = ref<boolean>(true)
@@ -171,26 +169,32 @@ function formatCommits(commits: RawCommit[]): TimelineEvent[] {
   })
 }
 
-async function fetchCommitsTimeline() {
-  // 1. 优先读取 1 小时本地缓存
-  try {
-    const raw = localStorage.getItem(TIMELINE_CACHE_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      if (parsed?.savedAt && Date.now() - parsed.savedAt < CACHE_TTL && Array.isArray(parsed.data) && parsed.data.length > 0) {
-        timeline.value = parsed.data
-        loading.value = false
-        await nextTick()
-        setupObserver()
-        return
-      }
-    }
-  } catch { /* 忽略缓存错误 */ }
+// 建议在开发阶段将缓存时间缩短，或者在控制台输入 localStorage.removeItem('cyber_github_timeline')
+const TIMELINE_CACHE_KEY = 'cyber_github_timeline'
+const CACHE_TTL = 5 * 60 * 1000 // 改为 5 分钟刷新一次
 
-  // 2. 缓存失效时请求云函数接口
+async function fetchCommitsTimeline(forceRefresh = false) {
+  // 1. 读取本地缓存 (forceRefresh 时跳过)
+  if (!forceRefresh) {
+    try {
+      const raw = localStorage.getItem(TIMELINE_CACHE_KEY)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (parsed?.savedAt && Date.now() - parsed.savedAt < CACHE_TTL && Array.isArray(parsed.data) && parsed.data.length > 1) {
+          timeline.value = parsed.data
+          loading.value = false
+          await nextTick()
+          setupObserver()
+          return
+        }
+      }
+    } catch { /* ignore */ }
+  }
+
+  // 2. 请求接口
   try {
     const res = await fetch(API_URL)
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const commits: RawCommit[] = await res.json()
     
     if (Array.isArray(commits) && commits.length > 0) {
@@ -205,7 +209,6 @@ async function fetchCommitsTimeline() {
   } catch (err) {
     console.error('[GitHub Timeline] 获取失败:', err)
   } finally {
-    // ✅ 关键修复：无论成功还是返回空，都必须关闭骨架屏！
     loading.value = false
   }
 }
