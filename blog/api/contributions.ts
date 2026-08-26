@@ -1,7 +1,24 @@
-import './lib/env'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const GITHUB_USERNAME = 'white66-7'
+
+// 定义返回的数据结构接口
+interface GitHubGraphQLResponse {
+  data?: {
+    user?: {
+      contributionsCollection?: {
+        contributionCalendar?: {
+          weeks?: Array<{
+            contributionDays: Array<{
+              contributionCount: number
+              date: string
+            }>
+          }>
+        }
+      }
+    }
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -37,7 +54,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
 
     if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`)
-    const json = await response.json()
+    
+    // 👇 类型断言为定义好的接口类型
+    const json = (await response.json()) as GitHubGraphQLResponse
     const weeks = json.data?.user?.contributionsCollection?.contributionCalendar?.weeks || []
 
     return res.status(200).json({ weeks })

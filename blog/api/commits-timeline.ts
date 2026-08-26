@@ -1,4 +1,3 @@
-import './lib/env'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const GITHUB_USERNAME = 'white66-7'
