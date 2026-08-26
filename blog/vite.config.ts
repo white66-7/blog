@@ -5,6 +5,7 @@ import path from 'path'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
+  base: '/', // 👈 显式指定根路径基准，避免任何子路由解析异常
   plugins: [
     vue(),
     vueDevTools(),

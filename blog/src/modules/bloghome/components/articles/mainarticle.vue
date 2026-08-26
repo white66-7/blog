@@ -191,28 +191,41 @@ onMounted(async () => {
   }
 })
 
-//后端联动
+// 💡 全局内存缓存（切页或从详情页返回时 0 毫秒展示，不再重复请求）
+const globalViewsCache = new Map<number, number>()
 const articleViews = ref<Record<number, number>>({})
 
 const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) => {
-  if (!articles.length) return
-  // 并发请求所有文章的浏览量
-  const promises = articles.map(article =>
-  axios.get(`/api/views?id=${article.id}`)
-    .then(res => ({ id: article.id, views: res.data.views }))
-    .catch(() => ({ id: article.id, views: 0 }))
-)
-  const results = await Promise.all(promises)
-  // 更新 articleViews
-  results.forEach(({ id, views }) => {
-    articleViews.value[id] = views
+  if (!articles || articles.length === 0) return
+
+  // 1. 先用本地内存缓存立刻渲染，页面完全不卡顿
+  articles.forEach(a => {
+    if (globalViewsCache.has(a.id)) {
+      articleViews.value[a.id] = globalViewsCache.get(a.id)!
+    }
   })
+
+  // 2. 找出当前页中所有文章 ID，一次性发送 1 个批量请求
+  const ids = articles.map(a => a.id).join(',')
+  try {
+    const res = await axios.get(`/api/views?ids=${ids}`)
+    const remoteViews = res.data.views || {}
+
+    // 3. 更新响应式数据与全局缓存
+    articles.forEach(a => {
+      const count = remoteViews[a.id] ?? remoteViews[String(a.id)] ?? 0
+      articleViews.value[a.id] = count
+      globalViewsCache.set(a.id, count)
+    })
+  } catch (err) {
+    console.warn('[Views] 批量获取阅读量失败:', err)
+  }
 }
 
-// 监听分页数据变化，自动获取新一页的浏览量
+// 监听当前分页变化，触发单次批量请求
 watch(paginatedArticles, (newArticles) => {
   fetchViewsForArticles(newArticles)
-}, { immediate: true })  // immediate 让组件挂载时立即执行一次
+}, { immediate: true })
 
 </script>
 
