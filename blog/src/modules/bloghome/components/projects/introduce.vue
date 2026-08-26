@@ -172,7 +172,7 @@ function formatCommits(commits: RawCommit[]): TimelineEvent[] {
 }
 
 async function fetchCommitsTimeline() {
-  // ✅ 1. 优先读取 1 小时本地缓存，实现秒开
+  // 1. 优先读取 1 小时本地缓存
   try {
     const raw = localStorage.getItem(TIMELINE_CACHE_KEY)
     if (raw) {
@@ -187,7 +187,7 @@ async function fetchCommitsTimeline() {
     }
   } catch { /* 忽略缓存错误 */ }
 
-  // ✅ 2. 缓存失效时请求云函数接口
+  // 2. 缓存失效时请求云函数接口
   try {
     const res = await fetch(API_URL)
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`)
@@ -196,7 +196,6 @@ async function fetchCommitsTimeline() {
     if (Array.isArray(commits) && commits.length > 0) {
       const events = formatCommits(commits)
       timeline.value = events
-      loading.value = false
       try {
         localStorage.setItem(TIMELINE_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data: events }))
       } catch { }
@@ -206,10 +205,8 @@ async function fetchCommitsTimeline() {
   } catch (err) {
     console.error('[GitHub Timeline] 获取失败:', err)
   } finally {
-    // 如果已经有历史数据展示，则关闭 loading；如果是首次且彻底失败，保持骨架屏
-    if (timeline.value.length > 0) {
-      loading.value = false
-    }
+    // ✅ 关键修复：无论成功还是返回空，都必须关闭骨架屏！
+    loading.value = false
   }
 }
 
