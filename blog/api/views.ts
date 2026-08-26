@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+
+  console.log('[DEBUG ENV KEYS]:', Object.keys(process.env).filter(k => k.includes('MONGO') || k.includes('GITHUB') || k.includes('VERCEL')))
   // 设置跨域
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
