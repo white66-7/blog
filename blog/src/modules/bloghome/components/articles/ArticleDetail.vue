@@ -159,14 +159,13 @@ async function handleCopy(e: MouseEvent) {
 const route = useRoute()
 const article = ref<Article | null>(null)
 
-
 function addSpacing(text: string): string {
   if (!text) return ''
 
   const placeholders: string[] = []
   const PH = '\u0000SP\u0000'
 
-  // 保护围栏代码块、行内代码（原有逻辑，保持不变）
+  // 保护围栏代码块、行内代码
   text = text.replace(/```[\s\S]*?```/g, (match) => {
     const key = `${PH}${placeholders.length}\u0000`
     placeholders.push(match)
@@ -178,22 +177,21 @@ function addSpacing(text: string): string {
     return key
   })
 
-  // 中英文之间加空格（原有逻辑，保持不变）
+  // 中英文之间加空格
   text = text.replace(/([\u4e00-\u9fa5])(?![ \t])([a-zA-Z0-9])/g, '$1 $2')
   text = text.replace(/([a-zA-Z0-9])(?![ \t])([\u4e00-\u9fa5])/g, '$1 $2')
 
-  // ★ 新增：Windows 路径的反斜杠后插入零宽空格（U+200B），
-  //   让 C:\Program Files\...\Translate 这类长路径可以在 \ 处断行。
-  //   只匹配 \ 后跟字母/数字的情况（路径），不会误伤 markdown 转义符（\* 等）。
+  // Windows 路径反斜杠断行优化
   text = text.replace(/\\(?=[A-Za-z0-9])/g, '\\\u200B')
 
-  // 还原所有被保护的内容（原有逻辑，保持不变）
+  // 还原所有被保护的内容
   text = text.replace(new RegExp(`${PH}(\\d+)\u0000`, 'g'), (_, idx) => {
     return placeholders[parseInt(idx)] ?? ''
   })
 
   return text
 }
+
 const renderedContent = computed(() => {
   if (!article.value) return ''
   return md.render(addSpacing(article.value.content))
@@ -273,7 +271,7 @@ let animating = ref(false)
 let isOpen = ref(false)
 let animationFrameId = 0
 let hintTimeoutId: ReturnType<typeof setTimeout> | null = null
-let stayTimeoutId: ReturnType<typeof setTimeout> | null = null // ==== 新增：用于控制停留时间的定时器 ====
+let stayTimeoutId: ReturnType<typeof setTimeout> | null = null
 const hasInteracted = ref(false)
 const showHintText = ref(false)
 
@@ -312,7 +310,6 @@ function animatePath(
 function playHintAnimation() {
   if (hasInteracted.value || isOpen.value) return
   animating.value = true
-
   showHintText.value = true
 
   animatePath(65, 15, 1200, 'smallElastic', () => {
@@ -321,21 +318,17 @@ function playHintAnimation() {
       return
     }
 
-    // ==== 修改：弹出动画结束后，不立刻收回，而是等待 1500 毫秒 ====
     stayTimeoutId = setTimeout(() => {
-      // 停留期间如果用户操作了，就中断后续操作
       if (hasInteracted.value) return
-
       showHintText.value = false
 
       animatePath(START_BASE, 0, 1600, 'smallElastic', () => {
         animating.value = false
         if (!hasInteracted.value && !isOpen.value) {
-          // 收缩完毕后，等待 1500 毫秒后再次循环弹出
           hintTimeoutId = setTimeout(playHintAnimation, 1500)
         }
       })
-    }, 1500) // <-- 这里的 1500 就是目录展开和文字停留在屏幕上的时间，可以根据喜好修改（比如改成 2000 即2秒）
+    }, 1500)
   })
 }
 
@@ -346,9 +339,8 @@ function startDrag(e: MouseEvent | TouchEvent) {
   hasInteracted.value = true
   showHintText.value = false
 
-  // ==== 修改：清除所有的定时器 ====
   if (hintTimeoutId) clearTimeout(hintTimeoutId)
-  if (stayTimeoutId) clearTimeout(stayTimeoutId) // 清除停留定时器
+  if (stayTimeoutId) clearTimeout(stayTimeoutId)
 
   cancelAnimationFrame(animationFrameId)
   animating.value = false
@@ -427,10 +419,10 @@ function closeSidebarOutside(e: MouseEvent) {
 
 let cleanupScroll: () => void = () => { }
 
-onBeforeRouteLeave((to, from, next) => {
+// ✅ 1. 修复 Vue Router 守卫：去掉了 next()，避免控制台产生 Deprecated 警告
+onBeforeRouteLeave(() => {
   const currentId = Number(route.params.id)
   articleScrollCache.set(currentId, window.scrollY || document.documentElement.scrollTop)
-  next()
 })
 
 onMounted(() => {
@@ -440,7 +432,10 @@ onMounted(() => {
   hintTimeoutId = setTimeout(playHintAnimation, 500)
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
-  axios.post(`https://white66-backend.onrender.com/api/views/${id}/increment`).catch(() => { })
+
+  // ✅ 2. 修复阅读量递增接口：直接使用相对路径请求当前 Vercel Serverless Function
+  axios.post(`/api/views?id=${id}`).catch(() => { })
+
   window.addEventListener('scroll', handleScroll)
   cleanupScroll = () => { window.removeEventListener('scroll', handleScroll) }
   const savedHeight = articleScrollCache.get(id) || 0
@@ -453,7 +448,7 @@ onUnmounted(() => {
   cleanupScroll?.()
   document.removeEventListener('click', closeSidebarOutside)
   if (hintTimeoutId) clearTimeout(hintTimeoutId)
-  if (stayTimeoutId) clearTimeout(stayTimeoutId) // 清理停留定时器
+  if (stayTimeoutId) clearTimeout(stayTimeoutId)
   cancelAnimationFrame(animationFrameId)
 })
 

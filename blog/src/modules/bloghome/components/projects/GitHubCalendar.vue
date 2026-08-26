@@ -63,20 +63,22 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import IntroSection from './introduce.vue'
-import 'animate.css';
+import 'animate.css'
+
 interface ContributionDay {
-  contributionCount: number;
+  contributionCount: number
+  date: string
 }
 
 interface ContributionWeek {
-  contributionDays: ContributionDay[];
+  contributionDays: ContributionDay[]
 }
 
 const API_URL = '/api/contributions'
 const GITHUB_USERNAME = 'white66-7'
 const WEEKS_TO_SHOW = 30
 
-// ── GitHub 数据 24h 缓存（避免频繁请求 / rate limit） ──
+// ── GitHub 数据 24h 缓存 ──
 const CONTRIB_CACHE_KEY = 'cyber_github_contrib'
 const USER_CACHE_KEY = 'cyber_github_user'
 const CACHE_TTL = 24 * 60 * 60 * 1000
@@ -93,17 +95,18 @@ function readCache(key: string, ttl: number): any | null {
     return null
   }
 }
+
 function writeCache(key: string, payload: any): void {
   try {
     localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), payload }))
-  } catch { /* 缓存满时忽略 */ }
+  } catch { /* 缓存满时安全忽略 */ }
 }
 
-const weeksData = ref<ContributionWeek[]>([]);
-const publicRepos = ref<number>(0);
-const loadingContrib = ref<boolean>(true);
-const loadingStats = ref<boolean>(true);
-let refreshTimer: ReturnType<typeof setInterval> | null = null;
+const weeksData = ref<ContributionWeek[]>([])
+const publicRepos = ref<number>(0)
+const loadingContrib = ref<boolean>(true)
+const loadingStats = ref<boolean>(true)
+let refreshTimer: ReturnType<typeof setInterval> | null = null
 
 const hasData = computed(() => weeksData.value.length > 0)
 
@@ -111,8 +114,8 @@ const totalContributions = computed(() => {
   if (!weeksData.value.length) return 0
   let sum = 0
   weeksData.value.forEach(week => {
-    week.contributionDays.forEach(day => {
-      sum += day.contributionCount
+    week.contributionDays?.forEach(day => {
+      sum += (day.contributionCount || 0)
     })
   })
   return sum
@@ -121,52 +124,57 @@ const totalContributions = computed(() => {
 const recentWeeks = computed(() => weeksData.value.slice(-WEEKS_TO_SHOW))
 
 const contributionGrid = computed<number[][]>(() => {
-  const weeks = recentWeeks.value;
-  if (!weeks.length) return [];
-  const rows: number[][] = Array.from({ length: 7 }, () => []);
+  const weeks = recentWeeks.value
+  if (!weeks.length) return []
+  const rows: number[][] = Array.from({ length: 7 }, () => [])
   weeks.forEach((week: ContributionWeek) => {
-    week.contributionDays.forEach((day: ContributionDay, idx: number) => {
+    week.contributionDays?.forEach((day: ContributionDay, idx: number) => {
       if (idx < 7) {
-        rows[idx]!.push(day.contributionCount); 
+        rows[idx]!.push(day.contributionCount || 0)
       }
-    });
-  });
-  return rows;
-});
+    })
+  })
+  return rows
+})
 
 function getLevelClass(count: number): string {
-  if (count === 0) return '';
-  if (count <= 3) return 'l1';
-  if (count <= 6) return 'l2';
-  if (count <= 9) return 'l3';
-  return 'l4';
+  if (count === 0) return ''
+  if (count <= 3) return 'l1'
+  if (count <= 6) return 'l2'
+  if (count <= 9) return 'l3'
+  return 'l4'
 }
 
 async function fetchContributions() {
-  // 命中 24h 缓存则直接用，避免频繁请求
+  // ✅ 关键修复：只有缓存存在【且有真实数据】时才命中，防止把之前的空数据当有效缓存
   const cached = readCache(CONTRIB_CACHE_KEY, CACHE_TTL)
-  if (cached && Array.isArray(cached.weeks)) {
+  if (cached && Array.isArray(cached.weeks) && cached.weeks.length > 0) {
     weeksData.value = cached.weeks
     loadingContrib.value = false
     return
   }
+
   try {
     const res = await fetch(API_URL)
     if (!res.ok) throw new Error(`Server responded with ${res.status}`)
     const data = await res.json()
     if (!data.weeks || !Array.isArray(data.weeks)) throw new Error('Invalid data format')
-    weeksData.value = data.weeks
-    writeCache(CONTRIB_CACHE_KEY, { weeks: data.weeks })
-    loadingContrib.value = false   // 数据获取成功后关闭加载状态
+    
+    // 只有拿到有效非空数据才写入缓存
+    if (data.weeks.length > 0) {
+      weeksData.value = data.weeks
+      writeCache(CONTRIB_CACHE_KEY, { weeks: data.weeks })
+    }
   } catch (err) {
     if (!hasData.value) console.error('[Contribution Wall] Failed:', err)
+  } finally {
+    loadingContrib.value = false
   }
 }
 
 async function fetchUserStats() {
-  // 命中 24h 缓存则直接用
   const cached = readCache(USER_CACHE_KEY, CACHE_TTL)
-  if (cached && typeof cached.publicRepos === 'number') {
+  if (cached && typeof cached.publicRepos === 'number' && cached.publicRepos > 0) {
     publicRepos.value = cached.publicRepos
     loadingStats.value = false
     return

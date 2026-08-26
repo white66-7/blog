@@ -89,29 +89,56 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
 
+interface RawCommit {
+  commitDate: string
+  message: string
+  repoName: string
+}
+
+interface TimelineEvent {
+  id: string
+  timestamp: number
+  year: number
+  month: number
+  text: string
+  repoName: string
+}
+
+interface MonthGroup {
+  month: number
+  events: TimelineEvent[]
+}
+
+interface YearGroup {
+  year: number
+  months: MonthGroup[]
+}
+
 const API_URL = '/api/commits-timeline'
-const timeline = ref([])
-const loading = ref(true)
+const TIMELINE_CACHE_KEY = 'cyber_github_timeline'
+const CACHE_TTL = 60 * 60 * 1000 // 缓存 1 小时，切页面秒开无需等待
 
-// 存储已触发动画的事件 ID
-const animatedItems = ref(new Set())
-let observer = null
+const timeline = ref<TimelineEvent[]>([])
+const loading = ref<boolean>(true)
+const animatedItems = ref<Set<string>>(new Set())
+let observer: IntersectionObserver | null = null
 
-const getShortMonth = (monthNum) => {
-  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+const getShortMonth = (monthNum: number) => {
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
   return months[monthNum - 1] || monthNum
 }
 
 // 分组计算
-const groupedTimeline = computed(() => {
+const groupedTimeline = computed<YearGroup[]>(() => {
   if (!timeline.value.length) return []
   const sorted = [...timeline.value].sort((a, b) => b.timestamp - a.timestamp)
-  const result = []
-  let currentYearGroup = null
-  let currentMonthGroup = null
+  const result: YearGroup[] = []
+  let currentYearGroup: YearGroup | null = null
+  let currentMonthGroup: MonthGroup | null = null
+
   sorted.forEach(event => {
     if (!currentYearGroup || currentYearGroup.year !== event.year) {
       currentYearGroup = { year: event.year, months: [] }
@@ -127,53 +154,84 @@ const groupedTimeline = computed(() => {
   return result
 })
 
-// 获取 commits 数据（重要修改：出错时保持 loading 为 true，骨架图不消失）
+function formatCommits(commits: RawCommit[]): TimelineEvent[] {
+  return commits.map((commit, index) => {
+    const dateObj = new Date(commit.commitDate)
+    const timestamp = isNaN(dateObj.getTime()) ? Date.now() : dateObj.getTime()
+    const fullMessage = commit.message || 'Update code'
+    const commitTitle = fullMessage.split('\n')[0] || 'Update code'
+    return {
+      id: `${timestamp}-${index}`,
+      timestamp,
+      year: dateObj.getFullYear() || new Date().getFullYear(),
+      month: dateObj.getMonth() + 1 || 1,
+      text: commitTitle,
+      repoName: commit.repoName || 'repo'
+    }
+  })
+}
+
 async function fetchCommitsTimeline() {
+  // ✅ 1. 优先读取 1 小时本地缓存，实现秒开
+  try {
+    const raw = localStorage.getItem(TIMELINE_CACHE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed?.savedAt && Date.now() - parsed.savedAt < CACHE_TTL && Array.isArray(parsed.data) && parsed.data.length > 0) {
+        timeline.value = parsed.data
+        loading.value = false
+        await nextTick()
+        setupObserver()
+        return
+      }
+    }
+  } catch { /* 忽略缓存错误 */ }
+
+  // ✅ 2. 缓存失效时请求云函数接口
   try {
     const res = await fetch(API_URL)
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-    const commits = await res.json()
-    const events = commits.map(commit => {
-      const dateObj = new Date(commit.commitDate)
-      const fullMessage = commit.message || 'Update code'
-      const commitTitle = fullMessage.split('\n')[0]
-      return {
-        timestamp: dateObj.getTime(),
-        year: dateObj.getFullYear(),
-        month: dateObj.getMonth() + 1,
-        text: commitTitle,
-        repoName: commit.repoName
-      }
-    })
-    timeline.value = events
-    loading.value = false   // 仅成功时关闭骨架图
-    await nextTick()
-    setupObserver()
+    const commits: RawCommit[] = await res.json()
+    
+    if (Array.isArray(commits) && commits.length > 0) {
+      const events = formatCommits(commits)
+      timeline.value = events
+      loading.value = false
+      try {
+        localStorage.setItem(TIMELINE_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data: events }))
+      } catch { }
+      await nextTick()
+      setupObserver()
+    }
   } catch (err) {
-    console.error('[GitHub Timeline] 数据获取失败，将继续显示骨架图：', err)
-    // 注意：这里不改变 loading，骨架图会一直显示
-    // 如果需要定时重试，可在此添加 setInterval，但当前需求不包含
+    console.error('[GitHub Timeline] 获取失败:', err)
+  } finally {
+    // 如果已经有历史数据展示，则关闭 loading；如果是首次且彻底失败，保持骨架屏
+    if (timeline.value.length > 0) {
+      loading.value = false
+    }
   }
 }
 
-// 创建 Intersection Observer，监听 .event-item
 function setupObserver() {
   if (observer) observer.disconnect()
   const items = document.querySelectorAll('.event-item[data-event-id]')
   if (items.length === 0) return
+
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const id = entry.target.dataset.eventId
+        const id = (entry.target as HTMLElement).dataset.eventId
         if (id && !animatedItems.value.has(id)) {
           animatedItems.value.add(id)
           animatedItems.value = new Set(animatedItems.value)
         }
-        observer.unobserve(entry.target)
+        observer?.unobserve(entry.target)
       }
     })
   }, { threshold: 0.1 })
-  items.forEach(item => observer.observe(item))
+
+  items.forEach(item => observer?.observe(item))
 }
 
 onMounted(() => {
