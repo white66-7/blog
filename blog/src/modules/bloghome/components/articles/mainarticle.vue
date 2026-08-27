@@ -19,6 +19,7 @@ import Navbar from '@/modules/bloghome/components/load.vue'
 import SearchRecentCard from '@/modules/bloghome/components/articles/search_article.vue'
 import PageHeader from '@/modules/bloghome/components/articles/PageHeader.vue'
 import { preloadImages as cachePreload, isImageLoaded, markImageLoaded } from '@/modules/bloghome/utils/imageCache'
+import { prefetchArticleDetail } from '@/modules/bloghome/utils/prefetch'
 
 import 'animate.css'
 
@@ -223,6 +224,8 @@ onMounted(async () => {
   }
 
   fetchViewsForArticles(paginatedArticles.value)
+  // 进入列表页即预取详情页 chunk，首次点击也不卡
+  prefetchArticleDetail()
 })
 </script>
 <template>
@@ -246,7 +249,7 @@ onMounted(async () => {
               'card',
               index % 2 === 0 ? 'horizontal' : 'reverse-horizontal',
               { 'animate__animated animate__bounceIn fast-enter': animatedIds.has(article.id) }
-            ]" :data-article-id="article.id" @click="goToArticle(article.id)">
+            ]" :data-article-id="article.id" @mouseenter="prefetchArticleDetail" @click="goToArticle(article.id)">
               <div v-if="article.cover" class="card__img-wrapper">
                 <!-- 骨架：始终存在，通过类名控制淡出 -->
                 <div :class="['skeleton-img', { 'skeleton-hidden': imageLoaded[article.id] }]"></div>

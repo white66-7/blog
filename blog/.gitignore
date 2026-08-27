@@ -38,5 +38,8 @@ __screenshots__/
 # Vite
 *.timestamp-*-*.mjs
 
+# Vercel (含 project.json 与本地 env 副本，避免密钥入库)
+.vercel
+
 
 sync-local.mjs

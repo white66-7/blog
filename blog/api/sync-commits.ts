@@ -1,6 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { MongoClient } from 'mongodb'
 import process from 'node:process'
+import * as dns from 'node:dns'
+
+// 本地开发修复：Node 的 c-ares 默认 DNS 可能指向无效的 127.0.0.1
+const DNS_SERVERS = (process.env.DNS_SERVERS || '').split(',').map(s => s.trim()).filter(Boolean)
+if (DNS_SERVERS.length) {
+  try { dns.setServers(DNS_SERVERS) } catch { /* ignore invalid config */ }
+}
 
 const GITHUB_USERNAME = 'white66-7'
 

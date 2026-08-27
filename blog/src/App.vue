@@ -1,33 +1,70 @@
 <template>
   <!-- 全局路由出口 -->
   <router-view v-slot="{ Component }">
-    <!-- 缓存首页、音乐播放器、文章列表页 -->
-    <keep-alive include="BlogHome,MusicPlayer,MainArticle">
-      <component :is="Component" />
-    </keep-alive>
+    <!-- 缓存首页、音乐播放器、文章列表页；过渡动画平滑切换 -->
+    <transition name="page" mode="out-in">
+      <keep-alive include="BlogHome,MusicPlayer,MainArticle">
+        <component :is="Component" />
+      </keep-alive>
+    </transition>
   </router-view>
   <audio ref="audioRef" style="display: none;"></audio>
-  <!-- 全局开场动画1 -->
+  <!-- 全局开场动画：首次完整播放，路由切换时显示快速版 -->
   <Teleport to="body">
-    <SplashScreen v-if="showGlobalSplash" @finish="onSplashFinish" />
+    <SplashScreen
+      v-if="showGlobalSplash"
+      :mode="splashMode"
+      :navigated="navCompleted"
+      @finish="onSplashFinish"
+    />
   </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import SplashScreen from '@/views/begin.vue'
 import { useLibraryStore } from '@/stores/libraryStore'
 import { useAudioStore } from '@/stores/audioStore'
+import { prefetchArticleDetail } from '@/modules/bloghome/utils/prefetch'
 
-const showGlobalSplash = ref(true)
+const router = useRouter()
 
-const audioRef = ref<HTMLAudioElement | null>(null)
+// 全局开场动画：首次完整播放，路由切换时显示快速版
+type SplashMode = 'initial' | 'navigating'
+const showGlobalSplash = ref(false)
+const splashMode = ref<SplashMode>('initial')
+const navCompleted = ref(false)
 
 const onSplashFinish = () => {
   showGlobalSplash.value = false
 }
 
+// 路由切换加载屏：只有"首次访问某路由"才显示快速版 begin.vue，
+// 再次访问已加载过的路由（chunk 已缓存）直接切换，不显示加载屏。
+// 按 chunk 维度记录：用路由名 name，无 name 的路由（如 /player 子页）归到首个匹配路由 path
+const visitedRoutes = new Set<string>()
+let firstNavigation = true
+router.beforeEach((to, from) => {
+  if (firstNavigation || to.fullPath === from.fullPath) return
+  const key = String(to.name ?? to.matched[0]?.path)
+  if (visitedRoutes.has(key)) return
+  splashMode.value = 'navigating'
+  navCompleted.value = false
+  showGlobalSplash.value = true
+})
+router.afterEach((to) => {
+  visitedRoutes.add(String(to.name ?? to.matched[0]?.path))
+  navCompleted.value = true
+  firstNavigation = false
+})
+
+const audioRef = ref<HTMLAudioElement | null>(null)
+
 onMounted(async () => {
+  showGlobalSplash.value = true // 首次启动显示完整开场动画
+  // 应用启动即预取文章详情页 chunk，消除"首次点击进详情页"的加载卡顿
+  prefetchArticleDetail()
   const libraryStore = useLibraryStore()
   const audioStore = useAudioStore()
   
@@ -73,4 +110,21 @@ body, html, #app, .app-flex, .hero-section,
 .hero-section input[type="submit"] {
   cursor: pointer !important;
 }
+
+/* ========= 路由切换过渡动画 ========= */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
 </style>

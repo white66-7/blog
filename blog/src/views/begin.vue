@@ -1,6 +1,6 @@
 <template>
   <!-- 加载屏主容器，通过 isExiting 触发平滑上滑淡出退场 -->
-  <div class="t1" :class="{ 'slide-up-exit': isExiting }">
+  <div class="t1" :class="{ 'slide-up-exit': isExiting, 't1--quick': mode === 'navigating' }">
     <!-- 2. 主体区：手写书法文字 + 右下角传统朱砂落款印章 -->
     <div class="brand-wrapper">
       <div class="svg-container">
@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { articles } from '@/date/articles'
@@ -53,18 +53,37 @@ import bgImage from '@/assets/木叶创立.webp'
 
 const router = useRouter()
 const emit = defineEmits<{ (e: 'finish'): void }>()
+
+// 模式：initial 首次完整开场；navigating 路由切换快速版
+// navigated 由 App 在 afterEach 置 true，表示本次导航已完成
+const props = defineProps<{
+  mode?: 'initial' | 'navigating'
+  navigated?: boolean
+}>()
+
 const isExiting = ref(false)
 
 const isFastMode = sessionStorage.getItem('splash_shown') !== null
 sessionStorage.setItem('splash_shown', 'true')
 const MIN_DISPLAY_TIME = isFastMode ? 300 : 2200
+const NAVIGATE_DISPLAY_MS = 600 // 路由切换最短展示时长
+const EXIT_ANIMATION_MS = props.mode === 'navigating' ? 450 : 1100
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
 
 onMounted(() => {
+  if (props.mode === 'navigating') {
+    runNavigatingSplash()
+  } else {
+    runInitialSplash()
+  }
+})
+
+// 💡 首次启动：等路由就绪 + 核心大图，保证开场动画自然播放；后台静默预热
+const runInitialSplash = () => {
   const startTime = Date.now()
 
-  // 💡 1. 关键路径：只等待路由就绪 + 核心 2 张大图
+  // 1. 关键路径：只等待路由就绪 + 核心 2 张大图
   const routerPromise = router.isReady()
   const criticalImages = [MYimage, bgImage]
   const imagePromise = Promise.all(
@@ -76,8 +95,7 @@ onMounted(() => {
     }))
   )
 
-  // 💡 2. 非关键路径（后台静默运行，绝不卡住开场退场）
-  // 异步预热阅读量 API
+  // 2. 非关键路径预热（仅首次执行，导航切换不重复请求）
   const firstPageIds = articles.slice(0, 6).map(a => a.id).join(',')
   axios.get(`/api/views?ids=${firstPageIds}`).then(res => {
     if (res.data?.views) {
@@ -85,22 +103,18 @@ onMounted(() => {
     }
   }).catch(() => {})
 
-  // 异步预热时间线
   fetch('/api/commits-timeline').catch(() => {})
 
   // 闲时加载相册等次要大图（不影响首屏）
   setTimeout(() => {
-    const secondaryImages = [
-      '/covers/game.webp',
-      // 其余相册图片路径...
-    ]
+    const secondaryImages = ['/covers/game.webp']
     secondaryImages.forEach(src => {
       const img = new Image()
       img.src = src
     })
   }, 1000)
 
-  // 💡 3. 只等关键资源 + 保证开场动画自然播放
+  // 3. 只等关键资源 + 保证开场动画自然播放
   Promise.all([
     imagePromise,
     routerPromise
@@ -110,13 +124,28 @@ onMounted(() => {
     await sleep(delay)
     exitSplash()
   })
-})
+}
+
+// 💡 路由切换：等本次导航完成（navigated=true），至少展示 600ms 再退场
+const runNavigatingSplash = () => {
+  const startTime = Date.now()
+
+  watch(() => props.navigated, (done) => {
+    if (!done) return
+    const elapsed = Date.now() - startTime
+    const delay = Math.max(NAVIGATE_DISPLAY_MS - elapsed, 0)
+    setTimeout(exitSplash, delay)
+  }, { immediate: true })
+
+  // 兜底：导航失败/被取消（如重复点击当前页）时也要能退出，避免卡屏
+  setTimeout(exitSplash, 8000)
+}
 
 const exitSplash = () => {
   isExiting.value = true
   setTimeout(() => {
     emit('finish')
-  }, 1100)
+  }, EXIT_ANIMATION_MS)
 }
 </script>
 
@@ -137,6 +166,11 @@ const exitSplash = () => {
   overflow: hidden;
   z-index: 9999;
   transition: transform 1.1s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.9s ease;
+}
+
+/* 路由切换快速版的短退场 */
+.t1--quick {
+  transition: transform 0.45s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.4s ease;
 }
 
 /* 顶部暖阳微光晕 */
