@@ -1,8 +1,10 @@
 <template>
   <!-- 全局路由出口 -->
   <router-view v-slot="{ Component }">
-    <!-- 缓存首页、音乐播放器、文章列表页；过渡动画平滑切换 -->
-    <transition name="page" mode="out-in">
+    <!-- 缓存首页、音乐播放器、文章列表页；过渡动画平滑切换。
+         ⚠️ 不要加 mode="out-in"：Vue 3 已知 bug（vuejs/core#7956、vuejs/router#1655），
+         从非缓存的详情页切回缓存的列表页时 enter 卡在 opacity:0，导致白屏 -->
+    <transition name="page">
       <keep-alive include="BlogHome,MusicPlayer,MainArticle">
         <component :is="Component" />
       </keep-alive>
