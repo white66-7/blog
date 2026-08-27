@@ -1,55 +1,55 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import BlogHome from '@/views/bloghome.vue'
-import PhotoShow from '@/modules/bloghome/components/photos/photo.vue'
-import Github from '@/modules/bloghome/components/projects/projects.vue'
-import MusicPlayer from '@/views/music-player.vue'
-import SongsView from '@/modules/player/components/songsview.vue'
-import PlaylistsView from '@/modules/player/components/Playlistsview.vue'
-import MainArticle from '@/modules/bloghome/components/articles/mainarticle.vue'
-import ArticleDetail from '@/modules/bloghome/components/articles/ArticleDetail.vue'
-import About from '@/modules/bloghome/components/about/about.vue'
 
+// 💡 导出文章滚动位置缓存（保持原样）
 export const articleScrollCache = new Map<number, number>()
 
 const routes = [
   {
     path: '/',
     name: 'blog',
-    component: BlogHome
+    // 💡 1. 首页动态懒加载
+    component: () => import('@/views/bloghome.vue')
   },
   {
-    path:'/photos',
+    path: '/photos',
     name: 'photo-show',
-    component: PhotoShow
+    // 💡 2. 相册模块动态懒加载（相册里的大图绝不会拖慢首屏）
+    component: () => import('@/modules/bloghome/components/photos/photo.vue')
   },
   {
-    path:'/projects',
+    path: '/projects',
     name: 'github',
-    component: Github
+    // 💡 3. GitHub 开源项目页懒加载
+    component: () => import('@/modules/bloghome/components/projects/projects.vue')
   },
   {
     path: '/player',
-    component: MusicPlayer,
+    // 💡 4. 音乐播放器及其子视图按需加载
+    component: () => import('@/views/music-player.vue'),
     children: [
-      { path: 'songs', component: SongsView },
-      { path: 'playlists', component: PlaylistsView },
+      { path: 'songs', component: () => import('@/modules/player/components/songsview.vue') },
+      { path: 'playlists', component: () => import('@/modules/player/components/Playlistsview.vue') },
       { path: '', redirect: '/player/playlists' }
     ]
   },
   {
     path: '/articles',
     name: 'mainarticle',
-    component: MainArticle
+    // 💡 5. 文章列表页懒加载
+    component: () => import('@/modules/bloghome/components/articles/mainarticle.vue')
   },
   {
     path: '/article/:id',
     name: 'ArticleDetail',
-    component: ArticleDetail
+    // 💡 6. 最关键：文章详情页懒加载（包含了重型 Markdown 和语法高亮库）
+    // 只有用户真正点进某篇文章时，才会拉取这部分代码
+    component: () => import('@/modules/bloghome/components/articles/ArticleDetail.vue')
   },
   {
     path: '/about',
     name: 'about',
-    component: About
+    // 💡 7. 关于页懒加载
+    component: () => import('@/modules/bloghome/components/about/about.vue')
   },
 ]
 

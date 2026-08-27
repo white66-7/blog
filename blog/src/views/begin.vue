@@ -45,18 +45,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { articles } from '@/date/articles' // 引入文章数据以获取第一页文章的 ID
+import { articles } from '@/date/articles'
 
-// 导入需要预加载的图片
+// 仅保留首屏立刻会见到的 1~2 张核心背景/头像
 import MYimage from '@/assets/me.webp'
-import image from '/covers/game.webp'
 import bgImage from '@/assets/木叶创立.webp'
-import img1 from '@/assets/think.webp'
-import img2 from '@/assets/play.webp'
-import photo1 from '@/assets/album/动漫/超燃.webp'
-import photo3 from '@/assets/album/动漫/黑色五叶草.webp'
-import photo5 from '@/assets/album/动漫/来自深渊.webp'
-import photo9 from '@/assets/album/动漫/video.webp'
 
 const router = useRouter()
 const emit = defineEmits<{ (e: 'finish'): void }>()
@@ -64,7 +57,6 @@ const isExiting = ref(false)
 
 const isFastMode = sessionStorage.getItem('splash_shown') !== null
 sessionStorage.setItem('splash_shown', 'true')
-
 const MIN_DISPLAY_TIME = isFastMode ? 300 : 2200
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
@@ -72,71 +64,49 @@ const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
 onMounted(() => {
   const startTime = Date.now()
 
-  // 1. 路由加载
+  // 💡 1. 关键路径：只等待路由就绪 + 核心 2 张大图
   const routerPromise = router.isReady()
-
-  // 2. 图片预加载
-  const imagesToLoad = [
-    MYimage,
-    bgImage,
-    img1,
-    img2,
-    photo1,
-    photo3,
-    photo5,
-    photo9,
-    image,
-  ]
+  const criticalImages = [MYimage, bgImage]
   const imagePromise = Promise.all(
-    imagesToLoad.map(url => new Promise((resolve) => {
+    criticalImages.map(url => new Promise((resolve) => {
       const img = new Image()
       img.src = url
       img.onload = resolve
-      img.onerror = resolve 
+      img.onerror = resolve
     }))
   )
 
-  // 3. 字体预加载
-  const fontPromise = (async () => {
-    try {
-      if (document.fonts) {
-        await document.fonts.load('20px "ShangShouJiangHuShuFa"', '禅絮沾泥做点真正想做的认准的方向就坚定走下去动漫人物风景暑假')
-        await document.fonts.load('20px ZiTiGuanJiaKaiTi')
-      }
-    } catch (error) {
-      console.warn('字体预加载失败', error)
+  // 💡 2. 非关键路径（后台静默运行，绝不卡住开场退场）
+  // 异步预热阅读量 API
+  const firstPageIds = articles.slice(0, 6).map(a => a.id).join(',')
+  axios.get(`/api/views?ids=${firstPageIds}`).then(res => {
+    if (res.data?.views) {
+      sessionStorage.setItem('preloaded_views', JSON.stringify(res.data.views))
     }
-  })()
+  }).catch(() => {})
 
-  // 4. ✅ 核心：文章阅读量预加载（加入 Promise 队列，且设置 3.5s 超时熔断以防卡死）
-  const viewsPromise = (async () => {
-    try {
-      // 提取前 6 篇文章（第一页）的 ID 发送批量请求
-      const firstPageIds = articles.slice(0, 6).map(a => a.id).join(',')
-      const res = await axios.get(`/api/views?ids=${firstPageIds}`, {
-        timeout: 3500 // 最多等待 3.5 秒，超时自动放行
-      })
-      if (res.data?.views) {
-        sessionStorage.setItem('preloaded_views', JSON.stringify(res.data.views))
-      }
-    } catch (err) {
-      console.warn('[Splash] 阅读量预加载跳过/降级:', err)
-    }
-  })()
-
-  // 5. 顺带预热时间线接口（将之前的 localhost 修复为相对路径）
+  // 异步预热时间线
   fetch('/api/commits-timeline').catch(() => {})
 
-  // 等待：图片 + 字体 + 路由 + 阅读量 全部就绪
+  // 闲时加载相册等次要大图（不影响首屏）
+  setTimeout(() => {
+    const secondaryImages = [
+      '/covers/game.webp',
+      // 其余相册图片路径...
+    ]
+    secondaryImages.forEach(src => {
+      const img = new Image()
+      img.src = src
+    })
+  }, 1000)
+
+  // 💡 3. 只等关键资源 + 保证开场动画自然播放
   Promise.all([
     imagePromise,
-    fontPromise,
-    routerPromise,
-    viewsPromise // 👈 必须等待阅读量返回
+    routerPromise
   ]).then(async () => {
     const elapsed = Date.now() - startTime
     const delay = Math.max(MIN_DISPLAY_TIME - elapsed, 0)
-
     await sleep(delay)
     exitSplash()
   })

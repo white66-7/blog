@@ -1,16 +1,27 @@
+<!-- src/modules/bloghome/views/Home.vue -->
 <template>
   <div class="home-page">
-    <Navbar :transparent="false" />
+        <!-- 导航栏悬浮在顶部 -->
+    <Navbar :transparent="false" class="page-navbar" />
+    <!-- 顶部 3D 宇宙封面背景 -->
+    <CosmicScene />
+    <!-- 技术栈内容区 -->
     <div class="text animate__animated animate__fadeIn" style="animation-delay: 0.3s">
       <h1>我的技术栈</h1>
+      <span class="sub-text">TECH STACK & SKILLS</span>
     </div>
+
     <div class="content-wrapper">
       <TechStackCard />
       <div class="skill-sections">
-        <SkillGroup v-for="(group, index) in skillGroups" :key="group.title" :group="group" :index="index" />
+        <SkillGroup
+          v-for="(group, index) in skillGroups"
+          :key="group.title"
+          :group="group"
+          :index="index"
+        />
       </div>
     </div>
-    <Clock />
   </div>
 </template>
 
@@ -18,7 +29,7 @@
 import Navbar from '@/modules/bloghome/components/load.vue'
 import TechStackCard from '@/modules/bloghome/components/about/info.vue'
 import SkillGroup from '@/modules/bloghome/components/about/skills.vue'
-import Clock from '@/modules/bloghome/components/about/clock.vue'
+import CosmicScene from '@/modules/bloghome/components/about/CosmicScene.vue'
 
 const skillGroups = [
   {
@@ -39,43 +50,62 @@ const skillGroups = [
   },
   {
     title: '其他',
-    items: ['DaVinci Resolve', 'Photoshop',]
+    items: ['DaVinci Resolve', 'Photoshop']
   }
 ]
 </script>
 
 <style scoped>
 .home-page {
-  background: #FAF7F2;
+  /* 与宇宙深空背景底色 100% 一致 */
+  background: #101114;
   min-height: 100vh;
-  max-width: none;
+  width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
-  padding-top: 20px;
+  padding-top: 0;
+  padding-bottom: 90px;
+  box-sizing: border-box;
 }
 
+
 .text {
-  color: #000;
-  font-size: 24px;
-  margin-top: 80px;
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  z-index: 2;
 }
 
 .text h1 {
+  margin: 0;
+  font-size: 28px;
   font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   font-weight: normal;
+  color: #FFFFFF;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+}
+
+.sub-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 6px;
 }
 
 .content-wrapper {
   display: grid;
-  transform: translateY(-15px);
   grid-template-columns: 700px 360px;
   justify-content: center;
   align-items: center;
   column-gap: 80px;
-  margin-top: -80px;
+  z-index: 2;
 }
 
 .skill-sections {
@@ -86,10 +116,6 @@ const skillGroups = [
 }
 
 @media (max-width: 900px) {
-  .home-page {
-    padding-top: 20px;
-  }
-
   .content-wrapper {
     display: flex;
     flex-direction: column;
@@ -99,7 +125,6 @@ const skillGroups = [
     row-gap: 40px;
     padding: 0 16px;
     box-sizing: border-box;
-    transform: none;
   }
 
   .skill-sections {
