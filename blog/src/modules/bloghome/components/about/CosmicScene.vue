@@ -34,34 +34,20 @@
             <div class="right"></div>
           </div>
 
-          <!-- 3D 站立人物 -->
-          <div class="human">
-            <div class="neck"></div>
-            <div class="head"></div>
-            <div class="body">
-              <div class="shoulder"></div>
-              <div class="back"></div>
-              <div class="hip"><div class="center"></div></div>
-            </div>
-            <div class="leg left"><div class="knee"></div><div class="lower"></div></div>
-            <div class="leg right"><div class="knee"></div><div class="lower"></div></div>
-            <div class="arm left"><div class="hand"></div></div>
-            <div class="arm right"><div class="hand"></div></div>
-          </div>
-
-          <!-- 人物倒影 -->
-          <div class="human shadow">
-            <div class="neck"></div>
-            <div class="head"></div>
-            <div class="body">
-              <div class="shoulder"></div>
-              <div class="back"></div>
-              <div class="hip"><div class="center"></div></div>
-            </div>
-            <div class="leg left"><div class="knee"></div><div class="lower"></div></div>
-            <div class="leg right"><div class="knee"></div><div class="lower"></div></div>
-            <div class="arm left"><div class="hand"></div></div>
-            <div class="arm right"><div class="hand"></div></div>
+          <!-- 2D 融入式人物与倒影 -->
+          <div class="character-container">
+            <!-- 人物本体 -->
+            <img 
+              :src="characterImg" 
+              alt="character" 
+              class="character-body" 
+            />
+            <!-- 镜像倒影 -->
+            <img 
+              :src="characterImg" 
+              alt="character reflection" 
+              class="character-reflection" 
+            />
           </div>
         </div>
       </div>
@@ -79,9 +65,9 @@
         <div class="bar"></div>
         <div class="bar"></div>
       </button>
-      <audio ref="audioRef" loop src="https://assets.codepen.io/907471/cosmic_dreams.mp3"></audio>
+      <audio ref="audioRef" preload="none" loop :src="cosmicAudio"></audio>
 
-      <!-- SVG 滤镜定义（恢复木星流体地质与星云滤镜） -->
+      <!-- SVG 滤镜定义 -->
       <svg class="filter-svg" xmlns="http://www.w3.org/2000/svg">
         <filter id="planet-structure">
           <feTurbulence baseFrequency="0.195" />
@@ -102,6 +88,10 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+
+import characterImg from '@/assets/about/person.webp'
+
+import cosmicAudio from '@/assets/about/cosmic_dreams.mp3'
 
 const canvasRef = ref(null)
 const audioRef = ref(null)
@@ -128,6 +118,30 @@ onMounted(() => {
   let height = 0
   let dpr = window.devicePixelRatio || 1
 
+  let staticStars = []
+  let twinklingStars = []
+
+  // 初始化星空数据（按比例分布）
+  const initStars = () => {
+    // 1. 大量静态背景微星（450颗，静止不闪，构建深空星尘感）
+    staticStars = Array.from({ length: 800 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 0.9 + 0.2, // 0.2px ~ 1.1px 的细微星点
+      alpha: Math.random() * 0.45 + 0.1 // 0.1 ~ 0.55 的微弱明暗差
+    }))
+
+    // 2. 少量动态呼吸星（70颗，缓慢闪烁）
+    twinklingStars = Array.from({ length: 150 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 1.3 + 0.6,
+      baseAlpha: Math.random() * 0.4 + 0.3,
+      speed: Math.random() * 0.02 + 0.008,
+      phase: Math.random() * Math.PI * 2
+    }))
+  }
+
   const handleResize = () => {
     if (!canvas) return
     dpr = window.devicePixelRatio || 1
@@ -136,20 +150,13 @@ onMounted(() => {
     canvas.width = width * dpr
     canvas.height = height * dpr
     ctx.scale(dpr, dpr)
+    initStars()
   }
 
   handleResize()
   window.addEventListener('resize', handleResize)
 
-  const stars = Array.from({ length: 130 }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    size: Math.random() * 1.5 + 0.4,
-    baseAlpha: Math.random() * 0.5 + 0.2,
-    speed: Math.random() * 0.02 + 0.005,
-    phase: Math.random() * Math.PI * 2
-  }))
-
+  // 3. 动态流星类
   class ShootingStar {
     constructor() {
       this.reset()
@@ -199,18 +206,29 @@ onMounted(() => {
 
   const shootingStars = Array.from({ length: 4 }, () => new ShootingStar())
 
+  // 主渲染循环
   const render = () => {
     ctx.clearRect(0, 0, width, height)
 
-    stars.forEach((s) => {
+    // A. 批量绘制静态星海（静止不闪，超高帧率）
+    staticStars.forEach((s) => {
+      ctx.fillStyle = `rgba(240, 243, 255, ${s.alpha})`
+      ctx.beginPath()
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2)
+      ctx.fill()
+    })
+
+    // B. 绘制呼吸闪烁星
+    twinklingStars.forEach((s) => {
       s.phase += s.speed
-      const alpha = s.baseAlpha + Math.sin(s.phase) * 0.25
+      const alpha = s.baseAlpha + Math.sin(s.phase) * 0.3
       ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0.08, alpha)})`
       ctx.beginPath()
       ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2)
       ctx.fill()
     })
 
+    // C. 绘制流星雨
     shootingStars.forEach((star) => {
       star.update()
       star.draw(ctx)
@@ -299,9 +317,10 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   z-index: 3;
-  transform: translateY(-10px);
+  transform: translateY(45px);
+  transform-origin: center center;
+  transition: transform 0.3s ease;
 }
-
 .scene {
   position: absolute;
   display: flex;
@@ -387,428 +406,40 @@ onMounted(() => {
   }
 }
 
-/* 3D 站立人物 */
-.human {
+/* ================= 2D 融入式人物样式 ================= */
+.character-container {
   position: absolute;
-  display: grid;
-  place-items: center;
-  width: 70px;
-  height: 160px;
-  transform: translateY(112px);
-  z-index: 111;
+  /* 调整人物站立在立方体正上方 */
+  transform: translateY(168px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
 }
 
-.human:not(.shadow) {
-  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.85));
+.character-body {
+  width: 110px;          /* 适配基座比例的合适宽度 */
+  height: auto;
+  object-fit: contain;
+  /* 去除刺眼纯白高光，做深空冷色弱光轮廓与自然压暗 */
+  filter: brightness(0.9) contrast(1.05) drop-shadow(0 0 6px rgba(180, 205, 230, 0.25));
+  user-select: none;
+  /* 若原图朝向左侧，可通过加上 transform: scaleX(-1); 翻转向右 */
 }
 
-.human > div { position: absolute; }
-
-.human .head {
-  background: white;
-  width: 18px;
-  height: 19px;
-  border-radius: 50%;
-  translate: 2px -68px;
-  rotate: 355deg;
-}
-
-.human .head:before {
-  content: "";
-  position: absolute;
-  background: white;
-  width: 3px;
-  height: 8px;
-  border-radius: 50%;
-  translate: 13px 4px;
-  rotate: 136deg;
-  animation: head-nose calc(var(--time) / 4) ease-in-out infinite;
-}
-
-.human .head:after {
-  content: "";
-  position: absolute;
-  background: white;
-  width: 12px;
-  height: 10px;
-  border-radius: 50%;
-  translate: 5px 7px;
-  rotate: 45deg;
-  animation: head-chin calc(var(--time) / 4) ease-in-out infinite;
-}
-
-.human .neck {
-  background: white;
-  width: 9px;
-  height: 17px;
-  border-radius: 50%;
-  translate: 2px -58px;
-}
-
-.human .neck:before {
-  content: "";
-  position: absolute;
-  width: 3px;
-  height: 17px;
-  background: white;
-  border-radius: 50%;
-  translate: 7px 4px;
-  rotate: 352deg;
-}
-
-.human .body { z-index: 11; }
-.human .body > div { position: absolute; }
-
-.human .body .shoulder:before {
-  content: "";
-  position: absolute;
-  width: 15px;
-  height: 6px;
-  background: white;
-  border-radius: 50%;
-  translate: -12px -54px;
-  rotate: 330deg;
-}
-
-.human .body .shoulder:after {
-  content: "";
-  position: absolute;
-  width: 15px;
-  height: 6px;
-  background: white;
-  border-radius: 50%;
-  translate: 5px -53px;
-  rotate: 24deg;
-}
-
-.human .body .back {
-  width: 15px;
-  height: 46px;
-  background: #fbfbfb;
-  border-radius: 20%;
-  translate: -2px -53px;
-  rotate: 357deg;
-}
-
-.human .body .back:before {
-  content: "";
-  position: absolute;
-  width: 32px;
-  height: 17px;
-  background: #fbfbfb;
-  border-radius: 50%;
-  translate: -15px 8px;
-  rotate: 69deg;
-  z-index: -1;
-}
-
-.human .body .back:after {
-  content: "";
-  position: absolute;
-  width: 29px;
-  height: 11px;
-  background: #fbfbfb;
-  border-radius: 50%;
-  translate: 1px 12px;
-  rotate: 96deg;
-}
-
-.human .body .hip .center {
-  position: absolute;
-  width: 18px;
-  height: 20px;
-  background: radial-gradient(white, #f5f5f5);
-  border-radius: 39.6%;
-  translate: -3px -33px;
-  rotate: 267deg;
-}
-
-.human .body .hip:before {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 24px;
-  background: radial-gradient(white, #e7e4e4);
-  border-radius: 46.5%;
-  translate: -7px -27px;
-  rotate: 8deg;
-}
-
-.human .body .hip:after {
-  content: "";
-  position: absolute;
-  width: 15px;
-  height: 24px;
-  background: radial-gradient(white, #f6f5f5);
-  border-radius: 41.1%;
-  translate: 3px -24px;
-  rotate: 161deg;
-}
-
-.human .leg.right {
-  width: 12px;
-  height: 32px;
-  background: white;
-  border-radius: 50%;
-  translate: 13px 4px;
-  rotate: 348deg;
-}
-
-.human .leg.right:after {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 32px;
-  background: white;
-  border-radius: 50%;
-  translate: 5px 2px;
-  rotate: 13deg;
-}
-
-.human .leg.right .knee {
-  position: absolute;
-  height: 19px;
-  width: 8px;
-  background: white;
-  border-radius: 39.6%;
-  translate: 0px 24px;
-  rotate: 15deg;
-}
-
-.human .leg.right .lower {
-  position: absolute;
-  height: 36px;
-  width: 9px;
-  background: white;
-  border-radius: 50%;
-  translate: -3px 26px;
-  rotate: 15deg;
-}
-
-.human .leg.right .lower:before {
-  content: "";
-  position: absolute;
-  width: 6px;
-  height: 17px;
-  background: white;
-  border-radius: 67.8%;
-  translate: 5px 29px;
-  rotate: 66deg;
-}
-
-.human .leg.right .lower:after {
-  content: "";
-  position: absolute;
-  width: 6px;
-  height: 17px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 1px 25px;
-  rotate: 0deg;
-}
-
-.human .leg.left {
-  width: 12px;
-  height: 32px;
-  background: #ebe6e6;
-  border-radius: 50%;
-  translate: -3px 4px;
-  rotate: 2deg;
-  z-index: -1;
-}
-
-.human .leg.left:after {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 32px;
-  background: #ebe6e6;
-  border-radius: 50%;
-  translate: 5px 2px;
-  rotate: 13deg;
-}
-
-.human .leg.left .knee {
-  position: absolute;
-  height: 19px;
-  width: 8px;
-  background: #dfdbdb;
-  border-radius: 39.6%;
-  translate: 0px 24px;
-  rotate: 5deg;
-}
-
-.human .leg.left .lower {
-  position: absolute;
-  height: 36px;
-  width: 9px;
-  background: #e2dede;
-  border-radius: 50%;
-  translate: -1px 21px;
-  rotate: 5deg;
-}
-
-.human .leg.left .lower:before {
-  content: "";
-  position: absolute;
-  width: 6px;
-  height: 17px;
-  background: #dfdbdb;
-  border-radius: 67.8%;
-  translate: 5px 29px;
-  rotate: 47deg;
-}
-
-.human .leg.left .lower:after {
-  content: "";
-  position: absolute;
-  width: 6px;
-  height: 17px;
-  background: #dfdbdb;
-  border-radius: 27.8%;
-  translate: 1px 25px;
-  rotate: 0deg;
-}
-
-.human .arm.right {
-  position: absolute;
-  width: 8px;
-  height: 32px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 18px -34px;
-  rotate: 346deg;
-  animation: arm-right calc(var(--time) / 4) ease-in-out infinite;
-}
-
-.human .arm.right:before {
-  content: "";
-  position: absolute;
-  width: 3px;
-  height: 27px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 3px 23px;
-  rotate: 6deg;
-}
-
-.human .arm.right:after {
-  content: "";
-  position: absolute;
-  width: 4px;
-  height: 24px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 1px 23px;
-  rotate: 351deg;
-}
-
-.human .arm.right .hand {
-  position: absolute;
-  width: 3px;
-  height: 9px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 3px 41px;
-  rotate: 353deg;
-}
-
-.human .arm.right .hand:after {
-  content: "";
-  position: absolute;
-  width: 5px;
-  height: 6px;
-  background: white;
-  border-radius: 39.2%;
-  translate: -2px 7px;
-  rotate: 65deg;
-}
-
-.human .arm.left {
-  width: 8px;
-  height: 28px;
-  background: white;
-  border-radius: 59.8%;
-  translate: -10px -38px;
-  rotate: 359deg;
-  z-index: -2;
-  opacity: 0.85;
-  animation: arm-left calc(var(--time) / 4) ease-in-out infinite;
-}
-
-.human .arm.left:before {
-  content: "";
-  position: absolute;
-  width: 3px;
-  height: 27px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 3px 20px;
-  rotate: 6deg;
-}
-
-.human .arm.left:after {
-  content: "";
-  position: absolute;
-  width: 4px;
-  height: 24px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 2px 23px;
-  rotate: 351deg;
-}
-
-.human .arm.left .hand {
-  position: absolute;
-  width: 3px;
-  height: 9px;
-  background: white;
-  border-radius: 27.8%;
-  translate: 3px 41px;
-  rotate: 353deg;
-}
-
-.human .arm.left .hand:after {
-  content: "";
-  position: absolute;
-  width: 5px;
-  height: 6px;
-  background: white;
-  border-radius: 39.2%;
-  translate: -1px 2px;
-  rotate: 65deg;
-}
-
-.human.shadow {
-  transform: scaleY(-1) translateY(-145px);
+/* 人物在基座上的倒影效果 */
+.character-reflection {
+  width: 110px;
+  height: auto;
+  object-fit: contain;
+  /* 垂直镜像倒影 */
+  transform: scaleY(-1) translateY(4px);
   opacity: 0.22;
-  z-index: 0;
-  mask: linear-gradient(to top, black 10%, transparent 35%);
-}
-
-.human.shadow .leg.left .lower:before,
-.human.shadow .leg.right .lower:before {
-  rotate: 102deg;
-}
-
-@keyframes head-nose {
-  0%, 100% { translate: 13px 4px; }
-  50% { translate: 11px 4px; }
-}
-
-@keyframes head-chin {
-  0%, 100% { translate: 5px 7px; }
-  50% { translate: 2px 7px; }
-}
-
-@keyframes arm-right {
-  0%, 100% { rotate: 346deg; }
-  50% { rotate: 350deg; }
-}
-
-@keyframes arm-left {
-  0%, 100% { rotate: 359deg; }
-  50% { rotate: 364deg; }
+  /* 倒影向下自然渐隐消融与轻微模糊 */
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+  filter: blur(1.5px) brightness(0.65);
 }
 
 /* 行星系 */
@@ -879,7 +510,7 @@ onMounted(() => {
   opacity: 0.6;
 }
 
-/* 5号木星：恢复 SVG 流体噪波地质结构 */
+/* 5号木星：SVG 流体噪波地质结构 */
 .planet-5 {
   transform-style: preserve-3d;
   border-radius: 50%;
@@ -967,7 +598,6 @@ onMounted(() => {
   clip-path: ellipse(47% 22% at 50% 50%);
 }
 
-/* 播放按钮 */
 .audio-icon-button {
   border: 1px solid rgba(255, 255, 255, 0.35);
   padding: 0.5rem;
@@ -977,7 +607,9 @@ onMounted(() => {
   background: rgba(0, 0, 0, 0.45);
   position: absolute;
   right: 2rem;
-  top: 2rem;
+  bottom: 2.2rem;
+  top: auto;
+
   z-index: 4200;
   display: flex;
   gap: 0.15rem;
@@ -1020,27 +652,53 @@ onMounted(() => {
   to { transform: scaleY(1.3); }
 }
 
-@media (max-width: 900px) {
-  .cosmic-stage {
-    height: 75vh;
-    min-height: 520px;
-  }
+/* 针对较矮屏幕（如 13/14 寸笔记本或小高度窗口） */
+@media (max-height: 850px) {
   .scene-scaler {
-    transform: scale(0.82) translateY(-10px);
+    transform: scale(0.85) translateY(40px);
   }
-  .audio-icon-button {
-    right: 1.2rem;
-    top: 1.2rem;
+}
+@media (max-height: 700px) {
+  .scene-scaler {
+    transform: scale(0.72) translateY(30px);
   }
 }
 
-@media (max-width: 550px) {
+/* 针对中屏幕（平板 / 平板竖屏 max-width: 900px） */
+@media (max-width: 900px) {
   .cosmic-stage {
-    height: 68vh;
-    min-height: 460px;
+    height: 80vh;
+    min-height: 560px;
   }
   .scene-scaler {
-    transform: scale(0.68) translateY(-10px);
+    /* 缩小比例的同时保持适当的下移，星球绝不破顶 */
+    transform: scale(0.76) translateY(38px);
+  }
+  .audio-icon-button {
+    right: 1.2rem;
+    bottom: 1.5rem; /* 改为底部 */
+    top: auto;
+  }
+}
+
+/* 针对小屏幕（手机端 max-width: 600px） */
+@media (max-width: 600px) {
+  .cosmic-stage {
+    height: 75vh;
+    min-height: 500px;
+  }
+  .scene-scaler {
+    transform: scale(0.6) translateY(30px);
+  }
+}
+
+/* 针对超小屏幕手机（max-width: 400px） */
+@media (max-width: 400px) {
+  .cosmic-stage {
+    min-height: 440px;
+  }
+  .scene-scaler {
+    transform: scale(0.5) translateY(25px);
   }
 }
 </style>
