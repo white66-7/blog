@@ -66,6 +66,8 @@ import view10 from '@/assets/album/风景/云.webp'
 import view11 from '@/assets/album/风景/上海.mp4'
 import view12 from '@/assets/album/风景/孤独的树.mp4'
 import view13 from '@/assets/album/风景/彩虹.webp'
+import forview12 from '@/assets/album/风景/孤独的树封面.webp'
+import forview11 from '@/assets/album/风景/上海封面.webp'
 // import view14 from '@/assets/album/风景'
 
 import img1 from '@/assets/album/人物/朋友.webp'
@@ -74,7 +76,10 @@ import img3 from '@/assets/album/人物/dji.webp'
 import img4 from '@/assets/classmates.webp'
 import img5 from '@/assets/album/人物/student.webp'
 import img6 from '@/assets/album/人物/adult.webp'
-
+import img7 from '@/assets/album/人物/三人成行.mp4'
+import img8 from '@/assets/album/人物/三人成行2.mp4'
+import forimg7 from '@/assets/album/人物/三人成行封面.webp'
+import forimg8 from '@/assets/album/人物/三人成行2封面.webp'
 
 import holiday1 from '@/assets/album/暑假/tree.webp'
 import holiday2 from '@/assets/album/暑假/晚餐.webp'
@@ -117,8 +122,10 @@ const albumsData = [
       { title: '高中同学们', url: img4 },
       { title: '给朋友拍的照片', url: img1 },
       { title: '在旧宿舍的最后一晚', url: img3 },
-      { title: '过去', url: img5},
-      { title: '或许是未来', url: img6},
+      { title: '过去', url: img5 },
+      { title: '或许是未来', url: img6 },
+      { title: '三人成行', url: img7,cover: forimg7 },
+      { title: '三人成行 • 附', url: img8,cover: forimg8 },
     ]
   },
   {
@@ -136,8 +143,8 @@ const albumsData = [
       { title: 'NO SEVICE', url: view8 },
       { title: '这我真心觉得特别好看', url: view9 },
       { title: '这云神似Deepseek', url: view10 },
-      { title: '不愧是上海', url: view11 },
-      { title: '孤独的一颗树', url: view12 },
+      { title: '不愧是上海', url: view11,cover: forview11 },
+      { title: '孤独的一颗树', url: view12,cover: forview12 },
       { title: '拍到彩虹了', url: view13 },
     ]
   },

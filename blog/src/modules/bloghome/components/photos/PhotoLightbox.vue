@@ -1,29 +1,41 @@
 <template>
   <transition name="zoom">
-    <div class="lightbox" @click="$emit('close')">
+    <div class="lightbox" @click="handleClose">
       <!-- 右上角关闭按钮 -->
-      <button class="lightbox-close" @click="$emit('close')">×</button>
+      <button class="lightbox-close" @click="handleClose">×</button>
       
-      <!-- 弹窗内容区，阻止点击事件冒泡导致关闭 -->
+      <!-- 弹窗内容区 -->
       <div class="lightbox-content" @click.stop>
         
         <!-- 核心：拍立得大相片框 -->
         <div class="polaroid large-polaroid">
           <div class="photo large-photo">
-            <!-- 视频播放器：支持播放控制条、自动播放与循环 -->
+            <!-- 视频播放器：支持流式边下边播 + 缓冲等待转圈 -->
             <video
               v-if="isVideo(photo)"
+              ref="videoEl"
               :src="photo.url"
+              :poster="photo.cover"
               class="real-image-large"
               controls
               autoplay
               playsinline
+              preload="auto"
+              @waiting="isBuffering = true"
+              @playing="isBuffering = false"
+              @canplay="isBuffering = false"
             ></video>
 
             <!-- 真实图片 -->
             <img v-else :src="photo.url" class="real-image-large" />
 
-            <!-- 老照片特效图层：灰尘与划痕（已设置 pointer-events: none 不会遮挡视频控制栏） -->
+            <!-- 视频缓冲等待中动画 -->
+            <div v-if="isVideo(photo) && isBuffering" class="buffering-spinner">
+              <div class="spinner-icon"></div>
+              <span>加载中...</span>
+            </div>
+
+            <!-- 老照片特效图层：灰尘与划痕 -->
             <div class="dust"></div>
             <div class="scratches"></div>
           </div>
@@ -37,15 +49,20 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 const props = defineProps({
   photo: {
     type: Object,
     required: true
   }
 })
-defineEmits(['close'])
 
-// 判断是否为视频
+const emit = defineEmits(['close'])
+
+const videoEl = ref(null)
+const isBuffering = ref(true)
+
 const isVideo = (item) => {
   if (!item) return false
   if (item.type === 'video') return true
@@ -53,6 +70,14 @@ const isVideo = (item) => {
     return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(item.url)
   }
   return false
+}
+
+const handleClose = () => {
+  if (videoEl.value) {
+    videoEl.value.pause()
+    videoEl.value.src = '' // 释放资源
+  }
+  emit('close')
 }
 </script>
 
@@ -67,20 +92,21 @@ const isVideo = (item) => {
   background:
     radial-gradient(ellipse at center, rgba(255, 240, 220, 0.06), rgba(0, 0, 0, 0) 55%),
     rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  cursor: zoom-out !important; /* 鼠标变成缩小放大镜 */
+  cursor: zoom-out !important;
 }
 
 .lightbox-close {
   position: absolute;
   top: 30px;
   right: 40px;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,14 +114,15 @@ const isVideo = (item) => {
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
   color: white;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
   cursor: pointer !important;
   transition: all 0.35s ease;
   z-index: 10;
 }
+
 .lightbox-close:hover {
-  transform: rotate(90deg);
+  transform: rotate(90deg) scale(1.1);
   background: #fff;
   color: #333;
   border-color: #fff;
@@ -106,10 +133,9 @@ const isVideo = (item) => {
   background: white;
   width: auto; 
   max-width: 90vw; 
-  /* 上左右留窄边，底部留宽边写字 */
   padding: 15px 15px 25px 15px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
-  border-radius: 2px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  border-radius: 4px;
   cursor: default; 
 }
 
@@ -121,17 +147,46 @@ const isVideo = (item) => {
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 2px;
 }
 
-/* 兼容图片与视频共用尺寸与质感滤镜 */
 .real-image-large { 
   display: block;
   max-width: 85vw; 
-  max-height: 75vh; /* 留出底部文字和相框边距空间，防止超出屏幕 */
+  max-height: 72vh;
   object-fit: contain; 
-  /* 偏黄复古滤镜 */
   filter: contrast(1.05) sepia(0.12); 
   outline: none;
+  background: #000;
+}
+
+/* ==================== 缓冲加载动画 ==================== */
+.buffering-spinner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 12px 18px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.spinner-icon {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ==================== 手写标题 ==================== */
@@ -143,7 +198,7 @@ const isVideo = (item) => {
   color: #333; 
 }
 
-/* ==================== 老照片特效：灰尘与划痕 ==================== */
+/* ==================== 老照片特效 ==================== */
 .dust { 
   position: absolute; 
   width: 100%; 
@@ -155,7 +210,7 @@ const isVideo = (item) => {
   background-position: 0 0, 25px 25px; 
   opacity: 0.05; 
   z-index: 3; 
-  pointer-events: none; /* 保证能穿透点击视频播放器控制条 */
+  pointer-events: none;
 }
 
 .scratches { 
@@ -172,7 +227,7 @@ const isVideo = (item) => {
   pointer-events: none; 
 }
 
-/* ==================== 弹窗缩放动画 ==================== */
+/* ==================== 缩放进场动画 ==================== */
 .zoom-enter-active {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -182,6 +237,6 @@ const isVideo = (item) => {
 .zoom-enter-from,
 .zoom-leave-to {
   opacity: 0;
-  transform: scale(0.9);
+  transform: scale(0.88);
 }
 </style>
