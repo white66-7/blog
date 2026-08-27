@@ -37,21 +37,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const collection = db.collection('article_views')
 
     // ==================== POST：详情页阅读量 +1 ====================
-    if (req.method === 'POST') {
-      const rawId = (req.query.id || req.body?.id) as string
-      if (!rawId) return res.status(400).json({ error: 'Missing id' })
+  if (req.method === 'POST') {
+    const rawId = (req.query.id || req.body?.id) as string
+    if (!rawId) return res.status(400).json({ error: 'Missing id' })
 
-      const articleId = !isNaN(Number(rawId)) ? Number(rawId) : rawId
-      const result = await collection.findOneAndUpdate(
-        { $or: [{ articleId: articleId }, { articleId: String(articleId) }] },
-        {
-          $inc: { views: 1 },
-          $setOnInsert: { articleId: articleId }
-        },
-        { upsert: true, returnDocument: 'after' }
-      )
-      return res.status(200).json({ id: articleId, views: result?.views ?? 1 })
-    }
+    const articleId = !isNaN(Number(rawId)) ? Number(rawId) : rawId
+    const rawResult = await collection.findOneAndUpdate(
+      { $or: [{ articleId: articleId }, { articleId: String(articleId) }] },
+      {
+        $inc: { views: 1 },
+        $setOnInsert: { articleId: articleId }
+      },
+      { upsert: true, returnDocument: 'after' }
+    )
+
+    // 💡 兼容 MongoDB Driver v4/v5 (包含 .value) 与 v6+ (直接返回文档)
+    const result: any = (rawResult && typeof rawResult === 'object' && 'value' in rawResult) 
+      ? (rawResult as any).value 
+      : rawResult
+
+    return res.status(200).json({ id: articleId, views: result?.views ?? 1 })
+  }
 
     // ==================== GET：查询（单条 / 批量） ====================
     if (req.method === 'GET') {

@@ -25,7 +25,6 @@ import 'animate.css'
 const router = useRouter()
 const scrollRef = ref<HTMLElement | null>(null)
 const articlesContainerRef = ref<HTMLElement | null>(null)
-// 锚点：获取文章列表容器的 DOM 引用，用于精准定位
 const contentTopRef = ref<HTMLElement | null>(null)
 const searchKeyword = ref('')
 
@@ -34,11 +33,8 @@ const imageLoaded = ref<Record<number, boolean>>({})
 // ===== 分页逻辑 =====
 const currentPage = ref(globalSavedPage)
 const pageSize = ref(6)
-
-// 判断是否要播放搜索框进入动画
 const playSearchAnimation = ref(!globalSearchAnimated)
 
-// 预加载当前页文章封面：命中会话缓存的直接亮图，未命中的后台预载
 const preloadCovers = (articles: { id: number; cover?: string }[]) => {
   const withCover = articles.filter(a => a.cover)
   withCover.forEach(a => {
@@ -53,7 +49,6 @@ watch(currentPage, (newPage) => {
   globalSavedPage = newPage
 })
 
-// 核心优化：取消平滑滚动，瞬间跳到文章列表顶部
 const scrollToArticles = async () => {
   await nextTick()
   if (scrollRef.value && contentTopRef.value) {
@@ -62,7 +57,6 @@ const scrollToArticles = async () => {
   }
 }
 
-// 搜索触发
 watch(searchKeyword, () => {
   currentPage.value = 1
   scrollToArticles()
@@ -98,12 +92,10 @@ const paginatedArticles = computed(() => {
   return filteredArticles.value.slice(start, start + pageSize.value)
 })
 
-// 列表变化时预载当前页封面
 watch(paginatedArticles, () => preloadCovers(paginatedArticles.value), { immediate: true })
 
 const totalPages = computed(() => Math.ceil(filteredArticles.value.length / pageSize.value) || 1)
 
-// 分页触发
 const goToPage = (page: number) => {
   currentPage.value = page
   scrollToArticles()
@@ -120,11 +112,16 @@ const nextPage = () => {
     scrollToArticles()
   }
 }
+
+// 💡 优化 1：点击进入详情页时，前端立即乐观 +1，提供极致流畅体验
 const goToArticle = (id: number) => {
+  if (typeof articleViews.value[id] === 'number') {
+    articleViews.value[id]! += 1
+  }
   router.push(`/article/${id}`)
 }
 
-// ========= 滚动触发的弹跳动画逻辑 =========
+// ========= 滚动动画 =========
 const animatedIds = ref(new Set<number>())
 let observer: IntersectionObserver | null = null
 
@@ -157,7 +154,7 @@ const initCardsObserver = async () => {
 
 watch(paginatedArticles, initCardsObserver, { immediate: true })
 
-// ==================== 浏览量加载与缓存体系 ====================
+// ==================== 浏览量加载体系 ====================
 const getPreloadedViews = (): Record<number, number> => {
   try {
     const raw = sessionStorage.getItem('preloaded_views')
@@ -167,25 +164,22 @@ const getPreloadedViews = (): Record<number, number> => {
   }
 }
 
-// 记录浏览量：如果对应 ID 的值为 undefined，代表尚未加载完成，展示骨架动效
 const articleViews = ref<Record<number, number | undefined>>(getPreloadedViews())
 
+// 💡 优化 2：带时间戳请求，彻底防止浏览器缓存 GET 请求
 const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) => {
   if (!articles || articles.length === 0) return
 
-  // 找出需要查询的文章 ID
   const ids = articles.map(a => a.id).join(',')
   try {
-    const res = await axios.get(`/api/views?ids=${ids}`)
+    const res = await axios.get(`/api/views?ids=${ids}&_t=${Date.now()}`)
     const remoteViews = res.data.views || {}
 
-    // 平滑写入，触发渐显
     articles.forEach(a => {
       articleViews.value[a.id] = remoteViews[a.id] ?? remoteViews[String(a.id)] ?? 0
     })
   } catch (err) {
     console.warn('[Views] 获取阅读量失败:', err)
-    // 降级为 0
     articles.forEach(a => {
       if (articleViews.value[a.id] === undefined) {
         articleViews.value[a.id] = 0
@@ -194,20 +188,16 @@ const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) =
   }
 }
 
-// 翻页时自动拉取新页的浏览量
 watch(paginatedArticles, (newArticles) => {
   fetchViewsForArticles(newArticles)
 }, { immediate: false })
 
-// 路由生命周期
+// 💡 优化 3：从详情页返回时，强制触发静默更新，保证数据始终最新
 onActivated(async () => {
   console.log('✅ MainArticle 从缓存恢复')
   await initCardsObserver()
-  // 仅在尚未获取过时再拉取一次
-  const missing = paginatedArticles.value.some(a => articleViews.value[a.id] === undefined)
-  if (missing) {
-    await fetchViewsForArticles(paginatedArticles.value)
-  }
+  // 无论之前是否有数据，均重新静默拉取最新的阅读量
+  fetchViewsForArticles(paginatedArticles.value)
 })
 
 onDeactivated(() => {
@@ -232,11 +222,9 @@ onMounted(async () => {
     scrollRef.value.scrollTop = globalSavedScroll
   }
 
-  // 首屏若有未预载到的文章，发起补齐查询
   fetchViewsForArticles(paginatedArticles.value)
 })
 </script>
-
 <template>
   <div class="app-page-wrapper">
     <Navbar :transparent="false" />

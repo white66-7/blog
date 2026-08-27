@@ -433,8 +433,19 @@ onMounted(() => {
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
 
-  // ✅ 发送 POST 异步记录，失败自动忽略
-  axios.post(`/api/views?id=${id}`).catch(() => { })
+  // 发送 POST 并在成功后更新本地 sessionStorage 缓存
+  axios.post(`/api/views?id=${id}`)
+    .then(res => {
+      const newViews = res.data?.views
+      if (typeof newViews === 'number') {
+        try {
+          const stored = JSON.parse(sessionStorage.getItem('preloaded_views') || '{}')
+          stored[id] = newViews
+          sessionStorage.setItem('preloaded_views', JSON.stringify(stored))
+        } catch { }
+      }
+    })
+    .catch(() => { })
 
   window.addEventListener('scroll', handleScroll)
   cleanupScroll = () => { window.removeEventListener('scroll', handleScroll) }
@@ -442,13 +453,6 @@ onMounted(() => {
   if (savedHeight > 0) {
     requestAnimationFrame(() => window.scrollTo(0, savedHeight))
   }
-})
-onUnmounted(() => {
-  cleanupScroll?.()
-  document.removeEventListener('click', closeSidebarOutside)
-  if (hintTimeoutId) clearTimeout(hintTimeoutId)
-  if (stayTimeoutId) clearTimeout(stayTimeoutId)
-  cancelAnimationFrame(animationFrameId)
 })
 
 const previewVisible = ref(false)
