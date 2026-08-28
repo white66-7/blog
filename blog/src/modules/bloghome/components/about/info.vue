@@ -76,12 +76,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 const cardRef = ref(null)
+let tl = null
+let fallbackTimer = null
 
 onMounted(() => {
   // SVG 线条初始化
@@ -92,7 +94,7 @@ onMounted(() => {
   })
 
   // 绑定 ScrollTrigger：只要滚动到技术栈区域立刻执行入场动画
-  const tl = gsap.timeline({
+  tl = gsap.timeline({
     scrollTrigger: {
       trigger: cardRef.value,
       start: 'top 85%', // 提前触发，确保用户滑下来时已经完整展开
@@ -153,6 +155,27 @@ onMounted(() => {
     yoyo: true,
     ease: 'sine.inOut',
   })
+
+  // ⚠️ 兜底：从首页（keep-alive 缓存的 Swiper 页面）切换进入本路由时，本组件会在
+  // 首页 DOM 尚未被移除的过渡期内挂载，ScrollTrigger 按"含首页"的错误布局计算 start
+  // 位置，首页移除后又不刷新，导致 start 落在永远滚不到的地方、入场动画永不触发，
+  // 卡片停留在 fromTo 的 opacity:0 初始态（即"永远加载不出来"）。
+  // 这里在挂载 4 秒后若动画仍未播放则强制播放一次，保证卡片一定能显示。
+  fallbackTimer = setTimeout(() => {
+    if (tl && tl.progress() === 0) {
+      tl.play()
+    }
+  }, 4000)
+})
+
+onUnmounted(() => {
+  if (fallbackTimer) clearTimeout(fallbackTimer)
+  // 清理 ScrollTrigger 与 timeline，避免路由反复进出时实例泄漏、互相干扰
+  if (tl) {
+    tl.scrollTrigger?.kill()
+    tl.kill()
+    tl = null
+  }
 })
 </script>
 
