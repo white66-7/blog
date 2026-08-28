@@ -47,10 +47,14 @@ const onSplashFinish = () => {
 // 按 chunk 维度记录：用路由名 name，无 name 的路由（如 /player 子页）归到首个匹配路由 path
 const visitedRoutes = new Set<string>()
 let firstNavigation = true
+// 当前加载屏正在等待的导航目标，用于 onError 精确匹配——快速连点时旧导航会被取消，
+// 只有"出错的导航正是当前加载屏在等的那次"才让加载屏退出，避免误退
+let splashTargetPath: string | null = null
 router.beforeEach((to, from) => {
   if (firstNavigation || to.fullPath === from.fullPath) return
   const key = String(to.name ?? to.matched[0]?.path)
   if (visitedRoutes.has(key)) return
+  splashTargetPath = to.fullPath
   splashMode.value = 'navigating'
   navCompleted.value = false
   showGlobalSplash.value = true
@@ -59,6 +63,19 @@ router.afterEach((to) => {
   visitedRoutes.add(String(to.name ?? to.matched[0]?.path))
   navCompleted.value = true
   firstNavigation = false
+  splashTargetPath = null
+})
+
+// 路由导航失败（懒加载 chunk 加载失败 / 组件抛错等）时：
+// 立即让 navigating 加载屏退出（begin.vue 通过 watch navigated 感知），
+// 替代之前 begin.vue 里"8 秒定时退出"——那个机制在慢网络下会提前退出加载屏，
+// 造成"导航还没完成就退回原界面"的错觉。同时打印明确错误便于排查。
+router.onError((error, to) => {
+  if (splashTargetPath === to.fullPath) {
+    console.warn('[路由导航失败]', error)
+    navCompleted.value = true
+    splashTargetPath = null
+  }
 })
 
 const audioRef = ref<HTMLAudioElement | null>(null)

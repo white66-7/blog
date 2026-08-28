@@ -84,7 +84,8 @@ const runInitialSplash = () => {
   const startTime = Date.now()
 
   // 1. 关键路径：只等待路由就绪 + 核心 2 张大图
-  const routerPromise = router.isReady()
+  //    router.isReady() 在首次导航失败时会 reject，加 catch 防止把加载屏永久卡住
+  const routerPromise = router.isReady().catch(() => {})
   const criticalImages = [MYimage, bgImage]
   const imagePromise = Promise.all(
     criticalImages.map(url => new Promise((resolve) => {
@@ -92,8 +93,13 @@ const runInitialSplash = () => {
       img.src = url
       img.onload = resolve
       img.onerror = resolve
+      // 单张图片最多等 5 秒，避免网络异常时图片请求永远 pending 导致加载屏卡死
+      setTimeout(resolve, 5000)
     }))
   )
+  // 关键资源（路由 chunk + 2 张核心图）整体最多等 8 秒：
+  // 慢网络下加载屏最迟 8 秒后退出，让页面内容渐进式渲染，而不是一直停在加载屏
+  const MAX_INITIAL_WAIT_MS = 8000
 
   // 2. 非关键路径预热（仅首次执行，导航切换不重复请求）
   const firstPageIds = articles.slice(0, 6).map(a => a.id).join(',')
@@ -114,10 +120,11 @@ const runInitialSplash = () => {
     })
   }, 1000)
 
-  // 3. 只等关键资源 + 保证开场动画自然播放
-  Promise.all([
-    imagePromise,
-    routerPromise
+  // 3. 只等关键资源 + 保证开场动画自然播放；
+  //    用 Promise.race 兜底，即使关键资源超时也保证加载屏能退出
+  Promise.race([
+    Promise.all([imagePromise, routerPromise]),
+    sleep(MAX_INITIAL_WAIT_MS)
   ]).then(async () => {
     const elapsed = Date.now() - startTime
     const delay = Math.max(MIN_DISPLAY_TIME - elapsed, 0)
@@ -126,7 +133,11 @@ const runInitialSplash = () => {
   })
 }
 
-// 💡 路由切换：等本次导航完成（navigated=true），至少展示 600ms 再退场
+// 💡 路由切换：加载屏的退出时机完全绑定"本次导航是否完成"
+// - 导航成功：App 的 afterEach 置 navigated=true → 至少展示 600ms 后退出
+// - 导航失败：App 的 router.onError 也会置 navigated=true → 立即退出并打印错误
+// 慢网络下懒加载 chunk 加载几秒到十几秒都正常，加载屏会一直展示到导航完成，
+// 不再有"8 秒定时提前退出"——那个机制会让加载屏在导航完成前消失，造成退回原界面的错觉。
 const runNavigatingSplash = () => {
   const startTime = Date.now()
 
@@ -137,8 +148,9 @@ const runNavigatingSplash = () => {
     setTimeout(exitSplash, delay)
   }, { immediate: true })
 
-  // 兜底：导航失败/被取消（如重复点击当前页）时也要能退出，避免卡屏
-  setTimeout(exitSplash, 8000)
+  // 极端兜底（30 秒）：仅防导航"永久挂起"（如网络黑洞导致请求既不成功也不失败），
+  // 正常慢加载不会触发；真正的导航失败由 App 的 router.onError 更快地处理退出。
+  setTimeout(exitSplash, 30000)
 }
 
 const exitSplash = () => {
