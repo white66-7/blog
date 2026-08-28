@@ -204,6 +204,17 @@ export const articles: Article[] = [
     cover: '/messages/16/法环.gif',
     content:md16,
   },
+  {
+    id: 17,
+    title: '如何选择数据',
+    type: '后端',
+    date: '2026-08-28',
+    readTime: '10 minutes',
+    excerpt: '',
+    tags: ['', ''],
+    cover: '/messages/16/法环.gif',
+    content:md16,
+  },
   // {
   //   id: 14,
   //   title: '论我的学生时代',

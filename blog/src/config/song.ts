@@ -27,10 +27,37 @@ export const songs: PresetSong[] = [
     src: '/audio/No Bad Grades.mp3', 
     cover: '/song_covers/no_bad_grades.webp', 
     isPreset: true,
-    describe: '小孩般的声调,记账式的歌词'
+    describe: '无忧无虑,不用证明自己'
   },
   {
     id: 'preset_3',
+    name: 'そばにいるね',
+    artist: '青山テルマ', 
+    src: '/audio/そばにいるね.mp3', 
+    cover: '/song_covers/そばにいるね.webp', 
+    isPreset: true,
+    describe: '编曲真好听'
+  },
+  {
+    id: 'preset_4',
+    name: '我走以后',
+    artist: '水仙LONE', 
+    src: '/audio/我走以后.mp3', 
+    cover: '/song_covers/我走以后.webp',
+    isPreset: true,
+    describe: '何谓"宿命"'
+  },
+    {
+    id: 'preset_5',
+    name: 'Love Me',
+    artist: 'JMSN', 
+    src: '/audio/Love Me.mp3', 
+    cover: '/song_covers/Love Me.webp',
+    isPreset: true,
+    describe: '审判之爱'
+  },
+  {
+    id: 'preset_6',
     name: 'Ahead of Us',
     artist: '小瀬村晶', 
     src: '/audio/Ahead of Us.mp3', 
@@ -39,7 +66,7 @@ export const songs: PresetSong[] = [
     describe: '听起来像是朋友在分别前的最后一次话别,盛大又无奈'
   },
   {
-    id: 'preset_4',
+    id: 'preset_7',
     name: 'regret',
     artist: 'chypy', 
     src: '/audio/chypy - regret (我在未来等你).mp3', 
@@ -48,7 +75,7 @@ export const songs: PresetSong[] = [
     describe: '未来,尽在掌握'
   },
   {
-    id: 'preset_5',
+    id: 'preset_8',
     name: '自言自语',
     artist: '一路向北', 
     src: '/audio/自言自语.mp3', 
