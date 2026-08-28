@@ -26,6 +26,7 @@ import md13 from './md/13.md?raw'
 import md14 from './md/14.md?raw'
 import md15 from './md/15.md?raw'
 import md16 from './md/16.md?raw'
+import md17 from './md/17.md?raw'
 
 export const articles: Article[] = [
   {
@@ -195,7 +196,7 @@ export const articles: Article[] = [
   },
   {
     id: 16,
-    title: '用python实现简单的桌面工具开发',
+    title: '用python简单实现桌面工具开发',
     type: '后端',
     date: '2026-08-20',
     readTime: '10 minutes',
@@ -206,14 +207,14 @@ export const articles: Article[] = [
   },
   {
     id: 17,
-    title: '如何选择数据',
-    type: '后端',
-    date: '2026-08-28',
+    title: '性价比指南: 那些不得不薅的free羊毛',
+    type: '杂谈',
+    date: '2026-08-29',
     readTime: '10 minutes',
-    excerpt: '',
-    tags: ['', ''],
-    cover: '/messages/16/法环.gif',
-    content:md16,
+    excerpt: '就自己的使用体验而言,锐评国内外云免费套餐',
+    tags: ['Serverless', '免费套餐'],
+    cover: '/messages/17/1.webp',
+    content:md17,
   },
   // {
   //   id: 14,
