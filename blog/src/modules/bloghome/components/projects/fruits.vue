@@ -7,26 +7,39 @@
       </div>
       <div class="projects-count">{{ projects.length }} Projects</div>
     </div>
+    
     <div id="project-list" @mousemove="movePreview">
+      <!-- 优化 1：给整行绑定点击跳转，无论点击文字、描述还是空白处都能跳转 -->
       <div
         v-for="(project, index) in projects"
         :key="project.id"
         class="project-item"
         :class="hasAnimated ? '' : 'animate__animated animate__fadeInUp animate__fast'"
         :style="hasAnimated ? {} : { animationDelay: `${index * 0.15}s` }"
+        @click="openLink(project.link)"
         @mouseenter="showPreview(project)"
         @mouseleave="hidePreview"
       >
         <div class="project-num">{{ String(project.id).padStart(2, '0') }}</div>
+        
         <div class="project-info">
           <div class="project-name">{{ project.title }}</div>
           <div class="project-desc">{{ project.description }}</div>
         </div>
+
         <div class="project-tech">
           <span v-for="tag in project.tags" :key="tag" class="tech-badge">{{ tag }}</span>
         </div>
-        <a :href="project.link" target="_blank" class="project-link">
-          View
+
+        <!-- 优化 2：阻止 a 标签冒泡，防止与父级 click 重复触发 -->
+        <a
+          :href="project.link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="project-link"
+          @click.stop
+        >
+          <span>View</span>
           <svg width="14" height="14" viewBox="0 0 14 14">
             <path d="M1 13L13 1M13 1H4M13 1V10" stroke="currentColor" stroke-width="1.5" />
           </svg>
@@ -34,7 +47,7 @@
       </div>
     </div>
 
-    <!-- 悬浮预览容器：拆分为定位层与动画层，零延迟跟手 -->
+    <!-- 悬浮预览容器 -->
     <div
       class="project-preview-wrapper"
       :style="{
@@ -107,7 +120,14 @@ const projects = computed(() => {
     }))
 })
 
-// ========== 1. 图片预加载：解决弱网海报显示延迟/错位 ==========
+// 跳转方法：确保移动端/PC端任意区域点击都能正常新标签页打开
+const openLink = (url) => {
+  if (url) {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+}
+
+// 1. 图片预加载
 onMounted(() => {
   rawProjects.value.forEach((item) => {
     if (item.poster) {
@@ -117,12 +137,11 @@ onMounted(() => {
   })
 })
 
-// ========== 2. 悬浮与坐标跟踪 ==========
+// 2. 悬浮与坐标跟踪
 const currentPoster = ref('')
 const isPreviewActive = ref(false)
 const mousePos = ref({ x: 0, y: 0 })
 
-// 动画记忆
 const ANIM_KEY = 'projects-animated'
 const hasAnimated = ref(!!sessionStorage.getItem(ANIM_KEY))
 if (!hasAnimated.value) {
@@ -138,7 +157,6 @@ const movePreview = (e) => {
   let targetX = e.clientX + offsetX
   let targetY = e.clientY + offsetY
 
-  // 边界防溢出检测：防止窗口靠近屏幕右侧或下侧时图片被切断
   if (targetX + previewWidth > window.innerWidth) {
     targetX = e.clientX - previewWidth - 15
   }
@@ -225,6 +243,7 @@ const hidePreview = () => {
   margin: 0 -2rem;
   border-bottom: 1px solid #D8D2C8;
   position: relative;
+  cursor: pointer; /* 提示整行可点击 */
   transition: background .3s ease;
 }
 
@@ -290,8 +309,7 @@ const hidePreview = () => {
   color: #1A1814;
 }
 
-/* ========== 预览框样式优化 ========== */
-/* 容器只负责定位：开启 GPU 硬件加速，绝对无延时跟随 */
+/* 预览框样式 */
 .project-preview-wrapper {
   position: fixed;
   top: 0;
@@ -301,7 +319,6 @@ const hidePreview = () => {
   will-change: transform;
 }
 
-/* 图片内部负责淡入淡出与缩放，与位移解耦 */
 .project-preview-img {
   width: 260px;
   height: 160px;
@@ -319,32 +336,62 @@ const hidePreview = () => {
   transform: scale(1);
 }
 
+/* ====== 移动端适配：保证链接可见、可点且布局紧凑 ====== */
 @media (max-width: 768px) {
   #projects {
-    padding: 5rem 1.5rem;
+    padding: 3rem 1.25rem 0;
   }
 
   .projects-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 15px;
+    margin-bottom: 2rem;
+  }
+
+  .projects-title {
+    font-size: clamp(36px, 10vw, 48px);
   }
 
   .project-item {
-    grid-template-columns: 40px 1fr;
+    grid-template-columns: 32px 1fr auto; /* 移动端保留序号、内容和右侧跳转箭头 */
+    gap: 0.8rem;
+    padding: 1.2rem 0;
+    margin: 0; /* 消除导致横向滚动的负 margin */
   }
 
-  .project-tech,
+  .project-name {
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+
+  .project-desc {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .project-tech {
+    display: none; /* 移动端隐藏技术标签避免拥挤 */
+  }
+
+  /* 移动端保留右侧小箭头，隐藏 View 文字 */
   .project-link {
-    display: none;
+    display: flex !important;
+    align-items: center;
+    padding: 8px;
+  }
+
+  .project-link span {
+    display: none; /* 移动端只留箭头，节省横向空间 */
+  }
+
+  .project-link svg {
+    width: 16px;
+    height: 16px;
   }
 
   .project-preview-wrapper {
     display: none;
-  }
-
-  .project-name {
-    font-size: 24px;
   }
 }
 </style>

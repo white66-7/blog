@@ -76,14 +76,14 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, nextTick, ref } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 const cardRef = ref(null)
 let tl = null
-let fallbackTimer = null
+let refreshTimer = null
 
 onMounted(() => {
   // SVG 线条初始化
@@ -93,34 +93,34 @@ onMounted(() => {
     gsap.set(path, { strokeDasharray: length, strokeDashoffset: length })
   })
 
-  // 绑定 ScrollTrigger：只要滚动到技术栈区域立刻执行入场动画
+  // 创建动画时间轴
   tl = gsap.timeline({
     scrollTrigger: {
       trigger: cardRef.value,
-      start: 'top 85%', // 提前触发，确保用户滑下来时已经完整展开
+      start: 'top 90%', // 进入视口 90% 时触发
       toggleActions: 'play none none none'
     }
   })
 
   tl.fromTo('.gsap-scale', 
       { scale: 0.3, opacity: 0 }, 
-      { scale: 1, opacity: 1, duration: 1, ease: 'back.out(1.2)' }
+      { scale: 1, opacity: 1, duration: 0.8, ease: 'back.out(1.2)' }
     )
     .fromTo('.gsap-pop', 
       { scale: 0.3, rotation: -20, opacity: 0 }, 
-      { scale: 1, rotation: 0, opacity: 1, duration: 0.7, ease: 'back.out(2)' }, 
-      '-=0.6'
+      { scale: 1, rotation: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)' }, 
+      '-=0.5'
     )
     .to('.line-path', {
       strokeDashoffset: 0,
-      duration: 1.2,
+      duration: 0.9,
       ease: 'power2.inOut',
-      stagger: { amount: 0.4, from: 'center' }
-    }, '-=0.4')
+      stagger: { amount: 0.3, from: 'center' }
+    }, '-=0.3')
     .fromTo('.icon-node', 
       { scale: 0, opacity: 0 }, 
-      { scale: 1, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(1.5)', clearProps: 'all' }, 
-      '-=0.8'
+      { scale: 1, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'back.out(1.5)', clearProps: 'all' }, 
+      '-=0.6'
     )
 
   // 持续悬浮动画
@@ -156,21 +156,29 @@ onMounted(() => {
     ease: 'sine.inOut',
   })
 
-  // ⚠️ 兜底：从首页（keep-alive 缓存的 Swiper 页面）切换进入本路由时，本组件会在
-  // 首页 DOM 尚未被移除的过渡期内挂载，ScrollTrigger 按"含首页"的错误布局计算 start
-  // 位置，首页移除后又不刷新，导致 start 落在永远滚不到的地方、入场动画永不触发，
-  // 卡片停留在 fromTo 的 opacity:0 初始态（即"永远加载不出来"）。
-  // 这里在挂载 4 秒后若动画仍未播放则强制播放一次，保证卡片一定能显示。
-  fallbackTimer = setTimeout(() => {
-    if (tl && tl.progress() === 0) {
-      tl.play()
+  // 核心修复：
+  // 1. 下一帧刷新一次
+  nextTick(() => {
+    ScrollTrigger.refresh()
+  })
+
+  // 2. 等待路由过渡完成（page 过渡是 0.28s，这里给 300ms）后精确重新计算位置
+  refreshTimer = setTimeout(() => {
+    ScrollTrigger.refresh()
+    
+    // 如果已经在可视区内但由于特殊原因仍未触发，立即开始播放
+    if (cardRef.value) {
+      const rect = cardRef.value.getBoundingClientRect()
+      const inView = rect.top < window.innerHeight * 0.95 && rect.bottom > 0
+      if (inView && tl && tl.progress() === 0) {
+        tl.play()
+      }
     }
-  }, 4000)
+  }, 320)
 })
 
 onUnmounted(() => {
-  if (fallbackTimer) clearTimeout(fallbackTimer)
-  // 清理 ScrollTrigger 与 timeline，避免路由反复进出时实例泄漏、互相干扰
+  if (refreshTimer) clearTimeout(refreshTimer)
   if (tl) {
     tl.scrollTrigger?.kill()
     tl.kill()

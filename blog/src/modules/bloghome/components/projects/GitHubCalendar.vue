@@ -227,23 +227,64 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  margin-top: 150px;
 }
 
+/* 贡献墙容器：在小屏幕允许左右平滑滑动，避免撑破页面 */
+.wall-wrapper {
+  width: 100%;
+  overflow: hidden; 
+}
+
+.contrib-container {
+  position: relative;
+  min-height: 130px;
+  width: 100%;
+  overflow-x: auto; /* 允许横向滚动查看完整 30 周 */
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px; /* 留出滚动条空间 */
+  display: flex;
+  justify-content: flex-start; /* 移动端靠左对齐方便滑动 */
+}
+
+/* 自定义滚动条更轻量 */
+.contrib-container::-webkit-scrollbar {
+  height: 4px;
+}
+.contrib-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 71, 255, 0.2);
+  border-radius: 2px;
+}
+
+/* ====== 移动端响应式覆盖 ====== */
 @media (max-width: 768px) {
   .github-section {
     flex-direction: column;
-    padding: 3rem 1.5rem;
-    gap: 2rem;
+    padding: 3rem 1.25rem;
+    gap: 2.5rem;
   }
 
   .intro-side,
   .content-side {
     flex: none;
     width: 100%;
+    margin-top: 0 !important; /* 彻底清除移动端顶部空白 */
+  }
+
+  .stat-box {
+    padding: 1.2rem 1.2rem;
+  }
+
+  .stat-num,
+  .stat-value {
+    font-size: 2rem;
   }
 }
 
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr; /* 超小屏幕统计卡片上下单列显示 */
+  }
+}
 .section-label {
   font-family: 'Inter', sans-serif;
   font-size: 12px;
@@ -315,10 +356,7 @@ onUnmounted(() => {
   margin-top: 0.5rem;
 }
 
-/* ===== 贡献墙样式 ===== */
-.wall-wrapper {
-  width: 100%;
-}
+
 
 .wall-title {
   margin-bottom: 20px;
@@ -328,13 +366,7 @@ onUnmounted(() => {
   display: none;
 }
 
-.contrib-container {
-  position: relative;
-  min-height: 130px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+
 
 .contrib-grid {
   display: flex;
@@ -549,4 +581,5 @@ onUnmounted(() => {
     opacity: 1;
   }
 }
+
 </style>

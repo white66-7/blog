@@ -244,16 +244,16 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* ========== 原有样式（无任何改动） ========== */
 .intro-box {
   font-family: 'Inter', sans-serif;
   color: #1A1814;
-  height: 500px;
+  height: 480px;
   display: flex;
   flex-direction: column;
-  padding-top: 20px;
+  padding-top: 10px;
   background-color: #FAF7F2;
 }
+
 
 .section-label {
   font-size: 12px;
@@ -476,6 +476,62 @@ onBeforeUnmount(() => {
   }
   50% {
     opacity: 0.8;
+  }
+}
+
+/* ====== 移动端适配 ====== */
+@media (max-width: 768px) {
+  .intro-box {
+    height: 400px; /* 移动端适当收缩高度 */
+    padding-top: 0;
+  }
+
+  .section-label {
+    margin: 0 0 0.8rem 0;
+  }
+
+  .timeline-header {
+    padding: 0 0 1rem 0;
+  }
+
+  .journey-title {
+    font-size: 1.5rem;
+  }
+
+  .timeline-scroll-area {
+    padding: 0 0.5rem 1rem 0;
+  }
+
+  .timeline-line {
+    left: 36px;
+  }
+
+  .year-title {
+    font-size: 1.2rem;
+    padding: 0.6rem 0 0.8rem 55px;
+  }
+
+  .month-indicator {
+    width: 55px;
+  }
+
+  .month-label {
+    font-size: 0.72rem;
+    width: 28px;
+  }
+
+  .event-dot {
+    left: 33px;
+  }
+
+  .event-item {
+    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .repo-tag {
+    font-size: 0.6rem;
+    padding: 0.2em 0.5em;
   }
 }
 
