@@ -33,137 +33,80 @@ import AlbumShelf from './AlbumShelf.vue'
 import BookScene from './BookScene.vue'
 import PhotoLightbox from './PhotoLightbox.vue'
 
-import cover1 from '@/assets/cover/help.webp'
-import cover2 from '@/assets/cover/videos.webp'
-import cover3 from '@/assets/cover/view.webp'
-import cover4 from '@/assets/cover/friend.webp'
-
-
-import photo1 from '@/assets/album/动漫/超燃.webp'
-import photo2 from '@/assets/album/动漫/沉思.webp'
-import photo3 from '@/assets/album/动漫/黑色五叶草.webp'
-import photo4 from '@/assets/album/动漫/进击的巨人.webp'
-import photo5 from '@/assets/album/动漫/来自深渊.webp'
-import photo6 from '@/assets/album/动漫/圆梦.webp'
-import photo7 from '@/assets/album/动漫/佐助与鼬.webp'
-import photo8 from '@/assets/album/动漫/eye.webp'
-import photo9 from '@/assets/album/动漫/video.webp'
-import photo10 from '@/assets/album/动漫/pair.webp'
-import photo11 from '@/assets/album/动漫/阿玛天纳斯.webp'
-import photo12 from '@/assets/album/动漫/向日葵.webp'
-import photo13 from '@/assets/album/动漫/战败.webp'
-
-import view1 from '@/assets/album/风景/高考结束的小区门口.webp'
-import view2 from '@/assets/album/风景/library.webp'
-import view3 from '@/assets/album/风景/home.webp'
-import view4 from '@/assets/album/风景/十字路口.webp'
-import view5 from '@/assets/album/风景/星空.webp'
-import view6 from '@/assets/album/风景/破晓.webp'
-import view7 from '@/assets/album/风景/经典构图.webp'
-import view8 from '@/assets/album/风景/mountain.webp'
-import view9 from '@/assets/album/风景/真心好看.webp'
-import view10 from '@/assets/album/风景/云.webp'
-import view11 from '@/assets/album/风景/上海.mp4'
-import view12 from '@/assets/album/风景/孤独的树.mp4'
-import view13 from '@/assets/album/风景/彩虹.webp'
-import forview12 from '@/assets/album/风景/孤独的树封面.webp'
-import forview11 from '@/assets/album/风景/上海封面.webp'
-// import view14 from '@/assets/album/风景'
-
-import img1 from '@/assets/album/人物/朋友.webp'
-import img2 from '@/assets/album/人物/研学.webp'
-import img3 from '@/assets/album/人物/dji.webp'
-import img4 from '@/assets/classmates.webp'
-import img5 from '@/assets/album/人物/student.webp'
-import img6 from '@/assets/album/人物/adult.webp'
-import img7 from '@/assets/album/人物/三人成行.mp4'
-import img8 from '@/assets/album/人物/三人成行2.mp4'
-import forimg7 from '@/assets/album/人物/三人成行封面.webp'
-import forimg8 from '@/assets/album/人物/三人成行2封面.webp'
-
-import holiday1 from '@/assets/album/暑假/tree.webp'
-import holiday2 from '@/assets/album/暑假/晚餐.webp'
-import holiday3 from '@/assets/album/暑假/初中吃到现在的羊肉面.webp'
-import holiday4 from '@/assets/album/暑假/failure man.webp'
-import holiday5 from '@/assets/album/暑假/足节虫.webp'
-import holiday6 from '@/assets/album/暑假/蜻蜓.webp'
-import holiday7 from '@/assets/album/暑假/图书馆.webp'
-import holiday8 from '@/assets/album/暑假/篮球.webp'
-// import holiday6 from '@/assets/album/暑假'
-
 // ========== 2. 手动构建相册数据 ==========
 const albumsData = [
   {
     id: 'custom',
     title: '动漫',
-    cover: cover1,
+    cover: '/album/photo_covers/help.webp',
     photos: [
-      { title: '鹿丸', url: photo2 },
-      { title: '这算圆梦吧', url: photo6 },
-      { title: '佐助与鼬', url: photo7 },
-      { title: '黑色五叶草-战斗番', url: photo3 },
-      { title: '进击的巨人', url: photo4 },
-      { title: '燃到起鸡皮疙瘩', url: photo1 },
-      { title: '来自深渊-黄金乡', url: photo5 },
-      { title: 'RE0', url: photo8 },
-      { title: '慢节奏的异世界番', url: photo9 },
-      { title: '相反的你和我', url: photo10 },
-      { title: '中二病也要谈恋爱', url: photo11 },
-      { title: '通往夏天的隧道', url: photo12 },
-      { title: '败了', url: photo13 },
+      { title: '鹿丸', url: '/album/动漫/沉思.webp' },
+      { title: '这算圆梦吧', url: '/album/动漫/圆梦.webp' },
+      { title: '佐助与鼬', url: '/album/动漫/佐助与鼬.webp' },
+      { title: '黑色五叶草-战斗番', url: '/album/动漫/黑色五叶草.webp' },
+      { title: '进击的巨人', url: '/album/动漫/进击的巨人.webp' },
+      { title: '燃到起鸡皮疙瘩', url: '/album/动漫/超燃.webp' },
+      { title: '来自深渊-黄金乡', url: '/album/动漫/来自深渊.webp' },
+      { title: 'RE0', url: '/album/动漫/eye.webp' },
+      { title: '慢节奏的异世界番', url: '/album/动漫/video.webp' },
+      { title: '相反的你和我', url: '/album/动漫/pair.webp' },
+      { title: '中二病也要谈恋爱', url: '/album/动漫/阿玛天纳斯.webp' },
+      { title: '通往夏天的隧道', url: '/album/动漫/向日葵.webp' },
+      { title: '败了', url: '/album/动漫/战败.webp' },
     ]
   },
   {
     id: 'persons',
     title: '人物',
-    cover: cover2,
+    cover: '/album/photo_covers/videos.webp',
     photos: [
-      { title: '研学', url: img2 },
-      { title: '高中同学们', url: img4 },
-      { title: '给朋友拍的照片', url: img1 },
-      { title: '在旧宿舍的最后一晚', url: img3 },
-      { title: '过去', url: img5 },
-      { title: '或许是未来', url: img6 },
-      { title: '三人成行', url: img7,cover: forimg7 },
-      { title: '三人成行 • 附', url: img8,cover: forimg8 },
+      { title: '研学', url: '/album/人物/研学.webp' },
+      { title: '高中同学们', url: '/album/人物/classmates.webp' },
+      { title: '给朋友拍的照片', url: '/album/人物/朋友.webp' },
+      { title: '在旧宿舍的最后一晚', url: '/album/人物/dji.webp' },
+      { title: '过去', url: '/album/人物/student.webp' },
+      { title: '或许是未来', url: '/album/人物/adult.webp' },
+      { title: '三人成行', url: '/album/人物/三人成行.mp4', cover: '/album/人物/三人成行封面.webp' },
+      { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
     ]
   },
   {
     id: 'views',
     title: '风景',
-    cover: cover3,
+    cover: '/album/photo_covers/view.webp',
     photos: [
-      { title: '高考结束的小区门口', url: view1 },
-      { title: '期末周的图书馆', url: view2 },
-      { title: '乡村', url: view3 },
-      { title: '风起云涌', url: view4 },
-      { title: '少见的星空', url: view5 },
-      { title: '清晨的破晓', url: view6 },
-      { title: '这构图蛮舒服', url: view7 },
-      { title: 'NO SEVICE', url: view8 },
-      { title: '这我真心觉得特别好看', url: view9 },
-      { title: '这云神似Deepseek', url: view10 },
-      { title: '不愧是上海', url: view11,cover: forview11 },
-      { title: '孤独的一颗树', url: view12,cover: forview12 },
-      { title: '拍到彩虹了', url: view13 },
+      { title: '高考结束的小区门口', url: '/album/风景/高考结束的小区门口.webp' },
+      { title: '期末周的图书馆', url: '/album/风景/library.webp' },
+      { title: '乡村', url: '/album/风景/home.webp' },
+      { title: '风起云涌', url: '/album/风景/十字路口.webp' },
+      { title: '少见的星空', url: '/album/风景/星空.webp' },
+      { title: '清晨的破晓', url: '/album/风景/破晓.webp' },
+      { title: '这构图蛮舒服', url: '/album/风景/经典构图.webp' },
+      { title: 'NO SEVICE', url: '/album/风景/mountain.webp' },
+      { title: '这我真心觉得特别好看', url: '/album/风景/真心好看.webp' },
+      { title: '这云神似Deepseek', url: '/album/风景/云.webp' },
+      { title: '不愧是上海', url: '/album/风景/上海.mp4', cover: '/album/风景/上海封面.webp' },
+      { title: '孤独的一颗树', url: '/album/风景/孤独的树.mp4', cover: '/album/风景/孤独的树封面.webp' },
+      { title: '拍到彩虹了', url: '/album/风景/彩虹.webp' },
     ]
   },
   {
     id: 'holiday',
     title: '大一暑假',
-    cover: cover4,
+    cover: '/album/photo_covers/friend.webp',
     photos: [
-      { title: '不是说7月这几天要硬抗台风吗', url: holiday1 },
-      { title: '极其奢侈的一顿晚餐', url: holiday2 },
-      { title: '初中吃到现在的羊肉面', url: holiday3 },
-      { title: '暑假和朋友一起去看的电影', url: holiday4 },
-      { title: '细长的足节虫', url: holiday5 },
-      { title: '特写：蜻蜓', url: holiday6 },
-      { title: '上海教堂旁的图书馆', url: holiday7 },
-      { title: '早有耳闻的徐家汇篮球场', url: holiday8 },
+      { title: '不是说7月这几天要硬抗台风吗', url: '/album/暑假/tree.webp' },
+      { title: '极其奢侈的一顿晚餐', url: '/album/暑假/晚餐.webp' },
+      { title: '初中吃到现在的羊肉面', url: '/album/暑假/初中吃到现在的羊肉面.webp' },
+      { title: '暑假和朋友一起去看的电影', url: '/album/暑假/failure man.webp' },
+      { title: '细长的足节虫', url: '/album/暑假/足节虫.webp' },
+      { title: '特写：蜻蜓', url: '/album/暑假/蜻蜓.webp' },
+      { title: '上海教堂旁的图书馆', url: '/album/暑假/图书馆.webp' },
+      { title: '早有耳闻的徐家汇篮球场', url: '/album/暑假/篮球.webp' },
     ]
   }
 ]
+
 const isFirstScreen = ref(false)
 const currentAlbum = ref(null)
 const selectedPhoto = ref(null)

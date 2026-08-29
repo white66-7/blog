@@ -89,9 +89,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
-import characterImg from '@/assets/about/person.webp'
+import characterImg from '/about/person.webp'
 
-import cosmicAudio from '@/assets/about/cosmic_dreams.mp3'
+import cosmicAudio from '/about/cosmic_dreams.mp3'
 
 const canvasRef = ref(null)
 const audioRef = ref(null)

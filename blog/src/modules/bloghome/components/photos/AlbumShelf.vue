@@ -1,40 +1,72 @@
 <template>
   <div class="album-shelf-container">
     <div class="books-grid">
-      <div
-        v-for="(album, index) in albums"
-        :key="album.id"
-        class="book-item"
+      <div 
+        v-for="(album, index) in albums" 
+        :key="album.id" 
+        class="book-item" 
         :class="[
           'book-position-' + index,
-          'animate__animated',       // ← 启动 animate.css 动画
-          'animate__flipInX'       // ← 从下方滑入
-        ]"
-        :style="{ animationDelay: index * 0.2 + 's' }"  
+          'animate__animated',
+          'animate__flipInX'
+        ]" 
+        :style="{ animationDelay: index * 0.2 + 's' }"
       >
         <figure class="book" @click="$emit('select-album', album)">
           <!-- ==================== 封面 ==================== -->
           <ul class="hardcover_front">
-            <!-- 外侧：封面图 -->
+            <!-- 外侧：封面图 + 竖排标题 -->
             <li>
               <img :src="album.cover" alt="" width="100%" height="100%">
-              <!-- 新增：竖排标题 -->
               <div class="vertical-title">
-                <span v-for="(part, i) in splitIntoColumns(album.title, 2)" :key="i" class="title-column">{{ part
-                  }}</span>
+                <span v-for="(part, i) in splitIntoColumns(album.title, 2)" :key="i" class="title-column">
+                  {{ part }}
+                </span>
               </div>
             </li>
-            <!-- 内侧：翻开后的左侧页，骨架屏 -->
+            <!-- 封面内侧：翻开后的左扉页（展示第 1、2 张照片，pageIndex 为 0） -->
             <li>
+              <div class="mini-photos-wrapper">
+                <div 
+                  v-for="(photo, pIdx) in getPagePhotos(album.photos, 0)" 
+                  :key="pIdx" 
+                  class="mini-polaroid"
+                >
+                  <div class="mini-img-box">
+                    <img 
+                      :src="getPhotoSrc(photo)" 
+                      class="mini-img" 
+                      loading="lazy"
+                      @load="$event.target.classList.add('is-loaded')" 
+                      @error="$event.target.style.opacity = '0'" 
+                    />
+                  </div>
+                  <span v-if="photo.title" class="mini-title">{{ photo.title }}</span>
+                </div>
+              </div>
             </li>
           </ul>
 
-          <!-- ==================== 内页（五页全部加骨架屏） ==================== -->
+          <!-- ==================== 内页（第 1~5 页，展示后续照片） ==================== -->
           <ul class="page">
-            <li v-for="n in 5" :key="n">
-              <div class="skeleton-wrapper">
-                <div class="skeleton-block"></div>
-                <div class="skeleton-block"></div>
+            <li v-for="pageIndex in 5" :key="pageIndex">
+              <div class="mini-photos-wrapper">
+                <div 
+                  v-for="(photo, pIdx) in getPagePhotos(album.photos, pageIndex)" 
+                  :key="pIdx" 
+                  class="mini-polaroid"
+                >
+                  <div class="mini-img-box">
+                    <img 
+                      :src="getPhotoSrc(photo)" 
+                      class="mini-img" 
+                      loading="lazy"
+                      @load="$event.target.classList.add('is-loaded')" 
+                      @error="$event.target.style.opacity = '0'" 
+                    />
+                  </div>
+                  <span v-if="photo.title" class="mini-title">{{ photo.title }}</span>
+                </div>
               </div>
             </li>
           </ul>
@@ -63,13 +95,27 @@ defineProps({
 });
 defineEmits(['select-album']);
 
-// 将字符串按每列字符数分割成数组
+// 竖排文本分割
 function splitIntoColumns(str, colSize = 2) {
+  if (!str) return [];
   const result = [];
   for (let i = 0; i < str.length; i += colSize) {
     result.push(str.slice(i, i + colSize));
   }
   return result;
+}
+
+// 获取每一页展示的照片（每页分配 2 张）
+function getPagePhotos(photos = [], pageIndex = 0) {
+  if (!photos) return [];
+  const start = pageIndex * 2;
+  return photos.slice(start, start + 2);
+}
+
+// 获取图片展示路径（视频优先取 cover 封面）
+function getPhotoSrc(photo) {
+  if (!photo) return '';
+  return photo.cover || photo.url || '';
 }
 </script>
 
@@ -121,22 +167,13 @@ function splitIntoColumns(str, colSize = 2) {
   filter: blur(3px);
 }
 
-.book-position-0 {
-  grid-column: 1;
-}
-
-.book-position-1 {
-  grid-column: 2;
-}
-
+.book-position-0 { grid-column: 1; }
+.book-position-1 { grid-column: 2; }
 .book-position-2 {
   grid-column: 1 / -1;
   justify-self: center;
 }
-
-.book-position-3 {
-  grid-column: 1;
-}
+.book-position-3 { grid-column: 1; }
 
 /* ==================== 3D 书本核心样式 ==================== */
 .book {
@@ -160,13 +197,10 @@ ul {
 }
 
 .hardcover_front li:last-child {
-  background: #fffbec;
+  background: #fdfaf2;
 }
 
-.hardcover_back li:first-child {
-  background: #fffbec;
-}
-
+.hardcover_back li:first-child,
 .hardcover_back li:last-child {
   background: #fffbec;
 }
@@ -194,7 +228,7 @@ ul {
   background: #999;
 }
 
-.page>li {
+.page > li {
   background: linear-gradient(to right, #e1ddd8 0%, #fffbf6 100%);
   box-shadow:
     inset 0px -1px 2px rgba(50, 50, 50, 0.1),
@@ -205,31 +239,18 @@ ul {
 .hardcover_front {
   transform: rotateY(-34deg) translateZ(8px);
   z-index: 100;
+  transition: all 0.8s ease, z-index 0.6s;
 }
 
 .hardcover_back {
   transform: rotateY(-15deg) translateZ(-8px);
 }
 
-.page li:nth-child(1) {
-  transform: rotateY(-28deg);
-}
-
-.page li:nth-child(2) {
-  transform: rotateY(-30deg);
-}
-
-.page li:nth-child(3) {
-  transform: rotateY(-32deg);
-}
-
-.page li:nth-child(4) {
-  transform: rotateY(-34deg);
-}
-
-.page li:nth-child(5) {
-  transform: rotateY(-36deg);
-}
+.page li:nth-child(1) { transform: rotateY(-28deg); }
+.page li:nth-child(2) { transform: rotateY(-30deg); }
+.page li:nth-child(3) { transform: rotateY(-32deg); }
+.page li:nth-child(4) { transform: rotateY(-34deg); }
+.page li:nth-child(5) { transform: rotateY(-36deg); }
 
 .hardcover_front,
 .hardcover_back,
@@ -250,10 +271,6 @@ ul {
   transform-origin: 0% 100%;
 }
 
-.hardcover_front {
-  transition: all 0.8s ease, z-index 0.6s;
-}
-
 .hardcover_front li:first-child {
   cursor: pointer;
   user-select: none;
@@ -264,13 +281,8 @@ ul {
   transform: rotateY(180deg) translateZ(2px);
 }
 
-.hardcover_back li:first-child {
-  transform: translateZ(2px);
-}
-
-.hardcover_back li:last-child {
-  transform: translateZ(-2px);
-}
+.hardcover_back li:first-child { transform: translateZ(2px); }
+.hardcover_back li:last-child { transform: translateZ(-2px); }
 
 /* 书边厚度装饰 */
 .hardcover_front li:first-child:after,
@@ -278,11 +290,9 @@ ul {
   width: 4px;
   height: 100%;
 }
-
 .hardcover_front li:first-child:after {
   transform: rotateY(90deg) translateZ(-2px) translateX(2px);
 }
-
 .hardcover_front li:first-child:before {
   transform: rotateY(90deg) translateZ(158px) translateX(2px);
 }
@@ -292,11 +302,9 @@ ul {
   width: 4px;
   height: 160px;
 }
-
 .hardcover_front li:last-child:after {
   transform: rotateX(90deg) rotateZ(90deg) translateZ(80px) translateX(-2px) translateY(-78px);
 }
-
 .hardcover_front li:last-child:before {
   box-shadow: 0px 0px 30px 5px #333;
   transform: rotateX(90deg) rotateZ(90deg) translateZ(-140px) translateX(-2px) translateY(-78px);
@@ -307,11 +315,9 @@ ul {
   width: 4px;
   height: 100%;
 }
-
 .hardcover_back li:first-child:after {
   transform: rotateY(90deg) translateZ(-2px) translateX(2px);
 }
-
 .hardcover_back li:first-child:before {
   transform: rotateY(90deg) translateZ(158px) translateX(2px);
 }
@@ -321,11 +327,9 @@ ul {
   width: 4px;
   height: 160px;
 }
-
 .hardcover_back li:last-child:after {
   transform: rotateX(90deg) rotateZ(90deg) translateZ(80px) translateX(2px) translateY(-78px);
 }
-
 .hardcover_back li:last-child:before {
   box-shadow: 10px -1px 80px 20px #666;
   transform: rotateX(90deg) rotateZ(90deg) translateZ(-140px) translateX(2px) translateY(-78px);
@@ -336,46 +340,34 @@ ul {
   width: 16px;
   z-index: 0;
 }
-
-.book_spine li:first-child {
-  transform: translateZ(2px);
-}
-
-.book_spine li:last-child {
-  transform: translateZ(-2px);
-}
-
+.book_spine li:first-child { transform: translateZ(2px); }
+.book_spine li:last-child { transform: translateZ(-2px); }
 .book_spine li:first-child:after,
 .book_spine li:first-child:before {
   width: 4px;
   height: 100%;
 }
-
 .book_spine li:first-child:after {
   transform: rotateY(90deg) translateZ(-2px) translateX(2px);
 }
-
 .book_spine li:first-child:before {
   transform: rotateY(-90deg) translateZ(-12px);
 }
-
 .book_spine li:last-child:after,
 .book_spine li:last-child:before {
   width: 4px;
   height: 16px;
 }
-
 .book_spine li:last-child:after {
   transform: rotateX(90deg) rotateZ(90deg) translateZ(8px) translateX(2px) translateY(-6px);
 }
-
 .book_spine li:last-child:before {
   box-shadow: 5px -1px 100px 40px rgba(0, 0, 0, 0.2);
   transform: rotateX(90deg) rotateZ(90deg) translateZ(-210px) translateX(2px) translateY(-6px);
 }
 
 .page,
-.page>li {
+.page > li {
   position: absolute;
   top: 0;
   left: 0;
@@ -390,7 +382,7 @@ ul {
   z-index: 200;
 }
 
-.page>li {
+.page > li {
   width: 100%;
   height: 100%;
   transform-origin: left center;
@@ -398,171 +390,141 @@ ul {
   transition-timing-function: ease;
 }
 
-/* 所有包含内容的页面元素开启 flex 布局 */
+/* 包含照片的页面 */
 .hardcover_front li:last-child,
-.page>li {
+.page > li {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 12px 10px;
+  padding: 8px 6px;
   box-sizing: border-box;
 }
 
-.page>li:nth-child(1) {
-  transition-duration: 0.6s;
-}
-
-.page>li:nth-child(2) {
-  transition-duration: 0.6s;
-}
-
-.page>li:nth-child(3) {
-  transition-duration: 0.4s;
-}
-
-.page>li:nth-child(4) {
-  transition-duration: 0.5s;
-}
-
-.page>li:nth-child(5) {
-  transition-duration: 0.6s;
-}
+.page > li:nth-child(1) { transition-duration: 0.6s; }
+.page > li:nth-child(2) { transition-duration: 0.6s; }
+.page > li:nth-child(3) { transition-duration: 0.4s; }
+.page > li:nth-child(4) { transition-duration: 0.5s; }
+.page > li:nth-child(5) { transition-duration: 0.6s; }
 
 /* ==================== 书本翻开动画 ==================== */
-.book:hover>.hardcover_front {
+.book:hover > .hardcover_front {
   transform: rotateY(-145deg) translateZ(0);
   z-index: 0;
 }
 
-.book:hover>.page li:nth-child(1) {
+.book:hover > .page li:nth-child(1) {
   transform: rotateY(-30deg);
   transition-duration: 1.5s;
 }
 
-.book:hover>.page li:nth-child(2) {
+.book:hover > .page li:nth-child(2) {
   transform: rotateY(-35deg);
   transition-duration: 1.8s;
 }
 
-.book:hover>.page li:nth-child(3) {
+.book:hover > .page li:nth-child(3) {
   transform: rotateY(-118deg);
   transition-duration: 1.6s;
 }
 
-.book:hover>.page li:nth-child(4) {
+.book:hover > .page li:nth-child(4) {
   transform: rotateY(-130deg);
   transition-duration: 1.4s;
 }
 
-.book:hover>.page li:nth-child(5) {
+.book:hover > .page li:nth-child(5) {
   transform: rotateY(-140deg);
   transition-duration: 1.2s;
 }
 
-/* ==================== 骨架屏（全局） ==================== */
-.skeleton-wrapper {
+/* ==================== 内页真实照片展示 ==================== */
+.mini-photos-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
+  height: 100%;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
-/* hover 书本时，所有页面的骨架屏都显示 */
-.book:hover .skeleton-wrapper {
+/* hover 展开时渐现照片 */
+.book:hover .mini-photos-wrapper {
   opacity: 1;
   transition-delay: 0.15s;
 }
 
-.skeleton-block {
-  width: 95px;
-  height: 75px;
-  border-radius: 8px;
-  background: #e4e0d8;
-  background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+.mini-polaroid {
+  width: 114px;
+  background: #ffffff;
+  padding: 4px 4px 5px 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.mini-polaroid:nth-child(1) {
+  transform: rotate(-1.5deg);
+}
+
+.mini-polaroid:nth-child(2) {
+  transform: rotate(1.5deg);
+}
+
+/* 核心：固定 16:9 照片比例盒子 + 弱网微光骨架底色 */
+.mini-img-box {
+  width: 100%;
+  aspect-ratio: 16 / 9; /* 强制锁定 16:9 */
+  border-radius: 2px;
   position: relative;
   overflow: hidden;
+  background: #edeae3;
+  background: linear-gradient(
+    90deg,
+    #edeae3 0%,
+    #f7f4ed 50%,
+    #edeae3 100%
+  );
+  background-size: 200% 100%;
+  animation: miniShimmer 1.8s infinite linear;
 }
 
-@keyframes shimmer {
-  0% {
-    background: linear-gradient(110deg,
-        #e4e0d8 25%,
-        #e4e0d8 37%,
-        #f7f4ee 45%,
-        #fcfaf6 50%,
-        #f7f4ee 55%,
-        #e4e0d8 63%,
-        #e4e0d8 75%);
-    background-size: 200% 100%;
-    background-position: 150% 0;
-  }
-
-  100% {
-    background: linear-gradient(110deg,
-        #e4e0d8 25%,
-        #e4e0d8 37%,
-        #f7f4ee 45%,
-        #fcfaf6 50%,
-        #f7f4ee 55%,
-        #e4e0d8 63%,
-        #e4e0d8 75%);
-    background-size: 200% 100%;
-    background-position: -50% 0;
-  }
+/* 真实图片：撑满 16:9 盒子，cover 裁剪不变形，加载完成平滑淡入 */
+.mini-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
 }
 
-/* 给不同位置的骨架块设置波浪延迟（共 6 页 × 2 = 12 个块） */
-.hardcover_front li:last-child .skeleton-block:nth-child(1) {
-  animation-delay: 0s;
+.mini-img.is-loaded {
+  opacity: 1;
 }
 
-.hardcover_front li:last-child .skeleton-block:nth-child(2) {
-  animation-delay: 0.2s;
+@keyframes miniShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.page>li:nth-child(1) .skeleton-block:nth-child(1) {
-  animation-delay: 0.4s;
-}
-
-.page>li:nth-child(1) .skeleton-block:nth-child(2) {
-  animation-delay: 0.6s;
-}
-
-.page>li:nth-child(2) .skeleton-block:nth-child(1) {
-  animation-delay: 0.8s;
-}
-
-.page>li:nth-child(2) .skeleton-block:nth-child(2) {
-  animation-delay: 1.0s;
-}
-
-.page>li:nth-child(3) .skeleton-block:nth-child(1) {
-  animation-delay: 1.2s;
-}
-
-.page>li:nth-child(3) .skeleton-block:nth-child(2) {
-  animation-delay: 1.4s;
-}
-
-.page>li:nth-child(4) .skeleton-block:nth-child(1) {
-  animation-delay: 1.6s;
-}
-
-.page>li:nth-child(4) .skeleton-block:nth-child(2) {
-  animation-delay: 1.8s;
-}
-
-.page>li:nth-child(5) .skeleton-block:nth-child(1) {
-  animation-delay: 2.0s;
-}
-
-.page>li:nth-child(5) .skeleton-block:nth-child(2) {
-  animation-delay: 2.2s;
+.mini-title {
+  font-size: 8px;
+  color: #666;
+  margin-top: 3px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
 }
 
 /* ========== 封面左上角竖排标题 ========== */
@@ -571,11 +533,8 @@ ul {
   top: 20px;
   left: 20px;
   display: flex;
-  /* 横向排列各列 */
   gap: 2px;
-  /* 列间距 */
   pointer-events: none;
-  /* 不阻挡点击 */
   z-index: 5;
 }
 
@@ -589,7 +548,6 @@ ul {
   line-height: 1;
   letter-spacing: 2px;
   color: black;
-  /* 白色文字 */
   white-space: nowrap;
 }
 
@@ -611,9 +569,9 @@ ul {
     justify-self: center;
   }
 
-  .skeleton-block {
-    width: 75px;
-    height: 60px;
+  .mini-polaroid {
+    width: 92px;
+    padding: 3px 3px 4px 3px;
   }
 }
 </style>

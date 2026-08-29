@@ -552,7 +552,7 @@ onMounted(async () => {
 }
 
 .card__excerpt {
-  font-family: 'WenQuanWeiMiHei';
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   font-size: 15px;
   font-weight: normal;
   color: #4B5563;

@@ -456,7 +456,7 @@ onUnmounted(() => {
   overflow: auto;
   position: relative;
   box-shadow: 9px 7px 40px -6px rgba(0,0,0,0.25);
-  font-family: 'WenQuanWeiMiHei';
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   max-width: 300px;
   /* 默认 Wind 颜色 */
   background-color: #DAE3FD;

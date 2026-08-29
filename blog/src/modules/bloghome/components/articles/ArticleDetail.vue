@@ -31,25 +31,24 @@
   </div>
   <div class="elastic-sidebar" :class="{ 'is-open': isOpen }">
     <svg class="sidebar-svg" :viewBox="`0 0 350 ${svgHeight}`" preserveAspectRatio="none">
-<path 
-  class="s-path" 
-  fill="rgba(243, 245, 248, 0.94)" 
-  :d="currentPath" 
-  @mousedown="startDrag" 
-  @touchstart="startDrag" 
-/>
+      <path 
+        class="s-path" 
+        fill="rgba(243, 245, 248, 0.94)" 
+        :d="currentPath" 
+        @mousedown="startDrag" 
+        @touchstart="startDrag" 
+      />
     </svg>
 
-    <!-- ==== 新增：提示文字 ==== -->
+    <!-- ==== 提示文字 ==== -->
     <transition name="hint-fade">
       <div class="sidebar-hint-text" v-show="showHintText">
         目录
       </div>
     </transition>
-    <!-- ====================================== -->
 
     <div class="sidebar-content" :class="{ 'active': isOpen }">
-      <!-- 头部：更轻巧现代的排版 -->
+      <!-- 头部 -->
       <div class="toc__header">
         <div class="toc__icon-wrap">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"
@@ -68,13 +67,12 @@
         </div>
       </div>
 
-      <!-- 目录列表：轨道树结构 -->
+      <!-- 目录列表 -->
       <div class="toc-list">
         <a v-for="(h, i) in headings" :key="i" class="toc__item" :class="[
           `toc__item--h${h.level}`,
           { 'toc__item--active': activeHeading === i }
         ]" :style="{ paddingLeft: `${16 + (h.level - 1) * 14}px` }" @click.prevent="handleTocClick(i)">
-          <!-- 果冻小露珠节点 -->
           <span class="toc__dot"></span>
           <span class="toc__text">{{ h.text }}</span>
         </a>
@@ -91,7 +89,7 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
@@ -165,7 +163,6 @@ function addSpacing(text: string): string {
   const placeholders: string[] = []
   const PH = '\u0000SP\u0000'
 
-  // 保护围栏代码块、行内代码
   text = text.replace(/```[\s\S]*?```/g, (match) => {
     const key = `${PH}${placeholders.length}\u0000`
     placeholders.push(match)
@@ -177,14 +174,10 @@ function addSpacing(text: string): string {
     return key
   })
 
-  // 中英文之间加空格
   text = text.replace(/([\u4e00-\u9fa5])(?![ \t])([a-zA-Z0-9])/g, '$1 $2')
   text = text.replace(/([a-zA-Z0-9])(?![ \t])([\u4e00-\u9fa5])/g, '$1 $2')
-
-  // Windows 路径反斜杠断行优化
   text = text.replace(/\\(?=[A-Za-z0-9])/g, '\\\u200B')
 
-  // 还原所有被保护的内容
   text = text.replace(new RegExp(`${PH}(\\d+)\u0000`, 'g'), (_, idx) => {
     return placeholders[parseInt(idx)] ?? ''
   })
@@ -417,9 +410,6 @@ function closeSidebarOutside(e: MouseEvent) {
   closeSidebar()
 }
 
-let cleanupScroll: () => void = () => { }
-
-// ✅ 1. 修复 Vue Router 守卫：去掉了 next()，避免控制台产生 Deprecated 警告
 onBeforeRouteLeave(() => {
   const currentId = Number(route.params.id)
   articleScrollCache.set(currentId, window.scrollY || document.documentElement.scrollTop)
@@ -433,7 +423,6 @@ onMounted(() => {
   const id = Number(route.params.id)
   article.value = articles.find(a => a.id === id) || null
 
-  // 发送 POST 并在成功后更新本地 sessionStorage 缓存
   axios.post(`/api/views?id=${id}`)
     .then(res => {
       const newViews = res.data?.views
@@ -448,7 +437,6 @@ onMounted(() => {
     .catch(() => { })
 
   window.addEventListener('scroll', handleScroll)
-  cleanupScroll = () => { window.removeEventListener('scroll', handleScroll) }
   const savedHeight = articleScrollCache.get(id) || 0
   if (savedHeight > 0) {
     requestAnimationFrame(() => window.scrollTo(0, savedHeight))
@@ -513,14 +501,12 @@ function handleMarkdownClick(e: MouseEvent) {
 .s-path {
   cursor: grab;
   pointer-events: auto;
-  /* 柔和的中性阴影，消除突兀感 */
   filter: drop-shadow(-8px 0px 18px rgba(0, 0, 0, 0.07));
 }
 .s-path:active {
   cursor: grabbing;
 }
 
-/* 提示文字：改为雅致的深灰墨色 */
 .sidebar-hint-text {
   position: absolute;
   top: 50%;
@@ -528,7 +514,7 @@ function handleMarkdownClick(e: MouseEvent) {
   transform: translateY(-50%) translateX(0); 
   font-family: 'YouSheBiaoTiHei', sans-serif;
   font-size: 16px;
-  color: #4b5563; /* 优雅的石板灰 */
+  color: #4b5563;
   writing-mode: vertical-rl;
   letter-spacing: 4px;
   pointer-events: none;
@@ -536,26 +522,17 @@ function handleMarkdownClick(e: MouseEvent) {
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
 }
 
-
-/* === 自定义进出动画 === */
-/* 进场和退场的过程（时间设置为 0.8s，配合弹动曲线） */
 .hint-fade-enter-active,
 .hint-fade-leave-active {
-  /* 使用 cubic-bezier 让文字也带有一点点弹性感觉 */
   transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* 进场前 和 退场后 的状态 */
 .hint-fade-enter-from,
 .hint-fade-leave-to {
   opacity: 0;
-  /* 保持 Y轴居中不变，X轴向右偏移 30px（藏进屏幕右侧） */
   transform: translateY(-50%) translateX(30px);
 }
 
-/* ================= 极简果冻轨道目录 ================= */
-
-/* 侧边栏面板容器：轻盈磨砂亚克力板 */
 .sidebar-content {
   position: absolute;
   top: 30px;
@@ -563,7 +540,6 @@ function handleMarkdownClick(e: MouseEvent) {
   width: 290px;
   height: calc(100% - 60px);
   padding: 50px 20px 40px 16px;
-  /* 微微泛灰的高级磨砂白 */
   background: rgba(245, 247, 250, 0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -588,7 +564,6 @@ function handleMarkdownClick(e: MouseEvent) {
   display: none;
 }
 
-/* 头部排版 */
 .toc__header {
   display: flex;
   align-items: center;
@@ -616,7 +591,7 @@ function handleMarkdownClick(e: MouseEvent) {
 }
 
 .toc__title {
-  font-family: 'YouSheBiaoTiHei', sans-serif;
+  font-family: 'Ma Shan Zheng', cursive, sans-serif;
   font-size: 18px;
   color: #1f2937;
   letter-spacing: 1px;
@@ -629,7 +604,6 @@ function handleMarkdownClick(e: MouseEvent) {
   letter-spacing: 1.5px;
 }
 
-/* 轨道线：中性淡灰色轨道 */
 .toc-list {
   position: relative;
   display: flex;
@@ -649,7 +623,6 @@ function handleMarkdownClick(e: MouseEvent) {
   border-radius: 2px;
 }
 
-/* 目录项 */
 .toc__item {
   position: relative;
   display: flex;
@@ -691,7 +664,6 @@ function handleMarkdownClick(e: MouseEvent) {
   color: #6b7280;
 }
 
-/* 小水滴节点（默认态：柔和浅灰白） */
 .toc__dot {
   position: absolute;
   left: 3px;
@@ -710,7 +682,6 @@ function handleMarkdownClick(e: MouseEvent) {
   left: 2.5px;
 }
 
-/* 悬停态：微透白胶囊背景 + 微平移 */
 .toc__item:hover {
   background: rgba(255, 255, 255, 0.6);
   transform: translateX(4px);
@@ -725,7 +696,6 @@ function handleMarkdownClick(e: MouseEvent) {
   transform: scale(1.3);
 }
 
-/* 激活态（选中的项）：通透乳白质感 + 顶部高光 */
 .toc__item--active {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(0, 0, 0, 0.04);
@@ -740,7 +710,6 @@ function handleMarkdownClick(e: MouseEvent) {
   font-weight: 600;
 }
 
-/* 激活态水滴：点亮为精致的小黑珍珠/深墨灰，呼应整站现代感 */
 .toc__item--active .toc__dot {
   width: 8px;
   height: 8px;
@@ -808,13 +777,14 @@ main {
 }
 
 .article-title {
-  font-family: 'ShangShouJiangHuShuFa', sans-serif;
-  font-size: clamp(2rem, 4vw + 1rem, 6rem);
+  font-family: 'Caveat', 'Ma Shan Zheng', cursive, sans-serif;
+  font-size: clamp(1.6rem, 2vw + 0.6rem, 2.6rem); 
   font-weight: normal;
   text-align: center;
   margin: 0 0 16px 0;
   color: #1a1a1a;
-  line-height: 1.2;
+  line-height: 1.35; /* 略微调大一点行高，多行时不拥挤 */
+  letter-spacing: 1.5px;
   position: relative;
   z-index: 1;
 }
@@ -862,42 +832,55 @@ main {
   transform: translateY(-7px);
 }
 
+/* ==================== 1. Markdown 正文 ==================== */
 .markdown-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", 'WenQuanWeiMiHei', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   line-height: 1.8;
   font-size: clamp(1rem, 2.5vw, 1.3rem);
   color: #000;
-  max-width: 90ch;
+  /* 例如 1000px ~ 1100px */
+  max-width: 920px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
   letter-spacing: 0.02em;
-
-  /* 👇 下面是修改的部分 👇 */
   text-align: left;
-  /* 改为左对齐，彻底消除字间距异常拉伸 */
   word-break: normal;
-  /* 保持正常的单词完整性，不要从中截断 Extension */
   overflow-wrap: break-word;
-  /* 现代标准写法：遇到超长路径/链接（如 C:\Program...）实在放不下时，才允许换行 */
-  /* 👆 上面是修改的部分 👆 */
 }
 
+/* 一级标题 */
 .markdown-body :deep(h1) {
-  font-family: 'ShangShouJiangHuShuFa';
+  font-family: 'Ma Shan Zheng', cursive, sans-serif;
   font-weight: normal;
-  font-size: clamp(1.8rem, 3vw + 1rem, 4rem);
+  font-size: clamp(1.4rem, 1.8vw + 0.6rem, 2.2rem); /* 缩小到合适比例 */
   text-align: center;
-  margin: 1.5em 0 0.5em;
+  margin: 1.6em 0 0.6em;
   line-height: 1.3;
 }
 
+/* ==================== 2. 二级标题（得意黑） ==================== */
 .markdown-body :deep(h2) {
-  font-family: 'ShangShouJiangHuShuFa';
-  font-weight: normal;
-  font-size: clamp(1.5rem, 2.5vw + 1rem, 3rem);
-  margin: 0.6em 0 0.5em;
-  line-height: 1.3;
+  font-family: 'Smiley Sans', '得意黑', sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.2vw + 0.8rem, 2.2rem);
+  margin: 1.8em 0 0.6em;
+  line-height: 1.35;
+  letter-spacing: 0.5px;
+  color: #1a1a1a;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding-bottom: 0.35em;
+}
+
+/* ==================== 3. 三级标题（得意黑） ==================== */
+.markdown-body :deep(h3) {
+  font-family: 'Smiley Sans', '得意黑', sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.18rem, 1.8vw + 0.5rem, 1.6rem);
+  margin: 1.4em 0 0.5em;
+  line-height: 1.4;
+  letter-spacing: 0.4px;
+  color: #2c3e50;
 }
 
 .markdown-body :deep(p) {
@@ -914,11 +897,13 @@ main {
   padding: 12px 16px;
 }
 
+/* 行内代码标签：等宽编程字体 */
 .markdown-body :deep(p code),
 .markdown-body :deep(li code),
 .markdown-body :deep(h1 code),
-.markdown-body :deep(h2 code) {
-  font-family: 'WenQuanWeiMiHei', monospace;
+.markdown-body :deep(h2 code),
+.markdown-body :deep(h3 code) {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace;
   background: rgba(0, 0, 0, 0.06);
   padding: 2px 6px;
   border-radius: 4px;
@@ -1101,29 +1086,23 @@ main {
 @media (max-width: 768px) {
   .elastic-sidebar {
     pointer-events: none;
-    /* 让触摸事件穿透到背后文章 */
   }
 
   .s-path {
     pointer-events: auto;
-    /* 保留拖拽把手可操作 */
   }
 
-  /* 侧边栏内容面板半透明 */
   .sidebar-content {
     background: rgba(237, 242, 247, 0.75) !important;
     backdrop-filter: blur(10px);
-    /* 可选：轻微毛玻璃效果，更有质感 */
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   }
 
-  /* 目录条目本身也给一点半透明白底，保证文字清晰 */
   .toc__item {
     background: rgba(255, 255, 255, 0.6);
     box-shadow: none;
     color: #222;
-    /* 加深文字 */
   }
 
   .toc__item--active {
@@ -1131,7 +1110,6 @@ main {
     color: #fff;
   }
 
-  /* 提示文字 “目录” 颜色加深 */
   .sidebar-hint-text {
     color: #1a7a3a;
     font-weight: bold;

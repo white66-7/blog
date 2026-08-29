@@ -268,7 +268,7 @@ const hidePreview = () => {
 .project-desc {
   max-width: 420px;
   font-weight: 600;
-  font-family: 'WenQuanWeiMiHei';
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   font-size: 12px;
   line-height: 1.8;
   color: #6B6560;

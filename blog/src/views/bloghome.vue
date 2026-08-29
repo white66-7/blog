@@ -81,16 +81,6 @@ import 'swiper/css/mousewheel'
 import 'swiper/css/pagination'
 import 'animate.css'
 
-import img1 from '@/assets/think.webp'
-import img2 from '@/assets/play.webp'
-
-
-import photo1 from '@/assets/album/动漫/超燃.webp'
-import photo3 from '@/assets/album/动漫/黑色五叶草.webp'
-import photo5 from '@/assets/album/动漫/来自深渊.webp'
-import photo9 from '@/assets/album/动漫/video.webp'
-
-
 const mainBody = ref<HTMLElement | null>(null)
 const modules = [Mousewheel, Pagination]
 const isFirstScreen = ref(true)
@@ -171,12 +161,30 @@ const onSlideChange = (swiper: any) => {
 }
 
 const albumImages = [
-  { url: img1, description: `当时刚刚中考完特地换了张头像...` },
-  { url: img2, description: `第一次研学在外面住...` },
-  { url: photo1, description: `燃到起鸡皮疙瘩` },
-  { url: photo3, description: `99` },
-  { url: photo5, description: `为何人必须创造价值后才被重视` },
-  { url: photo9, description: `创造一个和平的国度吧` },
+  { 
+    url: '/album/人物/think.webp', 
+    description: '当时刚刚中考完特地换了张头像...' 
+  },
+  { 
+    url: '/album/人物/play.webp', 
+    description: '第一次研学在外面住...' 
+  },
+  { 
+    url: '/album/动漫/超燃.webp', 
+    description: '燃到起鸡皮疙瘩' 
+  },
+  { 
+    url: '/album/动漫/黑色五叶草.webp', 
+    description: '99' 
+  },
+  { 
+    url: '/album/动漫/来自深渊.webp', 
+    description: '为何人必须创造价值后才被重视' 
+  },
+  { 
+    url: '/album/动漫/video.webp', 
+    description: '创造一个和平的国度吧' 
+  },
 ]
 </script>
 
