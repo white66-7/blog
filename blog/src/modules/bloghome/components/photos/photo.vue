@@ -53,6 +53,7 @@ const albumsData = [
       { title: '中二病也要谈恋爱', url: '/album/动漫/阿玛天纳斯.webp' },
       { title: '通往夏天的隧道', url: '/album/动漫/向日葵.webp' },
       { title: '败了', url: '/album/动漫/战败.webp' },
+      { title: '好久不见', url: '/album/动漫/蕾姆.webp' },
     ]
   },
   {
@@ -103,6 +104,7 @@ const albumsData = [
       { title: '特写：蜻蜓', url: '/album/暑假/蜻蜓.webp' },
       { title: '上海教堂旁的图书馆', url: '/album/暑假/图书馆.webp' },
       { title: '早有耳闻的徐家汇篮球场', url: '/album/暑假/篮球.webp' },
+      { title: '辛劳了一年的风扇', url: '/album/暑假/风扇.webp' },
     ]
   }
 ]

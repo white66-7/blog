@@ -591,7 +591,7 @@ function handleMarkdownClick(e: MouseEvent) {
 }
 
 .toc__title {
-  font-family: 'Ma Shan Zheng', cursive, sans-serif;
+  font-family: 'ShangShouJiangHuShuFa';
   font-size: 18px;
   color: #1f2937;
   letter-spacing: 1px;
@@ -777,9 +777,9 @@ main {
 }
 
 .article-title {
-  font-family: 'Caveat', 'Ma Shan Zheng', cursive, sans-serif;
+  font-family: 'ShangShouJiangHuShuFa';
   font-size: clamp(1.6rem, 2vw + 0.6rem, 2.6rem); 
-  font-weight: normal;
+  font-weight: 400;
   text-align: center;
   margin: 0 0 16px 0;
   color: #1a1a1a;

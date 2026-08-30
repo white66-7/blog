@@ -554,8 +554,9 @@ onMounted(async () => {
 .card__excerpt {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   font-size: 15px;
-  font-weight: normal;
-  color: #4B5563;
+  font-weight: 550; /* 如果想要更粗一点，可以改为 600 */
+  color: #374151; 
+
   line-height: 1.6;
   margin-bottom: 16px;
   display: -webkit-box;

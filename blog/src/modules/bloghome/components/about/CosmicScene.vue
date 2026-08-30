@@ -90,7 +90,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 import characterImg from '/about/person.webp'
-
 import cosmicAudio from '/about/cosmic_dreams.mp3'
 
 const canvasRef = ref(null)
@@ -123,7 +122,7 @@ onMounted(() => {
 
   // 初始化星空数据（按比例分布）
   const initStars = () => {
-    // 1. 大量静态背景微星（450颗，静止不闪，构建深空星尘感）
+    // 1. 大量静态背景微星（构建深空星尘感）
     staticStars = Array.from({ length: 800 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -131,7 +130,7 @@ onMounted(() => {
       alpha: Math.random() * 0.45 + 0.1 // 0.1 ~ 0.55 的微弱明暗差
     }))
 
-    // 2. 少量动态呼吸星（70颗，缓慢闪烁）
+    // 2. 少量动态呼吸星（缓慢闪烁）
     twinklingStars = Array.from({ length: 150 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -210,7 +209,7 @@ onMounted(() => {
   const render = () => {
     ctx.clearRect(0, 0, width, height)
 
-    // A. 批量绘制静态星海（静止不闪，超高帧率）
+    // A. 批量绘制静态星海
     staticStars.forEach((s) => {
       ctx.fillStyle = `rgba(240, 243, 255, ${s.alpha})`
       ctx.beginPath()
@@ -258,8 +257,11 @@ onMounted(() => {
   inherits: true;
 }
 
+/* 占满整个屏幕 */
 .cosmic-hero-wrapper {
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh; /* 适配移动端动态地址栏 */
   position: relative;
   background-color: #101114;
   overflow: hidden;
@@ -270,9 +272,7 @@ onMounted(() => {
   --time: 24s;
 
   width: 100%;
-  height: 88vh;
-  min-height: 600px;
-  max-height: 960px;
+  height: 100%;
   position: relative;
   display: flex;
   justify-content: center;
@@ -321,6 +321,7 @@ onMounted(() => {
   transform-origin: center center;
   transition: transform 0.3s ease;
 }
+
 .scene {
   position: absolute;
   display: flex;
@@ -339,7 +340,7 @@ onMounted(() => {
 .cuboid {
   position: absolute;
   transform-style: preserve-3d;
-  transform: rotateY(312deg) rotateX(350deg) rotateZ(10deg) translateY(130px);
+  transform: rotateY(312deg) rotateX(350deg) rotateZ(10deg) translateY(220px);
   --size: 110px;
   --size-h: 55px;
   --size-h-n: -55px;
@@ -406,11 +407,10 @@ onMounted(() => {
   }
 }
 
-/* ================= 2D 融入式人物样式 ================= */
+/* 2D 融入式人物样式 */
 .character-container {
   position: absolute;
-  /* 调整人物站立在立方体正上方 */
-  transform: translateY(168px);
+  transform: translateY(268px);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -419,24 +419,19 @@ onMounted(() => {
 }
 
 .character-body {
-  width: 110px;          /* 适配基座比例的合适宽度 */
+  width: 110px;
   height: auto;
   object-fit: contain;
-  /* 去除刺眼纯白高光，做深空冷色弱光轮廓与自然压暗 */
   filter: brightness(0.9) contrast(1.05) drop-shadow(0 0 6px rgba(180, 205, 230, 0.25));
   user-select: none;
-  /* 若原图朝向左侧，可通过加上 transform: scaleX(-1); 翻转向右 */
 }
 
-/* 人物在基座上的倒影效果 */
 .character-reflection {
   width: 110px;
   height: auto;
   object-fit: contain;
-  /* 垂直镜像倒影 */
   transform: scaleY(-1) translateY(4px);
   opacity: 0.22;
-  /* 倒影向下自然渐隐消融与轻微模糊 */
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
   filter: blur(1.5px) brightness(0.65);
@@ -609,7 +604,6 @@ onMounted(() => {
   right: 2rem;
   bottom: 2.2rem;
   top: auto;
-
   z-index: 4200;
   display: flex;
   gap: 0.15rem;
@@ -652,7 +646,7 @@ onMounted(() => {
   to { transform: scaleY(1.3); }
 }
 
-/* 针对较矮屏幕（如 13/14 寸笔记本或小高度窗口） */
+/* 屏幕高度自适应缩放（防止较矮屏幕星球超出顶部） */
 @media (max-height: 850px) {
   .scene-scaler {
     transform: scale(0.85) translateY(40px);
@@ -664,39 +658,26 @@ onMounted(() => {
   }
 }
 
-/* 针对中屏幕（平板 / 平板竖屏 max-width: 900px） */
+/* 针对中屏幕（平板 / 平板竖屏） */
 @media (max-width: 900px) {
-  .cosmic-stage {
-    height: 80vh;
-    min-height: 560px;
-  }
   .scene-scaler {
-    /* 缩小比例的同时保持适当的下移，星球绝不破顶 */
     transform: scale(0.76) translateY(38px);
   }
   .audio-icon-button {
     right: 1.2rem;
-    bottom: 1.5rem; /* 改为底部 */
-    top: auto;
+    bottom: 1.5rem;
   }
 }
 
-/* 针对小屏幕（手机端 max-width: 600px） */
+/* 针对小屏幕（手机端） */
 @media (max-width: 600px) {
-  .cosmic-stage {
-    height: 75vh;
-    min-height: 500px;
-  }
   .scene-scaler {
     transform: scale(0.6) translateY(30px);
   }
 }
 
-/* 针对超小屏幕手机（max-width: 400px） */
+/* 针对超小屏幕手机 */
 @media (max-width: 400px) {
-  .cosmic-stage {
-    min-height: 440px;
-  }
   .scene-scaler {
     transform: scale(0.5) translateY(25px);
   }

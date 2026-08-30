@@ -15,9 +15,17 @@
         <figure class="book" @click="$emit('select-album', album)">
           <!-- ==================== 封面 ==================== -->
           <ul class="hardcover_front">
-            <!-- 外侧：封面图 + 竖排标题 -->
+            <!-- 外侧：封面骨架底色 + 封面图淡入 + 竖排标题 -->
             <li>
-              <img :src="album.cover" alt="" width="100%" height="100%">
+              <!-- 封面图片（带渐进加载和加载完成类） -->
+              <img 
+                :src="album.cover" 
+                alt="album-cover" 
+                class="cover-img"
+                loading="lazy"
+                @load="$event.target.classList.add('is-loaded')" 
+                @error="$event.target.classList.add('is-error')"
+              >
               <div class="vertical-title">
                 <span v-for="(part, i) in splitIntoColumns(album.title, 2)" :key="i" class="title-column">
                   {{ part }}
@@ -191,9 +199,45 @@ ul {
   list-style: none;
 }
 
+/* 🌟 封面外侧底座：米宣纸流光骨架屏动效 */
 .hardcover_front li:first-child {
-  background-color: #eee;
+  background: linear-gradient(
+    90deg,
+    #ede8de 0%,
+    #fbf9f4 50%,
+    #ede8de 100%
+  );
+  background-size: 200% 100%;
+  animation: coverShimmer 2s infinite linear;
   backface-visibility: hidden;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 🌟 封面真实图片：初始透明，加载后平滑淡入 */
+.cover-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 1;
+}
+
+.cover-img.is-loaded {
+  opacity: 1;
+}
+
+.cover-img.is-error {
+  display: none;
+}
+
+@keyframes coverShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .hardcover_front li:last-child {
@@ -478,10 +522,10 @@ ul {
   transform: rotate(1.5deg);
 }
 
-/* 核心：固定 16:9 照片比例盒子 + 弱网微光骨架底色 */
+/* 固定 16:9 照片比例盒子 + 弱网微光骨架底色 */
 .mini-img-box {
   width: 100%;
-  aspect-ratio: 16 / 9; /* 强制锁定 16:9 */
+  aspect-ratio: 16 / 9;
   border-radius: 2px;
   position: relative;
   overflow: hidden;
@@ -496,7 +540,7 @@ ul {
   animation: miniShimmer 1.8s infinite linear;
 }
 
-/* 真实图片：撑满 16:9 盒子，cover 裁剪不变形，加载完成平滑淡入 */
+/* 内页照片平滑淡入 */
 .mini-img {
   width: 100%;
   height: 100%;
@@ -535,7 +579,7 @@ ul {
   display: flex;
   gap: 2px;
   pointer-events: none;
-  z-index: 5;
+  z-index: 10;
 }
 
 .title-column {
@@ -549,6 +593,7 @@ ul {
   letter-spacing: 2px;
   color: black;
   white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
 }
 
 /* 响应式 */

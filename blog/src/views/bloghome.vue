@@ -185,6 +185,10 @@ const albumImages = [
     url: '/album/动漫/video.webp', 
     description: '创造一个和平的国度吧' 
   },
+  { 
+    url: '/album/动漫/蕾姆.webp', 
+    description: '好久不见' 
+  },
 ]
 </script>
 
