@@ -27,6 +27,7 @@ import md14 from './md/14.md?raw'
 import md15 from './md/15.md?raw'
 import md16 from './md/16.md?raw'
 import md17 from './md/17.md?raw'
+import md18 from './md/18.md?raw'
 
 export const articles: Article[] = [
   {
@@ -205,16 +206,27 @@ export const articles: Article[] = [
     cover: '/messages/16/法环.gif',
     content:md16,
   },
+  {
+    id: 17,
+    title: '性价比指南: 那些不得不薅的云羊毛',
+    type: '杂谈',
+    date: '2026-08-29',
+    readTime: '10 minutes',
+    excerpt: '就自己的使用体验而言,锐评国内外云免费套餐',
+    tags: ['Serverless', '免费套餐'],
+    cover: '/messages/17/1.webp',
+    content:md17,
+  },
   // {
-  //   id: 17,
-  //   title: '性价比指南: 那些不得不薅的云羊毛',
-  //   type: '杂谈',
-  //   date: '2026-08-29',
+  //   id: 18,
+  //   title: '网页端的3D效果与精细动画',
+  //   type: '前端',
+  //   date: '2026-09-01',
   //   readTime: '10 minutes',
-  //   excerpt: '就自己的使用体验而言,锐评国内外云免费套餐',
-  //   tags: ['Serverless', '免费套餐'],
-  //   cover: '/messages/17/1.webp',
-  //   content:md17,
+  //   excerpt: '',
+  //   tags: ['前端', 'Gsap', 'Snap'],
+  //   cover: '/messages/18/figure.webp',
+  //   content:md18,
   // },
   // {
   //   id: 14,
