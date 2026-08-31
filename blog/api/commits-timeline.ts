@@ -38,7 +38,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { db } = await connectToDatabase()
     const collection = db.collection('github_commits')
 
-    // 💡 查询库中全部记录（上限可提升到 3000+ 条）
     const dbCommits = await collection
       .find({})
       .sort({ commitDate: -1 })

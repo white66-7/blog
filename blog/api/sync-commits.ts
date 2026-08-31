@@ -3,23 +3,16 @@ import { MongoClient } from 'mongodb'
 import process from 'node:process'
 import * as dns from 'node:dns'
 
-// 本地开发修复：Node 的 c-ares 默认 DNS 可能指向无效的 127.0.0.1
+// 本地开发 DNS 兼容
 const DNS_SERVERS = (process.env.DNS_SERVERS || '').split(',').map(s => s.trim()).filter(Boolean)
 if (DNS_SERVERS.length) {
-  try { dns.setServers(DNS_SERVERS) } catch { /* ignore invalid config */ }
+  try { dns.setServers(DNS_SERVERS) } catch { /* ignore */ }
 }
 
 const GITHUB_USERNAME = 'white66-7'
 
-// 💡 可以在这里补充你本地可能用过的 Git 邮箱，避免漏抓
-const KNOWN_AUTHOR_EMAILS = [
-  'white66-7', // 用户名
-  // 'your-qq-email@qq.com',
-  // 'your-personal@gmail.com'
-]
-
 export const config = {
-  maxDuration: 60 // 申请最大执行时长（Vercel Pro 有效，免费版会自动取上限）
+  maxDuration: 15 // 增量同步通常 1~2 秒即可完成
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -31,7 +24,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!uri) return res.status(500).json({ error: 'MONGODB_URI 未配置' })
 
-  const client = new MongoClient(uri)
+  const client = new MongoClient(uri, {
+    serverSelectionTimeoutMS: 3000,
+    connectTimeoutMS: 3000
+  })
 
   try {
     await client.connect()
@@ -39,187 +35,121 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const collection = db.collection('github_commits')
 
     const headers: Record<string, string> = {
-      'User-Agent': 'Vercel-Sync-All',
+      'User-Agent': 'Vercel-Sync-Incremental',
       'Accept': 'application/vnd.github.v3+json',
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
 
     const operationsMap = new Map<string, any>()
 
-    // ================= 阶段 1：Search API 深度分页抓取（最多抓取 10 页共 1000 条） =================
-    let searchPage = 1
-    let hasMoreSearch = true
-
-    while (hasMoreSearch && searchPage <= 10) {
-      try {
-        const searchUrl = `https://api.github.com/search/commits?q=author:${GITHUB_USERNAME}&sort=author-date&order=desc&per_page=100&page=${searchPage}`
-        const searchRes = await fetch(searchUrl, {
-          headers: { ...headers, Accept: 'application/vnd.github.cloak-preview+json' },
-          signal: AbortSignal.timeout(6000)
-        })
-
-        if (!searchRes.ok) break
-
-        const sJson = (await searchRes.json()) as any
-        const items = sJson.items || []
-
-        if (items.length === 0) {
-          hasMoreSearch = false
-          break
-        }
-
-        for (const item of items) {
-          const commitData = item.commit
-          const commitDate = commitData?.author?.date || commitData?.committer?.date
-          if (!item.sha) continue
-
-          operationsMap.set(item.sha, {
-            updateOne: {
-              filter: { sha: item.sha },
-              update: {
-                $set: {
-                  sha: item.sha,
-                  repoName: item.repository?.name || 'repo',
-                  message: commitData?.message?.split('\n')[0] || 'Update code',
-                  commitDate: commitDate ? new Date(commitDate) : new Date(),
-                  url: item.html_url
-                }
-              },
-              upsert: true
+    // ================= 增量策略 1：查询用户最近的 Push 事件 =================
+    try {
+      const eventsRes = await fetch(
+        `https://api.github.com/users/${GITHUB_USERNAME}/events?per_page=30`,
+        { headers, signal: AbortSignal.timeout(3000) }
+      )
+      if (eventsRes.ok) {
+        const events = (await eventsRes.json()) as any[]
+        if (Array.isArray(events)) {
+          for (const ev of events) {
+            if (ev.type === 'PushEvent' && ev.payload?.commits) {
+              const repoSimpleName = (ev.repo?.name || '').split('/').pop() || 'repo'
+              for (const c of ev.payload.commits) {
+                if (!c.sha) continue
+                operationsMap.set(c.sha, {
+                  updateOne: {
+                    filter: { sha: c.sha },
+                    update: {
+                      $set: {
+                        sha: c.sha,
+                        repoName: repoSimpleName,
+                        message: c.message?.split('\n')[0] || 'Update code',
+                        commitDate: new Date(ev.created_at || Date.now()),
+                        url: c.url?.replace('api.github.com/repos', 'github.com').replace('/commits/', '/commit/') || ''
+                      }
+                    },
+                    upsert: true
+                  }
+                })
+              }
             }
-          })
+          }
         }
-
-        if (items.length < 100) hasMoreSearch = false
-        else searchPage++
-      } catch (e) {
-        console.warn(`[Search API] 第 ${searchPage} 页抓取失败:`, e)
-        break
       }
+    } catch (e) {
+      console.warn('[Events API 失败，继续执行仓库检查]:', e)
     }
 
-    // ================= 阶段 2：获取所有名下、协作、组织仓库 =================
-    // 优先使用 /user/repos（可获取私有仓库、组织仓库、协作仓库），若未配 Token 则回退到 /users/:username/repos
-    const reposUrl = token
-      ? 'https://api.github.com/user/repos?affiliation=owner,collaborator,organization_member&per_page=100&sort=updated'
-      : `https://api.github.com/users/${GITHUB_USERNAME}/repos?type=all&per_page=100&sort=updated`
+    // ================= 增量策略 2：只拉取最近发生过推送的前 6 个仓库 =================
+    try {
+      const reposUrl = token
+        ? 'https://api.github.com/user/repos?affiliation=owner,collaborator&per_page=6&sort=pushed&direction=desc'
+        : `https://api.github.com/users/${GITHUB_USERNAME}/repos?type=all&per_page=6&sort=pushed&direction=desc`
 
-    const reposRes = await fetch(reposUrl, { headers, signal: AbortSignal.timeout(6000) })
-
-    if (reposRes.ok) {
-      const repos = (await reposRes.json()) as any[]
-      if (Array.isArray(repos)) {
-        // 限制并发数量，防止 Vercel 函数超载或触发 GitHub API 速率限制
-        const MAX_CONCURRENT = 5
-        for (let i = 0; i < repos.length; i += MAX_CONCURRENT) {
-          const chunk = repos.slice(i, i + MAX_CONCURRENT)
+      const reposRes = await fetch(reposUrl, { headers, signal: AbortSignal.timeout(3000) })
+      if (reposRes.ok) {
+        const recentRepos = (await reposRes.json()) as any[]
+        if (Array.isArray(recentRepos)) {
+          // 并发抓取这几个活跃仓库的最新 20 条提交
           await Promise.all(
-            chunk.map(async (repo) => {
+            recentRepos.map(async (repo) => {
               const repoOwner = repo.owner?.login || GITHUB_USERNAME
               const repoName = repo.name
 
-              // 1. 获取该仓库的所有分支（解决非主分支提交丢失问题）
-              let branches: string[] = ['main', 'master']
-              try {
-                const bRes = await fetch(
-                  `https://api.github.com/repos/${repoOwner}/${repoName}/branches?per_page=20`,
-                  { headers, signal: AbortSignal.timeout(4000) }
-                )
-                if (bRes.ok) {
-                  const bList = (await bRes.json()) as any[]
-                  if (Array.isArray(bList) && bList.length > 0) {
-                    branches = bList.map(b => b.name)
-                  }
-                }
-              } catch { /* ignore */ }
+              const commitsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/commits?author=${encodeURIComponent(GITHUB_USERNAME)}&per_page=20`
+              const cRes = await fetch(commitsUrl, { headers, signal: AbortSignal.timeout(3000) })
+              if (!cRes.ok) return
 
-              // 2. 遍历该仓库的各主要分支
-              for (const branch of branches.slice(0, 5)) { // 每个仓库最多看前 5 个活跃分支
-                let page = 1
-                let hasMoreCommits = true
+              const commits = (await cRes.json()) as any[]
+              if (!Array.isArray(commits)) return
 
-                while (hasMoreCommits && page <= 5) { // 每个分支拉取最多 500 条
-                  try {
-                    const commitsRes = await fetch(
-                      `https://api.github.com/repos/${repoOwner}/${repoName}/commits?sha=${encodeURIComponent(branch)}&per_page=100&page=${page}`,
-                      { headers, signal: AbortSignal.timeout(5000) }
-                    )
-                    if (!commitsRes.ok) break
+              for (const item of commits) {
+                if (!item.sha) continue
+                const commitData = item.commit
+                const commitDate = commitData?.author?.date || commitData?.committer?.date
 
-                    const commits = (await commitsRes.json()) as any[]
-                    if (!Array.isArray(commits) || commits.length === 0) break
-
-                    for (const item of commits) {
-                      const commitData = item.commit
-                      const authorLogin = item.author?.login || ''
-                      const authorEmail = commitData?.author?.email || ''
-                      const authorName = commitData?.author?.name || ''
-
-                      // 💡 关键：精准匹配是自己的提交（排除 Fork 仓库中别人的提交）
-                      const isMe =
-                        authorLogin.toLowerCase() === GITHUB_USERNAME.toLowerCase() ||
-                        KNOWN_AUTHOR_EMAILS.some(k =>
-                          authorEmail.toLowerCase().includes(k.toLowerCase()) ||
-                          authorName.toLowerCase().includes(k.toLowerCase())
-                        )
-
-                      if (!isMe && repo.fork) {
-                        // 如果是 fork 项目且不是我自己的提交，跳过
-                        continue
+                operationsMap.set(item.sha, {
+                  updateOne: {
+                    filter: { sha: item.sha },
+                    update: {
+                      $set: {
+                        sha: item.sha,
+                        repoName,
+                        message: commitData?.message?.split('\n')[0] || 'Update code',
+                        commitDate: commitDate ? new Date(commitDate) : new Date(),
+                        url: item.html_url
                       }
-
-                      const commitDate = commitData?.author?.date || commitData?.committer?.date
-                      if (item.sha) {
-                        operationsMap.set(item.sha, {
-                          updateOne: {
-                            filter: { sha: item.sha },
-                            update: {
-                              $set: {
-                                sha: item.sha,
-                                repoName,
-                                message: commitData?.message?.split('\n')[0] || 'Update code',
-                                commitDate: commitDate ? new Date(commitDate) : new Date(),
-                                url: item.html_url
-                              }
-                            },
-                            upsert: true
-                          }
-                        })
-                      }
-                    }
-
-                    if (commits.length === 100) page++
-                    else hasMoreCommits = false
-                  } catch {
-                    hasMoreCommits = false
+                    },
+                    upsert: true
                   }
-                }
+                })
               }
             })
           )
         }
       }
+    } catch (e) {
+      console.warn('[Repos Commits 抓取失败]:', e)
     }
 
-    // ================= 阶段 3：批量写入 MongoDB =================
+    // ================= 批量增量 Upsert 写入 MongoDB =================
     const operations = Array.from(operationsMap.values())
-    let totalSaved = 0
+    let newlyAdded = 0
 
     if (operations.length > 0) {
-      // 分批写入，防止单次 Payload 过大
-      const BATCH_SIZE = 500
-      for (let i = 0; i < operations.length; i += BATCH_SIZE) {
-        const batch = operations.slice(i, i + BATCH_SIZE)
-        const res = await collection.bulkWrite(batch, { ordered: false })
-        totalSaved += (res.upsertedCount || 0) + (res.modifiedCount || 0) + (res.matchedCount || 0)
-      }
+      const resBulk = await collection.bulkWrite(operations, { ordered: false })
+      newlyAdded = (resBulk.upsertedCount || 0)
     }
+
+    // 查询当前库中总数
+    const totalCount = await collection.countDocuments()
 
     await client.close()
     return res.status(200).json({
       success: true,
-      count: operations.length,
-      message: `全量同步完成！共抓取并聚合了 ${operations.length} 条唯一提交记录。`
+      newlyAdded,
+      currentTotalInDB: totalCount,
+      message: `增量同步完成！本次扫描到 ${operations.length} 条最新提交，新增入库 ${newlyAdded} 条，数据库当前共有 ${totalCount} 条记录。`
     })
   } catch (error: any) {
     await client.close()

@@ -2,7 +2,7 @@
 <template>
   <div class="cosmic-hero-wrapper">
     <div class="cosmic-stage">
-      <!-- Canvas 动态星芒与发光流星雨 -->
+      <!-- Canvas 动态星芒与流星雨 -->
       <canvas ref="canvasRef" class="space-canvas"></canvas>
 
       <!-- 3D 核心主场景 -->
@@ -36,18 +36,31 @@
 
           <!-- 2D 融入式人物与倒影 -->
           <div class="character-container">
-            <!-- 人物本体 -->
-            <img 
-              :src="characterImg" 
-              alt="character" 
-              class="character-body" 
-            />
-            <!-- 镜像倒影 -->
-            <img 
-              :src="characterImg" 
-              alt="character reflection" 
-              class="character-reflection" 
-            />
+            <img :src="characterImg" alt="character" class="character-body" />
+            <img :src="characterImg" alt="character reflection" class="character-reflection" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 颗可点击的高亮信标星辰 (Beacon Stars) -->
+      <div class="beacons-layer">
+        <div
+          v-for="beacon in signalList"
+          :key="beacon.id"
+          class="interactive-beacon"
+          :style="{ top: beacon.top, left: beacon.left }"
+          @click="openSignal(beacon)"
+        >
+          <!-- 核心高亮发光核与十字星芒 -->
+          <div class="beacon-core"></div>
+          <div class="beacon-flare-h"></div>
+          <div class="beacon-flare-v"></div>
+          <div class="beacon-ripple"></div>
+          
+          <!-- 悬停微标签 -->
+          <div class="beacon-hint">
+            <span class="hint-dot"></span>
+            <span class="hint-freq">{{ beacon.freq }}</span>
           </div>
         </div>
       </div>
@@ -57,7 +70,7 @@
         class="audio-icon-button"
         :class="{ 'is-playing': isPlaying }"
         @click="toggleAudio"
-        title="播放/暂停宇宙白噪音"
+        title="播放/暂停宇宙背景音"
       >
         <div class="bar"></div>
         <div class="bar"></div>
@@ -67,7 +80,7 @@
       </button>
       <audio ref="audioRef" preload="none" loop :src="cosmicAudio"></audio>
 
-      <!-- SVG 滤镜定义 -->
+      <!-- SVG 噪波滤镜定义 -->
       <svg class="filter-svg" xmlns="http://www.w3.org/2000/svg">
         <filter id="planet-structure">
           <feTurbulence baseFrequency="0.195" />
@@ -81,13 +94,20 @@
       </svg>
     </div>
 
-    <!-- 底部深空羽化渐变 -->
+    <!-- 深空终端书信弹窗 -->
+    <CosmicSignalTerminal 
+      v-model="isModalOpen" 
+      :signal-data="activeSignal" 
+    />
+
+    <!-- 底部深空渐变暗角 -->
     <div class="bottom-dark-fade"></div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import CosmicSignalTerminal from './CosmicSignalTerminal.vue'
 
 import characterImg from '/about/person.webp'
 import cosmicAudio from '/about/cosmic_dreams.mp3'
@@ -96,6 +116,46 @@ const canvasRef = ref(null)
 const audioRef = ref(null)
 const isPlaying = ref(false)
 let animId = null
+
+// 弹窗状态与当前选中信标
+const isModalOpen = ref(false)
+const activeSignal = ref(null)
+
+// 3 颗固定位置与内容的信标数据（避开了中央人物与星球）
+const signalList = ref([
+  {
+    id: 'beacon-1',
+    top: '22%',
+    left: '18%',
+    freq: '1420.405MHz',
+    source: '一路向北',
+    date: '2026.03',
+    message: '坏了'
+  },
+  {
+    id: 'beacon-2',
+    top: '28%',
+    left: '82%',
+    freq: '2411.020MHz',
+    source: 'white66-7',
+    date: '2026.06',
+    message: '神了'
+  },
+  {
+    id: 'beacon-3',
+    top: '68%',
+    left: '14%',
+    freq: '8400.150MHz',
+    source: '鹿丸',
+    date: '2026.08',
+    message: '好了'
+  }
+])
+
+const openSignal = (beacon) => {
+  activeSignal.value = beacon
+  isModalOpen.value = true
+}
 
 const toggleAudio = () => {
   if (!audioRef.value) return
@@ -108,6 +168,7 @@ const toggleAudio = () => {
   }
 }
 
+// Canvas 星空与流星雨渲染
 onMounted(() => {
   const canvas = canvasRef.value
   if (!canvas) return
@@ -120,17 +181,14 @@ onMounted(() => {
   let staticStars = []
   let twinklingStars = []
 
-  // 初始化星空数据（按比例分布）
   const initStars = () => {
-    // 1. 大量静态背景微星（构建深空星尘感）
     staticStars = Array.from({ length: 800 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      size: Math.random() * 0.9 + 0.2, // 0.2px ~ 1.1px 的细微星点
-      alpha: Math.random() * 0.45 + 0.1 // 0.1 ~ 0.55 的微弱明暗差
+      size: Math.random() * 0.9 + 0.2,
+      alpha: Math.random() * 0.45 + 0.1
     }))
 
-    // 2. 少量动态呼吸星（缓慢闪烁）
     twinklingStars = Array.from({ length: 150 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -155,7 +213,6 @@ onMounted(() => {
   handleResize()
   window.addEventListener('resize', handleResize)
 
-  // 3. 动态流星类
   class ShootingStar {
     constructor() {
       this.reset()
@@ -205,11 +262,9 @@ onMounted(() => {
 
   const shootingStars = Array.from({ length: 4 }, () => new ShootingStar())
 
-  // 主渲染循环
   const render = () => {
     ctx.clearRect(0, 0, width, height)
 
-    // A. 批量绘制静态星海
     staticStars.forEach((s) => {
       ctx.fillStyle = `rgba(240, 243, 255, ${s.alpha})`
       ctx.beginPath()
@@ -217,7 +272,6 @@ onMounted(() => {
       ctx.fill()
     })
 
-    // B. 绘制呼吸闪烁星
     twinklingStars.forEach((s) => {
       s.phase += s.speed
       const alpha = s.baseAlpha + Math.sin(s.phase) * 0.3
@@ -227,7 +281,6 @@ onMounted(() => {
       ctx.fill()
     })
 
-    // C. 绘制流星雨
     shootingStars.forEach((star) => {
       star.update()
       star.draw(ctx)
@@ -257,11 +310,10 @@ onMounted(() => {
   inherits: true;
 }
 
-/* 占满整个屏幕 */
 .cosmic-hero-wrapper {
   width: 100vw;
   height: 100vh;
-  height: 100dvh; /* 适配移动端动态地址栏 */
+  height: 100dvh;
   position: relative;
   background-color: #101114;
   overflow: hidden;
@@ -298,6 +350,131 @@ onMounted(() => {
   z-index: 1;
 }
 
+/* ================= 交互星星信标 (Beacon Stars) ================= */
+.beacons-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.interactive-beacon {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interactive-beacon:hover {
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+/* 核心光点 */
+.beacon-core {
+  width: 4.5px;
+  height: 4.5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff, 0 0 20px rgba(180, 215, 255, 0.9);
+  z-index: 2;
+}
+
+/* 十字星芒 */
+.beacon-flare-h {
+  position: absolute;
+  width: 26px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+  animation: flare-glow 3s infinite ease-in-out;
+}
+
+.beacon-flare-v {
+  position: absolute;
+  width: 1px;
+  height: 26px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+  animation: flare-glow 3s infinite ease-in-out;
+}
+
+/* 脉冲扩散光环 */
+.beacon-ripple {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  animation: beacon-wave 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes beacon-wave {
+  0% {
+    width: 6px;
+    height: 6px;
+    opacity: 0.9;
+  }
+  100% {
+    width: 38px;
+    height: 38px;
+    opacity: 0;
+  }
+}
+
+@keyframes flare-glow {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* 悬停时的微型频段指示 */
+.beacon-hint {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(14, 15, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s ease;
+}
+
+.hint-freq {
+  font-family: 
+    monospace;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  
+  text-shadow: 0 0 8px rgba(126, 241, 178, 0.6);
+}
+
+.hint-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #7ef1b2;
+}
+
+.interactive-beacon:hover .beacon-hint {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+}
+
+/* ================= 场景原有 3D 样式 ================= */
 .bottom-dark-fade {
   position: absolute;
   bottom: 0;
@@ -407,7 +584,7 @@ onMounted(() => {
   }
 }
 
-/* 2D 融入式人物样式 */
+/* 2D 人物 */
 .character-container {
   position: absolute;
   transform: translateY(268px);
@@ -437,7 +614,7 @@ onMounted(() => {
   filter: blur(1.5px) brightness(0.65);
 }
 
-/* 行星系 */
+/* 行星系统 */
 @keyframes moon-animation {
   0%, 100% { --moon-angle: 180deg; }
   50% { --moon-angle: 200deg; }
@@ -505,7 +682,6 @@ onMounted(() => {
   opacity: 0.6;
 }
 
-/* 5号木星：SVG 流体噪波地质结构 */
 .planet-5 {
   transform-style: preserve-3d;
   border-radius: 50%;
@@ -593,6 +769,7 @@ onMounted(() => {
   clip-path: ellipse(47% 22% at 50% 50%);
 }
 
+/* 背景音按钮 */
 .audio-icon-button {
   border: 1px solid rgba(255, 255, 255, 0.35);
   padding: 0.5rem;
@@ -603,7 +780,6 @@ onMounted(() => {
   position: absolute;
   right: 2rem;
   bottom: 2.2rem;
-  top: auto;
   z-index: 4200;
   display: flex;
   gap: 0.15rem;
@@ -646,40 +822,20 @@ onMounted(() => {
   to { transform: scaleY(1.3); }
 }
 
-/* 屏幕高度自适应缩放（防止较矮屏幕星球超出顶部） */
 @media (max-height: 850px) {
-  .scene-scaler {
-    transform: scale(0.85) translateY(40px);
-  }
+  .scene-scaler { transform: scale(0.85) translateY(40px); }
 }
 @media (max-height: 700px) {
-  .scene-scaler {
-    transform: scale(0.72) translateY(30px);
-  }
+  .scene-scaler { transform: scale(0.72) translateY(30px); }
 }
-
-/* 针对中屏幕（平板 / 平板竖屏） */
 @media (max-width: 900px) {
-  .scene-scaler {
-    transform: scale(0.76) translateY(38px);
-  }
-  .audio-icon-button {
-    right: 1.2rem;
-    bottom: 1.5rem;
-  }
+  .scene-scaler { transform: scale(0.76) translateY(38px); }
+  .audio-icon-button { right: 1.2rem; bottom: 1.5rem; }
 }
-
-/* 针对小屏幕（手机端） */
 @media (max-width: 600px) {
-  .scene-scaler {
-    transform: scale(0.6) translateY(30px);
-  }
+  .scene-scaler { transform: scale(0.6) translateY(30px); }
 }
-
-/* 针对超小屏幕手机 */
 @media (max-width: 400px) {
-  .scene-scaler {
-    transform: scale(0.5) translateY(25px);
-  }
+  .scene-scaler { transform: scale(0.5) translateY(25px); }
 }
 </style>
