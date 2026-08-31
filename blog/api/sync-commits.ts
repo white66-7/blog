@@ -1,37 +1,20 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { MongoClient } from 'mongodb'
-import process from 'node:process'
-import * as dns from 'node:dns'
-
-// 本地开发 DNS 兼容
-const DNS_SERVERS = (process.env.DNS_SERVERS || '').split(',').map(s => s.trim()).filter(Boolean)
-if (DNS_SERVERS.length) {
-  try { dns.setServers(DNS_SERVERS) } catch { /* ignore */ }
-}
+import { connectToDatabase } from './lib/mongodb'
 
 const GITHUB_USERNAME = 'white66-7'
 
 export const config = {
-  maxDuration: 15 // 增量同步通常 1~2 秒即可完成
+  maxDuration: 15
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'OPTIONS') return res.status(200).end()
 
-  const uri = process.env.MONGODB_URI
   const token = process.env.GITHUB_TOKEN
 
-  if (!uri) return res.status(500).json({ error: 'MONGODB_URI 未配置' })
-
-  const client = new MongoClient(uri, {
-    serverSelectionTimeoutMS: 3000,
-    connectTimeoutMS: 3000
-  })
-
   try {
-    await client.connect()
-    const db = client.db()
+    const { db } = await connectToDatabase()
     const collection = db.collection('github_commits')
 
     const headers: Record<string, string> = {
@@ -90,7 +73,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (reposRes.ok) {
         const recentRepos = (await reposRes.json()) as any[]
         if (Array.isArray(recentRepos)) {
-          // 并发抓取这几个活跃仓库的最新 20 条提交
           await Promise.all(
             recentRepos.map(async (repo) => {
               const repoOwner = repo.owner?.login || GITHUB_USERNAME
@@ -141,10 +123,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       newlyAdded = (resBulk.upsertedCount || 0)
     }
 
-    // 查询当前库中总数
     const totalCount = await collection.countDocuments()
 
-    await client.close()
     return res.status(200).json({
       success: true,
       newlyAdded,
@@ -152,7 +132,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       message: `增量同步完成！本次扫描到 ${operations.length} 条最新提交，新增入库 ${newlyAdded} 条，数据库当前共有 ${totalCount} 条记录。`
     })
   } catch (error: any) {
-    await client.close()
     return res.status(500).json({ error: error.message })
   }
 }

@@ -1,32 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { MongoClient, Db } from 'mongodb'
-import process from 'node:process'
-import * as dns from 'node:dns'
-
-const DNS_SERVERS = (process.env.DNS_SERVERS || '').split(',').map(s => s.trim()).filter(Boolean)
-if (DNS_SERVERS.length) {
-  try { dns.setServers(DNS_SERVERS) } catch { /* ignore invalid config */ }
-}
-
-const uri = process.env.MONGODB_URI || ''
-let cachedClient: MongoClient | null = null
-let cachedDb: Db | null = null
-
-async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
-  if (cachedClient && cachedDb) return { client: cachedClient, db: cachedDb }
-  if (!uri) throw new Error('MONGODB_URI not configured')
-
-  const client = new MongoClient(uri, {
-    serverSelectionTimeoutMS: 3000,
-    connectTimeoutMS: 3000,
-    maxPoolSize: 10
-  })
-  await client.connect()
-  const db = client.db()
-  cachedClient = client
-  cachedDb = db
-  return { client, db }
-}
+import { connectToDatabase } from './lib/mongodb'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
