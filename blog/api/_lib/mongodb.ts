@@ -5,7 +5,7 @@ import process from 'node:process'
 
 const DNS_SERVERS = (process.env.DNS_SERVERS || '').split(',').map(s => s.trim()).filter(Boolean)
 if (DNS_SERVERS.length) {
-  try { dns.setServers(DNS_SERVERS) } catch { /* ignore */ }
+  try { dns.setServers(DNS_SERVERS) } catch (e: any){ console.warn('Invalid DNS_SERVERS, using system defaults:', e.message)}
 }
 
 const uri = process.env.MONGODB_URI || ''

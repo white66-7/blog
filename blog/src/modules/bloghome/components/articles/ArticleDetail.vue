@@ -1,4 +1,5 @@
 <template>
+  <div class="article-detail-container">
   <Navbar :transparent="false" />
 
   <button class="back-btn" @click="$router.back()">
@@ -85,6 +86,7 @@
       <img :src="previewSrc" class="lightbox-image" />
     </div>
   </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">

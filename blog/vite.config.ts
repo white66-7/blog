@@ -23,7 +23,6 @@ export default defineConfig({
     port: process.env.PORT ? Number(process.env.PORT) : 5173,
     host: true
   },
-  // ================= 💡 核心构建分包与性能优化 =================
   build: {
     // 1. 关闭生产环境 sourcemap，大幅降低打包体积
     sourcemap: false,

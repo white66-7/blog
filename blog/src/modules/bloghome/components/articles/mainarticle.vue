@@ -205,9 +205,8 @@ onDeactivated(() => {
   console.log('📦 MainArticle 被缓存，离开页面')
 })
 
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave(() => {
   if (scrollRef.value) globalSavedScroll = scrollRef.value.scrollTop
-  next()
 })
 
 onMounted(async () => {

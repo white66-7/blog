@@ -10,13 +10,20 @@
   <!-- 预连接与字体加载 -->
   <link rel="stylesheet" href="/text/ancient-font/sliced-font/result.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/text/black/YouSheBiaoTiHei/result.css" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/dyh/dist/得意黑/result.css" media="print" onload="this.media='all'">
 
   <!-- 首屏极速加载样式（内联在 Head，0 延迟解析） -->
   <style>
     body {
       margin: 0;
       background-color: #FAF7F2;
+    }
+
+    @font-face {
+      font-family: '得意黑'; 
+      src: url('/text/deiyihei/SmileySans-Oblique.otf.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap; /* 防止字体加载时文字短暂不可见 */
     }
 
     /* 原生首屏占位加载层 */
