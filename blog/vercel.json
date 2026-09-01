@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/sync",
+      "path": "/api/sync-commits",
       "schedule": "0 16 * * *"
     }
   ],
