@@ -5,7 +5,6 @@
     <div class="timeline-header">
       <h2 class="journey-title">COMMITS JOURNEY</h2>
     </div>
-
     <!-- 可滚动区域 -->
     <div class="timeline-scroll-area">
       <!-- ===== 骨架加载图：数据未成功之前始终显示 ===== -->
@@ -169,7 +168,6 @@ function formatCommits(commits: RawCommit[]): TimelineEvent[] {
   })
 }
 
-// 建议在开发阶段将缓存时间缩短，或者在控制台输入 localStorage.removeItem('cyber_github_timeline')
 const TIMELINE_CACHE_KEY = 'cyber_github_timeline'
 const CACHE_TTL = 5 * 60 * 1000 // 改为 5 分钟刷新一次
 

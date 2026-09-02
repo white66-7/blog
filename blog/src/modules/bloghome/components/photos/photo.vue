@@ -66,7 +66,7 @@ const albumsData = [
       { title: '给朋友拍的照片', url: '/album/人物/朋友.webp' },
       { title: '在旧宿舍的最后一晚', url: '/album/人物/dji.webp' },
       { title: '过去', url: '/album/人物/student.webp' },
-      { title: '或许是未来', url: '/album/人物/adult.webp' },
+      { title: '无题', url: '/album/人物/adult.webp' },
       { title: '三人成行', url: '/album/人物/三人成行.mp4', cover: '/album/人物/三人成行封面.webp' },
       { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
     ]
@@ -86,9 +86,11 @@ const albumsData = [
       { title: 'NO SEVICE', url: '/album/风景/mountain.webp' },
       { title: '这我真心觉得特别好看', url: '/album/风景/真心好看.webp' },
       { title: '这云神似Deepseek', url: '/album/风景/云.webp' },
-      { title: '不愧是上海', url: '/album/风景/上海.mp4', cover: '/album/风景/上海封面.webp' },
+      { title: '上海二次元商场', url: '/album/风景/上海.mp4', cover: '/album/风景/上海封面.webp' },
       { title: '孤独的一颗树', url: '/album/风景/孤独的树.mp4', cover: '/album/风景/孤独的树封面.webp' },
       { title: '拍到彩虹了', url: '/album/风景/彩虹.webp' },
+      { title: '低曝光 + 冷暖对比具备的美感', url: '/album/风景/冷暖对比.webp' },
+      { title: '逆水行舟，不进则退', url: '/album/风景/水中船.mp4',cover: '/album/风景/水中船.webp'},
     ]
   },
   {
@@ -98,13 +100,17 @@ const albumsData = [
     photos: [
       { title: '不是说7月这几天要硬抗台风吗', url: '/album/暑假/tree.webp' },
       { title: '极其奢侈的一顿晚餐', url: '/album/暑假/晚餐.webp' },
-      { title: '初中吃到现在的羊肉面', url: '/album/暑假/初中吃到现在的羊肉面.webp' },
-      { title: '暑假和朋友一起去看的电影', url: '/album/暑假/failure man.webp' },
+      { title: '一直吃到现在的羊肉面', url: '/album/暑假/初中吃到现在的羊肉面.webp' },
+      { title: '崭新之日', url: '/album/暑假/failure man.webp' },
       { title: '细长的足节虫', url: '/album/暑假/足节虫.webp' },
-      { title: '特写：蜻蜓', url: '/album/暑假/蜻蜓.webp' },
+      { title: '蜻蜓特写', url: '/album/暑假/蜻蜓.webp' },
       { title: '上海教堂旁的图书馆', url: '/album/暑假/图书馆.webp' },
-      { title: '早有耳闻的徐家汇篮球场', url: '/album/暑假/篮球.webp' },
+      { title: '徐家汇篮球场', url: '/album/暑假/篮球.webp' },
       { title: '辛劳了一年的风扇', url: '/album/暑假/风扇.webp' },
+      { title: '好久不打', url: '/album/暑假/好久不打.webp' },
+      { title: '似乎吃腻烤肉了', url: '/album/暑假/似乎吃腻烤肉了.webp' },
+      { title: '奥得赛', url: '/album/暑假/渺小的人.webp' },
+      { title: '诺兰的恶趣味', url: '/album/暑假/闪死我了.mp4', cover: '/album/暑假/闪死我了.webp' },
     ]
   }
 ]
