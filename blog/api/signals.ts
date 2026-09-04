@@ -69,22 +69,49 @@ async function createSignal(req: any, res: any) {
   }
 }
 
-// 2. 获取已审核留言列表 (GET)
+// 2. 获取留言列表 (GET) 
 async function getSignals(req: any, res: any) {
   try {
     const { db } = await connectToDatabase()
     const adminToken = req.headers['x-admin-token']
 
-    // 如果携带了正确的管理员密码，返回待审核列表
-    if (adminToken && adminToken === process.env.ADMIN_SECRET) {
+    // ==========================================
+    // ==========================================
+    if (adminToken) {
+      const serverSecret = process.env.ADMIN_SECRET
+
+      // 服务端根本没读取到环境变量
+      if (!serverSecret) {
+        return res.status(500).json({ 
+          success: false, 
+          error: '服务端未读取到 ADMIN_SECRET！如果你刚在 Vercel 添加了变量，必须去 Deployments 点一次【Redeploy（重新部署）】才能生效！' 
+        })
+      }
+
+      // 诊断 2：密码输入错误
+      if (adminToken.trim() !== serverSecret.trim()) {
+        return res.status(401).json({ 
+          success: false, 
+          error: '管理员密钥错误！请检查输入的密码是否与 Vercel 中的配置完全一致。' 
+        })
+      }
+
+      // 诊断 3：密码完全正确，查询 pending 数据
       const pendingSignals = await db.collection('signals')
         .find({ status: 'pending' })
         .sort({ createdAt: -1 })
         .toArray()
-      return res.json({ success: true, data: pendingSignals })
-    }
 
-    // 普通访客：只返回已通过的留言
+      // 顺便查一下数据库里一共有多少条数据（方便排查）
+      const totalCount = await db.collection('signals').countDocuments()
+
+      return res.json({ 
+        success: true, 
+        data: pendingSignals,
+        totalInDb: totalCount // 库里的总数据量
+      })
+    }
+    // B. 普通访客（无 x-admin-token 头）：只返回已审核通过的留言
     const signals = await db.collection('signals')
       .find({ status: 'approved' }, { projection: { clientIp: 0 } })
       .sort({ createdAt: -1 })
@@ -93,7 +120,8 @@ async function getSignals(req: any, res: any) {
 
     return res.json({ success: true, data: signals })
   } catch (err: any) {
-    return res.status(500).json({ error: '获取留言失败' })
+    console.error('获取留言失败:', err)
+    return res.status(500).json({ error: '获取留言失败: ' + err.message })
   }
 }
 // 3. 管理员审核留言 (PATCH)
