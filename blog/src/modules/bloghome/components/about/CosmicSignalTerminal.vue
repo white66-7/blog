@@ -1,124 +1,250 @@
-<!-- src/modules/bloghome/components/about/CosmicStars.vue -->
+<!-- src/modules/bloghome/components/about/CosmicSignalTerminal.vue -->
 <template>
-  <div class="stardust-layer" aria-hidden="true">
-    <!-- 1. 铺底静态微星群（通过单元素 box-shadow 高性能渲染） -->
-    <span class="dust dust-static"></span>
+  <Teleport to="body">
+    <Transition name="hud-pop">
+      <div 
+        v-if="modelValue" 
+        class="terminal-overlay"
+        @click.self="handleClose"
+      >
+        <!-- 全息浮空微窗 -->
+        <div class="hud-widget">
+          <!-- 顶部柔和星芒光晕 -->
+          <div class="ambient-glow-top"></div>
 
-    <!-- 2. 动态呼吸闪烁的明亮星点（错开节奏与位置） -->
-    <span class="dust dust-breathe dust-1"></span>
-    <span class="dust dust-breathe dust-2"></span>
-    <span class="dust dust-breathe dust-3"></span>
-    <span class="dust dust-breathe dust-4"></span>
-    <span class="dust dust-breathe dust-5"></span>
-  </div>
+          <!-- 顶栏：Orbitron 科幻数字频段 + 关闭按钮 -->
+          <div class="hud-header">
+            <div class="signal-tag">
+              <span class="pulse-beacon"></span>
+              <span class="tech-num freq-value">{{ signalData?.freq || '0000.000MHz' }}</span>
+            </div>
+
+            <button class="hud-close-btn" @click="handleClose" title="关闭 (ESC)">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- 主体：得意黑正文 (Smiley Sans) -->
+          <div class="hud-body">
+            <p class="message-text smiley-font">{{ signalData?.message }}</p>
+          </div>
+
+          <!-- 底部：发信人 (得意黑) 与 时间戳 (Orbitron 数字) -->
+          <div class="hud-footer">
+            <div class="sender-info">
+              <span class="sender-icon">◇</span>
+              <span class="sender-name smiley-font">{{ signalData?.source }}</span>
+            </div>
+            <div class="tech-num timestamp">{{ signalData?.date }}</div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
+import { onMounted, onUnmounted } from 'vue'
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  signalData: {
+    type: Object,
+    default: () => ({})
+  }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const handleClose = () => {
+  emit('update:modelValue', false)
+}
+
+const onKeyDown = (e) => {
+  if (e.key === 'Escape' && props.modelValue) {
+    handleClose()
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', onKeyDown))
+onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 </script>
 
 <style scoped>
-.stardust-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
+.smiley-font {
+  font-family: 'Smiley Sans', 'SmileySans-Oblique', '得意黑', sans-serif;
+  letter-spacing: 0.08em;
 }
 
-/* ================= 静态微星点阵 ================= */
-.dust-static {
+/* 科技感数字 (等宽紧凑，专用于频率与时间) */
+.tech-num {
+  font-family: 'Orbitron', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+/* ================= 遮罩背景 ================= */
+.terminal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(4, 5, 8, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ================= 全息浮空微窗 ================= */
+.hud-widget {
+  --cyan-mint: #7ef1b2;
+
+  position: relative;
+  width: 100%;
+  max-width: 310px;
+  background: radial-gradient(100% 100% at 50% 0%, rgba(22, 25, 34, 0.85) 0%, rgba(12, 13, 18, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  box-shadow: 
+    0 24px 48px -12px rgba(0, 0, 0, 0.8),
+    0 0 30px -5px rgba(126, 241, 178, 0.08);
+  padding: 1rem 1.35rem 0.95rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 顶部柔和微光 */
+.ambient-glow-top {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 1.5px;
-  height: 1.5px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(126, 241, 178, 0.45), transparent);
+  filter: blur(0.5px);
+}
+
+/* ================= 顶栏 ================= */
+.hud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.signal-tag {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pulse-beacon {
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
+  background: var(--cyan-mint);
+  box-shadow: 0 0 6px var(--cyan-mint);
+  animation: pulse-ring 2.4s infinite ease-in-out;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.freq-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.hud-close-btn {
   background: transparent;
-  box-shadow:
-    28px 18px 0 0 rgba(255, 255, 255, 0.4),
-    64px 42px 0.5px 0 rgba(255, 255, 255, 0.25),
-    112px 14px 0 0 rgba(255, 255, 255, 0.5),
-    158px 60px 0 0 rgba(255, 255, 255, 0.28),
-    206px 32px 0.5px 0 rgba(255, 255, 255, 0.35),
-    248px 76px 0 0 rgba(255, 255, 255, 0.22),
-    292px 20px 0 0 rgba(255, 255, 255, 0.45),
-    336px 92px 0.5px 0 rgba(255, 255, 255, 0.26),
-    370px 54px 0 0 rgba(255, 255, 255, 0.32),
-    398px 108px 0 0 rgba(255, 255, 255, 0.24),
-    52px 130px 0 0 rgba(255, 255, 255, 0.3),
-    140px 160px 0.5px 0 rgba(255, 255, 255, 0.2),
-    260px 145px 0 0 rgba(255, 255, 255, 0.28),
-    340px 175px 0 0 rgba(255, 255, 255, 0.18),
-    90px 210px 0 0 rgba(255, 255, 255, 0.24),
-    310px 230px 0.5px 0 rgba(255, 255, 255, 0.2);
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
 }
 
-/* ================= 呼吸闪耀亮星 ================= */
-.dust-breathe {
-  position: absolute;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 6px rgba(180, 220, 255, 0.8), 0 0 12px rgba(94, 200, 240, 0.4);
-  animation: star-breathe ease-in-out infinite alternate;
+.hud-close-btn:hover {
+  color: var(--cyan-mint);
+  transform: scale(1.15);
 }
 
-/* 各亮星的位置、大小、闪烁周期与延迟 */
-.dust-1 {
-  width: 2.5px;
-  height: 2.5px;
-  top: 18%;
-  left: 22%;
-  animation-duration: 4.2s;
-  animation-delay: 0s;
+/* ================= 主体文字 (得意黑高光呈现) ================= */
+.hud-body {
+  padding: 1.15rem 0 1.25rem;
 }
 
-.dust-2 {
-  width: 2px;
-  height: 2px;
-  top: 36%;
-  left: 58%;
-  animation-duration: 5.6s;
-  animation-delay: 1.4s;
+.message-text {
+  margin: 0;
+  font-size: 1.65rem; /* 得意黑为窄斜体，稍大字号视觉冲击力极佳 */
+  line-height: 1.25;
+  color: #ffffff;
+  text-shadow: 0 0 16px rgba(126, 241, 178, 0.3);
+  word-break: break-word;
 }
 
-.dust-3 {
-  width: 3px;
-  height: 3px;
-  top: 15%;
-  left: 78%;
-  animation-duration: 3.8s;
-  animation-delay: 0.7s;
+/* ================= 底部信息 ================= */
+.hud-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.dust-4 {
-  width: 2px;
-  height: 2px;
-  top: 72%;
-  left: 35%;
-  animation-duration: 4.8s;
-  animation-delay: 2.1s;
+.sender-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.dust-5 {
-  width: 2.5px;
-  height: 2.5px;
-  top: 65%;
-  left: 82%;
-  animation-duration: 6.2s;
-  animation-delay: 0.3s;
+.sender-icon {
+  color: var(--cyan-mint);
+  font-size: 0.55rem;
+  opacity: 0.75;
 }
 
-/* 呼吸缩放与明暗光晕动画 */
-@keyframes star-breathe {
-  0% {
-    opacity: 0.15;
-    transform: scale(0.75);
-    box-shadow: 0 0 2px rgba(180, 220, 255, 0.3);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1.2);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 16px rgba(94, 200, 240, 0.6);
-  }
+.sender-name {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.timestamp {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ================= 动效 ================= */
+.hud-pop-enter-active,
+.hud-pop-leave-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hud-pop-enter-from,
+.hud-pop-leave-to {
+  opacity: 0;
+}
+
+.hud-pop-enter-from .hud-widget {
+  transform: scale(0.95) translateY(4px);
+}
+
+.hud-pop-leave-to .hud-widget {
+  transform: scale(0.97);
+  opacity: 0;
 }
 </style>

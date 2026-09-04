@@ -268,7 +268,7 @@ onUnmounted(() => {
 .say-header h3 {
   margin: 0;
   font-size: 25px;
-  font-family: 'ShangShouJiangHuShuFa';
+  font-family:  'Orbitron','ShangShouJiangHuShuFa';
   font-weight: normal;
   letter-spacing: 1px;
   color: #2c2c2c;
@@ -283,7 +283,7 @@ onUnmounted(() => {
   margin-left: auto;
   font-size: 12px;
   color: #999;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
   opacity: 0.7;
 }
 
@@ -302,7 +302,7 @@ onUnmounted(() => {
 
 .content {
   margin: 0 0 10px 0;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
   font-size: 14.5px;
   line-height: 1.6;
   font-weight: 400;
@@ -331,7 +331,7 @@ onUnmounted(() => {
 
 .date-text {
   font-size: 12px;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
   color: #555;
 }
 
@@ -402,13 +402,14 @@ onUnmounted(() => {
 .modal-title h2 {
   margin: 0;
   font-size: 20px;
-  font-family: 'ShangShouJiangHuShuFa', sans-serif;
+  font-family:  'Orbitron','ShangShouJiangHuShuFa', sans-serif;
   font-weight: normal;
   color: #2c2c2c;
   letter-spacing: 1px;
 }
 
 .count-badge {
+  font-family:  'Orbitron';
   font-size: 12px;
   background: #f0e6dc;
   color: #8c6a4e;
@@ -528,7 +529,7 @@ onUnmounted(() => {
 .timeline-date {
   font-size: 12px;
   color: #8c8c8c;
-  font-family: 'YouSheBiaoTiHei', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', sans-serif;
   letter-spacing: 0.5px;
 }
 
@@ -537,7 +538,7 @@ onUnmounted(() => {
   font-size: 14px;
   line-height: 1.6;
   color: #333333;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
 }
 
 /* 适配移动端 */

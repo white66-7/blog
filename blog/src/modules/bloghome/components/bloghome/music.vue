@@ -179,7 +179,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
   color: #2C2C2C;
   transition: all 0.3s ease;
   cursor: pointer;

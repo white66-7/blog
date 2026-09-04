@@ -117,12 +117,22 @@ const audioRef = ref(null)
 const isPlaying = ref(false)
 let animId = null
 
-// 弹窗状态与当前选中信标
 const isModalOpen = ref(false)
 const activeSignal = ref(null)
 
-// 3 颗固定位置与内容的信标数据（避开了中央人物与星球）
-const signalList = ref([
+// 预设安全分布坐标池（完美避开中央人物与主星系统）
+const safePositions = [
+  { top: '22%', left: '18%' },
+  { top: '28%', left: '82%' },
+  { top: '68%', left: '14%' },
+  { top: '18%', left: '72%' },
+  { top: '48%', left: '86%' },
+  { top: '42%', left: '12%' },
+  { top: '75%', left: '78%' }
+]
+
+// 默认兜底示例（网络未通或数据库为空时显示）
+const defaultSignals = [
   {
     id: 'beacon-1',
     top: '22%',
@@ -150,13 +160,43 @@ const signalList = ref([
     date: '2026.08',
     message: '好了'
   }
-])
+]
+
+const signalList = ref([...defaultSignals])
+
+const fetchApprovedSignals = async () => {
+  try {
+    const res = await fetch('/api/signals')
+    const json = await res.json()
+    if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+      signalList.value = json.data.map((item, index) => {
+        const basePos = safePositions[index % safePositions.length]
+        
+        // 增加 ±2% 的随机漂移，防止超过 7 条时完全重叠
+        const offsetTop = (Math.random() * 4 - 2).toFixed(1)
+        const offsetLeft = (Math.random() * 4 - 2).toFixed(1)
+        
+        return {
+          id: item._id || `beacon-${index}`,
+          top: `calc(${basePos.top} + ${offsetTop}%)`,
+          left: `calc(${basePos.left} + ${offsetLeft}%)`,
+          freq: item.freq || '1420.405MHz',
+          source: item.source,
+          date: item.date,
+          message: item.message
+        }
+      })
+    }
+  } catch (e) {
+    console.warn('使用默认信标数据:', e)
+  }
+}
+
 
 const openSignal = (beacon) => {
   activeSignal.value = beacon
   isModalOpen.value = true
 }
-
 const toggleAudio = () => {
   if (!audioRef.value) return
   if (audioRef.value.paused) {
@@ -170,6 +210,7 @@ const toggleAudio = () => {
 
 // Canvas 星空与流星雨渲染
 onMounted(() => {
+  fetchApprovedSignals()
   const canvas = canvasRef.value
   if (!canvas) return
   const ctx = canvas.getContext('2d')
@@ -454,11 +495,11 @@ onMounted(() => {
 }
 
 .hint-freq {
-  font-family: 
+  font-family: 'Orbitron',
     monospace;
   letter-spacing: 0.1em;
   font-variant-numeric: tabular-nums;
-  
+  font-width: 200;
   text-shadow: 0 0 8px rgba(126, 241, 178, 0.6);
 }
 

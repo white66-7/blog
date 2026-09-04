@@ -143,7 +143,7 @@ body {
   background: #1e1a16;
   min-height: 100vh;
   overflow-x: hidden;
-  font-family: 'Times New Roman', serif;
+  font-family: 'Orbitron','Times New Roman', serif;
 }
 .hero-fullscreen {
   min-height: calc(100vh - 80px);
@@ -301,15 +301,15 @@ body {
     font-size:12px;
     letter-spacing:.22em;
     color:#8a7158;
-    font-family: "Times New Roman", serif;
+    font-family: 'Orbitron',"Times New Roman", serif;
     text-transform:uppercase;
     margin-bottom:8px;
 }
 
 .meta-value{
-    font-family:"Noto Serif SC";
+    font-family:'Orbitron',"Noto Serif SC";
     font-size:20px;
-    font-weight:700;
+    font-weight:400;
     color:#2d1d12;
 }
 

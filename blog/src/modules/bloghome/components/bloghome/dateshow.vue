@@ -145,7 +145,7 @@ onUnmounted(() => {
 .text {
   z-index: 1;
   display: inline-block;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family: 'Orbitron', 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   font-size: 32px;
   font-weight: normal;
   letter-spacing: 1px;

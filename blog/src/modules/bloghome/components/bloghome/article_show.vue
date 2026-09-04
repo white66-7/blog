@@ -334,7 +334,7 @@ onUnmounted(() => {
 .card__date {
   font-size: 12px;
   color: #999;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
   margin-bottom: 8px;
 }
 
@@ -342,7 +342,7 @@ onUnmounted(() => {
 .card__views {
   font-size: 12px;
   color: #999;
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -388,7 +388,7 @@ onUnmounted(() => {
 }
 
 .card__excerpt {
-  font-family: 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
   font-size: 13px;
   color: #555;
   line-height: 1.4;

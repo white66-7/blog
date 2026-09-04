@@ -482,7 +482,7 @@ onMounted(async () => {
 }
 
 .card__date {
-  font-family: 'YouSheBiaoTiHei';
+  font-family:  'Orbitron','YouSheBiaoTiHei';
   font-size: 12px;
   color: #9CA3AF;
   margin-bottom: 0;
@@ -493,7 +493,7 @@ onMounted(async () => {
 /* 浏览量容器 */
 .card__views {
   margin-top: 0;
-  font-family: 'YouSheBiaoTiHei';
+  font-family:  'Orbitron','YouSheBiaoTiHei';
   font-size: 12px;
   color: #9CA3AF;
   font-weight: normal;

@@ -215,6 +215,7 @@ onUnmounted(() => {
   width: 100%;
   margin: 0 auto;
   align-items: flex-start;
+  font-family: 'Orbitron';
 }
 
 .intro-side {
@@ -276,6 +277,7 @@ onUnmounted(() => {
 
   .stat-num,
   .stat-value {
+    font-family: 'Orbitron';
     font-size: 2rem;
   }
 }
@@ -327,26 +329,23 @@ onUnmounted(() => {
 }
 
 .stat-num {
-  font-family: 'Fraunces', serif;
-  font-size: 2.5rem;
-  font-weight: 300;
+  font-family: 'Orbitron', monospace; /* ✅ 改用 Orbitron */
+  font-size: 2.2rem; /* Orbitron 稍宽，2.2~2.4rem 视觉效果最佳 */
+  font-weight: 200;  /* 推荐 600 粗细，机甲科幻感最足 */
   color: #0047FF;
   line-height: 1;
   min-height: 2.5rem;
-  /* 固定高度，防止切换跳动 */
   display: flex;
   align-items: center;
-  /* 垂直居中 */
 }
 
 .stat-value {
-  font-family: 'Fraunces', serif;
-  font-size: 2.5rem;
-  font-weight: 300;
+  font-family: 'Orbitron', monospace; /* ✅ 改用 Orbitron */
+  font-size: 2.3rem;
+  font-weight: 200;
   color: #0047FF;
   line-height: 1;
 }
-
 .stat-label {
   font-family: 'DM Mono', monospace;
   font-size: 0.75rem;
