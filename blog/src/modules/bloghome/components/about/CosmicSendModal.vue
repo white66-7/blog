@@ -1,7 +1,7 @@
 <!-- src/modules/bloghome/components/about/CosmicSendModal.vue -->
 <template>
   <Teleport to="body">
-    <!-- 1. 独立暗黑遮罩：平滑淡入淡出，不随弹窗卡片缩放晃动 -->
+    <!-- 1. 独立暗黑遮罩 -->
     <Transition name="backdrop-fade">
       <div 
         v-if="modelValue" 
@@ -10,7 +10,7 @@
       ></div>
     </Transition>
 
-    <!-- 2. 弹窗主体：进入采用 animate__bounceIn，退出采用 animate__fadeOut -->
+    <!-- 2. 弹窗主体 -->
     <Transition
       enter-active-class="animate__animated animate__bounceIn"
       leave-active-class="animate__animated animate__fadeOut"
@@ -25,7 +25,7 @@
           <div class="modal-header">
             <span class="modal-title">留言</span>
             <button class="close-btn" @click="handleClose" title="关闭 (ESC)">
-              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="1.8" fill="none">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.8" fill="none">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
@@ -48,7 +48,7 @@
             <div class="textarea-wrapper">
               <textarea 
                 v-model="form.message" 
-                rows="3" 
+                rows="5" 
                 placeholder="留下一句想说的话..." 
                 maxlength="40"
                 class="clean-textarea smiley-font"
@@ -89,7 +89,7 @@ const form = reactive({
   message: ''
 })
 
-// 打开弹窗自动聚焦输入框，提升操作灵敏度
+// 打开弹窗自动聚焦输入框
 watch(() => props.modelValue, (val) => {
   if (val) {
     nextTick(() => {
@@ -121,10 +121,7 @@ const submitSignal = async () => {
     const data = await res.json()
 
     if (data.success) {
-      // 核心改动：立即关闭弹窗，零延迟秒关
       handleClose()
-
-      // 退出动画（约250ms）结束后在幕后静默清空表单
       setTimeout(() => {
         form.source = ''
         form.message = ''
@@ -147,7 +144,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 </script>
 
 <style scoped>
-/* 还原原生光标，防止主页全局 cursor: none 导致输入找不到鼠标 */
+/* 还原原生光标 */
 .modal-wrapper,
 .modal-wrapper * {
   cursor: auto !important;
@@ -168,8 +165,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   letter-spacing: 0.04em;
 }
 
-/* ================= 解决迟钝的关键：动画提速 ================= */
-/* 覆盖 Animate.css 原本拖泥带水的 1s 默认时长 */
+/* 动画时长控制 */
 .animate__bounceIn {
   --animate-duration: 0.38s !important;
   animation-duration: 0.38s !important;
@@ -180,12 +176,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   animation-duration: 0.22s !important;
 }
 
-/* 独立遮罩层 */
+/* 遮罩背景 */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 99998;
-  background: rgba(8, 9, 11, 0.68);
+  background: rgba(8, 9, 11, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -199,7 +195,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   opacity: 0;
 }
 
-/* 浮动容器 */
+/* 浮动居中容器 */
 .modal-wrapper {
   position: fixed;
   inset: 0;
@@ -207,19 +203,19 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem;
   pointer-events: auto;
 }
 
-/* 卡片主体 */
+/* 卡片主体：扩大至 490px */
 .modal-card {
   width: 100%;
-  max-width: 320px;
+  max-width: 490px;
   background: #141518;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
-  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow: 0 28px 56px -12px rgba(0, 0, 0, 0.8);
+  padding: 28px 32px;
   box-sizing: border-box;
 }
 
@@ -228,19 +224,20 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 22px;
 }
 
 .modal-title {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.5px;
 }
 
 .close-btn {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.35);
   padding: 4px;
   display: flex;
   align-items: center;
@@ -249,29 +246,29 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 }
 
 .close-btn:hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .close-btn:active {
-  transform: scale(0.88);
+  transform: scale(0.9);
 }
 
-/* 表单输入 */
+/* 表单主体 */
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
 .clean-input,
 .clean-textarea {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 8px 11px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 12px 16px;
   color: #ffffff;
-  font-size: 13px;
+  font-size: 15px;
   box-sizing: border-box;
   outline: none;
   transition: border-color 0.15s, background 0.15s;
@@ -279,8 +276,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
 .clean-input::placeholder,
 .clean-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 12px;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 14px;
 }
 
 .clean-input:focus,
@@ -295,15 +292,17 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
 .clean-textarea {
   resize: none;
-  padding-bottom: 22px;
-  font-size: 14px;
+  min-height: 120px;
+  padding-bottom: 28px;
+  font-size: 16px;
+  line-height: 1.45;
 }
 
 .word-counter {
   position: absolute;
-  right: 8px;
-  bottom: 6px;
-  font-size: 10px;
+  right: 14px;
+  bottom: 10px;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.25);
   font-family: ui-monospace, SFMono-Regular, monospace;
   pointer-events: none;
@@ -314,42 +313,49 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .status-tip {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .status-tip.error {
   color: #ff6b6b;
 }
 
-/* 提交按钮 */
+/* 按钮放大 */
 .submit-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.85);
-  padding: 5px 14px;
-  border-radius: 5px;
-  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 8px 24px;
+  border-radius: 7px;
+  font-size: 14px;
+  letter-spacing: 0.5px;
   outline: none;
   transition: all 0.15s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.55);
   color: #ffffff;
 }
 
 .submit-btn:active:not(:disabled) {
-  transform: scale(0.93);
+  transform: scale(0.94);
 }
 
 .submit-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed !important;
+}
+
+@media (max-width: 540px) {
+  .modal-card {
+    padding: 22px 20px;
+  }
 }
 </style>

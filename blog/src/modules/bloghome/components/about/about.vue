@@ -19,12 +19,7 @@
     <div class="content-wrapper">
       <TechStackCard />
       <div class="skill-sections">
-        <SkillGroup
-          v-for="(group, index) in skillGroups"
-          :key="group.title"
-          :group="group"
-          :index="index"
-        />
+        <SkillGroup v-for="(group, index) in skillGroups" :key="group.title" :group="group" :index="index" />
       </div>
     </div>
 
@@ -36,12 +31,7 @@
         留言 ↗
       </button>
 
-      <a
-        href="https://beian.miit.gov.cn/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="icp-text"
-      >
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="icp-text">
         赣ICP备2026017716号
       </a>
     </div>
@@ -89,8 +79,8 @@ const skillGroups = [
 </script>
 
 <style scoped>
+/* 默认情况下（手机、平板触控屏）保留完全正常的系统默认触摸 */
 .home-page {
-  cursor: none;
   background: #101114;
   min-height: 100vh;
   width: 100%;
@@ -100,15 +90,19 @@ const skillGroups = [
   align-items: center;
   overflow-x: hidden;
   padding-top: 0;
-  /* 适当收紧底部内边距，告别大片死黑留白 */
   padding-bottom: 40px;
   box-sizing: border-box;
 }
 
-:deep(*) {
-  cursor: none !important;
-}
+@media (hover: hover) and (pointer: fine) {
+  .home-page {
+    cursor: none;
+  }
 
+  :deep(*) {
+    cursor: none !important;
+  }
+}
 .text {
   display: flex;
   flex-direction: column;
@@ -154,7 +148,8 @@ const skillGroups = [
 
 /* ================= 极简底部：收紧间距，回归纯粹 ================= */
 .footer-simple {
-  margin-top: 36px; /* 间距大幅收紧，紧跟技术栈，不再脱节 */
+  margin-top: 36px;
+  /* 间距大幅收紧，紧跟技术栈，不再脱节 */
   display: flex;
   flex-direction: column;
   align-items: center;

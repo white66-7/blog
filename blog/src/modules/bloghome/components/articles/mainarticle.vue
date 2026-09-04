@@ -12,12 +12,14 @@ export default {
 
 <script setup lang="ts">
 import axios from 'axios'
-import { onActivated, ref, computed, watch, onMounted, nextTick, onDeactivated } from 'vue'
+import { onActivated, ref, computed, watch, onMounted, nextTick, onDeactivated, onUnmounted } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { articles as allArticles } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import SearchRecentCard from '@/modules/bloghome/components/articles/search_article.vue'
 import PageHeader from '@/modules/bloghome/components/articles/PageHeader.vue'
+// 💡 1. 引入独立的 TARS 挂件
+import TarsWidget from '@/modules/bloghome/components/articles/TarsWidget.vue'
 import { preloadImages as cachePreload, isImageLoaded, markImageLoaded } from '@/modules/bloghome/utils/imageCache'
 import { prefetchArticleDetail } from '@/modules/bloghome/utils/prefetch'
 
@@ -114,7 +116,7 @@ const nextPage = () => {
   }
 }
 
-// 💡 优化 1：点击进入详情页时，前端立即乐观 +1，提供极致流畅体验
+// 💡 优化 1：点击进入详情页时，前端立即乐观 +1
 const goToArticle = (id: number) => {
   if (typeof articleViews.value[id] === 'number') {
     articleViews.value[id]! += 1
@@ -153,7 +155,37 @@ const initCardsObserver = async () => {
   cards.forEach(card => observer!.observe(card))
 }
 
-watch(paginatedArticles, initCardsObserver, { immediate: true })
+// ==================== 💡 核心新增：TARS 仅在文章可见时出现的观察器 ====================
+const isArticlesVisible = ref(false)
+let tarsObserver: IntersectionObserver | null = null
+
+const initTarsVisibilityObserver = async () => {
+  await nextTick()
+  if (!articlesContainerRef.value || !scrollRef.value) return
+  tarsObserver?.disconnect()
+
+  tarsObserver = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry) {
+        // 当卡片容器进入视口时为 true，滑到顶部海报时为 false
+        isArticlesVisible.value = entry.isIntersecting
+      }
+    },
+    {
+      root: scrollRef.value,
+      threshold: 0.05 // 只要卡片露出一角就自然唤出
+    }
+  )
+
+  tarsObserver.observe(articlesContainerRef.value)
+}
+
+// 分页变化时重新联动监听
+watch(paginatedArticles, () => {
+  initCardsObserver()
+  initTarsVisibilityObserver()
+}, { immediate: true })
 
 // ==================== 浏览量加载体系 ====================
 const getPreloadedViews = (): Record<number, number> => {
@@ -167,7 +199,6 @@ const getPreloadedViews = (): Record<number, number> => {
 
 const articleViews = ref<Record<number, number | undefined>>(getPreloadedViews())
 
-// 💡 优化 2：带时间戳请求，彻底防止浏览器缓存 GET 请求
 const fetchViewsForArticles = async (articles: typeof paginatedArticles.value) => {
   if (!articles || articles.length === 0) return
 
@@ -193,11 +224,10 @@ watch(paginatedArticles, (newArticles) => {
   fetchViewsForArticles(newArticles)
 }, { immediate: false })
 
-// 💡 优化 3：从详情页返回时，强制触发静默更新，保证数据始终最新
 onActivated(async () => {
   console.log('✅ MainArticle 从缓存恢复')
   await initCardsObserver()
-  // 无论之前是否有数据，均重新静默拉取最新的阅读量
+  await initTarsVisibilityObserver()
   fetchViewsForArticles(paginatedArticles.value)
 })
 
@@ -223,10 +253,14 @@ onMounted(async () => {
   }
 
   fetchViewsForArticles(paginatedArticles.value)
-  // 进入列表页即预取详情页 chunk，首次点击也不卡
   prefetchArticleDetail()
 })
+
+onUnmounted(() => {
+  if (tarsObserver) tarsObserver.disconnect()
+})
 </script>
+
 <template>
   <div class="app-page-wrapper">
     <Navbar :transparent="false" />
@@ -250,9 +284,7 @@ onMounted(async () => {
               { 'animate__animated animate__bounceIn fast-enter': animatedIds.has(article.id) }
             ]" :data-article-id="article.id" @mouseenter="prefetchArticleDetail" @click="goToArticle(article.id)">
               <div v-if="article.cover" class="card__img-wrapper">
-                <!-- 骨架：始终存在，通过类名控制淡出 -->
                 <div :class="['skeleton-img', { 'skeleton-hidden': imageLoaded[article.id] }]"></div>
-                <!-- 图片：始终存在，加载完成后显示 -->
                 <img :src="article.cover" class="card__img" :class="{ 'img-visible': imageLoaded[article.id] }"
                   @load="onImageLoad(article.id)" @error="onImageLoad(article.id)" />
               </div>
@@ -262,7 +294,7 @@ onMounted(async () => {
                 <div class="card__info-bar">
                   <div class="card__date">{{ article.date }}</div>
 
-                  <!-- 💡 阅读量展示区域：带微型骨架流光与渐入动效 -->
+                  <!-- 浏览量展示区域 -->
                   <div class="card__views">
                     <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"
                       class="view-icon">
@@ -271,10 +303,7 @@ onMounted(async () => {
                         d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5" />
                     </svg>
 
-                    <!-- 1. 加载中：微型流光胶囊骨架 -->
                     <span v-if="articleViews[article.id] === undefined" class="skeleton-views-pill"></span>
-
-                    <!-- 2. 加载完毕：数字平滑淡入 -->
                     <span v-else class="views-num-text">
                       {{ articleViews[article.id] }}
                     </span>
@@ -304,6 +333,11 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+
+    <!-- 💡 2. 仅在文章卡片显示时才浮现，带平滑弹性滑入/滑出动画 -->
+    <transition name="tars-pop">
+      <TarsWidget v-show="isArticlesVisible" />
+    </transition>
   </div>
 </template>
 
@@ -326,6 +360,7 @@ onMounted(async () => {
   z-index: 2;
   height: 100vh;
   height: 100dvh;
+  overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: rgba(255, 255, 255, 0.08);
@@ -421,12 +456,8 @@ onMounted(async () => {
 }
 
 @keyframes skeleton-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .card__img-wrapper .card__img {
@@ -482,7 +513,7 @@ onMounted(async () => {
 }
 
 .card__date {
-  font-family:  'Orbitron','YouSheBiaoTiHei';
+  font-family: 'Orbitron', 'YouSheBiaoTiHei';
   font-size: 12px;
   color: #9CA3AF;
   margin-bottom: 0;
@@ -493,7 +524,7 @@ onMounted(async () => {
 /* 浏览量容器 */
 .card__views {
   margin-top: 0;
-  font-family:  'Orbitron','YouSheBiaoTiHei';
+  font-family: 'Orbitron', 'YouSheBiaoTiHei';
   font-size: 12px;
   color: #9CA3AF;
   font-weight: normal;
@@ -513,7 +544,6 @@ onMounted(async () => {
   color: #23c483;
 }
 
-/* 💡 浏览量微型骨架流光胶囊 */
 .skeleton-views-pill {
   display: inline-block;
   width: 26px;
@@ -525,37 +555,25 @@ onMounted(async () => {
 }
 
 @keyframes views-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-/* 💡 浏览量数字平滑渐显动画 */
 .views-num-text {
   display: inline-block;
   animation: numFadeIn 0.35s ease-out forwards;
 }
 
 @keyframes numFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .card__excerpt {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   font-size: 15px;
-  font-weight: 550; /* 如果想要更粗一点，可以改为 600 */
+  font-weight: 550;
   color: #374151; 
-
   line-height: 1.6;
   margin-bottom: 16px;
   display: -webkit-box;
@@ -647,12 +665,21 @@ onMounted(async () => {
   color: white;
 }
 
-.scrollable-content {
-  overflow-x: hidden;
-  overflow-y: auto;
+/* ================= 💡 3. TARS 弹性平滑浮现与缩回动画 ================= */
+.tars-pop-enter-active,
+.tars-pop-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ========= 响应式 ========= */
+.tars-pop-enter-from,
+.tars-pop-leave-to {
+  opacity: 0;
+  transform: translateY(40px) scale(0.8);
+  pointer-events: none;
+}
+
+/* ========= 响应式适配 ========= */
 @media (max-width: 768px) {
   .main-body {
     padding: 80px 5% 40px 5%;
