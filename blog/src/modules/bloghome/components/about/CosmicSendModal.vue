@@ -1,14 +1,27 @@
 <!-- src/modules/bloghome/components/about/CosmicSendModal.vue -->
 <template>
   <Teleport to="body">
-    <Transition name="modal-fade">
+    <!-- 1. 独立暗黑遮罩：平滑淡入淡出，不随弹窗卡片缩放晃动 -->
+    <Transition name="backdrop-fade">
       <div 
         v-if="modelValue" 
-        class="modal-overlay"
+        class="modal-backdrop" 
+        @click="handleClose"
+      ></div>
+    </Transition>
+
+    <!-- 2. 弹窗主体：进入采用 animate__bounceIn，退出采用 animate__fadeOut -->
+    <Transition
+      enter-active-class="animate__animated animate__bounceIn"
+      leave-active-class="animate__animated animate__fadeOut"
+    >
+      <div 
+        v-if="modelValue" 
+        class="modal-wrapper"
         @click.self="handleClose"
       >
         <div class="modal-card">
-          <!-- 极简顶栏 -->
+          <!-- 顶栏 -->
           <div class="modal-header">
             <span class="modal-title">留言</span>
             <button class="close-btn" @click="handleClose" title="关闭 (ESC)">
@@ -22,6 +35,7 @@
           <!-- 表单主体 -->
           <form class="modal-form" @submit.prevent="submitSignal">
             <input 
+              ref="sourceInputRef"
               v-model="form.source" 
               type="text" 
               placeholder="你的昵称" 
@@ -58,13 +72,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false }
 })
 const emit = defineEmits(['update:modelValue'])
 
+const sourceInputRef = ref(null)
 const isSubmitting = ref(false)
 const isError = ref(false)
 const tipText = ref('留言审核后可见')
@@ -72,6 +87,15 @@ const tipText = ref('留言审核后可见')
 const form = reactive({
   source: '',
   message: ''
+})
+
+// 打开弹窗自动聚焦输入框，提升操作灵敏度
+watch(() => props.modelValue, (val) => {
+  if (val) {
+    nextTick(() => {
+      sourceInputRef.value?.focus()
+    })
+  }
 })
 
 const handleClose = () => {
@@ -97,13 +121,15 @@ const submitSignal = async () => {
     const data = await res.json()
 
     if (data.success) {
-      tipText.value = '留言成功'
+      // 核心改动：立即关闭弹窗，零延迟秒关
+      handleClose()
+
+      // 退出动画（约250ms）结束后在幕后静默清空表单
       setTimeout(() => {
         form.source = ''
         form.message = ''
         tipText.value = '留言审核后可见'
-        handleClose()
-      }, 1000)
+      }, 300)
     } else {
       isError.value = true
       tipText.value = data.error || '提交失败'
@@ -121,9 +147,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 </script>
 
 <style scoped>
-/* 还原原生鼠标，确保输入体验 */
-.modal-overlay,
-.modal-overlay * {
+/* 还原原生光标，防止主页全局 cursor: none 导致输入找不到鼠标 */
+.modal-wrapper,
+.modal-wrapper * {
   cursor: auto !important;
 }
 
@@ -142,8 +168,39 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   letter-spacing: 0.04em;
 }
 
-/* 遮罩背景 */
-.modal-overlay {
+/* ================= 解决迟钝的关键：动画提速 ================= */
+/* 覆盖 Animate.css 原本拖泥带水的 1s 默认时长 */
+.animate__bounceIn {
+  --animate-duration: 0.38s !important;
+  animation-duration: 0.38s !important;
+}
+
+.animate__fadeOut {
+  --animate-duration: 0.22s !important;
+  animation-duration: 0.22s !important;
+}
+
+/* 独立遮罩层 */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: rgba(8, 9, 11, 0.68);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.backdrop-fade-enter-active,
+.backdrop-fade-leave-active {
+  transition: opacity 0.22s ease;
+}
+.backdrop-fade-enter-from,
+.backdrop-fade-leave-to {
+  opacity: 0;
+}
+
+/* 浮动容器 */
+.modal-wrapper {
   position: fixed;
   inset: 0;
   z-index: 99999;
@@ -151,12 +208,10 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(8, 9, 11, 0.65);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  pointer-events: auto;
 }
 
-/* 极简卡片容器 */
+/* 卡片主体 */
 .modal-card {
   width: 100%;
   max-width: 320px;
@@ -186,15 +241,19 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.3);
-  padding: 2px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, transform 0.1s ease;
 }
 
 .close-btn:hover {
   color: rgba(255, 255, 255, 0.85);
+}
+
+.close-btn:active {
+  transform: scale(0.88);
 }
 
 /* 表单输入 */
@@ -215,7 +274,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   font-size: 13px;
   box-sizing: border-box;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .clean-input::placeholder,
@@ -227,7 +286,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 .clean-input:focus,
 .clean-textarea:focus {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .textarea-wrapper {
@@ -267,7 +326,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   color: #ff6b6b;
 }
 
-/* 按钮样式（与页面的极简线框风统一） */
+/* 提交按钮 */
 .submit-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -276,7 +335,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   border-radius: 5px;
   font-size: 12px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -285,27 +344,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   color: #ffffff;
 }
 
+.submit-btn:active:not(:disabled) {
+  transform: scale(0.93);
+}
+
 .submit-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed !important;
-}
-
-/* 动效 */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
-
-.modal-fade-enter-from .modal-card {
-  transform: scale(0.97) translateY(4px);
-}
-
-.modal-fade-leave-to .modal-card {
-  transform: scale(0.98);
 }
 </style>

@@ -1,10 +1,23 @@
 <!-- src/modules/bloghome/components/about/CosmicSignalTerminal.vue -->
 <template>
   <Teleport to="body">
-    <Transition name="hud-pop">
+    <!-- 1. 独立遮罩背景：柔和淡入淡出，不随弹窗缩放抖动 -->
+    <Transition name="backdrop-fade">
       <div 
         v-if="modelValue" 
-        class="terminal-overlay"
+        class="terminal-backdrop" 
+        @click="handleClose"
+      ></div>
+    </Transition>
+
+    <!-- 2. 弹窗主体：与发送弹窗完全一致的 animate__bounceIn 弹跳与 animate__fadeOut 淡出 -->
+    <Transition
+      enter-active-class="animate__animated animate__bounceIn"
+      leave-active-class="animate__animated animate__fadeOut"
+    >
+      <div 
+        v-if="modelValue" 
+        class="terminal-wrapper"
         @click.self="handleClose"
       >
         <!-- 全息浮空微窗 -->
@@ -12,7 +25,7 @@
           <!-- 顶部柔和星芒光晕 -->
           <div class="ambient-glow-top"></div>
 
-          <!-- 顶栏：Orbitron 科幻数字频段 + 关闭按钮 -->
+          <!-- 顶栏：数字频段 + 关闭按钮 -->
           <div class="hud-header">
             <div class="signal-tag">
               <span class="pulse-beacon"></span>
@@ -32,7 +45,7 @@
             <p class="message-text smiley-font">{{ signalData?.message }}</p>
           </div>
 
-          <!-- 底部：发信人 (得意黑) 与 时间戳 (Orbitron 数字) -->
+          <!-- 底部：发信人与时间戳 -->
           <div class="hud-footer">
             <div class="sender-info">
               <span class="sender-icon">◇</span>
@@ -77,20 +90,60 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 </script>
 
 <style scoped>
+/* 还原原生光标，修复主页 cursor: none 带来的指针丢失 */
+.terminal-wrapper,
+.terminal-wrapper * {
+  cursor: auto !important;
+}
+
+.hud-close-btn {
+  cursor: pointer !important;
+}
+
 .smiley-font {
   font-family: 'Smiley Sans', 'SmileySans-Oblique', '得意黑', sans-serif;
   letter-spacing: 0.08em;
 }
 
-/* 科技感数字 (等宽紧凑，专用于频率与时间) */
+/* 科技感等宽数字 */
 .tech-num {
   font-family: 'Orbitron', monospace;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.08em;
 }
 
-/* ================= 遮罩背景 ================= */
-.terminal-overlay {
+/* ================= 动画提速（与发送弹窗保持同款爽快节奏） ================= */
+.animate__bounceIn {
+  --animate-duration: 0.38s !important;
+  animation-duration: 0.38s !important;
+}
+
+.animate__fadeOut {
+  --animate-duration: 0.22s !important;
+  animation-duration: 0.22s !important;
+}
+
+/* 独立半透明遮罩 */
+.terminal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: rgba(4, 5, 8, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.backdrop-fade-enter-active,
+.backdrop-fade-leave-active {
+  transition: opacity 0.22s ease;
+}
+.backdrop-fade-enter-from,
+.backdrop-fade-leave-to {
+  opacity: 0;
+}
+
+/* 弹窗浮动居中容器 */
+.terminal-wrapper {
   position: fixed;
   inset: 0;
   z-index: 99999;
@@ -98,20 +151,18 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: rgba(4, 5, 8, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  pointer-events: auto;
 }
 
-/* ================= 全息浮空微窗 ================= */
+/* 全息浮空微窗主体 */
 .hud-widget {
   --cyan-mint: #7ef1b2;
 
   position: relative;
   width: 100%;
   max-width: 310px;
-  background: radial-gradient(100% 100% at 50% 0%, rgba(22, 25, 34, 0.85) 0%, rgba(12, 13, 18, 0.9) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: radial-gradient(100% 100% at 50% 0%, rgba(22, 25, 34, 0.9) 0%, rgba(12, 13, 18, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   box-shadow: 
     0 24px 48px -12px rgba(0, 0, 0, 0.8),
@@ -121,7 +172,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   overflow: hidden;
 }
 
-/* 顶部柔和微光 */
+/* 顶部微光线 */
 .ambient-glow-top {
   position: absolute;
   top: 0;
@@ -132,7 +183,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   filter: blur(0.5px);
 }
 
-/* ================= 顶栏 ================= */
+/* 顶栏 */
 .hud-header {
   display: flex;
   align-items: center;
@@ -165,6 +216,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   color: rgba(255, 255, 255, 0.92);
 }
 
+/* 关闭按钮及按压反馈 */
 .hud-close-btn {
   background: transparent;
   border: none;
@@ -174,9 +226,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   padding: 0;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .hud-close-btn:hover {
@@ -184,21 +235,25 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   transform: scale(1.15);
 }
 
-/* ================= 主体文字 (得意黑高光呈现) ================= */
+.hud-close-btn:active {
+  transform: scale(0.88);
+}
+
+/* 主体文字 */
 .hud-body {
   padding: 1.15rem 0 1.25rem;
 }
 
 .message-text {
   margin: 0;
-  font-size: 1.65rem; /* 得意黑为窄斜体，稍大字号视觉冲击力极佳 */
+  font-size: 1.65rem;
   line-height: 1.25;
   color: #ffffff;
   text-shadow: 0 0 16px rgba(126, 241, 178, 0.3);
   word-break: break-word;
 }
 
-/* ================= 底部信息 ================= */
+/* 底部信息 */
 .hud-footer {
   display: flex;
   align-items: center;
@@ -226,25 +281,5 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
   font-size: 0.72rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.4);
-}
-
-/* ================= 动效 ================= */
-.hud-pop-enter-active,
-.hud-pop-leave-active {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hud-pop-enter-from,
-.hud-pop-leave-to {
-  opacity: 0;
-}
-
-.hud-pop-enter-from .hud-widget {
-  transform: scale(0.95) translateY(4px);
-}
-
-.hud-pop-leave-to .hud-widget {
-  transform: scale(0.97);
-  opacity: 0;
 }
 </style>

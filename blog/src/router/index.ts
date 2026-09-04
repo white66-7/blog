@@ -10,6 +10,12 @@ const routes = [
     // 💡 1. 首页动态懒加载
     component: () => import('@/views/bloghome.vue')
   },
+  // router/index.ts
+  {
+    path: '/sys-console-9273', 
+    name: 'AdminSignals',
+    component: () => import('@/modules/bloghome/views/AdminSignals.vue')
+  },
   {
     path: '/photos',
     name: 'photo-show',

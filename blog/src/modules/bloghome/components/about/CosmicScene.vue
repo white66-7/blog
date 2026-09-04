@@ -42,22 +42,26 @@
         </div>
       </div>
 
-      <!-- 3 颗可点击的高亮信标星辰 (Beacon Stars) -->
+      <!-- 可点击的高亮留言星辰 -->
       <div class="beacons-layer">
         <div
           v-for="beacon in signalList"
           :key="beacon.id"
           class="interactive-beacon"
-          :style="{ top: beacon.top, left: beacon.left }"
+          :style="{ 
+            top: beacon.top, 
+            left: beacon.left,
+            '--delay': beacon.delay || '0s'
+          }"
           @click="openSignal(beacon)"
         >
-          <!-- 核心高亮发光核与十字星芒 -->
+          <!-- 核心高亮发光核与十字星芒（加入交错延迟） -->
           <div class="beacon-core"></div>
-          <div class="beacon-flare-h"></div>
-          <div class="beacon-flare-v"></div>
-          <div class="beacon-ripple"></div>
+          <div class="beacon-flare-h" :style="{ animationDelay: beacon.delay }"></div>
+          <div class="beacon-flare-v" :style="{ animationDelay: beacon.delay }"></div>
+          <div class="beacon-ripple" :style="{ animationDelay: beacon.delay }"></div>
           
-          <!-- 悬停微标签 -->
+          <!-- 悬停频段微标签 -->
           <div class="beacon-hint">
             <span class="hint-dot"></span>
             <span class="hint-freq">{{ beacon.freq }}</span>
@@ -94,7 +98,7 @@
       </svg>
     </div>
 
-    <!-- 深空终端书信弹窗 -->
+    <!-- 留言全息微窗 -->
     <CosmicSignalTerminal 
       v-model="isModalOpen" 
       :signal-data="activeSignal" 
@@ -120,50 +124,52 @@ let animId = null
 const isModalOpen = ref(false)
 const activeSignal = ref(null)
 
-// 预设安全分布坐标池（完美避开中央人物与主星系统）
+/**
+ * 16 个精心测算的安全分散坐标池
+ * 彻底绕开中央禁区：
+ * - 顶部太阳 (X: 38%~62%, Y: 12%~45%)
+ * - 左右运转行星 (X: 28%~72%, Y: 15%~55%)
+ * - 中央基座与人物 (X: 42%~58%, Y: 60%~90%)
+ * - 右下角音频控制按钮 (X: 85%~100%, Y: 85%~100%)
+ * 
+ * 坐标按“左右对角交替”排序，保证数量较少时也能均匀布满星空两侧
+ */
 const safePositions = [
-  { top: '22%', left: '18%' },
-  { top: '28%', left: '82%' },
-  { top: '68%', left: '14%' },
-  { top: '18%', left: '72%' },
-  { top: '48%', left: '86%' },
-  { top: '42%', left: '12%' },
-  { top: '75%', left: '78%' }
+  { top: '16%', left: '10%' },  // 0: 左上远深空
+  { top: '22%', left: '86%' },  // 1: 右上深空
+  { top: '64%', left: '9%' },   // 2: 左下深空
+  { top: '38%', left: '76%' },  // 3: 右侧中上
+  { top: '38%', left: '19%' },  // 4: 左侧中上
+  { top: '74%', left: '84%' },  // 5: 右下远深空（高于音频按钮）
+  { top: '80%', left: '14%' },  // 6: 左侧下边缘
+  { top: '54%', left: '88%' },  // 7: 右侧中部偏外
+  { top: '12%', left: '24%' },  // 8: 左肩部极高点
+  { top: '13%', left: '75%' },  // 9: 右肩部极高点
+  { top: '50%', left: '8%' },   // 10: 左侧正中外沿
+  { top: '16%', left: '89%' },  // 11: 右上极远角
+  { top: '72%', left: '22%' },  // 12: 左侧近基座外沿
+  { top: '62%', left: '75%' },  // 13: 右侧近基座外沿
+  { top: '86%', left: '8%' },   // 14: 左下极边缘
+  { top: '84%', left: '88%' }   // 15: 右下极边缘
 ]
 
-// 默认兜底示例（网络未通或数据库为空时显示）
+// 兜底默认示例
 const defaultSignals = [
   {
     id: 'beacon-1',
-    top: '22%',
-    left: '18%',
+    top: '16%',
+    left: '10%',
+    delay: '0s',
     freq: '1420.405MHz',
     source: '一路向北',
-    date: '2026.03',
-    message: '坏了'
-  },
-  {
-    id: 'beacon-2',
-    top: '28%',
-    left: '82%',
-    freq: '2411.020MHz',
-    source: 'white66-7',
-    date: '2026.06',
-    message: '神了'
-  },
-  {
-    id: 'beacon-3',
-    top: '68%',
-    left: '14%',
-    freq: '8400.150MHz',
-    source: '鹿丸',
-    date: '2026.08',
-    message: '好了'
+    date: '2026.09',
+    message: '广告位招租'
   }
 ]
 
 const signalList = ref([...defaultSignals])
 
+// 异步拉取审核通过的留言并分配分散坐标
 const fetchApprovedSignals = async () => {
   try {
     const res = await fetch('/api/signals')
@@ -172,14 +178,18 @@ const fetchApprovedSignals = async () => {
       signalList.value = json.data.map((item, index) => {
         const basePos = safePositions[index % safePositions.length]
         
-        // 增加 ±2% 的随机漂移，防止超过 7 条时完全重叠
-        const offsetTop = (Math.random() * 4 - 2).toFixed(1)
-        const offsetLeft = (Math.random() * 4 - 2).toFixed(1)
+        // 增加微小非对称扰动（±1.2%），防止超出 16 条时硬性重合
+        const offsetTop = ((index * 7) % 5 - 2) * 0.5
+        const offsetLeft = ((index * 11) % 5 - 2) * 0.5
         
+        // 分散错开闪烁与脉冲节奏
+        const delaySec = ((index * 0.65) % 2.8).toFixed(2)
+
         return {
           id: item._id || `beacon-${index}`,
           top: `calc(${basePos.top} + ${offsetTop}%)`,
           left: `calc(${basePos.left} + ${offsetLeft}%)`,
+          delay: `${delaySec}s`,
           freq: item.freq || '1420.405MHz',
           source: item.source,
           date: item.date,
@@ -192,11 +202,11 @@ const fetchApprovedSignals = async () => {
   }
 }
 
-
 const openSignal = (beacon) => {
   activeSignal.value = beacon
   isModalOpen.value = true
 }
+
 const toggleAudio = () => {
   if (!audioRef.value) return
   if (audioRef.value.paused) {
@@ -413,7 +423,7 @@ onMounted(() => {
 }
 
 .interactive-beacon:hover {
-  transform: translate(-50%, -50%) scale(1.25);
+  transform: translate(-50%, -50%) scale(1.3);
 }
 
 /* 核心光点 */
@@ -467,11 +477,11 @@ onMounted(() => {
 }
 
 @keyframes flare-glow {
-  0%, 100% { opacity: 0.4; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1.15); }
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* 悬停时的微型频段指示 */
+/* 悬停时的频段微标签 */
 .beacon-hint {
   position: absolute;
   top: 100%;
@@ -491,15 +501,14 @@ onMounted(() => {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .hint-freq {
-  font-family: 'Orbitron',
-    monospace;
+  font-family: 'Orbitron', monospace;
   letter-spacing: 0.1em;
   font-variant-numeric: tabular-nums;
-  font-width: 200;
+  font-weight: 300;
   text-shadow: 0 0 8px rgba(126, 241, 178, 0.6);
 }
 
@@ -515,7 +524,7 @@ onMounted(() => {
   transform: translateX(-50%) translateY(10px);
 }
 
-/* ================= 场景原有 3D 样式 ================= */
+/* ================= 场景 3D 样式 ================= */
 .bottom-dark-fade {
   position: absolute;
   bottom: 0;
@@ -554,7 +563,7 @@ onMounted(() => {
   50% { transform: scale(1.03); }
 }
 
-/* 3D 浮空立方体基座 */
+/* 3D 浮空基座 */
 .cuboid {
   position: absolute;
   transform-style: preserve-3d;

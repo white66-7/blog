@@ -4,7 +4,17 @@ import { ObjectId } from 'mongodb'
 // 简单的内存防刷限流
 const ipRateLimitMap = new Map<string, number>()
 
-// 1. 访客提交留言 (POST)
+// 每 10 分钟自动清理一次过期的 IP 记录
+setInterval(() => {
+  const now = Date.now()
+  for (const [ip, timestamp] of ipRateLimitMap.entries()) {
+    if (now - timestamp > 60 * 1000) {
+      ipRateLimitMap.delete(ip)
+    }
+  }
+}, 10 * 60 * 1000)
+
+// 1. 提交留言 
 async function createSignal(req: any, res: any) {
   try {
     const clientIp = 
@@ -40,7 +50,7 @@ async function createSignal(req: any, res: any) {
       message: cleanMessage,
       freq: randomFreq,
       date: dateStr,
-      status: 'pending',
+      status: 'pending', 
       clientIp,
       createdAt: now
     }
@@ -60,25 +70,32 @@ async function createSignal(req: any, res: any) {
 }
 
 // 2. 获取已审核留言列表 (GET)
-async function getApprovedSignals(req: any, res: any) {
+async function getSignals(req: any, res: any) {
   try {
     const { db } = await connectToDatabase()
+    const adminToken = req.headers['x-admin-token']
+
+    // 如果携带了正确的管理员密码，返回待审核列表
+    if (adminToken && adminToken === process.env.ADMIN_SECRET) {
+      const pendingSignals = await db.collection('signals')
+        .find({ status: 'pending' })
+        .sort({ createdAt: -1 })
+        .toArray()
+      return res.json({ success: true, data: pendingSignals })
+    }
+
+    // 普通访客：只返回已通过的留言
     const signals = await db.collection('signals')
-      .find(
-        { status: 'approved' },
-        { projection: { clientIp: 0 } }
-      )
+      .find({ status: 'approved' }, { projection: { clientIp: 0 } })
       .sort({ createdAt: -1 })
-      .limit(14)
+      .limit(16)
       .toArray()
 
     return res.json({ success: true, data: signals })
   } catch (err: any) {
-    console.error('获取留言错误:', err)
-    return res.status(500).json({ error: '获取留言列表失败' })
+    return res.status(500).json({ error: '获取留言失败' })
   }
 }
-
 // 3. 管理员审核留言 (PATCH)
 async function reviewSignal(req: any, res: any) {
   try {
@@ -110,11 +127,13 @@ async function reviewSignal(req: any, res: any) {
   }
 }
 
+// ==========================================
+// Vercel Serverless Function 必须的默认导出入口
+// ==========================================
 export default async function handler(req: any, res: any) {
-  // 根据请求类型进行路由分发
   switch (req.method) {
     case 'GET':
-      return await getApprovedSignals(req, res)
+      return await getSignals(req, res)
     case 'POST':
       return await createSignal(req, res)
     case 'PATCH':

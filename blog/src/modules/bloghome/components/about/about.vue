@@ -50,7 +50,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import Navbar from '@/modules/bloghome/components/load.vue'
 import TechStackCard from '@/modules/bloghome/components/about/info.vue'
 import SkillGroup from '@/modules/bloghome/components/about/skills.vue'
