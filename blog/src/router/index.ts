@@ -14,7 +14,7 @@ const routes = [
   {
     path: '/sys-console-9273', 
     name: 'AdminSignals',
-    component: () => import('@/modules/bloghome/views/AdminSignals.vue')
+    component: () => import('@/views/AdminSignals.vue')
   },
   {
     path: '/photos',
