@@ -107,6 +107,7 @@ const saysList = [
   { id: 13, content: '因为豪哥,梦想哭了这个博主去看了《局外人》,老实说没咋读懂', date: '2026-08-20 22:58' },
   { id: 14, content: '读完《局外人》了,稍微有了点读小说的感觉,打算接着读《堕落》', date: '2026-08-23 12:59' },
   { id: 15, content: '被财经频道的长视频震撼了', date: '2026-08-26 23:58' },
+  { id: 16, content: '离开家回到了学校', date: '2026-09-05 22:15' },
 ]
 
 const timelineSays = computed(() => [...saysList].reverse())
