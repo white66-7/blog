@@ -90,7 +90,8 @@ const albumsData = [
       { title: '孤独的一颗树', url: '/album/风景/孤独的树.mp4', cover: '/album/风景/孤独的树封面.webp' },
       { title: '拍到彩虹了', url: '/album/风景/彩虹.webp' },
       { title: '低曝光 + 冷暖对比具备的美感', url: '/album/风景/冷暖对比.webp' },
-      { title: '逆水行舟，不进则退', url: '/album/风景/水中船.mp4',cover: '/album/风景/水中船.webp'},
+      { title: '逆水行舟', url: '/album/风景/水中船.mp4',cover: '/album/风景/水中船.webp'},
+      { title: '随手删', url: '/album/风景/夕阳.webp'},
     ]
   },
   {
@@ -111,6 +112,8 @@ const albumsData = [
       { title: '似乎吃腻烤肉了', url: '/album/暑假/似乎吃腻烤肉了.webp' },
       { title: '奥得赛', url: '/album/暑假/渺小的人.webp' },
       { title: '诺兰的恶趣味', url: '/album/暑假/闪死我了.mp4', cover: '/album/暑假/闪死我了.webp' },
+      { title: '《我不难过》', url: '/album/暑假/离别.webp' },
+      { title: '武汉这天气有点糙', url: '/album/暑假/霉.webp' },
     ]
   }
 ]

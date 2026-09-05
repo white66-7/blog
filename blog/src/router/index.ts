@@ -7,7 +7,7 @@ const routes = [
   {
     path: '/',
     name: 'blog',
-    // 💡 1. 首页动态懒加载
+    //  1. 首页动态懒加载
     component: () => import('@/views/bloghome.vue')
   },
   // router/index.ts
@@ -19,18 +19,18 @@ const routes = [
   {
     path: '/photos',
     name: 'photo-show',
-    // 💡 2. 相册模块动态懒加载（相册里的大图绝不会拖慢首屏）
+    //  2. 相册模块动态懒加载（相册里的大图绝不会拖慢首屏）
     component: () => import('@/modules/bloghome/components/photos/photo.vue')
   },
   {
     path: '/projects',
     name: 'github',
-    // 💡 3. GitHub 开源项目页懒加载
+    //  3. GitHub 开源项目页懒加载
     component: () => import('@/modules/bloghome/components/projects/projects.vue')
   },
   {
     path: '/player',
-    // 💡 4. 音乐播放器及其子视图按需加载
+    //  4. 音乐播放器及其子视图按需加载
     component: () => import('@/views/music-player.vue'),
     children: [
       { path: 'songs', component: () => import('@/modules/player/components/songsview.vue') },
@@ -41,20 +41,18 @@ const routes = [
   {
     path: '/articles',
     name: 'mainarticle',
-    // 💡 5. 文章列表页懒加载
+    //  5. 文章列表页懒加载
     component: () => import('@/modules/bloghome/components/articles/mainarticle.vue')
   },
   {
     path: '/article/:id',
     name: 'ArticleDetail',
-    // 💡 6. 最关键：文章详情页懒加载（包含了重型 Markdown 和语法高亮库）
-    // 只有用户真正点进某篇文章时，才会拉取这部分代码
     component: () => import('@/modules/bloghome/components/articles/ArticleDetail.vue')
   },
   {
     path: '/about',
     name: 'about',
-    // 💡 7. 关于页懒加载
+    //  7. 关于页懒加载
     component: () => import('@/modules/bloghome/components/about/about.vue')
   },
 ]

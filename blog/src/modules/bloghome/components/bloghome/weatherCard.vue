@@ -33,7 +33,7 @@ import { gsap } from 'gsap'
 // --- 数据变量 ---
 const cardRef = ref<HTMLElement | null>(null)
 const innerSvgRef = ref<SVGElement | null>(null)
-const address = ref('昆山千灯')
+const address = ref('武汉')
 
 const temp = ref('--')
 const weatherDesc = ref('加载中...')
@@ -125,8 +125,8 @@ async function fetchWeather() {
   // 命中 30 分钟内缓存则直接用，不再发请求
   if (loadWeatherFromCache()) return
   try {
-    const url = 'https://wttr.in/32.32,120.87?format=j1';
-    //千灯 32.32 120.87
+    const url = 'https://wttr.in/30.508522,114.332928?format=j1';
+    //千灯 32.32 120.87   武汉  30.508522 114.332928
     const res = await fetch(url);
     if (!res.ok) throw new Error('请求失败');
     const data = await res.json();
