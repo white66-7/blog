@@ -28,6 +28,7 @@ import md15 from './md/15.md?raw'
 import md16 from './md/16.md?raw'
 import md17 from './md/17.md?raw'
 import md18 from './md/18.md?raw'
+import md19 from './md/19.md?raw'
 
 export const articles: Article[] = [
   {
@@ -85,7 +86,7 @@ export const articles: Article[] = [
     cover: '/covers/animation.webp',
     content:md5,
   },
-      {
+  {
     id: 6,
     title: '实战记录:基础交互动画',
     type: '前端',
@@ -223,11 +224,22 @@ export const articles: Article[] = [
     type: '前端',
     date: '2026-09-06',
     readTime: '10 minutes',
-    excerpt: '',
+    excerpt: '功力稍有精进',
     tags: ['前端', 'Gsap', 'Snap'],
-    cover: '/messages/18/space.webp',
+    cover: '/messages/18/game.gif',
     content:md18,
   },
+  // {
+  //   id: 19,
+  //   title: '',
+  //   type: '后端',
+  //   date: '2026-09-11',
+  //   readTime: '10 minutes',
+  //   excerpt: '',
+  //   tags: ['', '', ''],
+  //   cover: '/messages/19/bad.gif',
+  //   content:md19,
+  // },
   // {
   //   id: 14,
   //   title: '论我的学生时代',

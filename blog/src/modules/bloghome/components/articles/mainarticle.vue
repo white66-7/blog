@@ -115,7 +115,7 @@ const nextPage = () => {
   }
 }
 
-// 💡 优化 1：点击进入详情页时，前端立即乐观 +1
+// 💡 点击进入详情页时前端立即乐观 +1
 const goToArticle = (id: number) => {
   if (typeof articleViews.value[id] === 'number') {
     articleViews.value[id]! += 1
@@ -154,7 +154,7 @@ const initCardsObserver = async () => {
   cards.forEach(card => observer!.observe(card))
 }
 
-// ==================== 💡 核心新增：TARS 仅在文章可见时出现的观察器 ====================
+// ==================== TARS 仅在文章可见时出现的观察器 ====================
 const isArticlesVisible = ref(false)
 let tarsObserver: IntersectionObserver | null = null
 
@@ -167,20 +167,18 @@ const initTarsVisibilityObserver = async () => {
     (entries) => {
       const entry = entries[0]
       if (entry) {
-        // 当卡片容器进入视口时为 true，滑到顶部海报时为 false
         isArticlesVisible.value = entry.isIntersecting
       }
     },
     {
       root: scrollRef.value,
-      threshold: 0.05 // 只要卡片露出一角就自然唤出
+      threshold: 0.05
     }
   )
 
   tarsObserver.observe(articlesContainerRef.value)
 }
 
-// 分页变化时重新联动监听
 watch(paginatedArticles, () => {
   initCardsObserver()
   initTarsVisibilityObserver()
@@ -293,13 +291,14 @@ onUnmounted(() => {
                 <div class="card__info-bar">
                   <div class="card__date">{{ article.date }}</div>
 
-                  <!-- 浏览量展示区域 -->
+                  <!-- 浏览量展示区域（已替换为全新彩色大眼 SVG） -->
                   <div class="card__views">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"
-                      class="view-icon">
-                      <path d="M0 0h24v24H0z" fill="none" />
-                      <path fill="currentColor"
-                        d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.15em" height="1.15em" viewBox="0 0 64 64" class="view-icon">
+                      <path d="M0 0h64v64H0z" fill="none" />
+                      <path fill="#231f20" d="M62 32S51.9 52 32 52S2 32 2 32s10.1-20 30-20s30 20 30 20" />
+                      <path fill="#fff" d="M57 32s-8.4 16.7-25 16.7S7 32 7 32s8.4-16.7 25-16.7S57 32 57 32" />
+                      <path fill="#42ade2" d="M45.4 32c0 7.5-6 13.5-13.5 13.5s-13.5-6-13.5-13.5s6-13.5 13.5-13.5s13.5 6 13.5 13.5" />
+                      <path fill="#231f20" d="M39.4 32c0 4.1-3.4 7.5-7.5 7.5s-7.5-3.4-7.5-7.5s3.4-7.5 7.5-7.5s7.5 3.4 7.5 7.5" />
                     </svg>
 
                     <span v-if="articleViews[article.id] === undefined" class="skeleton-views-pill"></span>
@@ -333,7 +332,6 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- 💡 2. 仅在文章卡片显示时才浮现，带平滑弹性滑入/滑出动画 -->
     <transition name="tars-pop">
       <TarsWidget v-show="isArticlesVisible" />
     </transition>
@@ -399,8 +397,10 @@ onUnmounted(() => {
   animation-duration: 0.6s !important;
 }
 
+/* 保持卡片原有 220px 高度 */
 .articles-container .card {
   min-height: 220px;
+  height: 220px;
   display: flex;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.9);
@@ -424,10 +424,11 @@ onUnmounted(() => {
   flex-direction: row-reverse;
 }
 
-/* ========= 图片包裹容器及骨架屏 ========= */
+/* ========= 16:9 封面容器匹配 220px 高度 ========= */
 .card.horizontal .card__img-wrapper,
 .card.reverse-horizontal .card__img-wrapper {
-  width: 40%;
+  width: calc(220px * 16 / 9);
+  height: 100%;
   aspect-ratio: 16 / 9;
   flex-shrink: 0;
   position: relative;
@@ -475,8 +476,10 @@ onUnmounted(() => {
 }
 
 .placeholder-img {
-  width: 40%;
+  width: calc(220px * 16 / 9);
+  height: 100%;
   aspect-ratio: 16 / 9;
+  flex-shrink: 0;
   background: #eee;
   display: flex;
   align-items: center;
@@ -487,10 +490,11 @@ onUnmounted(() => {
 /* ========= 卡片内容区 ========= */
 .card.horizontal .card__content,
 .card.reverse-horizontal .card__content {
-  width: 60%;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 20px 30px;
+  padding: 18px 28px;
   box-sizing: border-box;
   justify-content: center;
 }
@@ -499,16 +503,19 @@ onUnmounted(() => {
   font-family: 'YouSheBiaoTiHei';
   font-size: 22px;
   font-weight: normal;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: #1a1a1a;
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card__info-bar {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .card__date {
@@ -540,7 +547,6 @@ onUnmounted(() => {
 
 .card:hover .view-icon {
   transform: scale(1.15);
-  color: #23c483;
 }
 
 .skeleton-views-pill {
@@ -570,11 +576,11 @@ onUnmounted(() => {
 
 .card__excerpt {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 550;
   color: #374151; 
-  line-height: 1.6;
-  margin-bottom: 16px;
+  line-height: 1.5;
+  margin-bottom: 12px;
   display: -webkit-box;
   white-space: pre-wrap;
   -webkit-line-clamp: 2;
@@ -593,15 +599,15 @@ onUnmounted(() => {
 .tag {
   background: #fff;
   color: #000;
-  padding: 6px 15px;
+  padding: 4px 12px;
   border-radius: 45px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   font-family: 'YouSheBiaoTiHei';
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease 0s;
   cursor: default;
 }
@@ -609,8 +615,8 @@ onUnmounted(() => {
 .tag:hover {
   background-color: #23c483;
   color: #fff;
-  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
-  transform: scale(1.15);
+  box-shadow: 0px 10px 15px rgba(46, 229, 157, 0.4);
+  transform: scale(1.08);
 }
 
 /* ========= 分页 ========= */
@@ -664,7 +670,7 @@ onUnmounted(() => {
   color: white;
 }
 
-/* ================= 💡 3. TARS 弹性平滑浮现与缩回动画 ================= */
+/* ========= TARS 浮现动画 ========= */
 .tars-pop-enter-active,
 .tars-pop-leave-active {
   transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -678,7 +684,7 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-/* ========= 响应式适配 ========= */
+/* ========= 移动端响应式适配 ========= */
 @media (max-width: 768px) {
   .main-body {
     padding: 80px 5% 40px 5%;
@@ -686,6 +692,7 @@ onUnmounted(() => {
 
   .articles-container .card {
     height: auto;
+    min-height: unset;
   }
 
   .card.horizontal,
@@ -694,13 +701,16 @@ onUnmounted(() => {
   }
 
   .card.horizontal .card__img-wrapper,
-  .card.reverse-horizontal .card__img-wrapper {
+  .card.reverse-horizontal .card__img-wrapper,
+  .placeholder-img {
     width: 100%;
-    height: 160px;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 
   .card.horizontal .card__img,
   .card.reverse-horizontal .card__img {
+    width: 100%;
     height: 100%;
   }
 
