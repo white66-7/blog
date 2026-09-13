@@ -69,6 +69,7 @@ const albumsData = [
       { title: '无题', url: '/album/人物/adult.webp' },
       { title: '三人成行', url: '/album/人物/三人成行.mp4', cover: '/album/人物/三人成行封面.webp' },
       { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
+      { title: '聚餐', url: '/album/人物/dinner.webp' },
     ]
   },
   {

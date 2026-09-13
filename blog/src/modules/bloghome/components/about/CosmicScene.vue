@@ -39,14 +39,14 @@
         </div>
       </div>
 
-      <!-- 深空信号检索加载动画（专属射电天文雷达与微光共振态） -->
+      <!-- 深空信号检索加载：极简幽灵微光态（点位与第一页星标严格 1:1 锚定） -->
       <transition name="scanner-fade">
         <div v-if="isLoading" class="cosmic-scanner-layer">
-          <!-- 在安全信标坐标区展现全息探测探针 -->
+          <!-- 8 个在原位微微呼吸的幽灵星光核 -->
           <div
             v-for="probe in loadingProbePositions"
             :key="probe.key"
-            class="loading-probe"
+            class="ghost-beacon"
             :style="{
               '--d-top': probe.d.top,
               '--d-left': probe.d.left,
@@ -55,20 +55,15 @@
               '--delay': probe.delay
             }"
           >
-            <div class="probe-reticle"></div>
-            <div class="probe-wave"></div>
-            <div class="probe-core"></div>
-            <div class="probe-tag">ACQ·SIG</div>
+            <div class="ghost-dot"></div>
+            <div class="ghost-halo"></div>
           </div>
 
-          <!-- 底部中央深空频谱雷达扫描 HUD -->
-          <div class="scanner-hud">
-            <div class="scanner-radar-icon"></div>
-            <div class="scanner-info">
-              <span class="scanner-title">深空信标检索中</span>
-              <span class="scanner-divider">/</span>
-              <span class="scanner-freq">{{ scanFreq }}</span>
-            </div>
+          <!-- 底部极简呼吸提示（克制纤细） -->
+          <div class="minimal-hud">
+            <span class="hud-pulse-dot"></span>
+            <span class="hud-text">SIGNAL SEARCHING</span>
+            <span class="hud-freq">{{ scanFreq }}</span>
           </div>
         </div>
       </transition>
@@ -190,22 +185,32 @@ const safePositions = [
   { d: { top: '16%', left: '89%' }, m: { top: '76%', left: '68%' } }  // 15
 ]
 
-// 原始数据（默认为空，由接口动态获取）
+// 原始数据（默认为空，由接口或预加载缓存动态获取）
 const rawSignals = ref([])
 
-// 加载状态与深空频谱雷达扫描动效
+// 加载状态与深空频谱
 const isLoading = ref(true)
 const scanFreq = ref('1420.405 MHz')
 let freqInterval = null
 
-// 扫描期间在代表性方位展现的微光探针占位
-const loadingProbePositions = [
-  { ...safePositions[0], key: 'lp-0', delay: '0s' },
-  { ...safePositions[3], key: 'lp-1', delay: '0.35s' },
-  { ...safePositions[5], key: 'lp-2', delay: '0.7s' },
-  { ...safePositions[8], key: 'lp-3', delay: '1.05s' },
-  { ...safePositions[12], key: 'lp-4', delay: '1.4s' }
-]
+// ================= 星系分页与跃迁状态 =================
+const GALAXY_SIZE = 8
+const currentGalaxyIndex = ref(0)
+const warpState = ref('idle')
+
+// 严格对应第一星系（第 0 页）的 8 个初始点位，消除错位
+const loadingProbePositions = computed(() => {
+  return Array.from({ length: GALAXY_SIZE }, (_, i) => {
+    const posIndex = (0 * 5 + i * 2) % safePositions.length
+    const basePos = safePositions[posIndex]
+    return {
+      key: `probe-slot-${i}`,
+      d: basePos.d,
+      m: basePos.m,
+      delay: `${(i * 0.18).toFixed(2)}s`
+    }
+  })
+})
 
 const startFreqScanning = () => {
   const baseFreqs = [1420.405, 1420.812, 1421.325, 1420.128, 1422.046, 1419.789]
@@ -214,7 +219,7 @@ const startFreqScanning = () => {
     idx = (idx + 1) % baseFreqs.length
     const jitter = (Math.random() * 0.06 - 0.03).toFixed(3)
     scanFreq.value = `${(baseFreqs[idx] + parseFloat(jitter)).toFixed(3)} MHz`
-  }, 110)
+  }, 120)
 }
 
 const stopFreqScanning = () => {
@@ -223,11 +228,6 @@ const stopFreqScanning = () => {
     freqInterval = null
   }
 }
-
-// ================= 星系分页与跃迁状态 =================
-const GALAXY_SIZE = 8
-const currentGalaxyIndex = ref(0)
-const warpState = ref('idle')
 
 const totalGalaxies = computed(() => {
   return Math.max(1, Math.ceil(rawSignals.value.length / GALAXY_SIZE))
@@ -270,7 +270,29 @@ const warpToNextGalaxy = () => {
   }, 400)
 }
 
+// 💡 优先读取加载屏预热好的数据，无感秒开；若未命中则回退到真实 fetch
 const fetchApprovedSignals = async () => {
+  // 1. 检查是否存在加载屏提前拉取并存入的缓存
+  const cached = sessionStorage.getItem('preloaded_signals')
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        rawSignals.value = parsed
+        // 短暂展示 280ms 仪式感深空微光扫描后优雅亮起，无需发起任何网络请求
+        startFreqScanning()
+        setTimeout(() => {
+          isLoading.value = false
+          stopFreqScanning()
+        }, 280)
+        return
+      }
+    } catch (e) {
+      console.warn('解析预加载信标异常，降级为常规拉取:', e)
+    }
+  }
+
+  // 2. 缓存未命中（如用户单页刷新），执行常规接口拉取
   isLoading.value = true
   startFreqScanning()
   try {
@@ -278,15 +300,16 @@ const fetchApprovedSignals = async () => {
     const json = await res.json()
     if (json.success && Array.isArray(json.data) && json.data.length > 0) {
       rawSignals.value = json.data
+      // 写入 sessionStorage，为后续重复查看与星系切页建立缓存
+      sessionStorage.setItem('preloaded_signals', JSON.stringify(json.data))
     }
   } catch (e) {
     console.warn('获取信标信号异常:', e)
   } finally {
-    // 保持适度延时避免接口极速返回时产生突兀闪屏
     setTimeout(() => {
       isLoading.value = false
       stopFreqScanning()
-    }, 550)
+    }, 500)
   }
 }
 
@@ -307,7 +330,7 @@ const toggleAudio = () => {
   }
 }
 
-// Canvas 星空与流星系统 (包含离屏静态缓存与视口休眠)
+// Canvas 星空与流星系统
 onMounted(() => {
   fetchApprovedSignals()
   const canvas = canvasRef.value
@@ -504,7 +527,7 @@ onMounted(() => {
   z-index: 1;
 }
 
-/* ================= 深空信号检索加载动画图层 ================= */
+/* ================= 极简幽灵微光加载层 ================= */
 .cosmic-scanner-layer {
   position: absolute;
   inset: 0;
@@ -514,7 +537,7 @@ onMounted(() => {
 
 .scanner-fade-enter-active,
 .scanner-fade-leave-active {
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scanner-fade-enter-from,
@@ -522,13 +545,13 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* 全息探针 */
-.loading-probe {
+/* 幽灵信标点（位置严格匹配第一页信标） */
+.ghost-beacon {
   position: absolute;
   top: var(--d-top);
   left: var(--d-left);
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -536,129 +559,81 @@ onMounted(() => {
   pointer-events: none;
 }
 
-.probe-reticle {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border: 1px dashed rgba(56, 189, 248, 0.45);
+/* 核心极简暗光点 */
+.ghost-dot {
+  width: 3.5px;
+  height: 3.5px;
   border-radius: 50%;
-  animation: probe-rotate 7s linear infinite;
-}
-
-.probe-core {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 10px #38bdf8, 0 0 18px rgba(56, 189, 248, 0.85);
-  animation: probe-pulse 1.8s ease-in-out infinite alternate;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  animation: ghost-breathe 2.4s ease-in-out infinite alternate;
   animation-delay: var(--delay);
 }
 
-.probe-wave {
+/* 柔和微光光晕（彻底摒弃机械圈与文字） */
+.ghost-halo {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(56, 189, 248, 0.65);
-  animation: probe-expand 2.4s cubic-bezier(0.12, 0.8, 0.28, 1) infinite;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, transparent 70%);
+  animation: ghost-halo-pulse 2.4s ease-in-out infinite alternate;
   animation-delay: var(--delay);
 }
 
-.probe-tag {
+@keyframes ghost-breathe {
+  0% { transform: scale(0.7); opacity: 0.2; }
+  100% { transform: scale(1.15); opacity: 0.9; }
+}
+
+@keyframes ghost-halo-pulse {
+  0% { transform: scale(0.6); opacity: 0.08; }
+  100% { transform: scale(1.6); opacity: 0.45; }
+}
+
+/* 底部极简呼吸 HUD */
+.minimal-hud {
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  font-family: 'Orbitron', monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.08em;
-  color: rgba(56, 189, 248, 0.7);
-  white-space: nowrap;
-}
-
-@keyframes probe-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes probe-pulse {
-  0% { transform: scale(0.75); opacity: 0.45; }
-  100% { transform: scale(1.35); opacity: 1; }
-}
-
-@keyframes probe-expand {
-  0% { width: 6px; height: 6px; opacity: 0.85; }
-  100% { width: 36px; height: 36px; opacity: 0; }
-}
-
-/* 底部中央深空频谱雷达扫描 HUD */
-.scanner-hud {
-  position: absolute;
-  bottom: 2.2rem;
+  bottom: 2.5rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(15, 17, 24, 0.75);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15), inset 0 0 12px rgba(56, 189, 248, 0.06);
-  backdrop-filter: blur(12px);
-  padding: 6px 16px;
-  border-radius: 20px;
-  color: rgba(255, 255, 255, 0.9);
+  gap: 8px;
+  padding: 4px 14px;
+  background: rgba(16, 18, 24, 0.55);
+  border-radius: 30px;
+  backdrop-filter: blur(8px);
   pointer-events: none;
 }
 
-.scanner-radar-icon {
-  width: 14px;
-  height: 14px;
+.hud-pulse-dot {
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  border: 1px solid rgba(56, 189, 248, 0.8);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+  animation: hud-dot 1.5s ease-in-out infinite;
 }
 
-.scanner-radar-icon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent 60%, rgba(56, 189, 248, 0.85) 100%);
-  animation: radar-sweep 1.4s linear infinite;
-}
-
-@keyframes radar-sweep {
-  100% { transform: rotate(360deg); }
-}
-
-.scanner-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-}
-
-.scanner-title {
-  color: rgba(255, 255, 255, 0.75);
-  letter-spacing: 0.05em;
-}
-
-.scanner-divider {
-  color: rgba(255, 255, 255, 0.25);
-}
-
-.scanner-freq {
+.hud-text {
   font-family: 'Orbitron', monospace;
-  font-size: 0.7rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.hud-freq {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem;
   letter-spacing: 0.08em;
-  color: #38bdf8;
+  color: rgba(56, 189, 248, 0.7);
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+@keyframes hud-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
 
 /* ================= 交互星星信标图层 ================= */
@@ -1293,15 +1268,15 @@ onMounted(() => {
     opacity: 0.75;
   }
 
-  /* 移动端加载探针位置映射 */
-  .loading-probe {
+  /* 移动端幽灵信标位置映射 */
+  .ghost-beacon {
     top: var(--m-top);
     left: var(--m-left);
   }
 
-  .scanner-hud {
+  .minimal-hud {
     bottom: 5.2rem;
-    padding: 5px 12px;
+    padding: 3px 10px;
   }
 
   .interactive-beacon {

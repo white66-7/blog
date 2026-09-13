@@ -34,7 +34,7 @@
 
           <!-- 副标题 -->
           <span :class="['r-sub', playAnimation ? 'animate__animated animate__fadeIn' : '']" style="animation-delay: 0.9s"
-            >或许我们只是在演绎我们的人生</span>
+            >做点想做的</span>
         </h1>
         <div :class="['hero-meta', playAnimation ? 'animate__animated animate__fadeIn' : '']" style="animation-delay:1.2s">
           <div class="meta-divider"></div>
