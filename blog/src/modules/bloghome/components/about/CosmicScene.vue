@@ -39,8 +39,42 @@
         </div>
       </div>
 
+      <!-- 深空信号检索加载动画（专属射电天文雷达与微光共振态） -->
+      <transition name="scanner-fade">
+        <div v-if="isLoading" class="cosmic-scanner-layer">
+          <!-- 在安全信标坐标区展现全息探测探针 -->
+          <div
+            v-for="probe in loadingProbePositions"
+            :key="probe.key"
+            class="loading-probe"
+            :style="{
+              '--d-top': probe.d.top,
+              '--d-left': probe.d.left,
+              '--m-top': probe.m.top,
+              '--m-left': probe.m.left,
+              '--delay': probe.delay
+            }"
+          >
+            <div class="probe-reticle"></div>
+            <div class="probe-wave"></div>
+            <div class="probe-core"></div>
+            <div class="probe-tag">ACQ·SIG</div>
+          </div>
+
+          <!-- 底部中央深空频谱雷达扫描 HUD -->
+          <div class="scanner-hud">
+            <div class="scanner-radar-icon"></div>
+            <div class="scanner-info">
+              <span class="scanner-title">深空信标检索中</span>
+              <span class="scanner-divider">/</span>
+              <span class="scanner-freq">{{ scanFreq }}</span>
+            </div>
+          </div>
+        </div>
+      </transition>
+
       <!-- 可点击的高亮留言星辰（电影级时空曲率跃迁） -->
-      <div class="beacons-layer">
+      <div v-show="!isLoading" class="beacons-layer">
         <div
           v-for="(beacon, index) in currentGalaxySignals"
           :key="beacon.id"
@@ -73,7 +107,7 @@
 
       <!-- 【左下角】下一星系跃迁控制按钮 -->
       <button 
-        v-if="totalGalaxies > 1"
+        v-if="!isLoading && totalGalaxies > 1"
         class="warp-galaxy-btn"
         :disabled="warpState !== 'idle'"
         @click="warpToNextGalaxy"
@@ -156,10 +190,39 @@ const safePositions = [
   { d: { top: '16%', left: '89%' }, m: { top: '76%', left: '68%' } }  // 15
 ]
 
-// 原始数据
-const rawSignals = ref([
-  { id: 'beacon-1', freq: '1420.405MHz', source: '一路向北', date: '2026.09', message: '广告位招租' },
-])
+// 原始数据（默认为空，由接口动态获取）
+const rawSignals = ref([])
+
+// 加载状态与深空频谱雷达扫描动效
+const isLoading = ref(true)
+const scanFreq = ref('1420.405 MHz')
+let freqInterval = null
+
+// 扫描期间在代表性方位展现的微光探针占位
+const loadingProbePositions = [
+  { ...safePositions[0], key: 'lp-0', delay: '0s' },
+  { ...safePositions[3], key: 'lp-1', delay: '0.35s' },
+  { ...safePositions[5], key: 'lp-2', delay: '0.7s' },
+  { ...safePositions[8], key: 'lp-3', delay: '1.05s' },
+  { ...safePositions[12], key: 'lp-4', delay: '1.4s' }
+]
+
+const startFreqScanning = () => {
+  const baseFreqs = [1420.405, 1420.812, 1421.325, 1420.128, 1422.046, 1419.789]
+  let idx = 0
+  freqInterval = setInterval(() => {
+    idx = (idx + 1) % baseFreqs.length
+    const jitter = (Math.random() * 0.06 - 0.03).toFixed(3)
+    scanFreq.value = `${(baseFreqs[idx] + parseFloat(jitter)).toFixed(3)} MHz`
+  }, 110)
+}
+
+const stopFreqScanning = () => {
+  if (freqInterval) {
+    clearInterval(freqInterval)
+    freqInterval = null
+  }
+}
 
 // ================= 星系分页与跃迁状态 =================
 const GALAXY_SIZE = 8
@@ -208,6 +271,8 @@ const warpToNextGalaxy = () => {
 }
 
 const fetchApprovedSignals = async () => {
+  isLoading.value = true
+  startFreqScanning()
   try {
     const res = await fetch('/api/signals')
     const json = await res.json()
@@ -215,7 +280,13 @@ const fetchApprovedSignals = async () => {
       rawSignals.value = json.data
     }
   } catch (e) {
-    console.warn('使用默认信标数据:', e)
+    console.warn('获取信标信号异常:', e)
+  } finally {
+    // 保持适度延时避免接口极速返回时产生突兀闪屏
+    setTimeout(() => {
+      isLoading.value = false
+      stopFreqScanning()
+    }, 550)
   }
 }
 
@@ -251,7 +322,6 @@ onMounted(() => {
   let height = 0
   let dpr = 1
 
-  // 离屏 Canvas：静态星星只画一次，每帧一次性 drawImage，极低开销
   const offscreenCanvas = document.createElement('canvas')
   const offscreenCtx = offscreenCanvas.getContext('2d')
   let twinklingStars = []
@@ -308,7 +378,7 @@ onMounted(() => {
       this.len = Math.random() * 80 + 40
       this.speed = Math.random() * 6 + 6
       this.size = Math.random() * 1.0 + 0.6
-      this.angle = (35 * Math.PI) / 180
+      this.angle = ((35 + 5 * Math.random()) * Math.PI) / 180
       this.active = false
       this.wait = Math.random() * 180 + 30
     }
@@ -348,18 +418,14 @@ onMounted(() => {
   const shootingStars = Array.from({ length: isMobile ? 1 : 2 }, () => new ShootingStar())
 
   const render = () => {
-    // 离开屏幕视口时跳过绘制，极大节省滑动时的手机主线程算力
     if (!isSceneVisible.value) {
       animId = requestAnimationFrame(render)
       return
     }
 
     ctx.clearRect(0, 0, width, height)
-
-    // 1. 一键贴图静态星空
     ctx.drawImage(offscreenCanvas, 0, 0, width, height)
 
-    // 2. 闪烁动态星
     twinklingStars.forEach((s) => {
       s.phase += s.speed
       const alpha = s.baseAlpha + Math.sin(s.phase) * 0.25
@@ -369,7 +435,6 @@ onMounted(() => {
       ctx.fill()
     })
 
-    // 3. 流星
     shootingStars.forEach((star) => {
       star.update()
       star.draw(ctx)
@@ -379,7 +444,6 @@ onMounted(() => {
   }
   render()
 
-  // 交叉观察器：当用户向下滚动离开宇宙封面时自动休眠
   observer = new IntersectionObserver(([entry]) => {
     isSceneVisible.value = entry.isIntersecting
   }, { threshold: 0.05 })
@@ -387,6 +451,7 @@ onMounted(() => {
   observer.observe(canvas)
 
   onUnmounted(() => {
+    stopFreqScanning()
     if (animId) cancelAnimationFrame(animId)
     if (observer) observer.disconnect()
     window.removeEventListener('resize', handleResize)
@@ -437,6 +502,163 @@ onMounted(() => {
   height: 100%;
   pointer-events: none;
   z-index: 1;
+}
+
+/* ================= 深空信号检索加载动画图层 ================= */
+.cosmic-scanner-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 22;
+}
+
+.scanner-fade-enter-active,
+.scanner-fade-leave-active {
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scanner-fade-enter-from,
+.scanner-fade-leave-to {
+  opacity: 0;
+}
+
+/* 全息探针 */
+.loading-probe {
+  position: absolute;
+  top: var(--d-top);
+  left: var(--d-left);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.probe-reticle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 1px dashed rgba(56, 189, 248, 0.45);
+  border-radius: 50%;
+  animation: probe-rotate 7s linear infinite;
+}
+
+.probe-core {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8, 0 0 18px rgba(56, 189, 248, 0.85);
+  animation: probe-pulse 1.8s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+
+.probe-wave {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.65);
+  animation: probe-expand 2.4s cubic-bezier(0.12, 0.8, 0.28, 1) infinite;
+  animation-delay: var(--delay);
+}
+
+.probe-tag {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: rgba(56, 189, 248, 0.7);
+  white-space: nowrap;
+}
+
+@keyframes probe-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes probe-pulse {
+  0% { transform: scale(0.75); opacity: 0.45; }
+  100% { transform: scale(1.35); opacity: 1; }
+}
+
+@keyframes probe-expand {
+  0% { width: 6px; height: 6px; opacity: 0.85; }
+  100% { width: 36px; height: 36px; opacity: 0; }
+}
+
+/* 底部中央深空频谱雷达扫描 HUD */
+.scanner-hud {
+  position: absolute;
+  bottom: 2.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 17, 24, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15), inset 0 0 12px rgba(56, 189, 248, 0.06);
+  backdrop-filter: blur(12px);
+  padding: 6px 16px;
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+
+.scanner-radar-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 189, 248, 0.8);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scanner-radar-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 60%, rgba(56, 189, 248, 0.85) 100%);
+  animation: radar-sweep 1.4s linear infinite;
+}
+
+@keyframes radar-sweep {
+  100% { transform: rotate(360deg); }
+}
+
+.scanner-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+
+.scanner-title {
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.05em;
+}
+
+.scanner-divider {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.scanner-freq {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
 /* ================= 交互星星信标图层 ================= */
@@ -1038,12 +1260,10 @@ onMounted(() => {
 
 /* ================= 移动端精准避让与性能优化 ================= */
 @media (max-width: 768px) {
-  /* 1. 移动端取消全场景持续缩放，让高刷 OLED 屏画面更锐利且彻底消除重绘掉帧 */
   .scene {
     animation: none !important;
   }
 
-  /* 2. 优化基座线条，去掉模糊开销，呈现清晰的全息线框质感 */
   .cuboid .outline {
     box-shadow: none !important;
   }
@@ -1060,7 +1280,6 @@ onMounted(() => {
     }
   }
 
-  /* 3. 适度收窄移动端行星阴影半径 */
   .sun {
     box-shadow: 0 0 25px rgba(255, 255, 255, 0.25) !important;
   }
@@ -1068,11 +1287,21 @@ onMounted(() => {
     box-shadow: none !important;
   }
 
-  /* 4. 优化信标十字光 */
   .beacon-flare-h,
   .beacon-flare-v {
     animation: none !important;
     opacity: 0.75;
+  }
+
+  /* 移动端加载探针位置映射 */
+  .loading-probe {
+    top: var(--m-top);
+    left: var(--m-left);
+  }
+
+  .scanner-hud {
+    bottom: 5.2rem;
+    padding: 5px 12px;
   }
 
   .interactive-beacon {

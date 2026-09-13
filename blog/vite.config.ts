@@ -13,7 +13,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'react-native-fs': path.resolve(__dirname, 'react-native-fs-shim.js')
     },
   },
   optimizeDeps: {
