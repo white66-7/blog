@@ -115,6 +115,8 @@ const albumsData = [
       { title: '诺兰的恶趣味', url: '/album/暑假/闪死我了.mp4', cover: '/album/暑假/闪死我了.webp' },
       { title: '《我不难过》', url: '/album/暑假/离别.webp' },
       { title: '武汉这天气有点糙', url: '/album/暑假/霉.webp' },
+      { title: '前辈的劝告', url: '/album/暑假/前辈的劝告.webp' },
+      { title: '傲慢之罪', url: '/album/暑假/傲慢之罪.webp' },
     ]
   }
 ]
