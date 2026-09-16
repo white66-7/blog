@@ -76,6 +76,24 @@ export const songs: PresetSong[] = [
   },
   {
     id: 'preset_8',
+    name: 'aruarian dance',
+    artist: 'Nujabes', 
+    src: '/audio/Nujabes - aruarian dance.mp3', 
+    cover: '/song_covers/aruarian_dance.webp',
+    isPreset: true,
+    describe: '高中最爱听的一首歌'
+  },
+    {
+    id: 'preset_9',
+    name: 'Mr. Forgettable',
+    artist: 'David Kushner', 
+    src: '/audio/David Kushner - Mr. Forgettable.mp3', 
+    cover: '/song_covers/Mr. Forgettable.webp',
+    isPreset: true,
+    describe: 'Do you know me?'
+  },
+  {
+    id: 'preset_10',
     name: '自言自语',
     artist: '一路向北', 
     src: '/audio/自言自语.mp3', 
