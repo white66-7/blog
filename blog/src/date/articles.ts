@@ -29,6 +29,8 @@ import md16 from './md/16.md?raw'
 import md17 from './md/17.md?raw'
 import md18 from './md/18.md?raw'
 import md19 from './md/19.md?raw'
+import md20 from './md/20.md?raw'
+
 
 export const articles: Article[] = [
   {
@@ -202,19 +204,19 @@ export const articles: Article[] = [
     type: '后端',
     date: '2026-08-20',
     readTime: '10 minutes',
-    excerpt: '或许用过之后,才能理解何谓  "Life is short, I use Python."',
+    excerpt: '用过之后,终于理解何谓  "Life is short, I use Python."',
     tags: ['Python', 'tkinter','pystray'],
     cover: '/messages/16/法环.gif',
     content:md16,
   },
   {
     id: 17,
-    title: '那些不得不薅的云羊毛',
+    title: '我只是想让网站正常跑起来而已...',
     type: '杂谈',
     date: '2026-08-27',
     readTime: '10 minutes',
-    excerpt: '就自己使用体验锐评国内外云免费套餐',
-    tags: ['Serverless', '免费套餐'],
+    excerpt: '从阿里云折腾到 Vercel,再摸到 Render、MongoDB、Supabase',
+    tags: ['Serverless', '服务器'],
     cover: '/messages/17/1.webp',
     content:md17,
   },
@@ -231,15 +233,26 @@ export const articles: Article[] = [
   },
   {
     id: 19,
-    title: 'AI未来何去何从?',
+    title: 'AI未来会走向哪里?',
     type: '杂谈',
     date: '2026-09-16',
     readTime: '10 minutes',
-    excerpt: '最近AI暴论很多,我选择做个史官',
+    excerpt: '最近关于AI的暴论超级多,让我有第一次当史官的机会',
     tags: ['AI', '推特'],
     cover: '/messages/19/normal.webp',
     content:md19,
   },
+  // {
+  //   id: 20,
+  //   title: '全能的Node.js',
+  //   type: '后端',
+  //   date: '2026-09-17',
+  //   readTime: '10 minutes',
+  //   excerpt: '完美的全能尾兽',
+  //   tags: ['Node.js', '后端'],
+  //   cover: '/messages/20/space.webp',
+  //   content:md20,
+  // },
   // {
   //   id: 14,
   //   title: '论我的学生时代',

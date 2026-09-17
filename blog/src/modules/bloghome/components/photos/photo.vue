@@ -70,6 +70,7 @@ const albumsData = [
       { title: '三人成行', url: '/album/人物/三人成行.mp4', cover: '/album/人物/三人成行封面.webp' },
       { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
       { title: '聚餐', url: '/album/人物/dinner.webp' },
+      { title: '理完头发后', url: '/album/人物/理头.mp4', cover: '/album/人物/理头.webp' },
     ]
   },
   {
@@ -97,7 +98,7 @@ const albumsData = [
   },
   {
     id: 'holiday',
-    title: '大一暑假',
+    title: '大学',
     cover: '/album/photo_covers/friend.webp',
     photos: [
       { title: '不是说7月这几天要硬抗台风吗', url: '/album/暑假/tree.webp' },
