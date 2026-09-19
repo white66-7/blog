@@ -118,6 +118,10 @@ const albumsData = [
       { title: '武汉这天气有点糙', url: '/album/暑假/霉.webp' },
       { title: '前辈的劝告', url: '/album/暑假/前辈的劝告.webp' },
       { title: '傲慢之罪', url: '/album/暑假/傲慢之罪.webp' },
+      { title: '镰刀龙--魔女教团', url: '/album/暑假/镰刀龙.webp' },
+      { title: '霸王龙--七大原初恶魔及其附属', url: '/album/暑假/霸王龙.webp' },
+      { title: '爱交配的大地懒小队', url: '/album/暑假/大地懒.webp' },
+      { title: '我飞升了', url: '/album/暑假/飞升.webp' },
     ]
   }
 ]

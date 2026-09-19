@@ -107,7 +107,9 @@ const saysList = [
   { id: 13, content: '回到学校', date: '2026-09-05 22:15' },
   { id: 14, content: '上学总是莫名感到好累好困', date: '2026-09-07 21:58' },
   { id: 15, content: '这炎拳真是人能写出来的剧情吗', date: '2026-09-13 13:58' },
-  { id: 15, content: '最近要忙的事情有点多', date: '2026-09-15 22:52' },
+  { id: 16, content: '最近要忙的事情有点多', date: '2026-09-15 22:52' },
+  { id: 17, content: '天气一下变得好冷', date: '2026-09-17 22:54' },
+  { id: 18, content: '方舟进化通关了', date: '2026-09-17 22:54' },
 ]
 
 const timelineSays = computed(() => [...saysList].reverse())
