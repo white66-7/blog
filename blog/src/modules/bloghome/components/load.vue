@@ -157,15 +157,28 @@
         <span>关于</span>
       </router-link>
     </div>
+
+    <!-- 右侧 一起听按钮 -->
+    <div class="navbar__right">
+      <ListenTogetherBtn @click="handleListenTogether" />
+    </div>
   </nav>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+// 导入新建的按钮组件
+import ListenTogetherBtn from './ListenTogetherBtn.vue'
 
 defineProps({
   transparent: Boolean
 })
+
+// 点击一起听按钮触发的逻辑（后续可以在这里打开你的弹窗）
+const handleListenTogether = () => {
+  console.log('点击了一起听按钮')
+  // 例如：openModal() 或触发事件
+}
 
 // ---------- 导航栏自动隐藏 ----------
 const isVisible = ref(true)
@@ -205,7 +218,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px 0 0px;
+  padding: 0 20px;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(12px);
@@ -229,7 +242,6 @@ onUnmounted(() => {
   height: 100%;
   cursor: pointer;
   flex-shrink: 0;
-  padding-left: 20px;
 }
 
 .wave-svg {
@@ -254,9 +266,8 @@ onUnmounted(() => {
   display: flex;
   gap: 24px;
   align-items: center;
-  flex: 1;
   justify-content: center;
-  margin-left: -180px;
+  flex: 1;
 }
 
 .navbar__item {
@@ -298,6 +309,13 @@ onUnmounted(() => {
   outline: none;
 }
 
+/* ===== 右侧操作区 ===== */
+.navbar__right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 /* ===== 透明模式（第一屏） ===== */
 .navbar--transparent {
   background: transparent !important;
@@ -307,7 +325,8 @@ onUnmounted(() => {
   color: white !important;
 }
 
-.navbar--transparent .navbar__center {
+.navbar--transparent .navbar__center,
+.navbar--transparent .navbar__right {
   display: none;
 }
 
@@ -318,7 +337,7 @@ onUnmounted(() => {
 /* ===== 移动端适配 ===== */
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 12px; /* 稍微增加一点左右内边距 */
+    padding: 0 12px;
   }
 
   .navbar__left {
@@ -328,7 +347,7 @@ onUnmounted(() => {
   }
 
   .wave-svg {
-    height: 32px; /* 移动端字稍微缩小一点即可 */
+    height: 32px;
     width: auto;
   }
 
@@ -338,19 +357,25 @@ onUnmounted(() => {
 
   .navbar__center {
     margin-left: 0; 
-    
     flex: 1;
     justify-content: flex-end; 
-    gap: 10px; /* 调整移动端图标之间的间距 */
+    gap: 10px;
+    margin-right: 10px;
   }
 
   .navbar__item span {
-    display: none; /* 移动端隐藏文字，只留图标 */
+    display: none;
   }
 
   .navbar__item svg {
-    width: 26px; /* 移动端图标稍微加大一点方便手指点击 */
+    width: 26px;
     height: 26px;
+  }
+
+  /* 移动端将一起听按钮按比例缩小一点，避免挤压空间 */
+  .navbar__right :deep(.listen-btn) {
+    transform: scale(0.85);
+    transform-origin: right center;
   }
 }
 </style>
