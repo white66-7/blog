@@ -71,7 +71,7 @@ import 'animate.css'
 const rawProjects = ref([
   {
     id: 1,
-    title: '火影忍者',
+    title: '火影决斗场',
     description: '基于 C++ ，引入 SFML 与 Box2D 库开发的简陋小游戏',
     poster: '/project/vs.webp',
     link: 'https://github.com/white66-7/Naruto-battle-game',
@@ -80,14 +80,14 @@ const rawProjects = ref([
   {
     id: 2,
     title: '音乐播放器',
-    description: '基于css + javascript + html开发,Electron打包的图形化程序',
+    description: '基于css + javascript + html开发,Electron打包的图形化窗口',
     poster: '/project/music.webp',
     link: 'https://github.com/white66-7/music_app',
     tags: ['JavaScript', 'Electron', 'CSS', 'HTML']
   },
   {
     id: 3,
-    title: '博客-前端',
+    title: '博客',
     description: '基于 Vue3 框架开发的前端',
     poster: '/project/blog.webp',
     link: 'https://github.com/white66-7/blog',
@@ -96,7 +96,7 @@ const rawProjects = ref([
   {
     id: 4,
     title: '博客-后端',
-    description: '基于 SpringBoot 框架开发的后端',
+    description: '基于 SpringBoot 框架开发的后端,因为写得太烂现在已不再使用',
     poster: '/project/boot.webp',
     link: 'https://github.com/white66-7/java-backend',
     tags: ['SpringBoot', 'Java', 'IDEA']
@@ -104,11 +104,27 @@ const rawProjects = ref([
   {
     id: 5,
     title: '桌面美化工具',
-    description: '一个鼠标左键双击后隐藏桌面快捷图标工具',
-    poster: '/project/click.webp',
+    description: '鼠标左键双击后隐藏桌面快捷图标工具',
+    poster: '/project/click.gif',
     link: 'https://github.com/white66-7/DesktopHelper42',
     tags: ['Python', 'tkinter', 'pynput', 'pystray']
-  }
+  },
+  {
+    id: 6,
+    title: '弹簧网图谱',
+    description: 'logseq笔记软件插件',
+    poster: '/project/cricle.gif',
+    link: 'https://github.com/white66-7/Graph-Fluid-Spring',
+    tags: ['SoA', 'typescript', 'CSR']
+  },
+  {
+    id: 6,
+    title: '一起听',
+    description: '基于 NeriPlayer“一起听”功能开发的个人听歌房管理软件,服务器在海外。',
+    poster: '/project/apk.webp',
+    link: 'https://github.com/white66-7/white-social-environment',
+    tags: ['kolin', 'Android Studio', 'social']
+  },
 ])
 
 const projects = computed(() => {

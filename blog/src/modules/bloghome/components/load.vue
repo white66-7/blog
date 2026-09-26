@@ -174,10 +174,9 @@ defineProps({
   transparent: Boolean
 })
 
-// 点击一起听按钮触发的逻辑（后续可以在这里打开你的弹窗）
+// 点击一起听按钮触发的逻辑
 const handleListenTogether = () => {
   console.log('点击了一起听按钮')
-  // 例如：openModal() 或触发事件
 }
 
 // ---------- 导航栏自动隐藏 ----------
@@ -194,7 +193,8 @@ const handleUserActivity = () => {
 
 onMounted(() => {
   window.addEventListener('mousemove', handleUserActivity)
-  window.addEventListener('touchmove', handleUserActivity, { passive: true })
+  // 移动端用 touchstart 更合理：只在真正触碰时唤醒，滚动时不反复触发
+  window.addEventListener('touchstart', handleUserActivity, { passive: true })
   timer = setTimeout(() => {
     isVisible.value = false
   }, 2000)
@@ -202,7 +202,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleUserActivity)
-  window.removeEventListener('touchmove', handleUserActivity)
+  window.removeEventListener('touchstart', handleUserActivity)
   if (timer) clearTimeout(timer)
 })
 </script>
@@ -225,7 +225,7 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   color: #000000;
-  
+
   z-index: 100;
   transition: transform 0.4s ease, background 0.3s ease, backdrop-filter 0.3s ease,
     border-color 0.3s ease, color 0.3s ease;
@@ -334,20 +334,25 @@ onUnmounted(() => {
   color: white !important;
 }
 
-/* ===== 移动端适配 ===== */
+/* ============================================================
+   移动端适配
+   - 768px：平板竖屏 / 大屏手机
+   - 400px：小屏手机（iPhone SE / 12 mini 等）
+   - 340px：超小屏（老机型 / 320px 逻辑宽度）
+   ============================================================ */
 @media (max-width: 768px) {
   .navbar {
     padding: 0 12px;
+    height: 54px;
   }
 
   .navbar__left {
     padding-left: 0;
-    flex-shrink: 0; 
-    margin: -5px;
+    flex-shrink: 0;
   }
 
   .wave-svg {
-    height: 32px;
+    height: 22px;
     width: auto;
   }
 
@@ -355,12 +360,18 @@ onUnmounted(() => {
     display: none;
   }
 
+  /* 菜单改为靠右对齐，避免和 Logo 抢空间时被挤压 */
   .navbar__center {
-    margin-left: 0; 
     flex: 1;
-    justify-content: flex-end; 
-    gap: 10px;
-    margin-right: 10px;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0 8px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .navbar__item {
+    flex-shrink: 0;
   }
 
   .navbar__item span {
@@ -368,14 +379,74 @@ onUnmounted(() => {
   }
 
   .navbar__item svg {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
   }
 
-  /* 移动端将一起听按钮按比例缩小一点，避免挤压空间 */
+  .navbar__right {
+    flex-shrink: 0;
+  }
+
+  /* 关键：用实际尺寸缩小，而不是 transform: scale */
   .navbar__right :deep(.listen-btn) {
-    transform: scale(0.85);
-    transform-origin: right center;
+    height: 32px;
+    padding: 0 10px 0 0;
+    gap: 4px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px rgb(116, 116, 116);
+  }
+}
+
+/* 小屏手机：进一步压缩 */
+@media (max-width: 400px) {
+  .navbar {
+    padding: 0 8px;
+  }
+
+  .wave-svg {
+    height: 18px;
+  }
+
+  .navbar__center {
+    gap: 4px;
+    margin: 0 4px;
+  }
+
+  .navbar__item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .navbar__right :deep(.listen-btn) {
+    height: 28px;
+    padding: 0 8px 0 0;
+    gap: 3px;
+    font-size: 11px;
+  }
+
+  /* 按钮里 SVG 的 hover 放大动画在触屏上没意义，禁用以免误触 */
+  .navbar__right :deep(.listen-btn:hover svg) {
+    transform: none;
+  }
+  .navbar__right :deep(.listen-btn:hover .now),
+  .navbar__right :deep(.listen-btn:hover .play) {
+    transform: none;
+    transition-delay: 0ms;
+  }
+}
+
+/* 超小屏：320px 逻辑宽度下让菜单可以横向滑动，避免被裁切 */
+@media (max-width: 340px) {
+  .navbar__center {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .navbar__center::-webkit-scrollbar {
+    display: none;
   }
 }
 </style>

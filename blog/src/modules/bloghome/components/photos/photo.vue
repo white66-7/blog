@@ -122,6 +122,8 @@ const albumsData = [
       { title: '霸王龙--七大原初恶魔及其附属', url: '/album/暑假/霸王龙.webp' },
       { title: '爱交配的大地懒小队', url: '/album/暑假/大地懒.webp' },
       { title: '我飞升了', url: '/album/暑假/飞升.webp' },
+      { title: '还是你劲大', url: '/album/暑假/眼药水.webp' },
+      { title: '好圆的月亮', url: '/album/暑假/中秋节.webp' },
     ]
   }
 ]

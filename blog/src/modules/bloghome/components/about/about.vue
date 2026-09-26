@@ -69,7 +69,7 @@ const skillGroups = [
   },
   {
     title: '工具',
-    items: ['Git', 'VS Code', 'IDEA']
+    items: ['Git', 'VS Code', 'IDEA','Android Studio']
   },
   {
     title: '其他',

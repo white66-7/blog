@@ -1,91 +1,91 @@
 <template>
   <div class="article-detail-container">
-  <Navbar :transparent="false" />
+    <Navbar :transparent="false" />
 
-  <button class="back-btn" @click="$router.back()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-      stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
-    返回
-  </button>
+    <button class="back-btn" @click="$router.back()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+      返回
+    </button>
 
-  <div class="article-page" v-if="article">
-    <main>
-      <div class="content" ref="contentRef">
-        <div class="hero-image">
-          <img :src="article.cover" alt="cover" />
+    <div class="article-page" v-if="article">
+      <main>
+        <div class="content" ref="contentRef">
+          <div class="hero-image">
+            <img :src="article.cover" alt="cover" />
+          </div>
+          <h1 class="article-title">{{ article.title }}</h1>
+          <div class="meta">
+            <span>{{ article.date }}</span>
+          </div>
+          <div class="tags" v-if="article.tags.length">
+            <span class="tag" v-for="tag in article.tags" :key="tag">{{ tag }}</span>
+          </div>
+          <div class="markdown-body" v-html="renderedContent" @click="handleMarkdownClick"></div>
         </div>
-        <h1 class="article-title">{{ article.title }}</h1>
-        <div class="meta">
-          <span>{{ article.date }}</span>
-        </div>
-        <div class="tags" v-if="article.tags.length">
-          <span class="tag" v-for="tag in article.tags" :key="tag">{{ tag }}</span>
-        </div>
-        <div class="markdown-body" v-html="renderedContent" @click="handleMarkdownClick"></div>
-      </div>
-    </main>
-  </div>
-  <div class="not-found" v-else>
-    <p>文章未找到</p>
-  </div>
-  <div class="elastic-sidebar" :class="{ 'is-open': isOpen }">
-    <svg class="sidebar-svg" :viewBox="`0 0 350 ${svgHeight}`" preserveAspectRatio="none">
-      <path 
-        class="s-path" 
-        fill="rgba(243, 245, 248, 0.94)" 
-        :d="currentPath" 
-        @mousedown="startDrag" 
-        @touchstart="startDrag" 
-      />
-    </svg>
+      </main>
+    </div>
+    <div class="not-found" v-else>
+      <p>文章未找到</p>
+    </div>
+    <div class="elastic-sidebar" :class="{ 'is-open': isOpen }">
+      <svg class="sidebar-svg" :viewBox="`0 0 350 ${svgHeight}`" preserveAspectRatio="none">
+        <path 
+          class="s-path" 
+          fill="rgba(243, 245, 248, 0.94)" 
+          :d="currentPath" 
+          @mousedown="startDrag" 
+          @touchstart="startDrag" 
+        />
+      </svg>
 
-    <!-- ==== 提示文字 ==== -->
-    <transition name="hint-fade">
-      <div class="sidebar-hint-text" v-show="showHintText">
-        目录
-      </div>
-    </transition>
-
-    <div class="sidebar-content" :class="{ 'active': isOpen }">
-      <!-- 头部 -->
-      <div class="toc__header">
-        <div class="toc__icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
+      <!-- ==== 提示文字 ==== -->
+      <transition name="hint-fade">
+        <div class="sidebar-hint-text" v-show="showHintText">
+          目录
         </div>
-        <div class="toc__title-group">
-          <span class="toc__title">目录</span>
-          <span class="toc__subtitle">CONTENTS</span>
-        </div>
-      </div>
+      </transition>
 
-      <!-- 目录列表 -->
-      <div class="toc-list">
-        <a v-for="(h, i) in headings" :key="i" class="toc__item" :class="[
-          `toc__item--h${h.level}`,
-          { 'toc__item--active': activeHeading === i }
-        ]" :style="{ paddingLeft: `${16 + (h.level - 1) * 14}px` }" @click.prevent="handleTocClick(i)">
-          <span class="toc__dot"></span>
-          <span class="toc__text">{{ h.text }}</span>
-        </a>
+      <div class="sidebar-content" :class="{ 'active': isOpen }">
+        <!-- 头部 -->
+        <div class="toc__header">
+          <div class="toc__icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </div>
+          <div class="toc__title-group">
+            <span class="toc__title">目录</span>
+            <span class="toc__subtitle">CONTENTS</span>
+          </div>
+        </div>
+
+        <!-- 目录列表 -->
+        <div class="toc-list">
+          <a v-for="(h, i) in headings" :key="i" class="toc__item" :class="[
+            `toc__item--h${h.level}`,
+            { 'toc__item--active': activeHeading === i }
+          ]" :style="{ paddingLeft: `${16 + (h.level - 1) * 14}px` }" @click.prevent="handleTocClick(i)">
+            <span class="toc__dot"></span>
+            <span class="toc__text">{{ h.text }}</span>
+          </a>
+        </div>
       </div>
     </div>
-  </div>
 
-  <Teleport to="body">
-    <div v-if="previewVisible" class="lightbox-overlay" @click="closePreview">
-      <img :src="previewSrc" class="lightbox-image" />
-    </div>
-  </Teleport>
+    <Teleport to="body">
+      <div v-if="previewVisible" class="lightbox-overlay" @click="closePreview">
+        <img :src="previewSrc" class="lightbox-image" />
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -96,6 +96,11 @@ import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/vs2015.css'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
+// @ts-ignore
+import markdownItKatex from '@iktakahiro/markdown-it-katex'
+
 import { articles } from '@/date/articles'
 import type { Article } from '@/date/articles'
 import Navbar from '@/modules/bloghome/components/load.vue'
@@ -103,6 +108,30 @@ import { articleScrollCache } from '@/router/index'
 import 'animate.css'
 
 const md = new MarkdownIt({ html: true })
+// 使用插件负责识别 $ 与 $$ 分词
+md.use(markdownItKatex)
+
+//使用本地最新版 KaTeX ，解决上下标重叠错位
+md.renderer.rules.math_inline = (tokens, idx) => {
+  const token = tokens[idx]
+  if (!token) return ''
+  return katex.renderToString(token.content, {
+    displayMode: false,
+    throwOnError: false,
+    output: 'html' 
+  })
+}
+
+md.renderer.rules.math_block = (tokens, idx) => {
+  const token = tokens[idx]
+  if (!token) return ''
+  return katex.renderToString(token.content, {
+    displayMode: true,
+    throwOnError: false,
+    output: 'html'
+  })
+}
+
 md.renderer.rules.fence = function (tokens, idx) {
   const token = tokens[idx]
   if (!token) return ''
@@ -159,30 +188,47 @@ async function handleCopy(e: MouseEvent) {
 const route = useRoute()
 const article = ref<Article | null>(null)
 
+// 预编译常量与正则表达式，避免每次调用重复创建
+const PH_PREFIX = '\u0000SP_'
+const PH_SUFFIX = '_\u0000'
+
+// 合并保护规则：优先级从高到低
+const PROTECT_RE = /```[\s\S]*?```|`[^`\r\n]+`|\$\$[\s\S]*?\$\$|(?<!\\)\$(?!\s)([^\$\n]+?)(?<!\s)\$/g
+
+// 还原正则
+const RESTORE_RE = /\u0000SP_(\d+)_\u0000/g
+
+// 中英混排正则
+const HAN_ALPHANUM_RE = /(\p{Script=Han})([a-zA-Z0-9])/gu
+const ALPHANUM_HAN_RE = /([a-zA-Z0-9])(\p{Script=Han})/gu
+const ESCAPE_SLASH_RE = /\\(?=[A-Za-z0-9])/g
+
 function addSpacing(text: string): string {
   if (!text) return ''
 
   const placeholders: string[] = []
-  const PH = '\u0000SP\u0000'
 
-  text = text.replace(/```[\s\S]*?```/g, (match) => {
-    const key = `${PH}${placeholders.length}\u0000`
-    placeholders.push(match)
+  //单次遍历完成所有保护
+  text = text.replace(PROTECT_RE, (match, inlineFormula) => {
+    const key = `${PH_PREFIX}${placeholders.length}${PH_SUFFIX}`
+    
+    // 如果是行内公式，去除内部首尾冗余空格
+    if (inlineFormula !== undefined) {
+      placeholders.push(`$${inlineFormula.trim()}$`)
+    } else {
+      placeholders.push(match)
+    }
     return key
   })
-  text = text.replace(/`[^`]*`/g, (match) => {
-    const key = `${PH}${placeholders.length}\u0000`
-    placeholders.push(match)
-    return key
-  })
 
-  text = text.replace(/([\u4e00-\u9fa5])(?![ \t])([a-zA-Z0-9])/g, '$1 $2')
-  text = text.replace(/([a-zA-Z0-9])(?![ \t])([\u4e00-\u9fa5])/g, '$1 $2')
-  text = text.replace(/\\(?=[A-Za-z0-9])/g, '\\\u200B')
+  // 中英混排空格优化及反斜杠转义
+  text = text
+    .replace(HAN_ALPHANUM_RE, '$1 $2')
+    .replace(ALPHANUM_HAN_RE, '$1 $2')
+    .replace(ESCAPE_SLASH_RE, '\\\u200B')
 
-  text = text.replace(new RegExp(`${PH}(\\d+)\u0000`, 'g'), (_, idx) => {
-    return placeholders[parseInt(idx)] ?? ''
-  })
+  // 还原被保护的内容
+  text = text.replace(RESTORE_RE, (_, idx) => placeholders[Number(idx)] ?? '')
 
   return text
 }
@@ -785,7 +831,7 @@ main {
   text-align: center;
   margin: 0 0 16px 0;
   color: #1a1a1a;
-  line-height: 1.35; /* 略微调大一点行高，多行时不拥挤 */
+  line-height: 1.35;
   letter-spacing: 1.5px;
   position: relative;
   z-index: 1;
@@ -840,7 +886,6 @@ main {
   line-height: 1.8;
   font-size: clamp(1rem, 2.5vw, 1.3rem);
   color: #000;
-  /* 例如 1000px ~ 1100px */
   max-width: 920px;
   margin: 0 auto;
   position: relative;
@@ -855,7 +900,7 @@ main {
 .markdown-body :deep(h1) {
   font-family: 'Ma Shan Zheng', cursive, sans-serif;
   font-weight: normal;
-  font-size: clamp(1.4rem, 1.8vw + 0.6rem, 2.2rem); /* 缩小到合适比例 */
+  font-size: clamp(1.4rem, 1.8vw + 0.6rem, 2.2rem);
   text-align: center;
   margin: 1.6em 0 0.6em;
   line-height: 1.3;
@@ -910,6 +955,25 @@ main {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+/* ==================== 4. LaTeX 数学公式排版 ==================== */
+.markdown-body :deep(.katex-display) {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px 0;
+  margin: 1.2em 0;
+  text-align: center;
+}
+
+.markdown-body :deep(.katex) {
+  font-size: 1.08em;
+  text-rendering: auto;
+}
+
+/* 隐藏可能残留的 MathML 层 */
+.markdown-body :deep(.katex-mathml) {
+  display: none !important;
 }
 
 .markdown-body :deep(.code-editor) {
@@ -1009,7 +1073,6 @@ main {
   vertical-align: baseline;
   white-space: nowrap;
 
-  /* 沉稳科技深蓝，掠过清透冰蓝高光 */
   background: linear-gradient(
     110deg,
     #1d4ed8 0%,
@@ -1019,48 +1082,39 @@ main {
     #1d4ed8 100%
   );
   background-size: 200% 100%;
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: textShine 4s linear infinite;
 
-  /* 点击时的弹性按压反馈 */
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* 纯水平向右矢量箭头（→） */
 .markdown-body :deep(a)::after {
   content: '';
   display: inline-block;
-  width: 0.85em;  /* 水平箭头的黄金比例尺寸 */
+  width: 0.85em;
   height: 0.85em;
-  background-color: #1d4ed8; /* 与文字完全同色一体 */
+  background-color: #1d4ed8;
 
-  /* 顶尖开源图标库的标准水平向右箭头（粗度 3.2，端点圆润） */
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='4' y1='12' x2='19' y2='12'%3E%3C/line%3E%3Cpolyline points='12 5 19 12 12 19'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='4' y1='12' x2='19' y2='12'%3E%3C/line%3E%3Cpolyline points='12 5 19 12 12 19'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain;
 
-  /* 精准对准中文字体垂直中心线 */
   transform: translateY(1px);
   flex-shrink: 0;
 
-  /* 平滑顺畅的向右平移过渡 */
   transition: transform 0.25s ease-in-out, background-color 0.2s ease;
 }
 
-/* ==================== 交互动效 ==================== */
-
-/* 悬停时：箭头顺着指向自然向右滑出 4px，颜色加亮至 2563eb */
 .markdown-body :deep(a):hover::after {
   background-color: #2563eb;
   transform: translateY(1px) translateX(4px);
 }
 
-/* 鼠标按下时的微机械触感 */
 .markdown-body :deep(a):active {
   transform: scale(0.96);
 }
 
-/* ==================== 渐变流动动画 ==================== */
 @keyframes textShine {
   0% {
     background-position: 100% 0;
@@ -1069,6 +1123,7 @@ main {
     background-position: -100% 0;
   }
 }
+
 .back-btn {
   position: fixed;
   top: 80px;

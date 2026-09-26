@@ -11,11 +11,13 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@iktakahiro/markdown-it-katex": "^4.0.1",
     "animate.css": "^4.1.1",
     "axios": "^1.18.1",
     "buffer": "^6.0.3",
     "gsap": "^3.15.0",
     "highlight.js": "^11.11.1",
+    "katex": "^0.18.9",
     "markdown-it": "^14.3.0",
     "mongodb": "^7.6.0",
     "music-metadata": "^11.14.0",
@@ -28,6 +30,7 @@
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",
     "@types/jquery": "^4.0.1",
+    "@types/markdown-it": "^14.2.0",
     "@types/node": "^24.13.3",
     "@vercel/node": "^7.0.0",
     "@vitejs/plugin-vue": "^6.0.6",
