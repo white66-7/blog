@@ -7,10 +7,10 @@
       <!-- 弹窗内容区 -->
       <div class="lightbox-content" @click.stop>
         
-        <!-- 核心：拍立得大相片框 -->
+        <!-- 核心：拍立得相片框 -->
         <div class="polaroid large-polaroid">
           <div class="photo large-photo">
-            <!-- 视频播放器：支持流式边下边播 + 缓冲等待转圈 -->
+            <!-- 流式下载 + 缓冲等待 -->
             <video
               v-if="isVideo(photo)"
               ref="videoEl"
@@ -35,7 +35,7 @@
               <span>加载中...</span>
             </div>
 
-            <!-- 老照片特效图层：灰尘与划痕 -->
+            <!-- 特效图层 -->
             <div class="dust"></div>
             <div class="scratches"></div>
           </div>

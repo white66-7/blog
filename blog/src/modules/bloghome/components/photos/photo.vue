@@ -94,6 +94,15 @@ const albumsData = [
       { title: '低曝光 + 冷暖对比具备的美感', url: '/album/风景/冷暖对比.webp' },
       { title: '逆水行舟', url: '/album/风景/水中船.mp4',cover: '/album/风景/水中船.webp'},
       { title: '随手删', url: '/album/风景/夕阳.webp'},
+      { title: '动态的生命感', url: '/album/风景/sea1.mp4',cover: '/album/风景/sea1.webp'},
+      { title: '蠕动的水母', url: '/album/风景/sea2.mp4',cover: '/album/风景/sea2.webp'},
+      { title: '你瞅我干啥', url: '/album/风景/sea3.mp4',cover: '/album/风景/sea3.webp'},
+      { title: '区', url: '/album/风景/sea5.mp4',cover: '/album/风景/sea5.webp'},
+      { title: '这是蜜罐吗', url: '/album/风景/sea6.mp4',cover: '/album/风景/sea6.webp'},
+      { title: '可惜角度不太好', url: '/album/风景/sea7.mp4',cover: '/album/风景/sea7.webp'},
+      { title: '这三个柱子好有喜感', url: '/album/风景/sea8.mp4',cover: '/album/风景/sea8.webp'},
+      { title: '方舟里面老难抓捕了', url: '/album/风景/sea4.mp4',cover: '/album/风景/sea4.webp'},
+      { title: '想拍一群金鱼', url: '/album/风景/sea9.mp4',cover: '/album/风景/sea9.webp'},
     ]
   },
   {
@@ -122,8 +131,9 @@ const albumsData = [
       { title: '霸王龙--七大原初恶魔及其附属', url: '/album/暑假/霸王龙.webp' },
       { title: '爱交配的大地懒小队', url: '/album/暑假/大地懒.webp' },
       { title: '我飞升了', url: '/album/暑假/飞升.webp' },
-      { title: '还是你劲大', url: '/album/暑假/眼药水.webp' },
+      { title: '劲大', url: '/album/暑假/眼药水.webp' },
       { title: '好圆的月亮', url: '/album/暑假/中秋节.webp' },
+      { title: '给了', url: '/album/暑假/上课.webp' },
     ]
   }
 ]
@@ -132,7 +142,7 @@ const isFirstScreen = ref(false)
 const currentAlbum = ref(null)
 const selectedPhoto = ref(null)
 
-// 将选中的相册内的照片，转化为双页书本的数据结构
+// 将照片转化为双页书本的数据结构
 const sheets = computed(() => {
   if (!currentAlbum.value) return []
 
@@ -143,7 +153,7 @@ const sheets = computed(() => {
     pages.push({ type: 'grid-list', items: photos.slice(i, i + 2) })
   }
 
-  // 每 2 页合并为一张纸 (front, back)
+  // 每 2 页合并为一张纸
   const result = []
   for (let i = 0; i < pages.length; i += 2) {
     result.push({

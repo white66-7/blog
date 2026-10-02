@@ -9,16 +9,24 @@
       <div class="right">
         <div class="date">{{ formattedDate }}</div>
         <div class="address">{{ address }}</div>
+        <div class="change" @click="changeaddress" ><svg ref="changeIconRef" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+            viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m.91 16.15a.5.5 0 0 1-.85-.35V17H12c-1.28 0-2.56-.49-3.54-1.46a5 5 0 0 1-1.14-5.3c.19-.51.86-.64 1.24-.25c.22.22.27.54.17.82c-.46 1.24-.2 2.68.8 3.68c.7.7 1.62 1.03 2.54 1.01v-.94c0-.45.54-.67.85-.35l1.62 1.62c.2.2.2.51 0 .71zm2.53-4.13a.78.78 0 0 1-.17-.82c.46-1.24.2-2.68-.8-3.68c-.7-.7-1.62-1.04-2.53-1.02v.94c0 .45-.54.67-.85.35L9.46 8.18c-.2-.2-.2-.51 0-.71l1.62-1.62a.5.5 0 0 1 .85.35v.81c1.3-.02 2.61.45 3.6 1.45a5 5 0 0 1 1.14 5.3c-.19.52-.85.65-1.23.26" />
+          </svg>
+        </div>
       </div>
     </div>
     <svg id="weather-inner" ref="innerSvgRef">
       <defs>
         <!-- 原版树叶形状 -->
-        <path id="leaf-path" d="M41.9,56.3l0.1-2.5c0,0,4.6-1.2,5.6-2.2c1-1,3.6-13,12-15.6c9.7-3.1,19.9-2,26.1-2.1c2.7,0-10,23.9-20.5,25c-7.5,0.8-17.2-5.1-17.2-5.1L41.9,56.3z"/>
+        <path id="leaf-path"
+          d="M41.9,56.3l0.1-2.5c0,0,4.6-1.2,5.6-2.2c1-1,3.6-13,12-15.6c9.7-3.1,19.9-2,26.1-2.1c2.7,0-10,23.9-20.5,25c-7.5,0.8-17.2-5.1-17.2-5.1L41.9,56.3z" />
         <!-- 原版太阳光晕渐变 -->
         <radialGradient id="SVGID_1_" cx="0" cy="0" r="320.8304" gradientUnits="userSpaceOnUse">
-          <stop offset="0" style="stop-color:#FFDE17;stop-opacity:0.7"/>
-          <stop offset="1" style="stop-color:#FFF200;stop-opacity:0"/>
+          <stop offset="0" style="stop-color:#FFDE17;stop-opacity:0.7" />
+          <stop offset="1" style="stop-color:#FFF200;stop-opacity:0" />
         </radialGradient>
       </defs>
     </svg>
@@ -33,14 +41,13 @@ import { gsap } from 'gsap'
 // --- 数据变量 ---
 const cardRef = ref<HTMLElement | null>(null)
 const innerSvgRef = ref<SVGElement | null>(null)
-const address = ref('武汉')
 
 const temp = ref('--')
 const weatherDesc = ref('加载中...')
 const formattedDate = ref('')
-const weatherType = ref('wind') 
+const weatherType = ref('wind')
 
-// --- 动态尺寸（不再写死，会在组件挂载时读取真实的 DOM 宽高） ---
+// --- 动态尺寸 ---
 let cardWidth = 300
 let cardHeight = 400
 
@@ -86,17 +93,27 @@ const weatherNames: Record<string, string> = {
   sun: 'Sunny', wind: 'Windy', rain: 'Rain', thunder: 'Storms', snow: 'Snow'
 }
 
-//天气缓存30 分钟 TTL
-const CACHE_KEY = 'cyber_weather'
+
 const CACHE_TTL = 30 * 60 * 1000
+
+const addresslist = [
+  { name: '武汉', lat: 30.508522, lon: 114.332928 },
+  { name: '千灯', lat: 32.32, lon: 120.87 },
+  { name: '樟树', lat: 27.4907, lon: 115.42 },
+]
+
+const addressindex = ref(0)
+const address = ref(addresslist[0]?.name || null)
+const changeIconRef = ref<SVGElement | null>(null)
 
 function loadWeatherFromCache(): boolean {
   try {
-    const raw = localStorage.getItem(CACHE_KEY)
+    const raw = localStorage.getItem(currentCacheKey())
     if (!raw) return false
     const cached = JSON.parse(raw)
     if (!cached || typeof cached.fetchedAt !== 'number') return false
     if (Date.now() - cached.fetchedAt > CACHE_TTL) return false
+    address.value = addresslist[addressindex.value]?.name || null
     temp.value = cached.temp
     weatherDesc.value = cached.desc
     weatherType.value = cached.type
@@ -110,23 +127,28 @@ function loadWeatherFromCache(): boolean {
 
 function saveWeatherToCache(): void {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
+    localStorage.setItem(currentCacheKey(), JSON.stringify({
       fetchedAt: Date.now(),
       temp: temp.value,
       desc: weatherDesc.value,
       type: weatherType.value,
       date: formattedDate.value,
     }))
-  } catch { /* 缓存满时忽略 */ }
+  } catch { /* 忽略 */ }
+}
+
+function currentCacheKey(): string {
+  const loc = addresslist[addressindex.value]
+  return `cyber_weather_${loc?.lat}_${loc?.lon}`
 }
 
 // ── 获取武汉天气 ──
 async function fetchWeather() {
   // 命中 30 分钟内缓存则直接用，不再发请求
   if (loadWeatherFromCache()) return
+  const loc = addresslist[addressindex.value]
   try {
-    const url = 'https://wttr.in/30.508522,114.332928?format=j1';
-    //千灯 32.32 120.87   武汉  30.508522 114.332928
+    const url = `https://wttr.in/${loc?.lat},${loc?.lon}?format=j1`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('请求失败');
     const data = await res.json();
@@ -154,6 +176,23 @@ async function fetchWeather() {
   }
 }
 
+function changeaddress() {
+  if (changeIconRef.value) {
+    gsap.to(changeIconRef.value, {
+      rotation: '+=360',
+      duration: 0.6,
+      ease: 'power2.out',
+      transformOrigin: '50% 50%',
+    })
+  }
+  addressindex.value = (addressindex.value + 1) % addresslist.length
+  address.value = addresslist[addressindex.value]?.name || null
+
+  temp.value = '--'
+  weatherDesc.value = '加载中'
+  fetchWeather()
+}
+
 // ── 初始化 SVG ──
 function initSVG() {
   if (!innerSvgRef.value || !cardRef.value) return
@@ -165,7 +204,7 @@ function initSVG() {
   innerSVG = Snap(innerSvgRef.value)
 
   const sunburstPathData = "M0,319.7c-18.6,0-37.3-1.6-55.5-4.8L-7.8,41.4c5.1,0.9,10.6,0.9,15.7,0L56,314.8C37.6,318,18.8,319.7,0,319.7z M-160.8,276.6c-32.5-18.8-61.3-42.9-85.5-71.6L-34,26.2c3.4,4.1,7.4,7.4,12,10.1L-160.8,276.6z M161.3,276.4L22.1,36.2 c4.5-2.6,8.6-6,12-10.1l212.6,178.5C222.5,233.4,193.8,257.6,161.3,276.4z M-302.5,108.3C-315.4,73-321.9,36-322-1.8l277.6-0.5 c0,5.3,0.9,10.4,2.7,15.2L-302.5,108.3z M302.6,107.8L41.8,12.8c1.7-4.7,2.6-9.7,2.6-14.9c0-0.3,0-0.6,0-1H322l0-1.3l0,1.9 C322,35.4,315.5,72.5,302.6,107.8z M-41.8-17.5l-261-94.5c12.8-35.4,31.6-68,55.8-96.9L-34.1-30.8C-37.5-26.8-40.1-22.3-41.8-17.5z M41.7-17.7c-1.8-4.8-4.4-9.3-7.8-13.3l212-179.2c24.3,28.8,43.3,61.3,56.3,96.6L41.7-17.7z M-22.2-40.8l-139.6-240 c32.7-19,68.1-32,105.2-38.6L-8-46.1C-13-45.2-17.8-43.4-22.2-40.8z M22-40.9c-4.4-2.6-9.2-4.3-14.2-5.1l47.1-273.6 c37.2,6.4,72.7,19.2,105.4,38L22-40.9z"
-  
+
   sunburst = innerSVG.path(sunburstPathData).attr({
     fill: 'url(#SVGID_1_)',
     opacity: 0
@@ -220,7 +259,7 @@ function drawCloud(cloud: any, i: number) {
   points.push([-width, height].join(','))
   points.push('Q' + [-(width * 2), height / 2].join(','))
   points.push([-(width), 0].join(','))
-  
+
   if (!cloud.path) cloud.path = cloud.group.path()
   cloud.path.attr({ d: points.join(' '), fill: ['#efefef', '#E6E6E6', '#D5D5D5'][i] })
 }
@@ -230,24 +269,24 @@ function makeRain() {
   const lineWidth = Math.random() * 3
   const lineLength = currentWeather.type === 'thunder' ? 35 : 14
   const x = Math.random() * (cardWidth - 40) + 20
-  
+
   const holders = [innerRainHolder1, innerRainHolder2, innerRainHolder3]
   const holder = holders[2 - Math.floor(lineWidth)]!
-  
+
   const line = holder.path(`M0,0 0,${lineLength}`).attr({
     fill: 'none',
     stroke: currentWeather.type === 'thunder' ? '#777' : '#0000ff',
     strokeWidth: lineWidth
   })
-  
+
   rain.push(line)
-  
-  gsap.fromTo(line.node, 
-    { x, y: -lineLength }, 
-    { 
-      delay: Math.random(), 
-      y: cardHeight, 
-      duration: 1, 
+
+  gsap.fromTo(line.node,
+    { x, y: -lineLength },
+    {
+      delay: Math.random(),
+      y: cardHeight,
+      duration: 1,
       ease: 'power2.in',
       onComplete: () => {
         line.remove()
@@ -266,26 +305,26 @@ function makeSplash(x: number, type: string) {
   const speed = type === 'thunder' ? 0.7 : 0.5
   const splashUp = 0 - (Math.random() * splashBounce)
   const randomX = ((Math.random() * splashDistance) - (splashDistance / 2))
-  
+
   const points = []
   points.push('M' + 0 + ',' + 0)
   points.push('Q' + randomX + ',' + splashUp)
   points.push((randomX * 2) + ',' + splashDistance)
-  
+
   const splash = splashHolder.path(points.join(' ')).attr({
     fill: "none", stroke: type === 'thunder' ? '#777' : '#0000ff', strokeWidth: 1
   })
-  
+
   const pathLength = Snap.path.getTotalLength(splash as any)
   splash.node.style.strokeDasharray = splashLength + ' ' + pathLength
-  
-  gsap.fromTo(splash.node, 
-    { strokeWidth: 2, y: cardHeight, x: x, opacity: 1, strokeDashoffset: splashLength }, 
-    { 
-      strokeWidth: 0, 
-      strokeDashoffset: -pathLength, 
-      opacity: 1, 
-      duration: speed, 
+
+  gsap.fromTo(splash.node,
+    { strokeWidth: 2, y: cardHeight, x: x, opacity: 1, strokeDashoffset: splashLength },
+    {
+      strokeWidth: 0,
+      strokeDashoffset: -pathLength,
+      opacity: 1,
+      duration: speed,
       ease: 'power1.inOut',
       onComplete: () => splash.remove()
     }
@@ -298,14 +337,16 @@ function makeSnow() {
   const x = 20 + (Math.random() * (cardWidth - 40))
   const y = -10
   const endY = cardHeight + 10
-  
+
   const flake = innerSnowHolder.circle(0, 0, 5).attr({ fill: 'white' })
   snow.push(flake)
-  
-  gsap.fromTo(flake.node, { x, y }, { y: endY, duration: 3 + (Math.random() * 5), ease: 'none', onComplete: () => {
-    flake.remove()
-    snow = snow.filter(s => s.paper)
-  }})
+
+  gsap.fromTo(flake.node, { x, y }, {
+    y: endY, duration: 3 + (Math.random() * 5), ease: 'none', onComplete: () => {
+      flake.remove()
+      snow = snow.filter(s => s.paper)
+    }
+  })
   gsap.fromTo(flake.node, { scale: 0 }, { scale, duration: 1, ease: 'power1.inOut' })
   gsap.to(flake.node, { x: x + ((Math.random() * 150) - 75), duration: 3, repeat: -1, yoyo: true, ease: 'power1.inOut' })
 }
@@ -318,18 +359,18 @@ function makeLeaf() {
   const endY = y - ((Math.random() * (areaY * 2)) - areaY)
   const colors = ['#76993E', '#4A5E23', '#6D632F']
   const color = colors[Math.floor(Math.random() * colors.length)]
-  
+
   const newLeaf = (innerSVG.use('leaf-path') as Snap.Element).appendTo(innerLeafHolder).attr({ fill: color })
   leafs.push(newLeaf)
-  
+
   const x = -100
   const endX = cardWidth + 50
-  
-  gsap.fromTo(newLeaf.node, 
-    { rotation: Math.random() * 180, x, y, scale }, 
-    { 
-      rotation: Math.random() * 360, x: endX, y: endY, 
-      duration: 2, 
+
+  gsap.fromTo(newLeaf.node,
+    { rotation: Math.random() * 180, x, y, scale },
+    {
+      rotation: Math.random() * 360, x: endX, y: endY,
+      duration: 2,
       ease: 'power1.in',
       onComplete: () => {
         newLeaf.remove()
@@ -350,7 +391,7 @@ function startLightningTimer() {
 function lightning() {
   startLightningTimer()
   if (cardRef.value) gsap.fromTo(cardRef.value, { y: -30 }, { y: 0, duration: 0.75, ease: 'elastic.out(1, 0.3)' })
-  
+
   const pathX = 30 + Math.random() * (cardWidth - 60)
   const yOffset = 20
   const steps = 20
@@ -360,15 +401,15 @@ function lightning() {
     const y = (cardHeight / steps) * (i + 1)
     points.push(x + ',' + y)
   }
-  
+
   const strike = innerLightningHolder.path('M' + points.join(' ')).attr({
     fill: 'none', stroke: 'white', strokeWidth: 2 + Math.random()
   })
-  
+
   gsap.to(strike.node, { opacity: 0, duration: 1, ease: 'power4.out', onComplete: () => strike.remove() })
 }
 
-// 原版 Tick (帧动画逻辑)
+// 原版 Tick 
 function tick() {
   tickCount++
   if (tickCount % settings.renewCheck === 0) {
@@ -376,7 +417,7 @@ function tick() {
     if (leafs.length < settings.leafCount) makeLeaf()
     if (snow.length < settings.snowCount) makeSnow()
   }
-  
+
   for (let i = 0; i < clouds.length; i++) {
     if (currentWeather.type === 'sun') {
       if (clouds[i].offset > -(cardWidth * 1.5)) clouds[i].offset += settings.windSpeed / (i + 1)
@@ -436,7 +477,7 @@ function changeWeather(type: string) {
 onMounted(async () => {
   await nextTick()
   initSVG()
-  changeWeather('wind') 
+  changeWeather('wind')
   tickId = requestAnimationFrame(tick)
   await fetchWeather()
 })
@@ -455,7 +496,7 @@ onUnmounted(() => {
   border-radius: 16px;
   overflow: auto;
   position: relative;
-  box-shadow: 9px 7px 40px -6px rgba(0,0,0,0.25);
+  box-shadow: 9px 7px 40px -6px rgba(0, 0, 0, 0.25);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   max-width: 300px;
   /* 默认 Wind 颜色 */
@@ -463,20 +504,28 @@ onUnmounted(() => {
   transition: background-color 2s ease;
 }
 
-.weather-card[data-type="thunder"] { background-color: #9FA4AD; }
-.weather-card[data-type="rain"] { background-color: #D8D8D8; }
-.weather-card[data-type="sun"] { background-color: #ccccff; }
+.weather-card[data-type="thunder"] {
+  background-color: #9FA4AD;
+}
+
+.weather-card[data-type="rain"] {
+  background-color: #D8D8D8;
+}
+
+.weather-card[data-type="sun"] {
+  background-color: #ccccff;
+}
 
 /* 内部 SVG 铺满全屏 */
 #weather-inner {
   position: absolute;
-  top: 0; 
+  top: 0;
   left: 0;
-  width: 100%; 
+  width: 100%;
   height: 100%;
-  
-  background-color: rgba(255,255,255,1);
-  background: linear-gradient(to bottom, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+
+  background-color: rgba(255, 255, 255, 1);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
 }
 
 .details {
@@ -522,10 +571,15 @@ onUnmounted(() => {
   vertical-align: top;
   margin-left: 5px;
 }
+
 .address {
   font-size: 25px;
   color: #aaa;
   margin-top: 2px;
 }
 
+.change {
+  color: rgba(55, 55, 183, 0.694);
+  font-size: 30px;
+}
 </style>
