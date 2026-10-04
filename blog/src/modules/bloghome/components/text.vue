@@ -1,6 +1,7 @@
 <template>
   <div class="container">
-    <canvas ref="canvasRef" class="dust-canvas"></canvas>
+    <canvas ref="canvasRef" class="snow-canvas"></canvas>
+
     <!-- 三行逐行动画 -->
     <h1>
       <span>做点</span>
@@ -23,86 +24,208 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue'
 
-interface Particle {
+interface SnowOptions {
+  radius: [number, number]
+  speed: [number, number]
+  wind: [number, number]
+}
+
+interface SnowParams {
   x: number
   y: number
-  r: number
-  vy: number
-  alpha: number
-  phase: number
+  radius: number
   speed: number
+  wind: number
+  opacity: number
+  isResized: boolean
+}
+
+type SnowItemInstance = ReturnType<typeof createSnowItem>
+
+// 轻盈自然的下落配置
+const defaultOptions: SnowOptions = {
+  radius: [0.6, 2.2],
+  speed: [0.4, 1.2],
+  wind: [-0.3, 0.5],
+}
+
+const rand = (min: number, max: number) => min + Math.random() * (max - min)
+
+// 安全获取有效尺寸，防止容器隐藏时 offset 变 0 导致坐标坍塌
+function getSafeSize(canvas: HTMLCanvasElement) {
+  const width = canvas.offsetWidth || window.innerWidth || 375
+  const height = canvas.offsetHeight || window.innerHeight || 667
+  return { width, height }
+}
+
+function createSnowItem(canvas: HTMLCanvasElement, opts?: Partial<SnowOptions>) {
+  const options: SnowOptions = { ...defaultOptions, ...opts }
+  const { radius, speed, wind } = options
+  const { width, height } = getSafeSize(canvas)
+
+  const params: SnowParams = {
+    x: rand(0, width),
+    // 刚打开页面时直接铺满全屏（包括导航栏区域 0~60px 里直接就有雪花在飘）
+    y: rand(0, height),
+    radius: rand(radius[0], radius[1]),
+    speed: rand(speed[0], speed[1]),
+    wind: rand(wind[0], wind[1]),
+    opacity: rand(0.18, 0.65), // 景深半透明，不抢视觉焦点
+    isResized: false,
+  }
+
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+
+  const updateData = () => {
+    const { width: w } = getSafeSize(canvas)
+    params.x = rand(0, w)
+    params.y = rand(-15, 0)
+  }
+
+  const resized = () => {
+    params.isResized = true
+  }
+
+  const draw = () => {
+    ctx.beginPath()
+    ctx.arc(params.x, params.y, params.radius, 0, 2 * Math.PI)
+    ctx.fillStyle = `rgba(255, 255, 255, ${params.opacity})`
+    ctx.fill()
+    ctx.closePath()
+  }
+
+  const translate = () => {
+    params.y += params.speed
+    params.x += params.wind
+  }
+
+  const onDown = () => {
+    const { width: w, height: h } = getSafeSize(canvas)
+    if (params.y < h) return
+
+    if (params.isResized) {
+      updateData()
+      params.isResized = false
+    } else {
+      // 触底刷新：从导航栏顶端边缘（-15px 到 0px）无缝滑落，直接穿透透明导航栏
+      params.y = rand(-15, 0)
+      params.x = rand(0, w)
+    }
+  }
+
+  const update = () => {
+    translate()
+    onDown()
+  }
+
+  return { update, resized, draw, params }
 }
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-let ctx: CanvasRenderingContext2D | null = null
 let raf = 0
-let particles: Particle[] = []
-let width = 0
-let height = 0
+let isRunning = false
+let onResize: (() => void) | null = null
+const snowflakes: SnowItemInstance[] = []
 
-function createParticle(spread = false): Particle {
-  return {
-    x: Math.random() * width,
-    y: spread ? Math.random() * height : height + 10,
-    r: 0.8 + Math.random() * 2,
-    vy: 0.15 + Math.random() * 0.35,
-    alpha: 0.15 + Math.random() * 0.45,
-    phase: Math.random() * Math.PI * 2,
-    speed: 0.005 + Math.random() * 0.015,
-  }
+const update = () => {
+  for (const el of snowflakes) el.update()
 }
 
-function resize() {
+const draw = () => {
   const canvas = canvasRef.value
-  if (!canvas || !canvas.parentElement) return
-  width = canvas.parentElement.clientWidth
-  height = canvas.parentElement.clientHeight
-  const dpr = Math.min(window.devicePixelRatio || 1, 2)
-  canvas.width = width * dpr
-  canvas.height = height * dpr
-  ctx?.setTransform(dpr, 0, 0, dpr, 0, 0)
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const { width, height } = getSafeSize(canvas)
+  ctx.clearRect(0, 0, width, height)
+  for (const el of snowflakes) el.draw()
 }
 
-function tick() {
+const resize = () => {
+  const canvas = canvasRef.value
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
   if (!ctx) return
-  ctx.clearRect(0, 0, width, height)
-  for (const p of particles) {
-    p.y -= p.vy
-    p.phase += p.speed
-    if (p.y < -10) Object.assign(p, createParticle())
-    const x = p.x + Math.sin(p.phase) * 8
-    const twinkle = 0.6 + 0.4 * Math.sin(p.phase * 2)
-    ctx.beginPath()
-    ctx.arc(x, p.y, p.r, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(255, 244, 214, ${p.alpha * twinkle})`
-    ctx.fill()
+
+  // 尺寸大于 0 时才更新画布物理尺寸，防止被后台 0 覆盖
+  if (canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
+    ctx.canvas.width = canvas.offsetWidth
+    ctx.canvas.height = canvas.offsetHeight
+    for (const el of snowflakes) el.resized()
   }
-  raf = requestAnimationFrame(tick)
+}
+
+const loop = () => {
+  if (!isRunning) return
+  if (canvasRef.value && canvasRef.value.offsetWidth > 0) {
+    draw()
+    update()
+  }
+  raf = requestAnimationFrame(loop)
+}
+
+const startAnimation = () => {
+  if (isRunning) return
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  isRunning = true
+  loop()
+}
+
+const stopAnimation = () => {
+  isRunning = false
+  cancelAnimationFrame(raf)
 }
 
 onMounted(() => {
   const canvas = canvasRef.value
   if (!canvas) return
-  ctx = canvas.getContext('2d')
-  resize()
-  particles = Array.from({ length: width < 768 ? 14 : 26 }, () => createParticle(true))
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  tick()
+
+  // 初始化 65 颗雪花
+  snowflakes.length = 0
+  for (let i = 0; i < 65; i++) {
+    snowflakes.push(createSnowItem(canvas))
+  }
+
+  onResize = resize
   window.addEventListener('resize', resize)
+  resize()
+  startAnimation()
+})
+
+// Keep-Alive 激活：切回此页面时唤醒并校验散布
+onActivated(() => {
+  resize()
+  const canvas = canvasRef.value
+  if (canvas) {
+    const { width, height } = getSafeSize(canvas)
+    for (const item of snowflakes) {
+      if (item.params.x < 10) {
+        item.params.x = rand(0, width)
+        item.params.y = rand(0, height)
+      }
+    }
+  }
+  startAnimation()
+})
+
+// Keep-Alive 离开：切到其他页面时停止动画，防止后台空转把坐标全累加到左上角
+onDeactivated(() => {
+  stopAnimation()
 })
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(raf)
-  window.removeEventListener('resize', resize)
-  ctx = null
+  stopAnimation()
+  if (onResize) window.removeEventListener('resize', onResize)
+  onResize = null
 })
 </script>
 
 <style scoped lang="scss">
 $secondary-color: #ffe221;
 $tertiary-color: #ffffff;
+
 .container {
   width: 100%;
   min-height: 100vh;
@@ -116,9 +239,10 @@ $tertiary-color: #ffffff;
   padding: 0;
 }
 
-.dust-canvas {
+.snow-canvas {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
@@ -317,7 +441,6 @@ h1 span:nth-child(3) { animation-name: w3; }
   71%, 100% { transform: translateY(50px); opacity: 0; clip-path: polygon(100% 0, 100% -0%, 0 100%, 0 100%); }
 }
 
-/* 系统开启「减弱动效」时直接显示静态文字，并停止装饰动画 */
 @media (prefers-reduced-motion: reduce) {
   h1 span {
     animation: none !important;
@@ -325,7 +448,7 @@ h1 span:nth-child(3) { animation-name: w3; }
     opacity: 1;
     clip-path: none;
   }
-  .dust-canvas {
+  .snow-canvas {
     display: none;
   }
   .speeder,
@@ -335,7 +458,6 @@ h1 span:nth-child(3) { animation-name: w3; }
   }
 }
 
-/* 响应式 */
 @media (max-width: 768px) {
   h1 {
     font-size: 40px;

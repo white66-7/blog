@@ -1,13 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// 💡 导出文章滚动位置缓存（保持原样）
 export const articleScrollCache = new Map<number, number>()
 
 const routes = [
   {
     path: '/',
     name: 'blog',
-    //  1. 首页动态懒加载
+    //  首页动态懒加载
     component: () => import('@/views/bloghome.vue')
   },
   // router/index.ts
@@ -19,18 +18,18 @@ const routes = [
   {
     path: '/photos',
     name: 'photo-show',
-    //  2. 相册模块动态懒加载（相册里的大图绝不会拖慢首屏）
+    //  相册模块动态懒加载（相册里的大图绝不会拖慢首屏）
     component: () => import('@/modules/bloghome/components/photos/photo.vue')
   },
   {
     path: '/projects',
     name: 'github',
-    //  3. GitHub 开源项目页懒加载
+    //   GitHub 开源项目页懒加载
     component: () => import('@/modules/bloghome/components/projects/projects.vue')
   },
   {
     path: '/player',
-    //  4. 音乐播放器及其子视图按需加载
+    //   音乐播放器及其子视图按需加载
     component: () => import('@/views/music-player.vue'),
     children: [
       { path: 'songs', component: () => import('@/modules/player/components/songsview.vue') },
@@ -41,7 +40,7 @@ const routes = [
   {
     path: '/articles',
     name: 'mainarticle',
-    //  5. 文章列表页懒加载
+    //  文章列表页懒加载
     component: () => import('@/modules/bloghome/components/articles/mainarticle.vue')
   },
   {
@@ -52,7 +51,7 @@ const routes = [
   {
     path: '/about',
     name: 'about',
-    //  7. 关于页懒加载
+    // 关于页懒加载
     component: () => import('@/modules/bloghome/components/about/about.vue')
   },
 ]

@@ -71,6 +71,7 @@ const albumsData = [
       { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
       { title: '聚餐', url: '/album/人物/dinner.webp' },
       { title: '理完头发后', url: '/album/人物/理头.mp4', cover: '/album/人物/理头.webp' },
+      { title: '朋友里最闷的人', url: '/album/人物/wb.webp' },
     ]
   },
   {

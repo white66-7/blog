@@ -35,22 +35,31 @@
               <!-- 左侧：卡片列（information + player） -->
               <aside class="left-column">
                 <Information class="info-card" :class="[showAnimation && 'animate__animated animate__fadeInLeft']" />
-                <player class="sticky-card" :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']" style="--animate-delay: .15s;" />
-                <Say :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']" style="--animate-delay: .3s;" />
+                <player class="sticky-card"
+                  :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']"
+                  style="--animate-delay: .15s;" />
+                <Say :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']"
+                  style="--animate-delay: .3s;" />
               </aside>
 
               <!-- 右侧：相册、天气、文章列表 -->
               <div class="right-column">
                 <div class="top-row">
                   <div class="album-container">
-                    <ImageSlider :images="albumImages" :class="[showAnimation && 'animate__animated animate__zoomIn']" />
+                    <ImageSlider :images="albumImages"
+                      :class="[showAnimation && 'animate__animated animate__zoomIn']" />
                   </div>
-                  <WeatherCard address="武汉" class="weather-card-comp" :class="[showAnimation && 'animate__animated animate__fadeInRight animate__delay-1s']" style="--animate-delay: .15s;" />
+                  <WeatherCard address="武汉" class="weather-card-comp"
+                    :class="[showAnimation && 'animate__animated animate__fadeInRight animate__delay-1s']"
+                    style="--animate-delay: .15s;" />
                 </div>
                 <div class="articles-section">
-                  <ArticleShow :articles="articleData" :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']" style="--animate-delay: .3s;" />
+                  <ArticleShow :articles="articleData"
+                    :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']"
+                    style="--animate-delay: .3s;" />
                 </div>
-                <SiteAge :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']" style="--animate-delay: .75s;" />
+                <SiteAge :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']"
+                  style="--animate-delay: .75s;" />
               </div>
             </div>
           </div>
@@ -161,33 +170,33 @@ const onSlideChange = (swiper: any) => {
 }
 
 const albumImages = [
-  { 
-    url: '/album/人物/think.webp', 
-    description: '当时刚刚中考完特地换了张头像...' 
+  {
+    url: '/album/人物/think.webp',
+    description: '当时刚刚中考完特地换了张头像...'
   },
-  { 
-    url: '/album/人物/play.webp', 
-    description: '第一次研学在外面住...' 
+  {
+    url: '/album/人物/play.webp',
+    description: '第一次研学在外面住...'
   },
-  { 
-    url: '/album/动漫/超燃.webp', 
-    description: '燃到起鸡皮疙瘩' 
+  {
+    url: '/album/动漫/超燃.webp',
+    description: '燃到起鸡皮疙瘩'
   },
-  { 
-    url: '/album/动漫/黑色五叶草.webp', 
-    description: '99' 
+  {
+    url: '/album/动漫/黑色五叶草.webp',
+    description: '99'
   },
-  { 
-    url: '/album/动漫/来自深渊.webp', 
-    description: '为何人必须创造价值后才被重视' 
+  {
+    url: '/album/动漫/来自深渊.webp',
+    description: '为何人必须创造价值后才被重视'
   },
-  { 
-    url: '/album/动漫/video.webp', 
-    description: '创造一个和平的国度吧' 
+  {
+    url: '/album/动漫/video.webp',
+    description: '创造一个和平的国度吧'
   },
-  { 
-    url: '/album/动漫/蕾姆.webp', 
-    description: '好久不见' 
+  {
+    url: '/album/动漫/蕾姆.webp',
+    description: '好久不见'
   },
 ]
 </script>
@@ -206,11 +215,12 @@ const albumImages = [
 .app-flex::after {
   transition: opacity 0.4s ease;
 }
-/* 确保所有子元素在遮罩上面，但排除加载屏 */
-.app-flex > :not(.splash-screen) {
+
+.app-flex > :not(.splash-screen):not(.navbar) {
   position: relative;
   z-index: 2;
 }
+
 .app-flex--scrolled::before,
 .app-flex--scrolled::after {
   opacity: 0;
@@ -348,9 +358,11 @@ const albumImages = [
 /* 1. 让整体双列布局完美包裹内容，并在大屏居中 */
 .two-columns {
   display: flex;
-  justify-content: center; /* 增加这个，让整体内容在父盒子中居中 */
+  justify-content: center;
+  /* 增加这个，让整体内容在父盒子中居中 */
   gap: 32px;
-  max-width: 1148px; /* 从 1320px 改为 1148px，完美贴合内容的实际总宽度 */
+  max-width: 1148px;
+  /* 从 1320px 改为 1148px，完美贴合内容的实际总宽度 */
   margin: 0 auto;
 }
 
@@ -382,7 +394,8 @@ const albumImages = [
 }
 
 .album-container {
-  width: 500px; /* 保持你觉得舒服的大小 */
+  width: 500px;
+  /* 保持你觉得舒服的大小 */
   max-width: 100%;
   flex-shrink: 0;
 }
@@ -392,6 +405,7 @@ const albumImages = [
   flex: 0 0 280px;
   align-self: stretch;
 }
+
 .articles-section {
   width: 100%;
 }
@@ -469,13 +483,15 @@ const albumImages = [
 
 /* ========== 小屏手机极简适配 ========== */
 @media (max-width: 900px) {
+  .app-flex::before {
+    background-image: url('@/assets/斩首大刀.webp');
+  }
+
   .main-body {
     padding: 70px 16px 40px 16px;
-    /* 1. 强制预留滚动条空间，避免宽度抖动 */
     scrollbar-gutter: stable;
-    /* 2. 内容较少时也能撑满一屏，防止高度突变引起的跳动 */
     min-height: 100vh;
-    min-height: 100dvh; /* 动态视口高度，移动端更精准 */
+    min-height: 100dvh;
     box-sizing: border-box;
   }
 
@@ -490,7 +506,6 @@ const albumImages = [
 
   .right-column {
     width: 100%;
-    /* 3. 给文章区一个最小高度，避免加载中高度归零再弹起 */
     min-height: 60vh;
     min-height: 60dvh;
   }
