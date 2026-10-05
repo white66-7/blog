@@ -31,17 +31,14 @@ const days = computed(() => {
 const text = computed(() => `网站已上线 ${days.value} 天`)
 const chars = computed(() => text.value.split(''))
 
-
 // --- 动态光晕交互逻辑 ---
 const boxRef = ref<HTMLElement | null>(null)
 const glowX = ref('50%')
 const glowY = ref('50%')
-const transitionSpeed = ref('2s') // 默认漫游时的过渡时间较长，显得平滑
+const transitionSpeed = ref('2s')
 let randomTimer: number | null = null
 
-// 随机移动光晕
 const moveRandomly = () => {
-  // 让光标在 10% 到 90% 范围内随机漫游，避免过度贴边
   const randomX = Math.floor(Math.random() * 80) + 10
   const randomY = Math.floor(Math.random() * 80) + 10
   glowX.value = `${randomX}%`
@@ -49,9 +46,9 @@ const moveRandomly = () => {
 }
 
 const startRandomMovement = () => {
-  transitionSpeed.value = '2.5s' // 恢复缓慢平滑的移动速度
-  moveRandomly() // 马上移动一次
-  randomTimer = window.setInterval(moveRandomly, 2500) // 每2.5秒换个位置
+  transitionSpeed.value = '2.5s'
+  moveRandomly()
+  randomTimer = window.setInterval(moveRandomly, 2500)
 }
 
 const stopRandomMovement = () => {
@@ -62,14 +59,13 @@ const stopRandomMovement = () => {
 }
 
 const handleMouseEnter = () => {
-  stopRandomMovement() // 鼠标一进来，立刻停止漫游
-  transitionSpeed.value = '0.15s' // 切换到极速跟手模式
+  stopRandomMovement()
+  transitionSpeed.value = '0.15s'
 }
 
 const handleMouseMove = (e: MouseEvent) => {
   if (!boxRef.value) return
   const rect = boxRef.value.getBoundingClientRect()
-  // 计算鼠标在盒子内部的相对坐标
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
   glowX.value = `${x}px`
@@ -77,10 +73,9 @@ const handleMouseMove = (e: MouseEvent) => {
 }
 
 const handleMouseLeave = () => {
-  startRandomMovement() // 鼠标移开，重新开始随机漫游
+  startRandomMovement()
 }
 
-// 组件挂载时启动漫游，销毁时清除定时器
 onMounted(() => {
   startRandomMovement()
 })
@@ -99,8 +94,13 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 0 2rem;
   height: 4.5rem;
-  width: fit-content;
-  min-width: 40rem;
+  
+  /* 🌟 核心改动：仅改这两行让它拉满 960px 宽度，其余全部保持你的原设计 */
+  width: 100%;
+  box-sizing: border-box;
+  min-width: unset;
+  
+  /* 你的原本原汁原味样式 */
   border-radius: 5rem;
   background-color: #FFFDF6;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.08'/%3E%3C/svg%3E");
@@ -116,11 +116,10 @@ onUnmounted(() => {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* 柔和暖光晕 */
+/* 柔和暖光晕（保持原样） */
 .site-age-box::before {
   content: '';
   position: absolute;
-  /* 使用 CSS 变量绑定坐标，并保持原有居中偏移偏移量 */
   left: var(--glow-x);
   top: var(--glow-y);
   width: 140px;
@@ -129,10 +128,8 @@ onUnmounted(() => {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 200, 130, 0.5), rgba(255, 200, 130, 0) 70%);
   filter: blur(24px);
-  pointer-events: none; /* 确保不影响鼠标事件 */
-  /* 让位移变化和 CSS 变量保持一致的过渡效果 */
+  pointer-events: none;
   transition: left var(--glow-transition) ease-out, top var(--glow-transition) ease-out;
-  /* 呼吸动画控制的是 scale(大小) 和 opacity(透明度)，互不冲突 */
   animation: glowBreath 3.5s ease-in-out infinite;
   z-index: 0;
 }

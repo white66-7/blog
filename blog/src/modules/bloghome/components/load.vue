@@ -214,6 +214,7 @@ onUnmounted(() => {
   padding-top: env(safe-area-inset-top, 0px);
   height: calc(60px + env(safe-area-inset-top, 0px));
   display: flex;
+  z-index: 9999 !important;
   align-items: center;
   justify-content: space-between;
   padding-left: 20px;
@@ -224,8 +225,6 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   color: #000000;
-
-  z-index: 100;
   transition: transform 0.4s ease, background 0.3s ease, backdrop-filter 0.3s ease,
     border-color 0.3s ease, color 0.3s ease;
 }

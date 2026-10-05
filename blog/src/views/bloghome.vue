@@ -319,8 +319,7 @@ const albumImages = [
   z-index: 1;
 }
 
-/* 确保所有子元素在遮罩上面 */
-.app-flex>* {
+.fullpage-swiper {
   position: relative;
   z-index: 2;
 }
@@ -337,79 +336,92 @@ const albumImages = [
   cursor: default;
 }
 
-/* ========= 第二屏：可滚动内容 ========= */
+/* ========= 第二屏：大屏饱满大气布局 ========= */
 .scrollable-content {
   height: 100vh;
   height: 100dvh;
   overflow-y: auto;
-
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  /* 防止滚动链穿透到外层 */
   background-color: #FAF7F2;
+  overflow-x: hidden; /* 防止超大落叶掠出屏幕右边界时偶然出现横向微幅抖动 */
+  display: flex;
+  flex-direction: column;
 }
 
 .main-body {
-  display: block;
-  padding: 20px 5% 60px 5%;
+  flex: 1 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
+  /* 顶部 70px 刚好贴着导航栏下方，上下留白匀称紧凑 */
+  padding: 70px 4% 30px 4%;
 }
 
-/* 1. 让整体双列布局完美包裹内容，并在大屏居中 */
+/* 1. 整体总宽度：从 1148px 放大到 1360px，铺满大屏视野 */
 .two-columns {
   display: flex;
   justify-content: center;
-  /* 增加这个，让整体内容在父盒子中居中 */
-  gap: 32px;
-  max-width: 1148px;
-  /* 从 1320px 改为 1148px，完美贴合内容的实际总宽度 */
-  margin: 0 auto;
+  gap: 36px;
+  max-width: 1360px;     /* 👈 告别小气，显著拉宽 */
+  width: 100%;
+  margin: auto auto;     /* 垂直居中 */
 }
 
-
-/* 左侧粘性栏 */
+/* 2. 左侧列：调宽到 360px */
 .left-column {
-  width: 320px;
+  width: 360px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
-
-/* 2. 右侧列恢复原样，靠自身内容撑开即可 */
+/* 3. 右侧列：整体撑开 */
 .right-column {
-  flex: 0 1 auto;
+  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* 3. 顶部行和子元素恢复你的原始设定，保持你想要的尺寸 */
+/* 4. 顶部相册与天气：高度拉高到 280px */
 .top-row {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: stretch;
 }
 
 .album-container {
-  width: 500px;
-  /* 保持你觉得舒服的大小 */
+  width: 620px;          /* 👈 相册加宽到 620px */
+  flex: 0 0 620px;
   max-width: 100%;
-  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.album-container :deep(.swiper),
+.album-container :deep(.swiper-slide),
+.album-container :deep(.image-slider),
+.album-container :deep(img) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block;
 }
 
 .weather-card-comp {
-  width: 280px;
-  flex: 0 0 280px;
+  width: 320px;     
+  flex: 0 0 320px;
   align-self: stretch;
 }
 
+/* 5. 文章区域 */
 .articles-section {
   width: 100%;
 }
-
 
 /* ========= 滚动箭头 ========= */
 .arrow.bounce {

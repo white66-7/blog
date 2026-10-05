@@ -217,19 +217,19 @@ onUnmounted(() => {
   margin-top: 0;
 }
 
-/* ---------- Grid 基础 ---------- */
+/* ---------- Grid 基础：只改宽度尺寸与行高 ---------- */
 .articles-grid {
   display: grid;
   grid-auto-flow: row dense;
-  grid-template-columns: repeat(3, 256px);
-  grid-auto-rows: 196px;
-  gap: 16px;
+  /* 👈 仅改尺寸：左列 620px，右列 320px，总宽 960px 对齐上方 */
+  grid-template-columns: 620px 320px;
+  grid-auto-rows: 205px;                /* 👈 稍微拉高（原 196px） */
+  gap: 20px;                            /* 👈 间隙对齐上方（原 16px） */
   justify-content: center;
   position: relative;
-  /* 为绝对定位的离开卡片提供定位上下文 */
 }
 
-/* ---------- 卡片通用 ---------- */
+/* ---------- 卡片通用（100% 保持你原本样式） ---------- */
 .card {
   display: flex;
   height: 100%;
@@ -241,7 +241,6 @@ onUnmounted(() => {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
   will-change: transform, opacity;
-  /* 优化动画性能 */
 }
 
 .card:hover {
@@ -252,7 +251,7 @@ onUnmounted(() => {
 /* ---------- 横向卡片 (第一篇) ---------- */
 .card.horizontal {
   flex-direction: row;
-  grid-column: 1 / 3;
+  grid-column: 1;                       /* 👈 占左列 620px */
   grid-row: 1;
 }
 
@@ -264,20 +263,19 @@ onUnmounted(() => {
 
 .card.horizontal .card__content {
   width: 50%;
-  padding: 12px;
+  padding: 14px 16px;                   /* 配合变大稍微舒展，内容居中 */
 }
 
 /* ---------- 纵向卡片 (第二篇) ---------- */
 .card.vertical {
   flex-direction: column;
-  grid-column: 3;
+  grid-column: 2;                       /* 👈 占右列 320px */
   grid-row: 1 / 3;
 }
 
 .card.vertical .card__img {
   width: 100%;
-  height: auto;
-  aspect-ratio: 256 / 196;
+  height: 200px;                        /* 宽度从 256 增加到 320，高度按比例缩放 */
   object-fit: cover;
 }
 
@@ -285,13 +283,13 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 14px 16px;
 }
 
 /* ---------- 反向横向卡片 (第三篇) ---------- */
 .card.reverse-horizontal {
   flex-direction: row-reverse;
-  grid-column: 1 / 3;
+  grid-column: 1;                       /* 👈 占左列 620px */
   grid-row: 2;
 }
 
@@ -305,7 +303,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 12px;
+  padding: 14px 16px;
   width: 50%;
   box-sizing: border-box;
 }
@@ -315,7 +313,7 @@ onUnmounted(() => {
   align-self: flex-start;
 }
 
-/* ---------- 内容区通用 ---------- */
+/* ---------- 内容区通用（100% 保持你原本样式） ---------- */
 .card__content {
   display: flex;
   flex-direction: column;
@@ -334,15 +332,15 @@ onUnmounted(() => {
 .card__date {
   font-size: 12px;
   color: #999;
-  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family: 'Orbitron', 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   margin-bottom: 8px;
 }
 
-/* ---------- 浏览量展示（与文章列表页一致） ---------- */
+/* ---------- 浏览量展示（100% 保持你原本样式） ---------- */
 .card__views {
   font-size: 12px;
   color: #999;
-  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family: 'Orbitron', 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -360,7 +358,6 @@ onUnmounted(() => {
   color: #23c483;
 }
 
-/* 浏览量微型骨架流光胶囊 */
 .skeleton-views-pill {
   display: inline-block;
   width: 26px;
@@ -376,7 +373,6 @@ onUnmounted(() => {
   100% { background-position: -200% 0; }
 }
 
-/* 浏览量数字平滑渐显 */
 .views-num-text {
   display: inline-block;
   animation: numFadeIn 0.35s ease-out forwards;
@@ -388,13 +384,13 @@ onUnmounted(() => {
 }
 
 .card__excerpt {
-  font-family:  'Orbitron','YouSheBiaoTiHei', '优设标题黑', sans-serif;
+  font-family: 'Orbitron', 'YouSheBiaoTiHei', '优设标题黑', sans-serif;
   font-size: 13px;
   color: #555;
   line-height: 1.4;
   margin-bottom: 10px;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3;                /* 保持你的 3 行 */
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-clamp: 3;
@@ -407,6 +403,7 @@ onUnmounted(() => {
   margin-top: auto;
 }
 
+/* 标签：完全保持你原本的白底黑字、大阴影和悬浮动画 */
 .tag {
   background: #fff;
   color: #000;
@@ -461,34 +458,28 @@ onUnmounted(() => {
 }
 
 /* ========== 文章切换动画 ========== */
-
-/* 离开的卡片脱离文档流，防止布局跳动 */
 .article-list-leave-active {
   position: absolute;
   opacity: 0;
 }
 
-/* 进入的初始状态 */
 .article-list-enter-from {
   opacity: 0;
   transform: translateY(20px) scale(0.95);
   filter: blur(10px);
 }
 
-/* 离开的终点状态 */
 .article-list-leave-to {
   opacity: 0;
   transform: translateY(-20px) scale(0.95);
   filter: blur(10px);
 }
 
-/* 过渡过程配置 */
 .article-list-enter-active,
 .article-list-leave-active {
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 列表项移动时的平滑过渡（位置变化时） */
 .article-list-move {
   transition: transform 0.6s ease;
 }
