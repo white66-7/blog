@@ -156,28 +156,84 @@ const weatherNames: Record<string, string> = {
 }
 
 const CACHE_TTL = 30 * 60 * 1000
+// 单个请求的超时时间：超时立刻换下一个数据源，避免卡片长时间停在“加载中...”
+const REQUEST_TIMEOUT = 8000
+// 一次取数的总预算（多个数据源叠加也不会让卡片转圈太久）
+const TOTAL_BUDGET = 14000
+// 所有数据源都失败后的自动重试间隔
+const RETRY_DELAY = 20000
+// 服务端聚合接口（服务端再去拿数据，浏览器不直连第三方）
+const API_ENDPOINT = '/api/weather'
+
+type WeatherType = 'sun' | 'rain' | 'snow' | 'thunder' | 'wind'
+
+interface WeatherResult {
+  temp: string
+  type: WeatherType
+}
+
+interface CachedWeather {
+  fetchedAt: number
+  temp?: string
+  desc?: string
+  type?: string
+  date?: string
+}
+
+let retryTimer: ReturnType<typeof setTimeout> | null = null
+let inflightController: AbortController | null = null
 
 function currentCacheKey(): string {
   const loc = addresslist[addressindex.value]
   return `cyber_weather_${loc?.lat ?? 0}_${loc?.lon ?? 0}`
 }
 
-function loadWeatherFromCache(): boolean {
+/** “加载中/暂不可用”不是有效数据：旧版本的缓存 bug 把加载态存进去过，这里直接判为无效 */
+function isUsableCache(cached: CachedWeather | null): cached is CachedWeather {
+  if (!cached) return false
+  const tempText = String(cached.temp ?? '').trim()
+  const descText = String(cached.desc ?? '').trim()
+  if (!tempText || tempText === '--') return false
+  if (!descText || descText === '加载中...' || descText === '暂不可用') return false
+  return true
+}
+
+function readCache(maxAge?: number): CachedWeather | null {
   try {
     const raw = localStorage.getItem(currentCacheKey())
-    if (!raw) return false
-    const cached = JSON.parse(raw)
-    if (!cached || typeof cached.fetchedAt !== 'number') return false
-    if (Date.now() - cached.fetchedAt > CACHE_TTL) return false
-
-    currentAddress.value = addresslist[addressindex.value]?.name ?? '武汉'
-    updateWithTextTransition(cached.desc ?? 'Unknown', cached.temp ?? '--')
-    formattedDate.value = cached.date ?? ''
-    changeWeather(cached.type ?? 'sun')
-    return true
+    if (!raw) return null
+    const cached = JSON.parse(raw) as CachedWeather
+    if (!cached || typeof cached.fetchedAt !== 'number') return null
+    if (typeof maxAge === 'number' && Date.now() - cached.fetchedAt > maxAge) return null
+    if (!isUsableCache(cached)) return null
+    return cached
   } catch {
-    return false
+    return null
   }
+}
+
+function applyWeather(desc: string, tempValue: string, type: string, dateText?: string): void {
+  currentAddress.value = addresslist[addressindex.value]?.name ?? '武汉'
+  updateWithTextTransition(desc, tempValue)
+  formattedDate.value = dateText || new Date().toLocaleDateString('en-US', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  })
+  changeWeather(type)
+}
+
+function loadWeatherFromCache(): boolean {
+  const cached = readCache(CACHE_TTL)
+  if (!cached) return false
+  applyWeather(cached.desc ?? 'Unknown', cached.temp ?? '--', cached.type ?? 'sun', cached.date)
+  return true
+}
+
+/** 超时兜底：过期缓存也拿来顶住，绝不停留在“加载中...” */
+function loadStaleCache(): boolean {
+  const cached = readCache()
+  if (!cached) return false
+  applyWeather(cached.desc ?? 'Unknown', cached.temp ?? '--', cached.type ?? 'sun', cached.date)
+  return true
 }
 
 function saveWeatherToCache(): void {
@@ -192,80 +248,167 @@ function saveWeatherToCache(): void {
   } catch { /* 忽略 */ }
 }
 
+function clearRetryTimer(): void {
+  if (retryTimer) {
+    clearTimeout(retryTimer)
+    retryTimer = null
+  }
+}
+
+function scheduleRetry(): void {
+  clearRetryTimer()
+  retryTimer = setTimeout(() => {
+    retryTimer = null
+    fetchWeather()
+  }, RETRY_DELAY)
+}
+
 // ── 文本转场动画 ──
+/**
+ * 更新温度与描述。
+ * 关键：先把新值写进响应式状态，再交给 gsap 做视觉过渡。
+ * 之前是「先播动画、在 gsap 回调里才赋值」，于是紧接着执行的 saveWeatherToCache()
+ * 存下去的还是上一轮的旧值（首次加载时正好是 '--' / '加载中...'），
+ * 缓存被写成加载态后，30 分钟内每次进页面都直接命中这份脏缓存 —— 卡片就永远停在“加载中”。
+ */
 function updateWithTextTransition(newDesc: string = 'Unknown', newTemp: string = '--') {
   const safeDesc = newDesc || 'Unknown'
 
+  weatherDesc.value = safeDesc
+  temp.value = newTemp
+
   if (descRef.value) {
-    gsap.to(descRef.value, {
-      opacity: 0,
-      x: -20,
-      duration: 0.3,
-      ease: 'power2.in',
-      onComplete: () => {
-        weatherDesc.value = safeDesc
-        gsap.fromTo(descRef.value, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out' })
-      }
-    })
-  } else {
-    weatherDesc.value = safeDesc
+    gsap.killTweensOf(descRef.value)
+    gsap.fromTo(descRef.value, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out' })
   }
 
   if (tempRef.value) {
-    gsap.to(tempRef.value, {
-      opacity: 0.3,
-      scale: 0.94,
-      duration: 0.25,
-      onComplete: () => {
-        temp.value = newTemp
-        gsap.to(tempRef.value, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.4)' })
-      }
-    })
-  } else {
-    temp.value = newTemp
+    gsap.killTweensOf(tempRef.value)
+    gsap.fromTo(tempRef.value, { opacity: 0.25, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.4)' })
   }
 }
 
 // ── 获取真实天气 ──
+/** 带超时的 JSON 请求：超时/失败都会抛错，交给上层切换数据源 */
+async function requestJson(url: string, timeout = REQUEST_TIMEOUT): Promise<any> {
+  inflightController?.abort()
+  const controller = new AbortController()
+  inflightController = controller
+  const timer = setTimeout(() => controller.abort(), timeout)
+
+  try {
+    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } finally {
+    clearTimeout(timer)
+    if (inflightController === controller) inflightController = null
+  }
+}
+
+/** WMO 天气代码 → 卡片内置天气类型 */
+function wmoToType(code: number): WeatherType {
+  if (code === 0 || code === 1) return 'sun'
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow'
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return 'rain'
+  if (code >= 95) return 'thunder'
+  return 'wind'
+}
+
+function toWeatherType(type: unknown): WeatherType {
+  return type === 'sun' || type === 'rain' || type === 'snow' || type === 'thunder' || type === 'wind'
+    ? type
+    : 'wind'
+}
+
+/** 主路径：本站无服务器函数（服务端聚合数据源 + 边缘缓存） */
+async function fetchFromApi(loc: { lat: number; lon: number }, timeout?: number): Promise<WeatherResult> {
+  const data = await requestJson(`${API_ENDPOINT}?lat=${loc.lat}&lon=${loc.lon}`, timeout)
+  if (!data?.ok) throw new Error(data?.error || '天气接口返回失败')
+
+  const tempValue = Number(data.temp)
+  if (!Number.isFinite(tempValue)) throw new Error('天气接口返回数据异常')
+
+  return { temp: String(Math.round(tempValue)), type: toWeatherType(data.type) }
+}
+
+/** 兜底 1：本地 npm run dev 没有 Serverless 运行时会走到这里，直连公共接口 */
+async function fetchFromOpenMeteo(loc: { lat: number; lon: number }, timeout?: number): Promise<WeatherResult> {
+  const data = await requestJson(
+    `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}` +
+    '&current=temperature_2m,weather_code&timezone=auto',
+    timeout
+  )
+  const tempValue = Number(data?.current?.temperature_2m)
+  if (!Number.isFinite(tempValue)) throw new Error('open-meteo 返回数据异常')
+  const code = Number(data?.current?.weather_code)
+  return { temp: String(Math.round(tempValue)), type: wmoToType(Number.isFinite(code) ? code : -1) }
+}
+
+/** 兜底 2：wttr.in */
+async function fetchFromWttr(loc: { lat: number; lon: number }, timeout?: number): Promise<WeatherResult> {
+  const data = await requestJson(`https://wttr.in/${loc.lat},${loc.lon}?format=j1`, timeout)
+  const current = data?.current_condition?.[0]
+  const tempValue = Number(current?.temp_C)
+  if (!Number.isFinite(tempValue)) throw new Error('wttr.in 返回数据异常')
+
+  const descEn = String(current?.weatherDesc?.[0]?.value ?? '')
+  let type: WeatherType = 'wind'
+  if (descEn.includes('Sunny') || descEn.includes('Clear')) type = 'sun'
+  else if (descEn.includes('Snow') || descEn.includes('Sleet') || descEn.includes('Ice')) type = 'snow'
+  else if (descEn.includes('Thunder') || descEn.includes('Storm')) type = 'thunder'
+  else if (descEn.includes('Rain') || descEn.includes('Drizzle') || descEn.includes('Shower')) type = 'rain'
+
+  return { temp: String(Math.round(tempValue)), type }
+}
+
+const weatherSources = [fetchFromApi, fetchFromOpenMeteo, fetchFromWttr]
+
 async function fetchWeather() {
   const currentReqId = ++fetchRequestId
-  if (loadWeatherFromCache()) return
+  if (loadWeatherFromCache()) {
+    clearRetryTimer()
+    return
+  }
 
   const loc = addresslist[addressindex.value]
-  try {
-    const url = `https://wttr.in/${loc?.lat},${loc?.lon}?format=j1`
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('请求失败')
-    const data = await res.json()
+  if (!loc) return
 
-    if (currentReqId !== fetchRequestId) return
+  clearRetryTimer()
 
-    const current = data.current_condition[0]
-    const fetchedTemp = String(Math.round(parseFloat(current.temp_C)))
-    const descEn = current.weatherDesc[0].value
+  // 总预算：保证几个数据源叠加也不会让卡片长时间停在“加载中...”
+  const deadline = Date.now() + TOTAL_BUDGET
+  let result: WeatherResult | null = null
 
-    let type = 'wind'
-    if (descEn.includes('Sunny') || descEn.includes('Clear')) type = 'sun'
-    else if (descEn.includes('Rain')) type = 'rain'
-    else if (descEn.includes('Snow')) type = 'snow'
-    else if (descEn.includes('Thunder') || descEn.includes('Storm')) type = 'thunder'
+  for (const source of weatherSources) {
+    const remaining = deadline - Date.now()
+    if (remaining <= 1500) break
 
-    const nowText = weatherNames[type] ?? 'Unknown'
-    updateWithTextTransition(nowText, fetchedTemp)
-
-    const nowDate = new Date()
-    formattedDate.value = nowDate.toLocaleDateString('en-US', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    })
-
-    changeWeather(type)
-    saveWeatherToCache()
-  } catch (err) {
-    if (currentReqId !== fetchRequestId) return
-    console.error('获取天气失败', err)
-    updateWithTextTransition('Sunny', '24')
-    changeWeather('sun')
+    try {
+      result = await source(loc, Math.min(REQUEST_TIMEOUT, remaining))
+      if (result) break
+    } catch (err) {
+      // 期间已切换到其它地区，直接放弃后续数据源
+      if (currentReqId !== fetchRequestId) return
+      console.warn('[天气] 数据源请求失败，改用下一个数据源：', err)
+    }
   }
+
+  // 用户已切换地区，丢弃这次的结果
+  if (currentReqId !== fetchRequestId) return
+
+  if (!result) {
+    // 全部数据源失败：先用历史缓存顶住，再安排一次自动重试，绝不长期停在“加载中...”
+    if (!loadStaleCache()) {
+      temp.value = '--'
+      weatherDesc.value = '暂不可用'
+    }
+    scheduleRetry()
+    return
+  }
+
+  applyWeather(weatherNames[result.type] ?? 'Unknown', result.temp, result.type)
+  saveWeatherToCache()
 }
 
 // ── 地区切换事件 ──
@@ -282,6 +425,7 @@ function changeaddress() {
   addressindex.value = (addressindex.value + 1) % addresslist.length
   currentAddress.value = addresslist[addressindex.value]?.name ?? '武汉'
 
+  clearRetryTimer()
   temp.value = '--'
   weatherDesc.value = '加载中...'
   fetchWeather()
@@ -579,13 +723,14 @@ function startLightningTimer() {
     clearTimeout(lightningTimeout)
     lightningTimeout = null
   }
-  if (currentWeather.type === 'thunder') {
+  if (currentWeather.type === 'thunder' && innerSVG) {
     lightningTimeout = setTimeout(lightning, 2000 + Math.random() * 4500)
   }
 }
 
 function lightning() {
-  if (currentWeather.type !== 'thunder') return
+  // SVG 没初始化成功时直接跳过，别让动画逻辑抛错
+  if (!innerSVG || currentWeather.type !== 'thunder') return
   startLightningTimer()
 
   if (cardRef.value) {
@@ -677,6 +822,11 @@ function cleanUpParticles(newType: string) {
 
 // ── Tick 动画循环 ──
 function tick() {
+  tickId = requestAnimationFrame(tick)
+
+  // SVG 没初始化成功（例如 Snap 加载异常）时只保持循环，不做任何绘制
+  if (!innerSVG || !innerRainHolder1) return
+
   tickCount++
   if (tickCount % settings.renewCheck === 0) {
     if (rain.length < settings.rainCount) makeRain()
@@ -695,8 +845,6 @@ function tick() {
       clouds[i].group.transform(`t${clouds[i].offset},0`)
     }
   }
-
-  tickId = requestAnimationFrame(tick)
 }
 
 // ── 天气切换控制 ──
@@ -740,12 +888,13 @@ function changeWeather(type: string) {
   gsap.to(settings, { windSpeed: targetWindSpeed, duration: 2, ease: 'power2.inOut' })
 
   // 辉光只控制 scale 与 opacity，绝对不改动 x, y，确保原地漫射自旋
+  // （SVG 未初始化成功时 sun / sunburst 为空，直接跳过）
   if (type === 'sun') {
-    gsap.to(sun.node, { x: cardWidth / 2, y: cardHeight / 2, duration: 2.2, ease: 'power2.inOut' })
-    gsap.to(sunburst.node, { scale: 0.85, opacity: 0.85, duration: 2.2, ease: 'power2.inOut' })
+    if (sun?.node) gsap.to(sun.node, { x: cardWidth / 2, y: cardHeight / 2, duration: 2.2, ease: 'power2.inOut' })
+    if (sunburst?.node) gsap.to(sunburst.node, { scale: 0.85, opacity: 0.85, duration: 2.2, ease: 'power2.inOut' })
   } else {
-    gsap.to(sun.node, { x: cardWidth / 2, y: -100, duration: 1.6, ease: 'power2.inOut' })
-    gsap.to(sunburst.node, { scale: 0.35, opacity: 0, duration: 1.6, ease: 'power2.inOut' })
+    if (sun?.node) gsap.to(sun.node, { x: cardWidth / 2, y: -100, duration: 1.6, ease: 'power2.inOut' })
+    if (sunburst?.node) gsap.to(sunburst.node, { scale: 0.35, opacity: 0, duration: 1.6, ease: 'power2.inOut' })
   }
 
   startLightningTimer()
@@ -758,6 +907,7 @@ watch(() => props.address, (newAddr) => {
   if (idx !== -1 && idx !== addressindex.value) {
     addressindex.value = idx
     currentAddress.value = addresslist[idx]?.name ?? newAddr
+    clearRetryTimer()
     fetchWeather()
   }
 })
@@ -765,13 +915,22 @@ watch(() => props.address, (newAddr) => {
 // ── 生命周期 ──
 onMounted(async () => {
   await nextTick()
-  initSVG()
-  tickId = requestAnimationFrame(tick)
+  // 动画初始化独立兜底：它一旦抛错，绝不能让下面的取数逻辑跟着不执行
+  try {
+    initSVG()
+    tickId = requestAnimationFrame(tick)
+  } catch (err) {
+    console.error('[天气] SVG 动画初始化失败（不影响取数）：', err)
+  }
   await fetchWeather()
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(tickId)
+  // 组件卸载后不再接受迟到的请求结果
+  fetchRequestId++
+  clearRetryTimer()
+  inflightController?.abort()
   cleanUpParticles('none')
   if (cardRef.value) gsap.killTweensOf(cardRef.value)
   if (sun?.node) gsap.killTweensOf(sun.node)

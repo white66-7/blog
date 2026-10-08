@@ -106,11 +106,16 @@ onMounted(async () => {
 })
 </script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; user-select: none;
- scroll-snap-type: y proximity;}
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+/* 底部安全区（全面屏手势条）用页面底色兜住，避免露出白边 */
+html {
+  background-color: #FAF7F2;
+}
 body {
-  background-color: #FAF7F2; 
+  background-color: #FAF7F2;
+  /* 用 dvh 而不是 vh：移动端 vh 比可视区高，会让整页多出一条可轻微拖动的缝隙 */
   min-height: 100vh;
+  min-height: 100dvh;
 }
 #app {
   width: 100%;

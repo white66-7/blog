@@ -3,7 +3,8 @@
     <Navbar :transparent="isFirstScreen" />
     <swiper :modules="modules" :direction="'vertical'" :slidesPerView="1" :speed="600"
       :mousewheel="{ forceToAxis: true, releaseOnEdges: true }" @swiper="onSwiperInit" @slideChange="onSlideChange"
-      class="fullpage-swiper" :noSwipingClass="'scrollable-content'">
+      class="fullpage-swiper" :noSwipingClass="'scrollable-content'"
+      :simulateTouch="false" :resistanceRatio="0">
       <!-- 第一屏 -->
       <swiper-slide class="slide-hero">
         <div class="hero-section">
@@ -53,11 +54,12 @@
                     :class="[showAnimation && 'animate__animated animate__fadeInRight animate__delay-1s']"
                     style="--animate-delay: .15s;" />
                 </div>
-                <div class="articles-section">
-                  <ArticleShow :articles="articleData"
-                    :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']"
-                    style="--animate-delay: .3s;" />
-                </div>
+                <!-- 注意：ArticleShow 的根节点本身就是 .articles-section，
+                     不要再套一层同名 div —— 那层壳不会跟着 flex 长高，
+                     多出来的高度会全部堆在“网站已上线”条下方，导致右列底边对不齐左列 -->
+                <ArticleShow :articles="articleData"
+                  :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']"
+                  style="--animate-delay: .3s;" />
                 <SiteAge :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']"
                   style="--animate-delay: .75s;" />
               </div>
@@ -355,8 +357,11 @@ const albumImages = [
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  /* 顶部 70px 刚好贴着导航栏下方，上下留白匀称紧凑 */
-  padding: 70px 4% 30px 4%;
+  /* 上下留白收紧一档：第二屏内容总高约 971px（左列 883 + 上下留白 88），
+     比改造前的约 1031px 矮 60px，常见 1080P 窗口里也能一屏放下 */
+  padding: 68px 4% 20px 4%;
+  padding-top: calc(68px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
 }
 
 /* 1. 整体总宽度：从 1148px 放大到 1360px，铺满大屏视野 */
@@ -366,6 +371,8 @@ const albumImages = [
   gap: 36px;
   max-width: 1360px;     /* 👈 告别小气，显著拉宽 */
   width: 100%;
+  /* 高度交给内容自己决定：两列高度本来就相等（见下方相册 344px 的取值），
+     多余空间留在整块外侧，绝不再塞进卡片之间的间隙里 */
   margin: auto auto;     /* 垂直居中 */
 }
 
@@ -384,7 +391,7 @@ const albumImages = [
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 /* 4. 顶部相册与天气：高度拉高到 280px */
@@ -416,6 +423,20 @@ const albumImages = [
   width: 320px;     
   flex: 0 0 320px;
   align-self: stretch;
+}
+
+/* 桌面端：相册去掉内部 1em 外边距，高度取 344px（620×344 ≈ 1.8:1）。
+   这个高度是“配平值”：左列 346+22+333+22+160 = 883px，
+   右列 344+18+430+18+72 = 882px —— 两列自然高度相等、底边天然对齐，
+   所以任何一列都不需要再靠拉大间距去凑高度（移动端仍保持 16:9） */
+@media (min-width: 901px) {
+  .album-container :deep(.slider-wrapper) {
+    margin: 0;
+  }
+
+  .album-container :deep(.slide) {
+    aspect-ratio: 620 / 344;
+  }
 }
 
 /* 5. 文章区域 */
@@ -460,11 +481,6 @@ const albumImages = [
 
 /* ========== 平板及移动端适配 ========== */
 @media (max-width: 900px) {
-  .main-body {
-    /* 优化：取消 PC 端 270px 的左边距，使内容居中显示 */
-    padding: 80px 5% 40px 5%;
-  }
-
   /* 优化：从左右并排改为上下堆叠结构 */
   .two-columns {
     flex-direction: column;
@@ -480,6 +496,19 @@ const albumImages = [
     max-width: 100%;
   }
 
+  /* 关键修复：PC 端的 flex: 0 0 620px / 320px 在竖向堆叠后会变成“高度”，
+     会把相册撑到 620px 高、天气撑到 320px 高，从而在相册下方、天气上方留下大片空白。
+     这里必须把主轴基准改回 auto，让它们按内容（相册 16:9）各自撑开 */
+  .album-container {
+    flex: 0 0 auto;
+    height: auto;
+  }
+
+  .weather-card-comp {
+    flex: 0 0 auto;
+    height: 280px;
+  }
+
   .top-row {
     flex-direction: column;
     /* 优化：相册和天气模块在移动端上下排列 */
@@ -488,8 +517,8 @@ const albumImages = [
   }
 
   .arrow.bounce {
-    bottom: 40px;
-    /* 提升箭头高度，避免被底部控制栏挡住 */
+    bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+    /* 提升箭头高度，避免被底部控制栏/手势条挡住 */
   }
 }
 
@@ -500,7 +529,10 @@ const albumImages = [
   }
 
   .main-body {
+    /* 54px 导航栏 + 安全区 + 呼吸留白 */
     padding: 70px 16px 40px 16px;
+    padding-top: calc(70px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
     scrollbar-gutter: stable;
     min-height: 100vh;
     min-height: 100dvh;
