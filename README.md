@@ -32,21 +32,21 @@
 
 ### 文章
 - **Markdown 引擎**：基于 `markdown-it` 解析排版，搭配 `highlight.js` 实现代码语法高亮。
-- **阅读记忆**：自动缓存长文章的滚动浏览进度，返回时无缝定位。
+- **记忆化**：缓存长文章的滚动浏览进度，返回时定位。
 
 ### 音乐播放
-- **元数据解析**：利用 `music-metadata` 自动提取音频文件的 ID3 标签与高清封面图。
-- **完整播放控制**：支持顺序、循环、随机播放模式，具备进度拖拽、音量调节及本地历史回放能力。
+- **数据解析**：利用 `music-metadata` 自动提取音频文件的 ID3 标签与高清封面图。
+- **播放控制**：顺序、循环、随机播放模式，具备进度拖拽、音量调节及本地历史回放能力。
 
 ### 动画
 - **SVG 开场动画**：书法风 SVG 加载过渡。
 - **流畅动效**：基于 GSAP 与 SnapSVG 驱动页面切换及图形动态绘制。
-- **相册与灯箱**：网格式相册书架展示，图片全屏灯箱浏览与视频格式兼容播放。
-- **GitHub 生态联动**：自绘贡献日历热力墙，动态拉取展示公开仓库与开发统计。
+- **相册与灯箱**：相册书架，图片灯箱与视频格式兼容。
+- **GitHub 生态联动**：贡献日历热力墙，后端拉取,展示肌肉。
 
 ### 架构与体验
-- **状态与缓存**：结合 Pinia 状态管理与 `keep-alive` 实现核心视图的状态留存。
-- **自适应设计**：响应式布局，保证桌面端与移动端的视觉一致性。
+- **状态与缓存**：基于 Pinia 状态管理与 `keep-alive` 实现的状态留存。
+- **自适应设计**：移动端响应式布局适配。
 ---
 
 ## 路由架构
@@ -54,14 +54,14 @@
 | 路由路径 | 对应组件 | 功能说明 |
 | :--- | :--- | :--- |
 | `/` | `BlogHome` | 博客主页 |
-| `/articles` | `MainArticle` | 文章索引列表 |
-| `/article/:id` | `ArticleDetail` | 文章内容阅读页 |
+| `/articles` | `MainArticle` | 文章列表 |
+| `/article/:id` | `ArticleDetail` | 文章内容详情页 |
 | `/photos` | `Photo` | 媒体画廊 |
 | `/projects` | `Projects` | GitHub 开源项目与贡献热力展示 |
-| `/player` | `MusicPlayer` | 音乐播放器界面（嵌套子路由） |
+| `/player` | `MusicPlayer` | 音乐播放器界面 |
 | `/player/songs` | `SongList` | 歌曲曲库列表 |
 | `/player/playlists` | `Playlist` | 播放歌单管理 |
-| `/about` | `About` | 留言与个人展示 |
+| `/about` | `About` | 留言与个人 |
 
 ---
 
@@ -69,11 +69,11 @@
 
 | 分类 | 核心技术 / 依赖 | 说明 |
 | :--- | :--- | :--- |
-| **核心框架** | Vue 3 + TypeScript | 组合式 API (Composition API) 开发架构 |
-| **构建工具** | Vite | 极速冷启动与生产构建 |
-| **状态与路由** | Pinia + Vue Router | 集中状态管理与路由守卫 / 缓存控制 |
-| **网络请求** | Axios | RESTful API 交互与拦截处理 |
-| **样式与动效** | Sass + Animate.css + GSAP | 样式预处理与高性能补间动画 |
+| **核心框架** | Vue 3 + TypeScript | Composition API 开发架构 |
+| **构建工具** | Vite | 生产构建 |
+| **状态与路由** | Pinia + Vue Router | 集中状态管理缓存控制 |
+| **网络请求** | Axios | API 交互与拦截处理 |
+| **样式与动效** | Sass + Animate.css + GSAP | 样式处理与高性能动画 |
 | **图形与媒体** | SnapSVG + Swiper + Music-Metadata | 矢量绘图、滑动视差与音频解析 |
 | **内容解析** | Markdown-it + Highlight.js | 文档渲染与多语言语法高亮 |
 
@@ -89,7 +89,7 @@ vue-frontend/
     │   ├── config/               # 媒体与全局配置文件
     │   ├── date/                 # 文章 Markdown 源文件与元数据
     │   ├── modules/              # 业务领域模块
-    │   │   ├── bloghome/         # 首页模块（文章、相册、开源、关于）
+    │   │   ├── bloghome/         # 首页模块
     │   │   │   └── components/
     │   │   │       ├── articles/ # 文章列表 / 详情 / 检索组件
     │   │   │       ├── photos/   # 画廊展示 / 灯箱预览组件
@@ -99,7 +99,7 @@ vue-frontend/
     │   │       ├── components/   # 播放控制器 / 列表 / 侧栏
     │   │       └── utils/        # 封面解码 / 本地存储 / 格式化工具
     │   ├── router/               # 路由定义与导航拦截
-    │   ├── stores/               # 全局 Pinia Store (Audio / Library)
+    │   ├── stores/               # 全局 Pinia Store
     │   ├── views/                # 顶层视口与加载过渡页
     │   ├── App.vue               # 根组件
     │   └── main.ts               # 入口引导文件
@@ -141,7 +141,7 @@ npm run preview
 
 ## 开源协议与版权声明
 
-本项目基于 **Noncommercial License（非商业许可协议）** 进行代码公开：
+本项目基于 **非商业许可协议** 进行代码公开：
 
 - **技术代码**：仅供个人技术研究与学习交流，**严禁任何商业盈利、二次售卖或商业使用**。
 - **原创内容**：本博客内所有**文章、摄影与多媒体资源**均保留全部著作权，未经明确授权，禁止任何形式的抄袭、搬运与爬取。
