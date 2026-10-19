@@ -54,10 +54,10 @@ const albumsData = [
       { title: '通往夏天的隧道', url: '/album/动漫/向日葵.webp' },
       { title: '败了', url: '/album/动漫/战败.webp' },
       { title: '好久不见', url: '/album/动漫/蕾姆.webp' },
-      { title: '再战！', url: '/album/暑假/再战.webp' },
-      { title: '别沉浸在幸福中啊混蛋', url: '/album/暑假/欺骗.webp' },
-      { title: '第二季 • 终', url: '/album/暑假/史莱姆.webp' },
-      { title: '四百年的孤独', url: '/album/暑假/蝎子.webp' },
+      { title: '再战！', url: '/album//动漫/再战.webp' },
+      { title: '别沉浸在幸福中啊混蛋', url: '/album//动漫/欺骗.webp' },
+      { title: '第二季 • 终', url: '/album//动漫/史莱姆.webp' },
+      { title: '四百年的孤独', url: '/album//动漫/蝎子.webp' },
     ]
   },
   {
