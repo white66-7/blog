@@ -43,12 +43,12 @@
             d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z" />
         </svg>
       </a>
-      <a href="https://user.qzone.qq.com/3061690367" target="_blank" class="icon QQ">
-        <span class="tooltip">QQ</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24">
-          <path d="M0 0h24v24H0z" fill="none" />
-          <path fill="currentColor"
-            d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673c.54.065 2.103-2.472 2.103-2.472c0 1.469.756 3.387 2.394 4.771c-.612.188-1.363.479-1.845.835c-.434.32-.379.646-.301.778c.343.578 5.883.369 7.482.189c1.6.18 7.14.389 7.483-.189c.078-.132.132-.458-.301-.778c-.483-.356-1.233-.646-1.846-.836c1.637-1.384 2.393-3.302 2.393-4.771c0 0 1.563 2.537 2.103 2.472c.251-.03.581-1.39-.438-4.673" />
+      <a href="https://xiaoheihe.cn/app/user/profile/84829007" target="_blank" class="icon xiaoheihe">
+        <span class="tooltip">小黑盒</span>
+        <svg width="1.6em" height="1.6em" viewBox="0 0 251 251" xmlns="http://www.w3.org/2000/svg">
+          <path d="M81 72 L57 88 L57 162 L138 210 L138 140 L113 140 L110 162 L84 146 L84 73 Z" fill="#393C3F" />
+          <path d="M112 40 L112 110 L138 110 L140 88 L165 102 L166 177 L169 178 L193 162 L193 88 L187 82 Z"
+            fill="#393C3F" />
         </svg>
       </a>
     </ul>
@@ -207,6 +207,7 @@ const avatarLoaded = ref(false)
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  white-space: nowrap;
 }
 
 .wrapper .tooltip::before {
@@ -233,74 +234,23 @@ const avatarLoaded = ref(false)
   text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
 }
 
-/* GitHub */
 .wrapper .github:hover,
 .wrapper .github:hover .tooltip,
-.wrapper .github:hover .tooltip::before {
-  background: #333;
-  color: #fff;
-}
+.wrapper .github:hover .tooltip::before,
 
-/* Bilibili - 粉色背景 + 蓝色图标 */
-.wrapper .bilibili:hover,
-.wrapper .bilibili:hover .tooltip,
-.wrapper .bilibili:hover .tooltip::before {
-  background: #e8f0fe;
-  color: #00a1d6;
-}
-
-/* Steam */
 .wrapper .Steam:hover,
 .wrapper .Steam:hover .tooltip,
-.wrapper .Steam:hover .tooltip::before {
-  background: #1b2838;
-  /* Steam 深色背景 */
-  color: #66c0f4;
-  /* 明亮的蒸汽蓝图标 */
-}
+.wrapper .Steam:hover .tooltip::before,
 
-/* QQ */
-.wrapper .QQ:hover,
-.wrapper .QQ:hover .tooltip,
-.wrapper .QQ:hover .tooltip::before {
-  background: #12b7f5;
+.wrapper .bilibili:hover,
+.wrapper .bilibili:hover .tooltip,
+.wrapper .bilibili:hover .tooltip::before,
+
+.wrapper .xiaoheihe:hover,
+.wrapper .xiaoheihe:hover .tooltip,
+.wrapper .xiaoheihe:hover .tooltip::before {
+  background: #222;
   color: #fff;
-}
-
-/* ===== 微信弹窗 ===== */
-.wechat-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.wechat-content {
-  background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  text-align: center;
-}
-
-.wechat-content p {
-  margin-bottom: 16px;
-  font-size: 16px;
-  color: #333;
-}
-
-.wechat-content button {
-  padding: 8px 24px;
-  border: none;
-  border-radius: 6px;
-  background: #07c160;
-  color: #fff;
-  cursor: pointer;
 }
 
 </style>
