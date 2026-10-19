@@ -117,14 +117,14 @@ const rawProjects = ref([
     link: 'https://github.com/white66-7/Graph-Fluid-Spring',
     tags: ['SoA', 'typescript', 'CSR']
   },
-  {
-    id: 6,
-    title: '一起听',
-    description: '基于 NeriPlayer“一起听”功能开发的个人听歌房管理软件,服务器在海外。',
-    poster: '/project/apk.webp',
-    link: 'https://github.com/white66-7/white-social-environment',
-    tags: ['kolin', 'Android Studio', 'social']
-  },
+  // {
+  //   id: 6,
+  //   title: '一起听',
+  //   description: '基于 NeriPlayer“一起听”功能开发的个人听歌房管理软件,服务器在海外。',
+  //   poster: '/project/apk.webp',
+  //   link: 'https://github.com/white66-7/white-social-environment',
+  //   tags: ['kolin', 'Android Studio', 'social']
+  // },
 ])
 
 const projects = computed(() => {
@@ -136,14 +136,14 @@ const projects = computed(() => {
     }))
 })
 
-// 跳转方法：确保移动端/PC端任意区域点击都能正常新标签页打开
+// 跳转
 const openLink = (url) => {
   if (url) {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 }
 
-// 1. 图片预加载
+// 图片预加载
 onMounted(() => {
   rawProjects.value.forEach((item) => {
     if (item.poster) {
@@ -153,7 +153,7 @@ onMounted(() => {
   })
 })
 
-// 2. 悬浮与坐标跟踪
+// 悬浮与坐标跟踪
 const currentPoster = ref('')
 const isPreviewActive = ref(false)
 const mousePos = ref({ x: 0, y: 0 })

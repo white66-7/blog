@@ -39,7 +39,8 @@
                 <player class="sticky-card"
                   :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']"
                   style="--animate-delay: .15s;" />
-                <Say :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']"
+                <Say class="say-card-comp"
+                  :class="[showAnimation && 'animate__animated animate__fadeInLeft animate__delay-1s']"
                   style="--animate-delay: .3s;" />
               </aside>
 
@@ -357,94 +358,123 @@ const albumImages = [
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  /* 上下留白收紧一档：第二屏内容总高约 971px（左列 883 + 上下留白 88），
-     比改造前的约 1031px 矮 60px，常见 1080P 窗口里也能一屏放下 */
-  padding: 68px 4% 20px 4%;
-  padding-top: calc(68px + env(safe-area-inset-top, 0px));
+  padding: 72px 4% 20px 4%;
+  padding-top: calc(72px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
 }
 
-/* 1. 整体总宽度：从 1148px 放大到 1360px，铺满大屏视野 */
+/* 两列主布局  */
 .two-columns {
+  --ui-scale: 0.90;
+
+  --max-w: calc(1440px * var(--ui-scale));
+  --left-w: calc(360px * var(--ui-scale));
+  --col-gap: calc(32px * var(--ui-scale));
+  --top-gap: calc(20px * var(--ui-scale));
+  --block-gap: calc(18px * var(--ui-scale));
+
+  --weather-w: calc(320px * var(--ui-scale));
+  --top-h: clamp(calc(300px * var(--ui-scale)), calc(35vh * var(--ui-scale)), calc(380px * var(--ui-scale)));
+
+  --article-side: calc(320px * var(--ui-scale));
+  --article-gap: calc(20px * var(--ui-scale));
+  --article-row: clamp(calc(190px * var(--ui-scale)), calc(21.3vh * var(--ui-scale)), calc(232px * var(--ui-scale)));
+
   display: flex;
   justify-content: center;
-  gap: 36px;
-  max-width: 1360px;     /* 👈 告别小气，显著拉宽 */
+  align-items: stretch;
+  gap: var(--col-gap);
+  max-width: var(--max-w);
   width: 100%;
-  /* 高度交给内容自己决定：两列高度本来就相等（见下方相册 344px 的取值），
-     多余空间留在整块外侧，绝不再塞进卡片之间的间隙里 */
-  margin: auto auto;     /* 垂直居中 */
+  margin: auto;
 }
 
-/* 2. 左侧列：调宽到 360px */
 .left-column {
-  width: 360px;
+  width: var(--left-w);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: calc(22px * var(--ui-scale));
 }
 
-/* 3. 右侧列：整体撑开 */
 .right-column {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--block-gap);
 }
 
-/* 4. 顶部相册与天气：高度拉高到 280px */
 .top-row {
   display: flex;
-  gap: 20px;
+  gap: var(--top-gap);
   align-items: stretch;
+  height: var(--top-h);
+  flex: 0 0 auto;
 }
 
 .album-container {
-  width: 620px;          /* 👈 相册加宽到 620px */
-  flex: 0 0 620px;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
   max-width: 100%;
   border-radius: 18px;
   overflow: hidden;
 }
 
-.album-container :deep(.swiper),
-.album-container :deep(.swiper-slide),
-.album-container :deep(.image-slider),
-.album-container :deep(img) {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block;
-}
-
 .weather-card-comp {
-  width: 320px;     
-  flex: 0 0 320px;
+  width: var(--weather-w);
+  flex: 0 0 var(--weather-w);
+  height: 100%;
   align-self: stretch;
 }
 
-/* 桌面端：相册去掉内部 1em 外边距，高度取 344px（620×344 ≈ 1.8:1）。
-   这个高度是“配平值”：左列 346+22+333+22+160 = 883px，
-   右列 344+18+430+18+72 = 882px —— 两列自然高度相等、底边天然对齐，
-   所以任何一列都不需要再靠拉大间距去凑高度（移动端仍保持 16:9） */
-@media (min-width: 901px) {
-  .album-container :deep(.slider-wrapper) {
-    margin: 0;
+/* 相册：去掉组件自带的外边距，桌面端让轮播填满顶行高度 */
+.album-container :deep(.slider-wrapper) {
+  margin: 0;
+  height: 100%;
+  border-radius: inherit;
+}
+
+@media (min-width: 1181px) {
+  .album-container :deep(.slider-viewport),
+  .album-container :deep(.slider-inner) {
+    height: 100%;
   }
 
   .album-container :deep(.slide) {
-    aspect-ratio: 620 / 344;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  /* 左列最后一张“随心一说”吃掉两列高度差，底边自然对齐，不额外拉大卡片间隙 */
+  .say-card-comp {
+    flex: 1 1 auto;
+    min-height: calc(160px * var(--ui-scale));
+    display: flex;
+  }
+
+  .say-card-comp :deep(.stack) {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    margin: 0;
+    display: flex;
+  }
+
+  .say-card-comp :deep(.stack .card) {
+    flex: 1;
+    height: auto;
+    min-height: calc(160px * var(--ui-scale));
   }
 }
 
-/* 5. 文章区域 */
+/* 文章区域 */
 .articles-section {
   width: 100%;
 }
 
-/* ========= 滚动箭头 ========= */
+/* 滚动箭头 */
 .arrow.bounce {
   position: absolute;
   bottom: 120px;
@@ -479,50 +509,62 @@ const albumImages = [
 }
 
 
-/* ========== 平板及移动端适配 ========== */
-@media (max-width: 900px) {
-  /* 优化：从左右并排改为上下堆叠结构 */
+/* ========== 平板 / 竖屏：两列改为单列 ========== */
+@media (max-width: 1180px) {
   .two-columns {
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
   }
 
   .left-column,
   .right-column,
-  .album-container,
-  .weather-card-comp,
   .articles-section {
-    width: 100% !important;
-    max-width: 100%;
+    width: 100%;
+    min-width: 0;
   }
 
-  /* 关键修复：PC 端的 flex: 0 0 620px / 320px 在竖向堆叠后会变成“高度”，
-     会把相册撑到 620px 高、天气撑到 320px 高，从而在相册下方、天气上方留下大片空白。
-     这里必须把主轴基准改回 auto，让它们按内容（相册 16:9）各自撑开 */
-  .album-container {
-    flex: 0 0 auto;
+  .left-column {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .right-column {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .two-columns {
+    --article-side: 290px;
+    --article-gap: 16px;
+    --article-row: 190px;
+  }
+
+  /* 顶行不再写死高度，让相册按 16:9 自然撑开 */
+  .top-row {
     height: auto;
   }
 
+  .album-container {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+
   .weather-card-comp {
-    flex: 0 0 auto;
+    flex: 0 0 280px;
+    width: 280px;
     height: 280px;
+    align-self: auto;
   }
 
-  .top-row {
-    flex-direction: column;
-    /* 优化：相册和天气模块在移动端上下排列 */
-    gap: 20px;
-    margin-bottom: 24px;
-  }
-
-  .arrow.bounce {
-    bottom: calc(40px + env(safe-area-inset-bottom, 0px));
-    /* 提升箭头高度，避免被底部控制栏/手势条挡住 */
+  /* 平板宽度下“随心一说”不要拉成一整条 */
+  .say-card-comp :deep(.stack) {
+    max-width: 520px;
+    margin: 0 auto;
   }
 }
 
-/* ========== 小屏手机极简适配 ========== */
+/* ========== 手机：上下堆叠 ========== */
 @media (max-width: 900px) {
   .app-flex::before {
     background-image: url('@/assets/斩首大刀.webp');
@@ -533,25 +575,76 @@ const albumImages = [
     padding: 70px 16px 40px 16px;
     padding-top: calc(70px + env(safe-area-inset-top, 0px));
     padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
-    scrollbar-gutter: stable;
     min-height: 100vh;
     min-height: 100dvh;
     box-sizing: border-box;
   }
 
   .two-columns {
-    flex-direction: column;
     gap: 18px;
   }
 
   .left-column {
-    width: 100%;
+    gap: 18px;
   }
 
-  .right-column {
+  .top-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .album-container,
+  .weather-card-comp {
+    flex: 0 0 auto;
     width: 100%;
-    min-height: 60vh;
-    min-height: 60dvh;
+    max-width: 100%;
+  }
+
+  .album-container {
+    height: auto;
+  }
+
+  .weather-card-comp {
+    height: 280px;
+  }
+
+  .say-card-comp :deep(.stack) {
+    max-width: 100%;
+  }
+
+  .arrow.bounce {
+    bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+    /* 提升箭头高度，避免被底部控制栏/手势条挡住 */
+  }
+}
+
+/* ========== 矮桌面：收紧一档，避免必须滚动才能看完第二屏 ========== */
+@media (min-width: 1181px) and (max-height: 920px) {
+  .main-body {
+    padding-top: calc(66px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .two-columns {
+    --left-w: 340px;
+    --col-gap: 26px;
+    --block-gap: 14px;
+    --top-h: 300px;
+    --article-side: 290px;
+    --article-gap: 16px;
+    --article-row: 205px;
+  }
+
+  .left-column {
+    gap: 16px;
+  }
+
+  .say-card-comp {
+    min-height: 150px;
+  }
+
+  .say-card-comp :deep(.stack .card) {
+    min-height: 150px;
   }
 }
 </style>

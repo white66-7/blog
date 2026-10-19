@@ -84,6 +84,7 @@ const avatarLoaded = ref(false)
   position: relative;
   /* 为骨架层提供定位基准 */
   width: 100%;
+  max-width: calc(360px * var(--ui-scale, 1));
   aspect-ratio: 1 / 1;
   border-radius: 12px;
   overflow: hidden;
@@ -300,5 +301,13 @@ const avatarLoaded = ref(false)
   background: #07c160;
   color: #fff;
   cursor: pointer;
+}
+
+/* 矮桌面：头像适当压低，给第三张卡片留出空间 */
+@media (min-width: 1181px) and (max-height: 920px) {
+  .avatar-wrapper {
+    height: 296px;
+    aspect-ratio: auto;
+  }
 }
 </style>

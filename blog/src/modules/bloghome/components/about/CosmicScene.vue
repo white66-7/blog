@@ -4,7 +4,7 @@
       <!-- Canvas 动态星芒与流星雨 -->
       <canvas ref="canvasRef" class="space-canvas"></canvas>
 
-      <!-- 3D 核心主场景 -->
+      <!-- 主场景 -->
       <div class="scene-scaler">
         <div class="scene">
           <div class="sun"></div>
@@ -14,7 +14,7 @@
           <div class="planet-4"></div>
           <div class="planet-6"></div>
           
-          <!-- 5号木星（纯 GPU 硬件加速） -->
+          <!-- 5号木星 -->
           <div class="planet-5">
             <div class="jupiter-clouds"></div>
           </div>
@@ -31,7 +31,7 @@
             <div class="right"></div>
           </div>
 
-          <!-- 2D 融入式人物与倒影 -->
+          <!-- 人物 -->
           <div class="character-container">
             <img :src="characterImg" alt="character" class="character-body" />
             <img :src="characterImg" alt="character reflection" class="character-reflection" />
@@ -39,10 +39,8 @@
         </div>
       </div>
 
-      <!-- 深空信号检索加载：极简幽灵微光态（点位与第一页星标严格 1:1 锚定） -->
       <transition name="scanner-fade">
         <div v-if="isLoading" class="cosmic-scanner-layer">
-          <!-- 8 个在原位微微呼吸的幽灵星光核 -->
           <div
             v-for="probe in loadingProbePositions"
             :key="probe.key"
@@ -59,7 +57,6 @@
             <div class="ghost-halo"></div>
           </div>
 
-          <!-- 底部极简呼吸提示（克制纤细） -->
           <div class="minimal-hud">
             <span class="hud-pulse-dot"></span>
             <span class="hud-text">SIGNAL SEARCHING</span>
@@ -68,7 +65,6 @@
         </div>
       </transition>
 
-      <!-- 可点击的高亮留言星辰（电影级时空曲率跃迁） -->
       <div v-show="!isLoading" class="beacons-layer">
         <div
           v-for="(beacon, index) in currentGalaxySignals"
@@ -100,7 +96,7 @@
         </div>
       </div>
 
-      <!-- 【左下角】下一星系跃迁控制按钮 -->
+      <!-- 左下角的下一篇 -->
       <button 
         v-if="!isLoading && totalGalaxies > 1"
         class="warp-galaxy-btn"
@@ -112,7 +108,7 @@
         <span class="warp-label">跃迁</span>
       </button>
 
-      <!-- 【右下角】宇宙背景音播放按钮 -->
+      <!-- 右下角宇宙背景音按钮 -->
       <button
         class="audio-icon-button"
         :class="{ 'is-playing': isPlaying }"
@@ -185,7 +181,7 @@ const safePositions = [
   { d: { top: '16%', left: '89%' }, m: { top: '76%', left: '68%' } }  // 15
 ]
 
-// 原始数据（默认为空，由接口或预加载缓存动态获取）
+// 原始数据
 const rawSignals = ref([])
 
 // 加载状态与深空频谱
@@ -193,7 +189,7 @@ const isLoading = ref(true)
 const scanFreq = ref('1420.405 MHz')
 let freqInterval = null
 
-// ================= 星系分页与跃迁状态 =================
+// 星系分页与跃迁状态
 const GALAXY_SIZE = 8
 const currentGalaxyIndex = ref(0)
 const warpState = ref('idle')
@@ -636,7 +632,7 @@ onMounted(() => {
   50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* ================= 交互星星信标图层 ================= */
+/* 交互星星信标图层 */
 .beacons-layer {
   position: absolute;
   inset: 0;
@@ -664,7 +660,7 @@ onMounted(() => {
   transform: translate(-50%, -50%) scale(1.3);
 }
 
-/* ================= 超空间跃迁动画 ================= */
+/* 超空间跃迁动画 */
 .interactive-beacon.is-warping-out {
   pointer-events: none;
   animation: warp-singularity-collapse 0.38s cubic-bezier(0.6, 0.05, 0.2, 1) forwards;
@@ -850,7 +846,7 @@ onMounted(() => {
   transform: translateX(-50%) translateY(10px);
 }
 
-/* ================= 【左下角】星系跃迁按钮 ================= */
+/* 星系跃迁按钮 */
 .warp-galaxy-btn {
   position: absolute;
   left: 2rem;
@@ -902,7 +898,7 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* ================= 【右下角】背景音按钮 ================= */
+/* 右下角背景音按钮 */
 .audio-icon-button {
   border: 1px solid rgba(255, 255, 255, 0.35);
   padding: 0.5rem;
@@ -955,7 +951,7 @@ onMounted(() => {
   to { transform: scaleY(1.3); }
 }
 
-/* ================= 场景 3D 核心样式 ================= */
+/* 场景 3D 核心样式 */
 .bottom-dark-fade {
   position: absolute;
   bottom: 0;
@@ -1233,7 +1229,7 @@ onMounted(() => {
   clip-path: ellipse(47% 22% at 50% 50%);
 }
 
-/* ================= 移动端精准避让与性能优化 ================= */
+/* 移动端精准避让与性能优化 */
 @media (max-width: 768px) {
   .scene {
     animation: none !important;

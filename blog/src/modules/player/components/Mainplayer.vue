@@ -1,7 +1,5 @@
 <template>
   <div class="main">
-    <div class="sys-line">SYNTHWAVE</div>
-
     <div class="content">
       <div class="left-col">
         <div class="disc-box">
@@ -241,16 +239,6 @@ function onSetVolume(e: MouseEvent) {
   min-width: 0;
   display: flex;
   justify-content: flex-end;
-}
-
-.sys-line {
-  position: absolute;
-  top: 15px;
-  right: 10px;
-  color: #6b6b8a;
-  letter-spacing: 1.5px;
-  opacity: .8;
-  z-index: 2;
 }
 
 .disc-box {

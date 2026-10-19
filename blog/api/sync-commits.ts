@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const operationsMap = new Map<string, any>()
 
-    // ================= 策略 1：查询用户最近的 Push 事件 =================
+    // 查询用户最近的 Push 事件
     try {
       debugLogs.push(`正在请求 /users/${GITHUB_USERNAME}/events...`)
       const eventsRes = await fetch(
@@ -76,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       debugLogs.push(`Events API 异常: ${e.name === 'TimeoutError' ? '请求超时(8s)' : e.message}`)
     }
 
-    // ================= 策略 2：拉取最近活跃的前 6 个仓库 =================
+    // 拉取最近活跃的前 6 个仓库
     try {
       const reposUrl = `https://api.github.com/users/${GITHUB_USERNAME}/repos?type=all&per_page=6&sort=pushed&direction=desc`
       debugLogs.push(`正在请求用户仓库列表: ${reposUrl}...`)
@@ -95,7 +95,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               const repoOwner = repo.owner?.login || GITHUB_USERNAME
               const repoName = repo.name
 
-              // 💡 去掉 author 强制过滤，防止因本地 git 邮箱与 github 账号不匹配导致被过滤成 0
+              // 去掉 author 强制过滤
               const commitsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/commits?per_page=15`
               
               try {
@@ -137,7 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       debugLogs.push(`Repos 抓取流程异常: ${e.message}`)
     }
 
-    // ================= 批量写入 MongoDB =================
+    // 批量写入 MongoDB 
     const operations = Array.from(operationsMap.values())
     let newlyAdded = 0
 

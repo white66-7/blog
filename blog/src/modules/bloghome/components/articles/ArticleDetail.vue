@@ -516,16 +516,21 @@ function handleMarkdownClick(e: MouseEvent) {
   border-radius: 8px;
 }
 
-.navbar {
+</style>
+
+<style scoped>
+/* 只作用于文章详情页自己的导航栏。
+   之前这条规则写在全局 <style> 里，ArticleDetail 被首页预取后
+   会把 #ececec 的实心背景泄漏到首页导航栏，移动端看上去就像
+   导航栏上方多出一条白色/灰色 padding。 */
+.article-detail-container :deep(.navbar) {
   background: #ececec !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-bottom: none !important;
   box-shadow: none !important;
 }
-</style>
 
-<style scoped>
 .elastic-sidebar {
   position: fixed;
   top: 0px;

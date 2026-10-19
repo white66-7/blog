@@ -217,15 +217,17 @@ onUnmounted(() => {
   margin-top: 0;
 }
 
-/* ---------- Grid 基础：只改宽度尺寸与行高 ---------- */
+/* ---------- Grid 基础 ----------
+   列宽不再写死 620/320：由父级 .two-columns 下发变量，
+   左列吃掉剩余宽度，右列固定；网格永远等于右列宽度，
+   从布局根源上杜绝“文章卡片比右列宽、压到左列卡片”的重叠 */
 .articles-grid {
   display: grid;
   grid-auto-flow: row dense;
-  /* 👈 仅改尺寸：左列 620px，右列 320px，总宽 960px 对齐上方 */
-  grid-template-columns: 620px 320px;
-  grid-auto-rows: 205px;                /* 👈 稍微拉高（原 196px） */
-  gap: 20px;                            /* 👈 间隙对齐上方（原 16px） */
-  justify-content: center;
+  grid-template-columns: minmax(0, 1fr) var(--article-side, 320px);
+  grid-auto-rows: var(--article-row, 210px);
+  gap: var(--article-gap, 20px);
+  justify-content: stretch;
   position: relative;
 }
 
@@ -275,7 +277,7 @@ onUnmounted(() => {
 
 .card.vertical .card__img {
   width: 100%;
-  height: 200px;                        /* 宽度从 256 增加到 320，高度按比例缩放 */
+  height: clamp(calc(160px * var(--ui-scale, 1)), calc(20vh * var(--ui-scale, 1)), calc(200px * var(--ui-scale, 1)));
   object-fit: cover;
 }
 

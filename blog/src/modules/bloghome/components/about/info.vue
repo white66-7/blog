@@ -12,6 +12,7 @@
         <path class="line-path" d="M 400 225 Q 450 320 560 350" />
         <path class="line-path" d="M 400 225 Q 350 320 240 350" />
         <path class="line-path" d="M 400 225 Q 250 220 150 150" />
+        <path class="line-path" d="M 400 225 Q 350 308 400 414" />
       </svg>
 
       <!-- 中心空间站核心头像 -->
@@ -19,31 +20,35 @@
         <img src="@/assets/me.webp" alt="头像" />
       </div>
 
-      <!-- 1号卫星：正上方 (CSS3) -->
+      <!-- 正上方 (CSS3) -->
       <div class="icon-node n-1 float-anim">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256">
           <path d="M0 0h256v256H0z" fill="none" />
           <g fill="none">
             <rect width="256" height="256" fill="#0277bd" rx="60" />
-            <path fill="#ebebeb" d="m53.753 102.651l2.862 31.942h71.481v-31.942zM128.095 38H48l2.904 31.942h77.191zm0 180.841v-33.233l-.14.037l-35.574-9.605l-2.274-25.476H58.042l4.475 50.154l65.431 18.164z" />
-            <path fill="#fff" d="m167.318 134.593l-3.708 41.426l-35.625 9.616v33.231l65.483-18.148l.48-5.397l7.506-84.092l.779-8.578L208 38h-80.015v31.942h45.009l-2.906 32.709h-42.103v31.942z" />
+            <path fill="#ebebeb"
+              d="m53.753 102.651l2.862 31.942h71.481v-31.942zM128.095 38H48l2.904 31.942h77.191zm0 180.841v-33.233l-.14.037l-35.574-9.605l-2.274-25.476H58.042l4.475 50.154l65.431 18.164z" />
+            <path fill="#fff"
+              d="m167.318 134.593l-3.708 41.426l-35.625 9.616v33.231l65.483-18.148l.48-5.397l7.506-84.092l.779-8.578L208 38h-80.015v31.942h45.009l-2.906 32.709h-42.103v31.942z" />
           </g>
         </svg>
       </div>
 
-      <!-- 2号卫星：右上 (HTML5) -->
+      <!-- 右上 (HTML5) -->
       <div class="icon-node n-2 float-anim-alt">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256">
           <path d="M0 0h256v256H0z" fill="none" />
           <g fill="none">
             <rect width="256" height="256" fill="#e14e1d" rx="60" />
-            <path fill="#fff" d="m48 38l8.61 96.593h110.71l-3.715 41.43l-35.646 9.638l-35.579-9.624l-2.379-26.602H57.94l4.585 51.281l65.427 18.172l65.51-18.172l8.783-98.061H85.824l-2.923-32.71h122.238L208 38z" />
-            <path fill="#ebebeb" d="M128 38H48l8.61 96.593H128v-31.938H85.824l-2.923-32.71H128zm0 147.647l-.041.014l-35.579-9.624l-2.379-26.602H57.94l4.585 51.281l65.427 18.172l.049-.014z" />
+            <path fill="#fff"
+              d="m48 38l8.61 96.593h110.71l-3.715 41.43l-35.646 9.638l-35.579-9.624l-2.379-26.602H57.94l4.585 51.281l65.427 18.172l65.51-18.172l8.783-98.061H85.824l-2.923-32.71h122.238L208 38z" />
+            <path fill="#ebebeb"
+              d="M128 38H48l8.61 96.593H128v-31.938H85.824l-2.923-32.71H128zm0 147.647l-.041.014l-35.579-9.624l-2.379-26.602H57.94l4.585 51.281l65.427 18.172l.049-.014z" />
           </g>
         </svg>
       </div>
 
-      <!-- 3号卫星：右下 (Vue) -->
+      <!-- 右下 (Vue) -->
       <div class="icon-node n-3 float-anim">
         <svg xmlns="http://www.w3.org/2000/svg" width="1.16em" height="1em" viewBox="0 0 256 221">
           <path d="M0 0h256v221H0z" fill="none" />
@@ -53,7 +58,7 @@
         </svg>
       </div>
 
-      <!-- 4号卫星：左下 (Spring) -->
+      <!-- 左下 (Spring) -->
       <div class="icon-node n-4 float-anim-alt">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 8 8">
           <path d="M0 0h8v8H0z" fill="none" />
@@ -61,14 +66,24 @@
         </svg>
       </div>
 
-      <!-- 5号卫星：左上 (Node/Leaf) -->
+      <!-- 左上 (Node/Leaf) -->
       <div class="icon-node n-5 float-anim">
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 256 256">
           <path d="M0 0h256v256H0z" fill="none" />
           <g fill="none">
             <rect width="256" height="256" fill="#f4f2ed" rx="60" />
-            <path fill="#5fb832" d="M209.545 171.821c-24.615 32.797-77.198 21.726-110.91 23.318c0 0-5.968.332-11.979 1.322c0 0 2.273-.97 5.172-1.969c23.678-8.188 34.867-9.833 49.254-17.223c27.032-13.848 53.936-44.01 59.41-75.344c-10.29 30.136-41.583 56.073-70.077 66.605c-19.504 7.197-54.773 14.201-54.778 14.204c.016.025-1.406-.738-1.426-.755c-23.986-11.67-24.678-63.62 18.886-80.366c19.1-7.347 37.369-3.311 58.017-8.226c22.022-5.236 47.528-21.743 57.895-43.324c11.622 34.472 25.583 88.404.536 121.758m.428-132.44c-2.93 6.962-6.507 13.236-10.629 18.847C181.197 39.604 155.868 28 127.871 28C72.799 28 28 72.804 28 127.866c0 28.865 12.32 54.898 31.964 73.146l2.187 1.937c-3.652-2.978-4.213-8.341-1.253-11.997c2.978-3.657 8.346-4.224 12-1.262c3.664 2.968 4.222 8.345 1.256 12.007c-2.956 3.664-8.334 4.217-11.993 1.261l1.489 1.318c17.375 14.63 39.774 23.467 64.221 23.467c52.64 0 95.865-40.965 99.565-92.67c2.74-25.316-4.737-57.462-17.463-95.692" />
+            <path fill="#5fb832"
+              d="M209.545 171.821c-24.615 32.797-77.198 21.726-110.91 23.318c0 0-5.968.332-11.979 1.322c0 0 2.273-.97 5.172-1.969c23.678-8.188 34.867-9.833 49.254-17.223c27.032-13.848 53.936-44.01 59.41-75.344c-10.29 30.136-41.583 56.073-70.077 66.605c-19.504 7.197-54.773 14.201-54.778 14.204c.016.025-1.406-.738-1.426-.755c-23.986-11.67-24.678-63.62 18.886-80.366c19.1-7.347 37.369-3.311 58.017-8.226c22.022-5.236 47.528-21.743 57.895-43.324c11.622 34.472 25.583 88.404.536 121.758m.428-132.44c-2.93 6.962-6.507 13.236-10.629 18.847C181.197 39.604 155.868 28 127.871 28C72.799 28 28 72.804 28 127.866c0 28.865 12.32 54.898 31.964 73.146l2.187 1.937c-3.652-2.978-4.213-8.341-1.253-11.997c2.978-3.657 8.346-4.224 12-1.262c3.664 2.968 4.222 8.345 1.256 12.007c-2.956 3.664-8.334 4.217-11.993 1.261l1.489 1.318c17.375 14.63 39.774 23.467 64.221 23.467c52.64 0 95.865-40.965 99.565-92.67c2.74-25.316-4.737-57.462-17.463-95.692" />
           </g>
+        </svg>
+      </div>
+
+      <!-- 正下方 (MongoDB) -->
+      <div class="icon-node n-6 float-anim-alt">
+        <svg xmlns="http://www.w3.org/2000/svg" width="0.47em" height="1em" viewBox="0 0 256 549">
+          <path d="M0 0h256v549H0z" fill="none" />
+          <path fill="#01ec64"
+            d="M175.622 61.108C152.612 33.807 132.797 6.078 128.749.32a1.03 1.03 0 0 0-1.492 0c-4.048 5.759-23.863 33.487-46.874 60.788c-197.507 251.896 31.108 421.89 31.108 421.89l1.917 1.28c1.704 26.234 5.966 63.988 5.966 63.988h17.045s4.26-37.54 5.965-63.987l1.918-1.494c.213.214 228.828-169.78 31.32-421.677m-47.726 418.05s-10.227-8.744-12.997-13.222v-.428l12.358-274.292c0-.853 1.279-.853 1.279 0l12.357 274.292v.428c-2.77 4.478-12.997 13.223-12.997 13.223" />
         </svg>
       </div>
     </div>
@@ -102,13 +117,13 @@ onMounted(() => {
     }
   })
 
-  tl.fromTo('.gsap-scale', 
-      { scale: 0.3, opacity: 0 }, 
-      { scale: 1, opacity: 1, duration: 0.8, ease: 'back.out(1.2)' }
-    )
-    .fromTo('.gsap-pop', 
-      { scale: 0.3, rotation: -20, opacity: 0 }, 
-      { scale: 1, rotation: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)' }, 
+  tl.fromTo('.gsap-scale',
+    { scale: 0.3, opacity: 0 },
+    { scale: 1, opacity: 1, duration: 0.8, ease: 'back.out(1.2)' }
+  )
+    .fromTo('.gsap-pop',
+      { scale: 0.3, rotation: -20, opacity: 0 },
+      { scale: 1, rotation: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)' },
       '-=0.5'
     )
     .to('.line-path', {
@@ -117,9 +132,9 @@ onMounted(() => {
       ease: 'power2.inOut',
       stagger: { amount: 0.3, from: 'center' }
     }, '-=0.3')
-    .fromTo('.icon-node', 
-      { scale: 0, opacity: 0 }, 
-      { scale: 1, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'back.out(1.5)', clearProps: 'all' }, 
+    .fromTo('.icon-node',
+      { scale: 0, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'back.out(1.5)', clearProps: 'all' },
       '-=0.6'
     )
 
@@ -165,7 +180,7 @@ onMounted(() => {
   // 2. 等待路由过渡完成（page 过渡是 0.28s，这里给 300ms）后精确重新计算位置
   refreshTimer = setTimeout(() => {
     ScrollTrigger.refresh()
-    
+
     // 如果已经在可视区内但由于特殊原因仍未触发，立即开始播放
     if (cardRef.value) {
       const rect = cardRef.value.getBoundingClientRect()
@@ -211,7 +226,10 @@ onUnmounted(() => {
 /* 宇宙星轨发光同心圆 */
 .circles {
   position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   margin: auto;
   width: 320px;
   height: 320px;
@@ -246,7 +264,10 @@ onUnmounted(() => {
 /* 中心核心头像 */
 .avatar-wrapper {
   position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   margin: auto;
   z-index: 10;
   width: 150px;
@@ -268,8 +289,10 @@ onUnmounted(() => {
 /* SVG 发光连线 */
 .lines-svg {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 2;
   pointer-events: none;
 }
@@ -291,9 +314,11 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 20; /* 提升层级 */
+  z-index: 20;
+  /* 提升层级 */
   cursor: pointer;
-  opacity: 1; /* 默认可见兜底 */
+  opacity: 1;
+  /* 默认可见兜底 */
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -310,16 +335,71 @@ onUnmounted(() => {
   display: block;
 }
 
-.n-1 { top: 8%; left: 50%; margin-top: -32px; margin-left: -32px; }
-.n-2 { top: 33.33%; left: 81.25%; margin-top: -32px; margin-left: -32px; }
-.n-3 { top: 77.77%; left: 70%; margin-top: -32px; margin-left: -32px; }
-.n-4 { top: 77.77%; left: 30%; margin-top: -32px; margin-left: -32px; }
-.n-5 { top: 33.33%; left: 18.75%; margin-top: -32px; margin-left: -32px; }
+.n-1 {
+  top: 8%;
+  left: 50%;
+  margin-top: -32px;
+  margin-left: -32px;
+}
+
+.n-2 {
+  top: 33.33%;
+  left: 81.25%;
+  margin-top: -32px;
+  margin-left: -32px;
+}
+
+.n-3 {
+  top: 77.77%;
+  left: 70%;
+  margin-top: -32px;
+  margin-left: -32px;
+}
+
+.n-4 {
+  top: 77.77%;
+  left: 30%;
+  margin-top: -32px;
+  margin-left: -32px;
+}
+
+.n-5 {
+  top: 33.33%;
+  left: 18.75%;
+  margin-top: -32px;
+  margin-left: -32px;
+}
+
+.n-6 { top: 92%;    left: 50%;    margin-top: -32px; margin-left: -32px; }
+
+
+.n-6 svg {
+  width: auto;
+  height: 34px;
+}
 
 @media (max-width: 900px) {
-  .circles { width: 180px; height: 180px; }
-  .avatar-wrapper { width: 80px; height: 80px; }
-  .icon-node { width: 46px; height: 46px; border-radius: 12px; }
-  .icon-node svg { width: 26px; height: 26px; }
+  .circles {
+    width: 180px;
+    height: 180px;
+  }
+
+  .avatar-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .icon-node {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+  }
+
+  .icon-node svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .n-6 svg { width: auto; height: 24px; }
 }
 </style>

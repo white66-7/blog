@@ -177,12 +177,18 @@ const handleListenTogether = () => {
   console.log('点击了一起听按钮')
 }
 
-// 导航栏自动隐藏
+// 导航栏自动隐藏：只在有精确指针（鼠标）的设备上启用。
+// 触屏设备没有 hover，自动隐藏后页面顶部会一直留着导航栏占位形成一条空白带，
+// 因此移动端保持导航栏常驻。
 const isVisible = ref(true)
 let timer = null
+const canAutoHide = typeof window !== 'undefined' &&
+  window.matchMedia?.('(hover: hover) and (pointer: fine)').matches &&
+  !window.matchMedia?.('(max-width: 768px)').matches
 
 const handleUserActivity = () => {
   if (!isVisible.value) isVisible.value = true
+  if (!canAutoHide) return
   if (timer) clearTimeout(timer)
   timer = setTimeout(() => {
     isVisible.value = false
@@ -192,9 +198,11 @@ const handleUserActivity = () => {
 onMounted(() => {
   window.addEventListener('mousemove', handleUserActivity)
   window.addEventListener('touchstart', handleUserActivity, { passive: true })
-  timer = setTimeout(() => {
-    isVisible.value = false
-  }, 2000)
+  if (canAutoHide) {
+    timer = setTimeout(() => {
+      isVisible.value = false
+    }, 2000)
+  }
 })
 
 onUnmounted(() => {
@@ -339,6 +347,8 @@ onUnmounted(() => {
     padding-right: 12px;
     padding-top: env(safe-area-inset-top, 0px);
     height: calc(54px + env(safe-area-inset-top, 0px));
+    /* 与页面底色一致的导航底色：刘海/状态栏那一段不会再是一条突兀的白条 */
+    background: rgba(250, 247, 242, 0.86);
   }
 
   .navbar__left {

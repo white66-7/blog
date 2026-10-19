@@ -1,16 +1,5 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { VercelRequest, VercelResponse } from '@vercel/node'
 
-/**
- * 天气代理接口：前端只请求本站 /api/weather?lat=..&lon=..
- *
- * 为什么放到服务端：
- *  1. 浏览器直连 wttr.in / open-meteo 会撞上跨域、被墙、限流，之前“两个地区一直转圈”就是这个原因；
- *  2. 服务端可以聚合多个数据源，一个挂了立刻换下一个；
- *  3. 走 Vercel 边缘缓存（s-maxage），同一地区短时间内重复切换直接命中缓存，不给上游添压力。
- *
- * 返回：{ ok: true, temp, type, desc, source, fetchedAt } 或 { ok: false, error }
- * 失败也返回 HTTP 200（沿用本站其它接口的约定），前端只判断 ok 字段。
- */
 
 type WeatherType = 'sun' | 'rain' | 'snow' | 'thunder' | 'wind'
 

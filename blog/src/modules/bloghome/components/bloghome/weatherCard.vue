@@ -264,13 +264,6 @@ function scheduleRetry(): void {
 }
 
 // ── 文本转场动画 ──
-/**
- * 更新温度与描述。
- * 关键：先把新值写进响应式状态，再交给 gsap 做视觉过渡。
- * 之前是「先播动画、在 gsap 回调里才赋值」，于是紧接着执行的 saveWeatherToCache()
- * 存下去的还是上一轮的旧值（首次加载时正好是 '--' / '加载中...'），
- * 缓存被写成加载态后，30 分钟内每次进页面都直接命中这份脏缓存 —— 卡片就永远停在“加载中”。
- */
 function updateWithTextTransition(newDesc: string = 'Unknown', newTemp: string = '--') {
   const safeDesc = newDesc || 'Unknown'
 

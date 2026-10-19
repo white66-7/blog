@@ -14,7 +14,7 @@ setInterval(() => {
   }
 }, 10 * 60 * 1000)
 
-// 1. 提交留言 
+// 提交留言 
 async function createSignal(req: any, res: any) {
   try {
     const clientIp = 
@@ -69,14 +69,12 @@ async function createSignal(req: any, res: any) {
   }
 }
 
-// 2. 获取留言列表 (GET) 
+// 获取留言列表 
 async function getSignals(req: any, res: any) {
   try {
     const { db } = await connectToDatabase()
     const adminToken = req.headers['x-admin-token']
 
-    // ==========================================
-    // ==========================================
     if (adminToken) {
       const serverSecret = process.env.ADMIN_SECRET
 
@@ -88,7 +86,7 @@ async function getSignals(req: any, res: any) {
         })
       }
 
-      // 诊断 2：密码输入错误
+      // 密码输入错误
       if (adminToken.trim() !== serverSecret.trim()) {
         return res.status(401).json({ 
           success: false, 
@@ -96,13 +94,13 @@ async function getSignals(req: any, res: any) {
         })
       }
 
-      // 诊断 3：密码完全正确，查询 pending 数据
+      // 密码正确
       const pendingSignals = await db.collection('signals')
         .find({ status: 'pending' })
         .sort({ createdAt: -1 })
         .toArray()
 
-      // 顺便查一下数据库里一共有多少条数据（方便排查）
+      // 顺便查一下数据库里一共有多少条数据
       const totalCount = await db.collection('signals').countDocuments()
 
       return res.json({ 
@@ -111,7 +109,7 @@ async function getSignals(req: any, res: any) {
         totalInDb: totalCount // 库里的总数据量
       })
     }
-    // B. 普通访客（无 x-admin-token 头）：只返回已审核通过的留言
+    // 普通访客
     const signals = await db.collection('signals')
       .find({ status: 'approved' }, { projection: { clientIp: 0 } })
       .sort({ createdAt: -1 })
@@ -124,7 +122,7 @@ async function getSignals(req: any, res: any) {
     return res.status(500).json({ error: '获取留言失败: ' + err.message })
   }
 }
-// 3. 管理员审核留言 (PATCH)
+// 管理员审核留言 
 async function reviewSignal(req: any, res: any) {
   try {
     const adminToken = req.headers['x-admin-token']
@@ -155,9 +153,7 @@ async function reviewSignal(req: any, res: any) {
   }
 }
 
-// ==========================================
-// Vercel Serverless Function 必须的默认导出入口
-// ==========================================
+// Vercel Serverless Function 默认导出入口
 export default async function handler(req: any, res: any) {
   switch (req.method) {
     case 'GET':

@@ -1,11 +1,11 @@
 <template>
   <div v-show="isVisible" class="space-cursor-layer">
-    <!-- 1. 轻量等离子粒子尾流画布 -->
+    <!--轻量等离子粒子尾流画布 -->
     <canvas ref="trailCanvasRef" class="trail-canvas"></canvas>
 
-    <!-- 2. Ranger 漫游者号飞船主体 -->
+    <!-- Ranger 漫游者号飞船主体 -->
     <div ref="shipRef" class="ship-wrapper">
-      <!-- 动态双发等离子冷焰（严格对齐 Ranger 尾部内嵌喷口） -->
+      <!-- 动态双发等离子冷焰 -->
       <div class="thrusters-group">
         <div ref="thrusterLeft" class="thruster-plume left">
           <div class="plume-outer"></div>
@@ -17,57 +17,55 @@
         </div>
       </div>
 
-      <!-- 《星际穿越》Ranger 高精度还原 SVG (48 x 64) -->
+      <!-- Ranger -->
       <svg class="ship-svg" viewBox="0 0 48 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <!-- 航天陶瓷白装甲渐变 -->
           <linearGradient id="rangerHull" x1="24" y1="8" x2="24" y2="56" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stop-color="#FFFFFF"/>
             <stop offset="60%" stop-color="#E2E8F0"/>
             <stop offset="100%" stop-color="#CBD5E1"/>
           </linearGradient>
-          <!-- 侧翼切面阴影 -->
           <linearGradient id="facetShadow" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stop-color="#000000" stop-opacity="0.18"/>
             <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
           </linearGradient>
         </defs>
 
-        <!-- 1. 底部深黑防热瓦底盘与外边缘 -->
+        <!-- 底部深黑防热瓦底盘与外边缘 -->
         <path d="M21 7H27L43 45L40 54L34 52L24 53L14 52L8 54L5 45L21 7Z" fill="#111317" stroke="#2D3748" stroke-width="0.8" stroke-linejoin="round"/>
 
-        <!-- 2. 主甲板：白色航天陶瓷机身 -->
+        <!-- 主甲板：白色航天陶瓷机身 -->
         <path d="M21.5 8.5H26.5L41.2 44.5L38.5 51.5L32.5 50L24 51L15.5 50L9.5 51.5L6.8 44.5L21.5 8.5Z" fill="url(#rangerHull)"/>
 
-        <!-- 3. 左/右侧多面折角暗面 -->
+        <!-- 左/右侧多面折角暗面 -->
         <path d="M6.8 44.5L21.5 8.5L24 22L16 48L9.5 51.5L6.8 44.5Z" fill="url(#facetShadow)"/>
         <path d="M41.2 44.5L26.5 8.5L24 22L32 48L38.5 51.5L41.2 44.5Z" fill="url(#facetShadow)" transform="scale(-1, 1) translate(-48, 0)"/>
 
-        <!-- 4. 中央隆起脊梁与折线骨架 -->
+        <!-- 中央隆起脊梁与折线骨架 -->
         <polygon points="21.5,8.5 26.5,8.5 27.5,45 24,47 20.5,45" fill="#F1F5F9" stroke="#94A3B8" stroke-width="0.4"/>
         <line x1="24" y1="8.5" x2="24" y2="47" stroke="#CBD5E1" stroke-width="0.6"/>
 
-        <!-- 5. 漫游者号多联驾驶舱风挡 -->
+        <!-- 漫游者号多联驾驶舱风挡 -->
         <polygon points="21.5,15 26.5,15 27.2,19 20.8,19" fill="#090D14" stroke="#38BDF8" stroke-width="0.4" stroke-opacity="0.8"/>
         <polygon points="19.5,19.8 17.5,23 20.5,22.2" fill="#090D14"/>
         <polygon points="28.5,19.8 30.5,23 27.5,22.2" fill="#090D14"/>
 
-        <!-- 6. 背部中央圆形对接气闸环 -->
+        <!-- 背部中央圆形对接气闸环 -->
         <circle cx="24" cy="32" r="3.2" fill="#1E293B" stroke="#64748B" stroke-width="0.6"/>
         <circle cx="24" cy="32" r="1.6" fill="#0F172A" stroke="#94A3B8" stroke-width="0.4"/>
         <circle cx="24" cy="32" r="0.6" fill="#38BDF8" opacity="0.8"/>
 
-        <!-- 7. 机体黑色拼接接缝刻线 -->
+        <!-- 机体黑色拼接接缝刻线 -->
         <line x1="16" y1="36" x2="9.5" y2="43" stroke="#94A3B8" stroke-width="0.5"/>
         <line x1="32" y1="36" x2="38.5" y2="43" stroke="#94A3B8" stroke-width="0.5"/>
         <line x1="18" y1="45" x2="16" y2="49" stroke="#64748B" stroke-width="0.5"/>
         <line x1="30" y1="45" x2="32" y2="49" stroke="#64748B" stroke-width="0.5"/>
 
-        <!-- 8. 尾部双发主推进喷口 -->
+        <!-- 尾部双发主推进喷口 -->
         <rect x="14.5" y="50" width="4.5" height="3" rx="0.6" fill="#0F172A" stroke="#475569" stroke-width="0.6"/>
         <rect x="29" y="50" width="4.5" height="3" rx="0.6" fill="#0F172A" stroke="#475569" stroke-width="0.6"/>
 
-        <!-- 9. RCS 姿态喷嘴 -->
+        <!-- RCS 姿态喷嘴 -->
         <rect x="7" y="44" width="1.2" height="1.2" fill="#334155"/>
         <rect x="39.8" y="44" width="1.2" height="1.2" fill="#334155"/>
       </svg>

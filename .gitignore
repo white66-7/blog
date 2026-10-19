@@ -2,3 +2,5 @@ node_modules/
 .claude/
 .vercel
 .env*
+.edge-test/
+.edge-shot/

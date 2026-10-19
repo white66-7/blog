@@ -54,6 +54,10 @@ const albumsData = [
       { title: '通往夏天的隧道', url: '/album/动漫/向日葵.webp' },
       { title: '败了', url: '/album/动漫/战败.webp' },
       { title: '好久不见', url: '/album/动漫/蕾姆.webp' },
+      { title: '再战！', url: '/album/暑假/再战.webp' },
+      { title: '别沉浸在幸福中啊混蛋', url: '/album/暑假/欺骗.webp' },
+      { title: '第二季 • 终', url: '/album/暑假/史莱姆.webp' },
+      { title: '四百年的孤独', url: '/album/暑假/蝎子.webp' },
     ]
   },
   {
@@ -71,7 +75,7 @@ const albumsData = [
       { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
       { title: '聚餐', url: '/album/人物/dinner.webp' },
       { title: '理完头发后', url: '/album/人物/理头.mp4', cover: '/album/人物/理头.webp' },
-      { title: '朋友里最闷的人', url: '/album/人物/wb.webp' },
+      { title: '一周年纪念', url: '/album/人物/me.mp4', cover: '/album/人物/me.webp' },
     ]
   },
   {
@@ -135,6 +139,7 @@ const albumsData = [
       { title: '劲大', url: '/album/暑假/眼药水.webp' },
       { title: '好圆的月亮', url: '/album/暑假/中秋节.webp' },
       { title: '给了', url: '/album/暑假/上课.webp' },
+      { title: '打符号时还是会卡', url: '/album/暑假/练习.webp' },
     ]
   }
 ]

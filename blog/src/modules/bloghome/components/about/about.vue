@@ -1,13 +1,13 @@
 <!-- src/modules/bloghome/views/Home.vue -->
 <template>
   <div class="home-page">
-    <!-- 漫游者号飞船鼠标 -->
+    <!-- 鼠标 -->
     <SpaceCursor />
 
-    <!-- 导航栏悬浮在顶部 -->
+    <!-- 导航栏 -->
     <Navbar :transparent="false" class="page-navbar" />
 
-    <!-- 顶部 3D 宇宙封面背景 -->
+    <!-- 3D 宇宙封面背景 -->
     <CosmicScene />
 
     <!-- 技术栈内容区 -->
@@ -25,7 +25,6 @@
 
     <CosmicSendModal v-model="isSendModalOpen" />
 
-    <!-- ================= 极简底部收尾 ================= -->
     <div class="footer-simple">
       <button class="leave-btn" @click="handleMessageClick">
         留言 ↗
@@ -49,7 +48,7 @@ import CosmicSendModal from '@/modules/bloghome/components/about/CosmicSendModal
 
 
 const handleMessageClick = () => {
-  isSendModalOpen.value = true // 修复：打开弹窗
+  isSendModalOpen.value = true 
 }
 
 const isSendModalOpen = ref(false)
@@ -65,7 +64,7 @@ const skillGroups = [
   },
   {
     title: '数据库',
-    items: ['MySQL(学习中)']
+    items: ['MongoDB','MySQL(学习中)']
   },
   {
     title: '工具',
@@ -79,7 +78,6 @@ const skillGroups = [
 </script>
 
 <style scoped>
-/* 默认情况下（手机、平板触控屏）保留完全正常的系统默认触摸 */
 .home-page {
   background: #101114;
   min-height: 100vh;
