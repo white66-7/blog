@@ -437,6 +437,13 @@ const albumImages = [
 }
 
 @media (min-width: 1181px) {
+  /* 视觉上整体缩到 90%，等价于浏览器 90% 缩放：字体、卡片、间距一起缩 */
+  .two-columns {
+    --page-zoom: 0.9;
+    transform: scale(var(--page-zoom));
+    transform-origin: center center;
+  }
+
   .album-container :deep(.slider-viewport),
   .album-container :deep(.slider-inner) {
     height: 100%;
