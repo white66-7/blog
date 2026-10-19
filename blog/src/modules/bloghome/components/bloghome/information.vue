@@ -303,11 +303,4 @@ const avatarLoaded = ref(false)
   cursor: pointer;
 }
 
-/* 矮桌面：头像适当压低，给第三张卡片留出空间 */
-@media (min-width: 1181px) and (max-height: 920px) {
-  .avatar-wrapper {
-    height: 296px;
-    aspect-ratio: auto;
-  }
-}
 </style>

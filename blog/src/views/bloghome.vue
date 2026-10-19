@@ -625,26 +625,20 @@ const albumImages = [
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   }
 
+  /* 宽度继续沿用 --ui-scale，只把高度微调到刚好占满矮屏。
+     这样 1440×900 和 1704×986 下卡片宽度、间距、文章高度基本一致，
+     不会因为窗口高度跨过 920px 就突然“变大”。 */
   .two-columns {
-    --left-w: 340px;
-    --col-gap: 26px;
-    --block-gap: 14px;
-    --top-h: 300px;
-    --article-side: 290px;
-    --article-gap: 16px;
-    --article-row: 205px;
+    --col-gap: calc(32px * var(--ui-scale));
+    --block-gap: calc(18px * var(--ui-scale));
+    --top-h: 310px;
+    --article-side: calc(320px * var(--ui-scale));
+    --article-gap: calc(20px * var(--ui-scale));
+    --article-row: 195px;
   }
 
   .left-column {
-    gap: 16px;
-  }
-
-  .say-card-comp {
-    min-height: 150px;
-  }
-
-  .say-card-comp :deep(.stack .card) {
-    min-height: 150px;
+    gap: calc(22px * var(--ui-scale));
   }
 }
 </style>
