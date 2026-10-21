@@ -178,7 +178,7 @@ const albumImages = [
     description: '当时刚刚中考完特地换了张头像...'
   },
   {
-    url: '/src/assets/游戏.webp',
+    url: '/home/游戏.webp',
     description: '静坐'
   },
   {
