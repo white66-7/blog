@@ -463,14 +463,8 @@ onBeforeRouteLeave(() => {
   articleScrollCache.set(currentId, window.scrollY || document.documentElement.scrollTop)
 })
 
-onMounted(() => {
-  window.addEventListener('resize', () => {
-    svgHeight.value = window.innerHeight > 70 ? window.innerHeight - 70 : 800
-  })
-  hintTimeoutId = setTimeout(playHintAnimation, 500)
-  const id = Number(route.params.id)
-  article.value = articles.find(a => a.id === id) || null
-
+// 💡 浏览量 +1：与列表页共享 sessionStorage 里的计数缓存，返回列表时数字是最新的
+function increaseViews(id: number) {
   axios.post(`/api/views?id=${id}`)
     .then(res => {
       const newViews = res.data?.views
@@ -483,12 +477,37 @@ onMounted(() => {
       }
     })
     .catch(() => { })
+}
 
-  window.addEventListener('scroll', handleScroll)
-  const savedHeight = articleScrollCache.get(id) || 0
+// 💡 切换文章（含「随机一篇」这类 /article/A → /article/B 的同组件跳转）
+function loadArticle(id: number, restoreScroll: boolean) {
+  article.value = articles.find(a => a.id === id) || null
+  activeHeading.value = -1
+  increaseViews(id)
+
+  const savedHeight = restoreScroll ? articleScrollCache.get(id) || 0 : 0
   if (savedHeight > 0) {
     requestAnimationFrame(() => window.scrollTo(0, savedHeight))
+  } else {
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }
+}
+
+watch(() => route.params.id, (newId) => {
+  if (route.name !== 'ArticleDetail') return
+  const id = Number(newId)
+  if (!id || Number.isNaN(id) || id === article.value?.id) return
+  // 同一组件内切换文章时不恢复旧滚动位置，直接回到顶部
+  loadArticle(id, false)
+})
+
+onMounted(() => {
+  window.addEventListener('resize', () => {
+    svgHeight.value = window.innerHeight > 70 ? window.innerHeight - 70 : 800
+  })
+  hintTimeoutId = setTimeout(playHintAnimation, 500)
+  loadArticle(Number(route.params.id), true)
+  window.addEventListener('scroll', handleScroll)
 })
 
 const previewVisible = ref(false)

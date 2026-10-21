@@ -178,8 +178,8 @@ const albumImages = [
     description: '当时刚刚中考完特地换了张头像...'
   },
   {
-    url: '/album/人物/play.webp',
-    description: '第一次研学在外面住...'
+    url: '/src/assets/游戏.webp',
+    description: '静坐'
   },
   {
     url: '/album/动漫/超燃.webp',

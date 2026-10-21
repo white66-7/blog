@@ -1,10 +1,10 @@
 <template>
   <div class="listen-together-wrapper">
-    <a
+    <button
+      type="button"
       class="listen-btn"
-      href="https://github.com/white66-7/white-social-environment/releases"
-      target="_blank"
-      rel="noopener noreferrer"
+      title="随机一篇"
+      @click="goToRandomArticle"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -47,13 +47,36 @@
         ></path>
       </svg>
       <span class="now">Go!</span>
-      <span class="play">一起听歌</span>
-    </a>
+      <span class="play">随机一篇</span>
+    </button>
   </div>
 </template>
 
-<script setup>
-// 纯展示组件，无需任何逻辑与状态
+<script setup lang="ts">
+import { useRouter, useRoute } from 'vue-router'
+import { articles } from '@/date/articles'
+import { prefetchArticleDetail } from '@/modules/bloghome/utils/prefetch'
+
+const router = useRouter()
+const route = useRoute()
+
+// 可随机跳转的文章池
+const pool = articles.filter(a => a.title && a.title !== '无')
+
+const goToRandomArticle = () => {
+  if (pool.length === 0) return
+
+  // 避开当前正在阅读的文章
+  const currentId = Number(route.params.id)
+  let candidates = Number.isNaN(currentId) ? pool : pool.filter(a => a.id !== currentId)
+  if (candidates.length === 0) candidates = pool
+
+  const target = candidates[Math.floor(Math.random() * candidates.length)]
+  if (!target) return
+
+  prefetchArticleDetail()
+  router.push(`/article/${target.id}`)
+}
 </script>
 
 <style scoped>
@@ -85,8 +108,11 @@
   transition: all 0.5s ease;
   flex-shrink: 0;
   user-select: none;
-  /* a 标签重置 */
+  /* button 标签重置 */
   text-decoration: none;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .listen-btn:active {
