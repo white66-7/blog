@@ -27,7 +27,7 @@ async function createSignal(req: any, res: any) {
 
     if (lastSubmitTime && nowTimestamp - lastSubmitTime < 60 * 1000) {
       const waitSeconds = Math.ceil((60 * 1000 - (nowTimestamp - lastSubmitTime)) / 1000)
-      return res.status(429).json({ error: `提交太频繁，请等待 ${waitSeconds} 秒后再试` })
+      return res.status(429).json({ error: `提交太频繁，请等待 ${waitSeconds} 秒后重试` })
     }
 
     const { source, message } = req.body
@@ -82,7 +82,7 @@ async function getSignals(req: any, res: any) {
       if (!serverSecret) {
         return res.status(500).json({ 
           success: false, 
-          error: '服务端未读取到 ADMIN_SECRET！如果你刚在 Vercel 添加了变量，必须去 Deployments 点一次【Redeploy（重新部署）】才能生效！' 
+          error: '服务端未读取到 ADMIN_SECRET' 
         })
       }
 
@@ -90,7 +90,7 @@ async function getSignals(req: any, res: any) {
       if (adminToken.trim() !== serverSecret.trim()) {
         return res.status(401).json({ 
           success: false, 
-          error: '管理员密钥错误！请检查输入的密码是否与 Vercel 中的配置完全一致。' 
+          error: '管理员密钥错误！' 
         })
       }
 
@@ -133,7 +133,7 @@ async function reviewSignal(req: any, res: any) {
     const { id, status } = req.body
 
     if (!id || !['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({ error: '参数不完整或状态无效' })
+      return res.status(400).json({ error: '参数不完整' })
     }
 
     const { db } = await connectToDatabase()

@@ -15,7 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const debugLogs: string[] = []
 
   if (!token) {
-    debugLogs.push('⚠️ 警告: 未检测到 GITHUB_TOKEN，极易触发 GitHub API 403 限流！')
+    debugLogs.push('未检测到 GITHUB_TOKEN')
   }
 
   try {
@@ -153,7 +153,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       newlyAdded,
       currentTotalInDB: totalCount,
       operationsFound: operations.length,
-      debugLogs, // 💡 返回完整的调试日志
+      debugLogs, //  返回完整的调试日志
       message: `同步完成！本次扫描到 ${operations.length} 条提交，新增入库 ${newlyAdded} 条，数据库共 ${totalCount} 条。`
     })
   } catch (error: any) {

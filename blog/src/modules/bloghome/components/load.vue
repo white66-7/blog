@@ -177,8 +177,6 @@ const handleListenTogether = () => {
   console.log('点击了一起听按钮')
 }
 
-// 导航栏自动隐藏：只在有精确指针（鼠标）的设备上启用。
-// 触屏设备没有 hover，自动隐藏后页面顶部会一直留着导航栏占位形成一条空白带，
 // 因此移动端保持导航栏常驻。
 const isVisible = ref(true)
 let timer = null
