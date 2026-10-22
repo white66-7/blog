@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { connectToDatabase } from './_lib/mongodb.js'
+import { cacheDel } from './_lib/redis.js'
+import { CACHE_KEYS } from './_lib/cache.js'
 
 const GITHUB_USERNAME = 'white66-7'
 
@@ -147,6 +149,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const totalCount = await collection.countDocuments()
+
+    // 数据库已更新，立刻让时间线缓存失效，避免访客继续看到旧数据
+    await cacheDel(CACHE_KEYS.timeline)
 
     return res.status(200).json({
       success: true,

@@ -1,33 +1,61 @@
 import { connectToDatabase } from './_lib/mongodb.js'
 import { ObjectId } from 'mongodb'
+import { createHash } from 'node:crypto'
+import { cacheDel, hitRateLimit } from './_lib/redis.js'
+import { cached, CACHE_KEYS, CACHE_TTL } from './_lib/cache.js'
 
-// 简单的内存防刷限流
+const RATE_LIMIT_WINDOW_SECONDS = 60
+
+// Redis 不可用时退化为进程内限流（只能挡住同一实例的请求，聊胜于无）
 const ipRateLimitMap = new Map<string, number>()
 
-// 每 10 分钟自动清理一次过期的 IP 记录
-setInterval(() => {
+function hitMemoryRateLimit(ip: string, windowMs: number): number {
   const now = Date.now()
-  for (const [ip, timestamp] of ipRateLimitMap.entries()) {
-    if (now - timestamp > 60 * 1000) {
-      ipRateLimitMap.delete(ip)
-    }
+
+  // 惰性清理，避免 setInterval 在 Serverless 实例里常驻、影响函数冻结
+  for (const [key, timestamp] of ipRateLimitMap) {
+    if (now - timestamp >= windowMs) ipRateLimitMap.delete(key)
   }
-}, 10 * 60 * 1000)
+
+  const lastSubmitTime = ipRateLimitMap.get(ip)
+  if (lastSubmitTime !== undefined && now - lastSubmitTime < windowMs) {
+    return Math.ceil((windowMs - (now - lastSubmitTime)) / 1000)
+  }
+
+  ipRateLimitMap.set(ip, now)
+  return 0
+}
+
+function getClientIp(req: any): string {
+  return (
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    req.socket?.remoteAddress ||
+    'unknown'
+  )
+}
 
 // 提交留言 
 async function createSignal(req: any, res: any) {
   try {
-    const clientIp = 
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || 
-      req.socket.remoteAddress || 
-      'unknown'
+    const clientIp = getClientIp(req)
 
-    const lastSubmitTime = ipRateLimitMap.get(clientIp)
-    const nowTimestamp = Date.now()
+    // IP 只以哈希形式进入 Redis，避免在缓存里留下明文地址
+    const ipHash = createHash('sha256').update(clientIp).digest('hex').slice(0, 16)
+    const rateLimit = await hitRateLimit(
+      CACHE_KEYS.signalsRateLimit(ipHash),
+      RATE_LIMIT_WINDOW_SECONDS,
+    )
 
-    if (lastSubmitTime && nowTimestamp - lastSubmitTime < 60 * 1000) {
-      const waitSeconds = Math.ceil((60 * 1000 - (nowTimestamp - lastSubmitTime)) / 1000)
-      return res.status(429).json({ error: `提交太频繁，请等待 ${waitSeconds} 秒后重试` })
+    if (rateLimit?.limited) {
+      return res.status(429).json({ error: `提交太频繁，请等待 ${rateLimit.retryAfter} 秒后重试` })
+    }
+
+    // Redis 未配置或调用失败时，退回当前实例的内存限流
+    if (rateLimit === null) {
+      const waitSeconds = hitMemoryRateLimit(clientIp, RATE_LIMIT_WINDOW_SECONDS * 1000)
+      if (waitSeconds > 0) {
+        return res.status(429).json({ error: `提交太频繁，请等待 ${waitSeconds} 秒后重试` })
+      }
     }
 
     const { source, message } = req.body
@@ -56,7 +84,6 @@ async function createSignal(req: any, res: any) {
     }
 
     const result = await db.collection('signals').insertOne(newSignal)
-    ipRateLimitMap.set(clientIp, nowTimestamp)
 
     return res.json({ 
       success: true, 
@@ -72,7 +99,6 @@ async function createSignal(req: any, res: any) {
 // 获取留言列表 
 async function getSignals(req: any, res: any) {
   try {
-    const { db } = await connectToDatabase()
     const adminToken = req.headers['x-admin-token']
 
     if (adminToken) {
@@ -95,6 +121,7 @@ async function getSignals(req: any, res: any) {
       }
 
       // 密码正确
+      const { db } = await connectToDatabase()
       const pendingSignals = await db.collection('signals')
         .find({ status: 'pending' })
         .sort({ createdAt: -1 })
@@ -109,12 +136,16 @@ async function getSignals(req: any, res: any) {
         totalInDb: totalCount // 库里的总数据量
       })
     }
-    // 普通访客
-    const signals = await db.collection('signals')
-      .find({ status: 'approved' }, { projection: { clientIp: 0 } })
-      .sort({ createdAt: -1 })
-      .limit(16)
-      .toArray()
+
+    // 普通访客：只展示审核通过的留言，审核动作会主动失效这份缓存
+    const signals = await cached(CACHE_KEYS.signalsApproved, CACHE_TTL.signals, async () => {
+      const { db } = await connectToDatabase()
+      return db.collection('signals')
+        .find({ status: 'approved' }, { projection: { clientIp: 0 } })
+        .sort({ createdAt: -1 })
+        .limit(16)
+        .toArray()
+    })
 
     return res.json({ success: true, data: signals })
   } catch (err: any) {
@@ -145,6 +176,9 @@ async function reviewSignal(req: any, res: any) {
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: '留言不存在' })
     }
+
+    // 审核结果会改变访客看到的列表，立刻让缓存失效
+    await cacheDel(CACHE_KEYS.signalsApproved)
 
     return res.json({ success: true, message: `审核完成（状态：${status}）` })
   } catch (err: any) {

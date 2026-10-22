@@ -1,4 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
+import { cached, CACHE_KEYS, CACHE_TTL } from './_lib/cache.js'
 
 
 type WeatherType = 'sun' | 'rain' | 'snow' | 'thunder' | 'wind'
@@ -79,6 +80,11 @@ async function fetchFromWttr(lat: number, lon: number): Promise<WeatherPayload> 
 
 const SOURCES = [fetchFromOpenMeteo, fetchFromWttr]
 
+// 两个数据源 + Redis 超时叠加可能接近默认 10s，显式放宽到 15s
+export const config = {
+  maxDuration: 15,
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -91,18 +97,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ ok: false, error: 'Invalid lat/lon' })
   }
 
-  const errors: string[] = []
-  for (const source of SOURCES) {
-    try {
-      const payload = await source(lat, lon)
-      res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=1800')
-      return res.status(200).json({ ok: true, ...payload, fetchedAt: Date.now() })
-    } catch (error: any) {
-      errors.push(`${source.name}: ${error?.message || error}`)
-    }
-  }
+  try {
+    // 同一个坐标 10 分钟内直接复用，减少对 open-meteo / wttr.in 的请求
+    const payload = await cached(
+      CACHE_KEYS.weather(lat, lon),
+      CACHE_TTL.weather,
+      async () => {
+        const errors: string[] = []
+        for (const source of SOURCES) {
+          try {
+            const result = await source(lat, lon)
+            return { ...result, fetchedAt: Date.now() }
+          } catch (error: any) {
+            errors.push(`${source.name}: ${error?.message || error}`)
+          }
+        }
+        throw new Error(errors.join(' | '))
+      },
+    )
 
-  console.error('[Weather API] 所有数据源均失败:', errors.join(' | '))
-  res.setHeader('Cache-Control', 'no-store')
-  return res.status(200).json({ ok: false, error: errors.join(' | ') })
+    res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=1800')
+    return res.status(200).json({ ok: true, ...payload })
+  } catch (error: any) {
+    console.error('[Weather API] 所有数据源均失败:', error.message)
+    res.setHeader('Cache-Control', 'no-store')
+    return res.status(200).json({ ok: false, error: error.message })
+  }
 }
