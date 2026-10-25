@@ -111,6 +111,7 @@ const saysList = [
   { id: 16, content: '中秋节快乐', date: '2026-09-25 21:16' },
   { id: 17, content: '给logseq写了个插件: Graph Inertia,再有两三次更新就完全版了', date: '2026-10-14 10:42' },
   { id: 18, content: '两年后世界会变成什么样呢', date: '2026-10-18 21:58' },
+  { id: 19, content: '补点计算机网络的知识', date: '2026-10-24 22:58' },
 ]
 
 const timelineSays = computed(() => [...saysList].reverse())

@@ -140,6 +140,7 @@ const albumsData = [
       { title: '好圆的月亮', url: '/album/暑假/中秋节.webp' },
       { title: '给了', url: '/album/暑假/上课.webp' },
       { title: '打符号时还是会卡', url: '/album/暑假/练习.webp' },
+      { title: '脸皮,你自由了', url: '/album/暑假/实习.webp' },
     ]
   }
 ]

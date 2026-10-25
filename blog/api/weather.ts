@@ -11,7 +11,7 @@ interface WeatherPayload {
   source: 'open-meteo' | 'wttr.in'
 }
 
-/** 单个数据源的超时时间，两个源叠加仍远小于 Vercel 函数默认 10s 上限 */
+/** 单数据源的超时时间 */
 const SOURCE_TIMEOUT = 3500
 
 const TYPE_LABEL: Record<WeatherType, string> = {
@@ -22,7 +22,6 @@ const TYPE_LABEL: Record<WeatherType, string> = {
   wind: 'Windy',
 }
 
-/** WMO 天气代码 → 卡片内置天气类型 */
 function wmoToType(code: number): WeatherType {
   if (code === 0 || code === 1) return 'sun'
   if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow'
@@ -31,7 +30,7 @@ function wmoToType(code: number): WeatherType {
   return 'wind'
 }
 
-/** wttr.in 的英文描述 → 卡片内置天气类型 */
+/** wttr.in 的英文描述 */
 function descToType(desc: string): WeatherType {
   const text = desc.toLowerCase()
   if (text.includes('sunny') || text.includes('clear')) return 'sun'
@@ -41,7 +40,7 @@ function descToType(desc: string): WeatherType {
   return 'wind'
 }
 
-/** 数据源 1：open-meteo（免密钥、支持跨域、国内基本可直连） */
+/** 数据源 open-meteo */
 async function fetchFromOpenMeteo(lat: number, lon: number): Promise<WeatherPayload> {
   const url =
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
@@ -59,13 +58,13 @@ async function fetchFromOpenMeteo(lat: number, lon: number): Promise<WeatherPayl
   return { type, temp: Math.round(temp), desc: TYPE_LABEL[type], source: 'open-meteo' }
 }
 
-/** 数据源 2：wttr.in 兜底 */
+/** wttr.in  */
 async function fetchFromWttr(lat: number, lon: number): Promise<WeatherPayload> {
   const url = `https://wttr.in/${lat},${lon}?format=j1`
 
   const res = await fetch(url, {
     signal: AbortSignal.timeout(SOURCE_TIMEOUT),
-    headers: { 'User-Agent': 'curl/8.0.1' }, // wttr.in 对浏览器 UA 会返回网页版，这里固定成 curl
+    headers: { 'User-Agent': 'curl/8.0.1' }, // wttr.in
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
@@ -93,12 +92,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const lat = Number(req.query.lat)
   const lon = Number(req.query.lon)
+  
   if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
     return res.status(400).json({ ok: false, error: 'Invalid lat/lon' })
   }
 
   try {
-    // 同一个坐标 10 分钟内直接复用，减少对 open-meteo / wttr.in 的请求
     const payload = await cached(
       CACHE_KEYS.weather(lat, lon),
       CACHE_TTL.weather,
