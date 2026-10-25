@@ -260,7 +260,7 @@ export const articles: Article[] = [
   //   type: '后端',
   //   date: '2026-10-26',
   //   readTime: '10 minutes',
-  //   excerpt: '在进阶学习后端之前总结一下基本认识,可能出现错误与纰漏',
+  //   excerpt: '在进阶学习后端前总结一下基本认识',
   //   tags: ['后端', 'node.js','express'],
   //   cover: '/messages/21/sun.webp',
   //   content:md21,
