@@ -2,6 +2,9 @@
 
 # 一路向北
 
+<img alt="download" src="https://github.com/user-attachments/assets/d4cb9356-003a-4901-9303-b05bd41b0191" width="249" />
+
+
 **基于 Vue 3 构建的个人博客**
 
 [![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D.svg?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
