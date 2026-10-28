@@ -18,7 +18,7 @@ const routes = [
   {
     path: '/photos',
     name: 'photo-show',
-    //  相册模块动态懒加载（相册里的大图绝不会拖慢首屏）
+    //  相册模块动态懒加载
     component: () => import('@/modules/bloghome/components/photos/photo.vue')
   },
   {

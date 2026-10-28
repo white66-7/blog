@@ -254,6 +254,17 @@ export const articles: Article[] = [
     cover: '/messages/20/依偎.webp',
     content:md20,
   },
+  {
+    id: 21,
+    title: 'Git与Github阶段性总结',
+    type: '杂谈',
+    date: '2026-10-28',
+    readTime: '10 minutes',
+    excerpt: '个人与协作开发的必经之路',
+    tags: ['Git', 'Github','开发'],
+    cover: '/messages/21/sun.webp',
+    content:md21,
+  },
   // {
   //   id: 21,
   //   title: '后端的初级理解',

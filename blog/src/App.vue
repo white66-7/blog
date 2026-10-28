@@ -34,7 +34,9 @@ const router = useRouter()
 
 // 全局开场动画：首次完整播放，路由切换时显示快速版
 type SplashMode = 'initial' | 'navigating'
+
 const showGlobalSplash = ref(false)
+
 const splashMode = ref<SplashMode>('initial')
 const navCompleted = ref(false)
 
@@ -81,7 +83,8 @@ router.onError((error, to) => {
 const audioRef = ref<HTMLAudioElement | null>(null)
 
 onMounted(async () => {
-  showGlobalSplash.value = true // 首次启动显示完整开场动画
+  // 首次启动显示完整开场动画
+  showGlobalSplash.value = true 
   // 应用启动即预取文章详情页 chunk，消除"首次点击进详情页"的加载卡顿
   prefetchArticleDetail()
   const libraryStore = useLibraryStore()

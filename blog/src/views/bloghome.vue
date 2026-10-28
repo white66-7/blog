@@ -10,7 +10,6 @@
         <div class="hero-section">
           <TextEffect />
           <div class="arrow bounce"></div>
-
           <div class="wave-container">
             <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
               viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
@@ -33,7 +32,7 @@
         <div class="scrollable-content" @touchstart="handleTouchStart" @touchmove="handleTouchMove">
           <div class="main-body" ref="mainBody">
             <div class="two-columns">
-              <!-- 左侧：卡片列（information + player） -->
+              <!-- 左侧：卡片列 -->
               <aside class="left-column">
                 <Information class="info-card" :class="[showAnimation && 'animate__animated animate__fadeInLeft']" />
                 <player class="sticky-card"
@@ -55,9 +54,6 @@
                     :class="[showAnimation && 'animate__animated animate__fadeInRight animate__delay-1s']"
                     style="--animate-delay: .15s;" />
                 </div>
-                <!-- 注意：ArticleShow 的根节点本身就是 .articles-section，
-                     不要再套一层同名 div —— 那层壳不会跟着 flex 长高，
-                     多出来的高度会全部堆在“网站已上线”条下方，导致右列底边对不齐左列 -->
                 <ArticleShow :articles="articleData"
                   :class="[showAnimation && 'animate__animated animate__fadeInUp animate__delay-1s']"
                   style="--animate-delay: .3s;" />
@@ -114,7 +110,6 @@ onBeforeRouteLeave((to, from) => {
   if (container) {
     savedScrollTop.value = container.scrollTop
   }
-  // 无需调用 next()，正常执行完毕即代表放行路由
 })
 
 onActivated(async () => {
@@ -327,7 +322,7 @@ const albumImages = [
   z-index: 2;
 }
 
-/* ========= 第一屏：Hero Section ========= */
+/* 第一屏：Hero Section */
 .hero-section {
   position: relative;
   width: 100%;
@@ -339,7 +334,7 @@ const albumImages = [
   cursor: default;
 }
 
-/* ========= 第二屏：大屏饱满大气布局 ========= */
+/* 第二屏：大屏饱满大气布局 */
 .scrollable-content {
   height: 100vh;
   height: 100dvh;
@@ -347,7 +342,7 @@ const albumImages = [
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   background-color: #FAF7F2;
-  overflow-x: hidden; /* 防止超大落叶掠出屏幕右边界时偶然出现横向微幅抖动 */
+  overflow-x: hidden; 
   display: flex;
   flex-direction: column;
 }
@@ -366,7 +361,6 @@ const albumImages = [
 /* 两列主布局  */
 .two-columns {
   --ui-scale: 0.90;
-
   --max-w: calc(1440px * var(--ui-scale));
   --left-w: calc(360px * var(--ui-scale));
   --col-gap: calc(32px * var(--ui-scale));
@@ -516,7 +510,7 @@ const albumImages = [
 }
 
 
-/* ========== 平板 / 竖屏：两列改为单列 ========== */
+/*  平板 / 竖屏 */
 @media (max-width: 1180px) {
   .two-columns {
     flex-direction: column;
@@ -564,14 +558,13 @@ const albumImages = [
     align-self: auto;
   }
 
-  /* 平板宽度下“随心一说”不要拉成一整条 */
   .say-card-comp :deep(.stack) {
     max-width: 520px;
     margin: 0 auto;
   }
 }
 
-/* ========== 手机：上下堆叠 ========== */
+/* 上下堆叠 */
 @media (max-width: 900px) {
   .app-flex::before {
     background-image: url('@/assets/斩首大刀.webp');
@@ -625,7 +618,7 @@ const albumImages = [
   }
 }
 
-/* ========== 矮桌面：收紧一档，避免必须滚动才能看完第二屏 ========== */
+/*  矮桌面：收紧一档，避免必须滚动才能看完第二屏 */
 @media (min-width: 1181px) and (max-height: 920px) {
   .main-body {
     padding-top: calc(66px + env(safe-area-inset-top, 0px));
