@@ -198,7 +198,6 @@ function openPlaylist(dirId: string) {
 </template>
 
 <style scoped>
-/* ================= 列表及基础样式 ================= */
 .playlist-view {
   flex: 1;
   display: flex;

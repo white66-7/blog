@@ -1,7 +1,6 @@
 <<template>
   <aside class="sidebar">
 
-    <!-- 当前播放卡片 -->
     <RouterView />
   </aside>
 </template>

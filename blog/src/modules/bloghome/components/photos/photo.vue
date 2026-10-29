@@ -141,6 +141,8 @@ const albumsData = [
       { title: '给了', url: '/album/暑假/上课.webp' },
       { title: '打符号时还是会卡', url: '/album/暑假/练习.webp' },
       { title: '脸皮,你自由了', url: '/album/暑假/实习.webp' },
+      { title: '我的拳头想喝血了', url: '/album/暑假/手.webp' },
+      { title: '我说真的', url: '/album/暑假/亲眼.webp' },
     ]
   }
 ]

@@ -51,7 +51,6 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
         </svg>
       </button>
 
-      <!-- 动效搜索框 (融入了你提供的结构，并绑定了 v-model) -->
       <div class="search-container">
         <input type="text" v-model="libraryStore.kw" class="search-input" required placeholder="">
         <div class="search-icon">
@@ -108,7 +107,12 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
           </div>
 
           <div class="sv-acts">
-            <button class="sv-rm" @click.stop="removeSong(s.id)" title="删除">🗑</button>
+            <button class="sv-rm" @click.stop="removeSong(s.id)" title="删除"><svg xmlns="http://www.w3.org/2000/svg"
+                width="1em" height="1em" viewBox="0 0 24 24">
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path fill="currentColor" d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6z" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -404,12 +408,16 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
 .sv-tooltip {
   position: absolute;
   left: auto;
-  right: 10px;                  /* 贴向行尾空白处，避开左侧歌名 */
-  bottom: calc(100% + 12px);    /* 完全浮出行外，与行顶保持 12px 间隙 */
+  right: 10px;
+  /* 贴向行尾空白处，避开左侧歌名 */
+  bottom: calc(100% + 12px);
+  /* 完全浮出行外，与行顶保持 12px 间隙 */
   width: max-content;
-  max-width: 190px;             /* 控制宽度，减小盖住上一行歌名的范围 */
+  max-width: 190px;
+  /* 控制宽度，减小盖住上一行歌名的范围 */
   min-width: 180px;
-  max-height: 150px;            /* 过长内容内部滚动，防止向上盖住多行 */
+  max-height: 150px;
+  /* 过长内容内部滚动，防止向上盖住多行 */
   padding: 8px 12px;
   background: rgba(16, 20, 30, 0.96);
   backdrop-filter: blur(14px);
@@ -419,7 +427,8 @@ const totalPlayCount = computed(() => libraryStore.getTotalPlayCount().toLocaleS
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 243, 255, 0.15);
   opacity: 0;
   visibility: hidden;
-  transform: translate(10px, 10px) scale(0.95);  /* 从斜右下方入场 */
+  transform: translate(10px, 10px) scale(0.95);
+  /* 从斜右下方入场 */
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   /* 提高层级，确保不被播放器覆盖（若播放器 z-index 更高可继续调大） */
