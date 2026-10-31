@@ -1,9 +1,6 @@
 <template>
   <!-- 全局路由出口 -->
   <router-view v-slot="{ Component }">
-    <!-- 缓存首页、音乐播放器、文章列表页；过渡动画平滑切换。
-         ⚠️ 不要加 mode="out-in"：Vue 3 已知 bug（vuejs/core#7956、vuejs/router#1655），
-         从非缓存的详情页切回缓存的列表页时 enter 卡在 opacity:0，导致白屏 -->
     <transition name="page">
       <keep-alive include="BlogHome,MusicPlayer,MainArticle">
         <component :is="Component" />
@@ -11,7 +8,6 @@
     </transition>
   </router-view>
   <audio ref="audioRef" style="display: none;"></audio>
-  <!-- 全局开场动画：首次完整播放，路由切换时显示快速版 -->
   <Teleport to="body">
     <SplashScreen
       v-if="showGlobalSplash"
@@ -44,14 +40,12 @@ const onSplashFinish = () => {
   showGlobalSplash.value = false
 }
 
-// 路由切换加载屏：只有"首次访问某路由"才显示快速版 begin.vue，
-// 再次访问已加载过的路由（chunk 已缓存）直接切换，不显示加载屏。
-// 按 chunk 维度记录：用路由名 name，无 name 的路由（如 /player 子页）归到首个匹配路由 path
+// 路由切换加载屏
 const visitedRoutes = new Set<string>()
 let firstNavigation = true
-// 当前加载屏正在等待的导航目标，用于 onError 精确匹配——快速连点时旧导航会被取消，
-// 只有"出错的导航正是当前加载屏在等的那次"才让加载屏退出，避免误退
+
 let splashTargetPath: string | null = null
+
 router.beforeEach((to, from) => {
   if (firstNavigation || to.fullPath === from.fullPath) return
   const key = String(to.name ?? to.matched[0]?.path)
@@ -68,10 +62,7 @@ router.afterEach((to) => {
   splashTargetPath = null
 })
 
-// 路由导航失败（懒加载 chunk 加载失败 / 组件抛错等）时：
-// 立即让 navigating 加载屏退出（begin.vue 通过 watch navigated 感知），
-// 替代之前 begin.vue 里"8 秒定时退出"——那个机制在慢网络下会提前退出加载屏，
-// 造成"导航还没完成就退回原界面"的错觉。同时打印明确错误便于排查。
+// 路由导航失败
 router.onError((error, to) => {
   if (splashTargetPath === to.fullPath) {
     console.warn('[路由导航失败]', error)
@@ -110,13 +101,11 @@ onMounted(async () => {
 </script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-/* 底部安全区（全面屏手势条）用页面底色兜住，避免露出白边 */
 html {
   background-color: #FAF7F2;
 }
 body {
   background-color: #FAF7F2;
-  /* 用 dvh 而不是 vh：移动端 vh 比可视区高，会让整页多出一条可轻微拖动的缝隙 */
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -138,7 +127,7 @@ body, html, #app, .app-flex, .hero-section,
   cursor: pointer !important;
 }
 
-/* ========= 路由切换过渡动画 ========= */
+/* 路由切换过渡动画 */
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.28s ease, transform 0.28s ease;

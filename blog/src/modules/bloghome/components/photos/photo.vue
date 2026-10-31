@@ -58,6 +58,8 @@ const albumsData = [
       { title: '别沉浸在幸福中啊混蛋', url: '/album//动漫/欺骗.webp' },
       { title: '第二季 • 终', url: '/album//动漫/史莱姆.webp' },
       { title: '四百年的孤独', url: '/album//动漫/蝎子.webp' },
+       { title: '淡游...甚至有点想退游', url: '/album/动漫/火影.mp4', cover: '/album/动漫/火影.webp' },
+       { title: '时隔三个月后继续', url: '/album//动漫/重温.webp' },
     ]
   },
   {
@@ -66,16 +68,17 @@ const albumsData = [
     cover: '/album/photo_covers/videos.webp',
     photos: [
       { title: '研学', url: '/album/人物/研学.webp' },
-      { title: '高中同学们', url: '/album/人物/classmates.webp' },
-      { title: '给朋友拍的照片', url: '/album/人物/朋友.webp' },
-      { title: '在旧宿舍的最后一晚', url: '/album/人物/dji.webp' },
-      { title: '过去', url: '/album/人物/student.webp' },
-      { title: '无题', url: '/album/人物/adult.webp' },
+      // { title: '高中同学们', url: '/album/人物/classmates.webp' },
+      { title: '冬天', url: '/album/人物/朋友.webp' },
+      // { title: '在旧宿舍的最后一晚', url: '/album/人物/dji.webp' },
+      // { title: '过去', url: '/album/人物/student.webp' },
+      // { title: '无题', url: '/album/人物/adult.webp' },
       { title: '三人成行', url: '/album/人物/三人成行.mp4', cover: '/album/人物/三人成行封面.webp' },
-      { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
+      // { title: '三人成行 • 附', url: '/album/人物/三人成行2.mp4', cover: '/album/人物/三人成行2封面.webp' },
       { title: '聚餐', url: '/album/人物/dinner.webp' },
-      { title: '理完头发后', url: '/album/人物/理头.mp4', cover: '/album/人物/理头.webp' },
-      { title: '一周年纪念', url: '/album/人物/me.mp4', cover: '/album/人物/me.webp' },
+      // { title: '理完头发后', url: '/album/人物/理头.mp4', cover: '/album/人物/理头.webp' },
+      { title: '深度思考', url: '/album/人物/me.mp4', cover: '/album/人物/me.webp' },
+      { title: '我的拳头想喝血了', url: '/album/人物/hurt.mp4', cover: '/album/人物/hurt.webp' },
     ]
   },
   {
@@ -143,6 +146,7 @@ const albumsData = [
       { title: '脸皮,你自由了', url: '/album/暑假/实习.webp' },
       { title: '我的拳头想喝血了', url: '/album/暑假/手.webp' },
       { title: '我说真的', url: '/album/暑假/亲眼.webp' },
+      { title: '出奇的好用', url: '/album/暑假/护肤.webp' },
     ]
   }
 ]
