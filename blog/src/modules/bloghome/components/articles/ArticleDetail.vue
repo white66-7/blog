@@ -958,6 +958,21 @@ main {
   margin-bottom: 1.25rem;
 }
 
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  padding-left: 1.5em;     /* 控制圆点与左侧边缘的距离 */
+  margin-bottom: 1.25rem;
+}
+
+.markdown-body :deep(li) {
+  margin-bottom: 0.5em;     /* 增加列表项之间的间距 */
+  line-height: 1.8;
+}
+
+.markdown-body :deep(li::marker) {
+  color: #000000; 
+}
+
 .markdown-body :deep(blockquote) {
   border-left: 4px solid #bebebe;
   padding-left: 16px;
