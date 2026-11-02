@@ -256,7 +256,7 @@ export const articles: Article[] = [
   },
   {
     id: 21,
-    title: 'Git与Github使用守则',
+    title: 'Git语法归档',
     type: '中间件',
     date: '2026-10-28',
     readTime: '10 minutes',

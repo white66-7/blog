@@ -1098,7 +1098,25 @@ main {
   padding: 0;
 }
 
-/* ==================== 经典科技深蓝 + 水平向右箭头 ==================== */
+/* 段落首行缩进两字符 */
+.markdown-body :deep(p) {
+  text-indent: 2em;
+}
+
+/* 列表、引用、表格里的段落不缩进，避免排版错位 */
+.markdown-body :deep(li p),
+.markdown-body :deep(blockquote p),
+.markdown-body :deep(td p),
+.markdown-body :deep(th p) {
+  text-indent: 0;
+}
+
+/* 纯图片段落不缩进，避免图片容器出现多余缩进 */
+.markdown-body :deep(p:has(> img:only-child)) {
+  text-indent: 0;
+}
+
+/*  深蓝+水平向右箭头  */
 .markdown-body :deep(a) {
   position: relative;
   display: inline-flex;
