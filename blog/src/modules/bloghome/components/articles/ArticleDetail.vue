@@ -930,7 +930,6 @@ main {
   line-height: 1.3;
 }
 
-/* ==================== 2. 二级标题（得意黑） ==================== */
 .markdown-body :deep(h2) {
   font-family: 'Smiley Sans', '得意黑', sans-serif;
   font-weight: 600;
@@ -943,7 +942,6 @@ main {
   padding-bottom: 0.35em;
 }
 
-/* ==================== 3. 三级标题（得意黑） ==================== */
 .markdown-body :deep(h3) {
   font-family: 'Smiley Sans', '得意黑', sans-serif;
   font-weight: 600;
@@ -954,18 +952,21 @@ main {
   color: #2c3e50;
 }
 
-.markdown-body :deep(p) {
-  margin-bottom: 1.25rem;
+.markdown-body :deep(blockquote p) {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .markdown-body :deep(ul),
 .markdown-body :deep(ol) {
-  padding-left: 1.5em;     /* 控制圆点与左侧边缘的距离 */
+  /* 控制圆点与左侧边缘的距离 */
+  padding-left: 1.5em;     
   margin-bottom: 1.25rem;
 }
 
 .markdown-body :deep(li) {
-  margin-bottom: 0.5em;     /* 增加列表项之间的间距 */
+  /* 增加列表项之间的间距 */
+  margin-bottom: 0.5em;     
   line-height: 1.8;
 }
 
@@ -974,29 +975,28 @@ main {
 }
 
 .markdown-body :deep(blockquote) {
-  border-left: 4px solid #bebebe;
-  padding-left: 16px;
-  color: #666;
+  border-left: 4px solid #23c483; 
+  color: #6b7280; 
   margin: 1.5em 0;
-  background: rgba(255, 255, 255, 0.3);
+  background: #f3f4f6; 
   border-radius: 0 12px 12px 0;
   padding: 12px 16px;
 }
 
-/* 行内代码标签：等宽编程字体 */
+/* 行内代码标签 */
 .markdown-body :deep(p code),
 .markdown-body :deep(li code),
 .markdown-body :deep(h1 code),
 .markdown-body :deep(h2 code),
 .markdown-body :deep(h3 code) {
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace;
-  background: rgba(0, 0, 0, 0.06);
+  background: #e5e7eb;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.9em;
 }
 
-/* ==================== 4. LaTeX 数学公式排版 ==================== */
+/* LaTeX 数学公式排版  */
 .markdown-body :deep(.katex-display) {
   overflow-x: auto;
   overflow-y: hidden;

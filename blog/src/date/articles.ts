@@ -124,7 +124,7 @@ export const articles: Article[] = [
   },
   {
     id: 9,
-    title: '对算法的初级理解',
+    title: '算法的初级理解',
     type: '算法',
     date: '2026-07-03',
     readTime: '20 minutes',
@@ -158,7 +158,7 @@ export const articles: Article[] = [
   {
     id: 12,
     title: '前端资源数据处理与骨架屏加载',
-    type: '后端',
+    type: '前端',
     date: '2026-07-18',
     readTime: '20 minutes',
     excerpt: '对图片,字体,音频及基本数据处理方式,以及骨架屏加载动画实现效果。',
@@ -190,7 +190,7 @@ export const articles: Article[] = [
   },
   {
     id: 15,
-    title: '加载屏实现逻辑',
+    title: '加载屏切换实现逻辑',
     type: '前端',
     date: '2026-08-03',
     readTime: '10 minutes',
@@ -202,7 +202,7 @@ export const articles: Article[] = [
   {
     id: 16,
     title: '基于python开发的桌面工具软件',
-    type: '后端',
+    type: '中间件',
     date: '2026-08-20',
     readTime: '10 minutes',
     excerpt: '用过之后,终于理解何谓  "Life is short, I use Python."',
@@ -256,11 +256,11 @@ export const articles: Article[] = [
   },
   {
     id: 21,
-    title: 'Git与Github阶段性总结',
-    type: '杂谈',
+    title: 'Git与Github使用守则',
+    type: '中间件',
     date: '2026-10-28',
     readTime: '10 minutes',
-    excerpt: '个人与协作开发的必经之路',
+    excerpt: '个人与团队开发的必经之路',
     tags: ['Git', 'Github','开发'],
     cover: '/messages/21/sun.webp',
     content:md21,

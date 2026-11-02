@@ -118,7 +118,8 @@ const order = [
   '算法',
   '杂谈',
   '大学',
-  '复盘'
+  '复盘',
+  '中间件',
 ]
 
 const categoryStats = computed(() => {
