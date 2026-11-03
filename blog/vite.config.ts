@@ -1,7 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
@@ -17,7 +16,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['mongodb', '@vercel/node', 'api'],
-    // 👇 新增：阻止 Vite 依赖扫描时触碰 api 目录
     entries: ['index.html', '!api/**']
   },
   server: {
@@ -40,7 +38,7 @@ export default defineConfig({
     assetsInlineLimit: 4096,
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
-      // 打包时把 api 当作外部依赖，绝不打包进去
+      // 打包时将 api 当作外部依赖
       external: [/^\/api\//],
       output: {
         manualChunks(id) {

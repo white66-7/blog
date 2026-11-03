@@ -32,13 +32,8 @@
     </div>
     <div class="elastic-sidebar" :class="{ 'is-open': isOpen }">
       <svg class="sidebar-svg" :viewBox="`0 0 350 ${svgHeight}`" preserveAspectRatio="none">
-        <path 
-          class="s-path" 
-          fill="rgba(243, 245, 248, 0.94)" 
-          :d="currentPath" 
-          @mousedown="startDrag" 
-          @touchstart="startDrag" 
-        />
+        <path class="s-path" fill="rgba(243, 245, 248, 0.94)" :d="currentPath" @mousedown="startDrag"
+          @touchstart="startDrag" />
       </svg>
 
       <!-- ==== 提示文字 ==== -->
@@ -118,7 +113,7 @@ md.renderer.rules.math_inline = (tokens, idx) => {
   return katex.renderToString(token.content, {
     displayMode: false,
     throwOnError: false,
-    output: 'html' 
+    output: 'html'
   })
 }
 
@@ -211,7 +206,7 @@ function addSpacing(text: string): string {
   //单次遍历完成所有保护
   text = text.replace(PROTECT_RE, (match, inlineFormula) => {
     const key = `${PH_PREFIX}${placeholders.length}${PH_SUFFIX}`
-    
+
     // 如果是行内公式，去除内部首尾冗余空格
     if (inlineFormula !== undefined) {
       placeholders.push(`$${inlineFormula.trim()}$`)
@@ -534,7 +529,6 @@ function handleMarkdownClick(e: MouseEvent) {
   max-width: 100%;
   border-radius: 8px;
 }
-
 </style>
 
 <style scoped>
@@ -575,6 +569,7 @@ function handleMarkdownClick(e: MouseEvent) {
   pointer-events: auto;
   filter: drop-shadow(-8px 0px 18px rgba(0, 0, 0, 0.07));
 }
+
 .s-path:active {
   cursor: grabbing;
 }
@@ -583,7 +578,7 @@ function handleMarkdownClick(e: MouseEvent) {
   position: absolute;
   top: 50%;
   right: 18px;
-  transform: translateY(-50%) translateX(0); 
+  transform: translateY(-50%) translateX(0);
   font-family: 'YouSheBiaoTiHei', sans-serif;
   font-size: 16px;
   color: #4b5563;
@@ -771,7 +766,7 @@ function handleMarkdownClick(e: MouseEvent) {
 .toc__item--active {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.04),
     inset 0 1px 1px rgba(255, 255, 255, 1);
   transform: translateX(4px);
@@ -850,7 +845,7 @@ main {
 
 .article-title {
   font-family: 'ShangShouJiangHuShuFa';
-  font-size: clamp(1.6rem, 2vw + 0.6rem, 2.6rem); 
+  font-size: clamp(1.6rem, 2vw + 0.6rem, 2.6rem);
   font-weight: 400;
   text-align: center;
   margin: 0 0 16px 0;
@@ -904,7 +899,7 @@ main {
   transform: translateY(-7px);
 }
 
-/* ==================== 1. Markdown 正文 ==================== */
+/*  Markdown 正文 */
 .markdown-body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   line-height: 1.8;
@@ -960,25 +955,25 @@ main {
 .markdown-body :deep(ul),
 .markdown-body :deep(ol) {
   /* 控制圆点与左侧边缘的距离 */
-  padding-left: 1.5em;     
+  padding-left: 1.5em;
   margin-bottom: 1.25rem;
 }
 
 .markdown-body :deep(li) {
   /* 增加列表项之间的间距 */
-  margin-bottom: 0.5em;     
+  margin-bottom: 0.5em;
   line-height: 1.8;
 }
 
 .markdown-body :deep(li::marker) {
-  color: #000000; 
+  color: #000000;
 }
 
 .markdown-body :deep(blockquote) {
-  border-left: 4px solid #23c483; 
-  color: #6b7280; 
+  border-left: 4px solid #23c483;
+  color: #6b7280;
   margin: 1.5em 0;
-  background: #f3f4f6; 
+  background: #f3f4f6;
   border-radius: 0 12px 12px 0;
   padding: 12px 16px;
 }
@@ -994,6 +989,7 @@ main {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.9em;
+  text-indent: 0;
 }
 
 /* LaTeX 数学公式排版  */
@@ -1129,15 +1125,14 @@ main {
   cursor: pointer;
   vertical-align: baseline;
   white-space: nowrap;
+  text-indent: 0;
 
-  background: linear-gradient(
-    110deg,
-    #1d4ed8 0%,
-    #1d4ed8 35%,
-    #93c5fd 50%,
-    #1d4ed8 65%,
-    #1d4ed8 100%
-  );
+  background: linear-gradient(110deg,
+      #1d4ed8 0%,
+      #1d4ed8 35%,
+      #93c5fd 50%,
+      #1d4ed8 65%,
+      #1d4ed8 100%);
   background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -1176,6 +1171,7 @@ main {
   0% {
     background-position: 100% 0;
   }
+
   100% {
     background-position: -100% 0;
   }
