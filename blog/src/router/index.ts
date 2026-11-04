@@ -54,6 +54,14 @@ const routes = [
     // 关于页懒加载
     component: () => import('@/modules/bloghome/components/about/about.vue')
   },
+  {
+    // 兜底路由
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    // 404 插画页
+    component: () => import('@/views/NotFound.vue'),
+    meta: { title: '页面未找到' }
+  },
 ]
 
 const router = createRouter({
