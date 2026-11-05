@@ -151,7 +151,7 @@ export const articles: Article[] = [
     date: '2026-07-12',
     readTime: '20 minutes',
     excerpt: '动态路由,makedown解析,目录导航一系列蛮有意思的东西。',
-    tags: ['MarkdownIt', '正则表达式', '动态路由','回调函数'],
+    tags: ['MarkdownIt', '正则表达式', '动态路由'],
     cover: '/messages/11/difficult.webp',
     content:md11,
   },

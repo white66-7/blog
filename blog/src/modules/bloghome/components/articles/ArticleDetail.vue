@@ -10,6 +10,7 @@
       返回
     </button>
 
+    <!-- 分支 -->
     <div class="article-page" v-if="article">
       <main>
         <div class="content" ref="contentRef">
@@ -27,6 +28,7 @@
         </div>
       </main>
     </div>
+
     <div class="not-found" v-else>
       <p>文章未找到</p>
     </div>
@@ -36,7 +38,7 @@
           @touchstart="startDrag" />
       </svg>
 
-      <!-- ==== 提示文字 ==== -->
+      <!--  提示文字  -->
       <transition name="hint-fade">
         <div class="sidebar-hint-text" v-show="showHintText">
           目录
@@ -88,9 +90,14 @@
 import axios from 'axios'
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router'
+
+// 渲染主力
 import MarkdownIt from 'markdown-it'
+
+// 高亮语法块
 import hljs from 'highlight.js'
 import 'highlight.js/styles/vs2015.css'
+
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 
@@ -108,7 +115,7 @@ const md = new MarkdownIt({ html: true })
 // 使用插件负责识别 $ 与 $$ 分词
 md.use(markdownItKatex)
 
-//使用本地最新版 KaTeX ，解决上下标重叠错位
+// 自定义规则
 md.renderer.rules.math_inline = (tokens, idx) => {
   const token = tokens[idx]
   if (!token) return ''
@@ -132,7 +139,9 @@ md.renderer.rules.math_block = (tokens, idx) => {
 md.renderer.rules.fence = function (tokens, idx) {
   const token = tokens[idx]
   if (!token) return ''
+  
   const code = token.content || ''
+
   const rawLang = (token.info || '').trim()
   const displayLang = rawLang.toUpperCase() || 'CODE'
 
@@ -144,6 +153,7 @@ md.renderer.rules.fence = function (tokens, idx) {
   let highlightedCode = ''
   if (hljsLang && hljs.getLanguage(hljsLang)) {
     try {
+      // 指定语言 + 忽略非法语法
       highlightedCode = hljs.highlight(code, { language: hljsLang, ignoreIllegals: true }).value
     } catch (__) {
       highlightedCode = md.utils.escapeHtml(code)
@@ -177,8 +187,8 @@ async function handleCopy(e: MouseEvent) {
       btn.classList.add('copied')
       setTimeout(() => btn.classList.remove('copied'), 2000)
     } catch (err) {
-      alert('您的浏览器不支持自动复制，请手动复制。')
-    }
+      alert('当前浏览器不支持自动复制')
+    }   
   }
 }
 
@@ -460,7 +470,7 @@ onBeforeRouteLeave(() => {
   articleScrollCache.set(currentId, window.scrollY || document.documentElement.scrollTop)
 })
 
-// 💡 浏览量 +1：与列表页共享 sessionStorage 里的计数缓存，返回列表时数字是最新的
+// 浏览量 +1：与列表页共享 sessionStorage 里的计数缓存，返回列表时数字是最新的
 function increaseViews(id: number) {
   axios.post(`/api/views?id=${id}`)
     .then(res => {
@@ -476,7 +486,7 @@ function increaseViews(id: number) {
     .catch(() => { })
 }
 
-// 💡 切换文章（含「随机一篇」这类 /article/A → /article/B 的同组件跳转）
+// 切换文章（含「随机一篇」这类 /article/A → /article/B 的同组件跳转）
 function loadArticle(id: number, restoreScroll: boolean) {
   article.value = articles.find(a => a.id === id) || null
   activeHeading.value = -1
@@ -534,10 +544,6 @@ function handleMarkdownClick(e: MouseEvent) {
 </style>
 
 <style scoped>
-/* 只作用于文章详情页自己的导航栏。
-   之前这条规则写在全局 <style> 里，ArticleDetail 被首页预取后
-   会把 #ececec 的实心背景泄漏到首页导航栏，移动端看上去就像
-   导航栏上方多出一条白色/灰色 padding。 */
 .article-detail-container :deep(.navbar) {
   background: #ececec !important;
   backdrop-filter: none !important;
