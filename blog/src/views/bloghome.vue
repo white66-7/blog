@@ -196,6 +196,10 @@ const albumImages = [
     url: '/album/动漫/蕾姆.webp',
     description: '好久不见'
   },
+  {
+    url: '/album/动漫/来战.webp',
+    description: '来手感了'
+  },
 ]
 </script>
 

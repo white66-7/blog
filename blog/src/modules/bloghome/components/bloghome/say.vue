@@ -113,7 +113,6 @@ const saysList = [
   { id: 18, content: '两年后世界会变成什么样呢', date: '2026-10-18 21:58' },
   { id: 19, content: '补点计算机网络的知识', date: '2026-10-24 22:58' },
   { id: 20, content: '好冷啊,气温降到13度了', date: '2026-11-01 21:30' },
-  { id: 21, content: '更新了第11篇文章', date: '2026-11-05 17:12' },
 ]
 
 const timelineSays = computed(() => [...saysList].reverse())

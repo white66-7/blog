@@ -504,7 +504,7 @@ watch(() => route.params.id, (newId) => {
   if (route.name !== 'ArticleDetail') return
   const id = Number(newId)
   if (!id || Number.isNaN(id) || id === article.value?.id) return
-  // 同一组件内切换文章时不恢复旧滚动位置，直接回到顶部
+  // 同一组件内切换文章时不恢复旧滚动位置
   loadArticle(id, false)
 })
 
