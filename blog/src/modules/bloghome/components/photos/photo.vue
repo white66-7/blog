@@ -2,25 +2,25 @@
   <div class="album-page-wrapper">
     <Navbar :transparent="isFirstScreen" />
 
-    <!-- 全局返回按钮 (进入相册内部时显示) -->
+    <!-- 全局返回按钮  -->
     <transition name="fade">
       <button v-if="currentAlbum" class="fixed-back-btn" @click="returnToShelf">
         <span>返回</span>
       </button>
     </transition>
 
-    <!-- ================= 视口切换区 ================= -->
+    <!--  视口切换区  -->
     <div class="view-container">
 
-      <!-- 视图 A：相册书架 (没有选中相册时显示) -->
+      <!-- 相册书架 -->
       <AlbumShelf v-if="!currentAlbum" :albums="albumsData" @select-album="handleSelectAlbum" />
 
-      <!-- 视图 B：原版 3D 翻页书本 (选中相册时显示该相册的相片) -->
+      <!-- 3D 翻页书本 -->
       <BookScene v-else :sheets="sheets" :cover="currentAlbum.cover" @open-photo="handleOpenPhoto" />
 
     </div>
 
-    <!-- ================= 照片详情独立弹窗 ================= -->
+    <!--  照片详情独立弹窗  -->
     <PhotoLightbox v-if="selectedPhoto" :photo="selectedPhoto" @close="selectedPhoto = null" />
   </div>
 </template>
@@ -33,7 +33,7 @@ import AlbumShelf from './AlbumShelf.vue'
 import BookScene from './BookScene.vue'
 import PhotoLightbox from './PhotoLightbox.vue'
 
-// ========== 2. 手动构建相册数据 ==========
+//  手动构建相册数据 
 const albumsData = [
   {
     id: 'custom',
@@ -46,23 +46,22 @@ const albumsData = [
       { title: '黑色五叶草-战斗番', url: '/album/动漫/黑色五叶草.webp' },
       { title: '进击的巨人', url: '/album/动漫/进击的巨人.webp' },
       { title: '燃到起鸡皮疙瘩', url: '/album/动漫/超燃.webp' },
+      { title: '每个人的参考系是不同的', url: '/album//动漫/长生.webp' },
+      { title: '所谓坚持', url: '/album//动漫/练习.webp' },
       { title: '来自深渊-黄金乡', url: '/album/动漫/来自深渊.webp' },
       { title: 'RE0', url: '/album/动漫/eye.webp' },
       { title: '慢节奏的异世界番', url: '/album/动漫/video.webp' },
       { title: '相反的你和我', url: '/album/动漫/pair.webp' },
       { title: '中二病也要谈恋爱', url: '/album/动漫/阿玛天纳斯.webp' },
       { title: '通往夏天的隧道', url: '/album/动漫/向日葵.webp' },
-      { title: '败了', url: '/album/动漫/战败.webp' },
       { title: '好久不见', url: '/album/动漫/蕾姆.webp' },
       { title: '再战！', url: '/album//动漫/再战.webp' },
       { title: '别沉浸在幸福中啊混蛋', url: '/album//动漫/欺骗.webp' },
       { title: '第二季 • 终', url: '/album//动漫/史莱姆.webp' },
       { title: '四百年的孤独', url: '/album//动漫/蝎子.webp' },
-      { title: '淡游...甚至有点想退游', url: '/album/动漫/火影.mp4', cover: '/album/动漫/火影.webp' },
-      { title: '时隔三个月后继续', url: '/album//动漫/重温.webp' },
       { title: '这谁不怕', url: '/album//动漫/巨人.webp' },
       { title: '来战来战', url: '/album//动漫/来战.webp' },
-      { title: '你的人生不会呐喊吗？', url: '/album//动漫/呐喊.mp4',cover: '/album/动漫/呐喊.webp'  },
+      { title: '你的人生不会呐喊吗？', url: '/album//动漫/呐喊.mp4', cover: '/album/动漫/呐喊.webp' },
     ]
   },
   {
@@ -72,6 +71,7 @@ const albumsData = [
     photos: [
       { title: '研学', url: '/album/人物/研学.webp' },
       // { title: '高中同学们', url: '/album/人物/classmates.webp' },
+      { title: '耍起耍起', url: '/album/人物/耍起.webp' },
       { title: '冬天', url: '/album/人物/朋友.webp' },
       // { title: '在旧宿舍的最后一晚', url: '/album/人物/dji.webp' },
       // { title: '过去', url: '/album/人物/student.webp' },
@@ -139,10 +139,6 @@ const albumsData = [
       { title: '武汉这天气有点糙', url: '/album/暑假/霉.webp' },
       { title: '前辈的劝告', url: '/album/暑假/前辈的劝告.webp' },
       { title: '傲慢之罪', url: '/album/暑假/傲慢之罪.webp' },
-      { title: '镰刀龙--魔女教团', url: '/album/暑假/镰刀龙.webp' },
-      { title: '霸王龙--七大原初恶魔及其附属', url: '/album/暑假/霸王龙.webp' },
-      { title: '爱交配的大地懒小队', url: '/album/暑假/大地懒.webp' },
-      { title: '我飞升了', url: '/album/暑假/飞升.webp' },
       { title: '劲大', url: '/album/暑假/眼药水.webp' },
       { title: '好圆的月亮', url: '/album/暑假/中秋节.webp' },
       { title: '给了', url: '/album/暑假/上课.webp' },
@@ -151,6 +147,34 @@ const albumsData = [
       { title: '我的拳头想喝血了', url: '/album/暑假/手.webp' },
       { title: '我说真的', url: '/album/暑假/亲眼.webp' },
       { title: '出奇的好用', url: '/album/暑假/护肤.webp' },
+    ]
+  },
+  {
+    id: 'game',
+    title: '游戏',
+    cover: '/album/photo_covers/game.webp',
+    photos: [
+      { title: '第一款steam游戏', url: '/album/游戏/steam.webp' },
+       { title: '飞行宠', url: '/album/游戏/steam1.webp' },
+      { title: '通关了', url: '/album/游戏/浮光.webp' },
+      { title: '心意相通', url: '/album/游戏/崴特.webp' },
+      { title: '可以可以', url: '/album/游戏/牵手.webp' },
+      { title: '还有这种内容?', url: '/album/游戏/镇长.webp' },
+      { title: '又心动了', url: '/album/游戏/紫发.webp' },
+      { title: '饥荒属这角色最强', url: '/album/游戏/饥荒.webp' },
+      { title: '画风好美', url: '/album/游戏/王国.webp' },
+      { title: '弹反一切', url: '/album/游戏/时钟.webp' },
+      { title: '竞技场太难打了', url: '/album/游戏/竞技.webp' },
+      { title: '为何会是这个结局', url: '/album/游戏/师傅.webp' },
+      { title: '哎呦我壶哥', url: '/album/游戏/壶哥.webp' },
+      { title: '败了', url: '/album/游戏/战败.webp' },
+      { title: '淡游...有点想退游', url: '/album/游戏/火影.mp4', cover: '/album/游戏/火影.webp' },
+      { title: '还是个元气骑士的手子', url: '/album/游戏/元气骑士.webp' },
+      { title: '时隔三个月后继续', url: '/album/游戏/重温.webp' },
+      { title: '我飞升了', url: '/album/游戏/飞升.webp' },
+      { title: '镰刀龙--魔女教团', url: '/album/游戏/镰刀龙.webp' },
+      { title: '霸王龙--七大原初恶魔及其附属', url: '/album/游戏/霸王龙.webp' },
+      { title: '爱交配的大地懒小队', url: '/album/游戏/大地懒.webp' },
     ]
   }
 ]
