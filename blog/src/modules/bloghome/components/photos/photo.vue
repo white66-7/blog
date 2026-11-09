@@ -82,7 +82,8 @@ const albumsData = [
       // { title: '理完头发后', url: '/album/人物/理头.mp4', cover: '/album/人物/理头.webp' },
       { title: '深度思考', url: '/album/人物/me.mp4', cover: '/album/人物/me.webp' },
       { title: '我的拳头想喝血了', url: '/album/人物/hurt.mp4', cover: '/album/人物/hurt.webp' },
-      { title: '一顶帽子', url: '/album/人物/map.mp4', cover: '/album/人物/map.webp' },
+      { title: '战技: 油头遮掩、挡风', url: '/album/人物/map.mp4', cover: '/album/人物/map.webp' },
+      { title: '一年的变化', url: '/album/人物/一年.mp4', cover: '/album/人物/一年.webp' },
     ]
   },
   {

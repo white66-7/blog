@@ -47,14 +47,14 @@ async function createSignal(req: any, res: any) {
     )
 
     if (rateLimit?.limited) {
-      return res.status(429).json({ error: `提交太频繁，请等待 ${rateLimit.retryAfter} 秒后重试` })
+      return res.status(429).json({ error: `提交频繁，请等待 ${rateLimit.retryAfter} 秒后重试` })
     }
 
     // Redis 未配置或调用失败时，退回当前实例的内存限流
     if (rateLimit === null) {
       const waitSeconds = hitMemoryRateLimit(clientIp, RATE_LIMIT_WINDOW_SECONDS * 1000)
       if (waitSeconds > 0) {
-        return res.status(429).json({ error: `提交太频繁，请等待 ${waitSeconds} 秒后重试` })
+        return res.status(429).json({ error: `提交频繁，请等待 ${waitSeconds} 秒后重试` })
       }
     }
 
@@ -187,7 +187,7 @@ async function reviewSignal(req: any, res: any) {
   }
 }
 
-// Vercel Serverless Function 默认导出入口
+// Vercel Serverless Function 
 export default async function handler(req: any, res: any) {
   switch (req.method) {
     case 'GET':

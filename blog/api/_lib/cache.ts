@@ -1,6 +1,5 @@
 import { cacheGet, cacheSet } from './redis.js'
 
-
 export const CACHE_KEYS = {
   /** 全部文章的浏览量映射 */
   viewsAll: 'views:all:v1',
@@ -10,7 +9,7 @@ export const CACHE_KEYS = {
   contributions: 'github:contributions:v1',
   /** 审核通过的留言列表 */
   signalsApproved: 'signals:approved:v1',
-  /** 天气按坐标缓存，保留两位小数约等于 1km 精度 */
+  /** 天气按坐标缓存 */
   weather: (lat: number, lon: number) => `weather:${lat.toFixed(2)}:${lon.toFixed(2)}`,
   /** 留言提交限流键 */
   signalsRateLimit: (ipHash: string) => `ratelimit:signals:${ipHash}`,

@@ -32,7 +32,7 @@
         <div class="scrollable-content" @touchstart="handleTouchStart" @touchmove="handleTouchMove">
           <div class="main-body" ref="mainBody">
             <div class="two-columns">
-              <!-- 左侧：卡片列 -->
+              <!-- 左侧卡片列 -->
               <aside class="left-column">
                 <Information class="info-card" :class="[showAnimation && 'animate__animated animate__fadeInLeft']" />
                 <player class="sticky-card"
@@ -43,7 +43,7 @@
                   style="--animate-delay: .3s;" />
               </aside>
 
-              <!-- 右侧：相册、天气、文章列表 -->
+              <!-- 右侧相册、天气、文章列表 -->
               <div class="right-column">
                 <div class="top-row">
                   <div class="album-container">
@@ -204,7 +204,7 @@ const albumImages = [
 </script>
 
 <style scoped>
-/* ========= 全局背景 & 布局 ========= */
+/*  全局背景 & 布局  */
 .app-flex {
   position: relative;
   width: 100%;

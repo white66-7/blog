@@ -10,7 +10,9 @@ if (DNS_SERVERS.length) {
 
 const uri = process.env.MONGODB_URI || ''
 let cachedClient: MongoClient | null = null //调度中心
-let cachedDb: Db | null = null   //具体数据库
+
+//具体数据库
+let cachedDb: Db | null = null   
 
 
 let clientPromise: Promise<MongoClient> | null = null
