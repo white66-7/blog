@@ -13,6 +13,9 @@
 [![Pinia](https://img.shields.io/badge/Pinia-3.0-FFD859.svg?style=flat-square&logo=pinia&logoColor=black)](https://pinia.vuejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
+[![CI](https://github.com/white66-7/blog/actions/workflows/ci.yml/badge.svg)](https://github.com/white66-7/blog/actions/workflows/ci.yml)
+[![Deployment Smoke Test](https://github.com/white66-7/blog/actions/workflows/deploy.yml/badge.svg)](https://github.com/white66-7/blog/actions/workflows/deploy.yml)
+
 <p align="center">
   <a href="#项目概述">项目概述</a> •
   <a href="#功能特性">功能特性</a> •
@@ -116,7 +119,7 @@ vue-frontend/
 ## 本地开发
 
 ### 环境准备
-- Node.js 20+
+- Node.js 22.12+（CI 与 Vercel 运行时使用 24.x）
 - npm 或 pnpm
 
 ### 常用命令
@@ -141,6 +144,16 @@ npm run build
 npm run preview
 ```
 ---
+
+## CI 与自动化
+
+自动化基于 GitHub Actions，配置在 `.github/`：
+
+| 文件 | 触发时机 | 作用 |
+| :--- | :--- | :--- |
+| `workflows/ci.yml` | push 到 `main`、任意 PR | `npm ci`：`vue-tsc` 类型检查 → 生产构建 → 校验 `dist` 产物 |
+| `workflows/deploy.yml` | Vercel 部署成功、每天 09:00 | 冒烟测试：首页与子路由的 SPA rewrite、`/api/weather` 与 `/api/views` 返回结构 |
+| `dependabot.yml` | 每周一 09:00 | 按 Vue 栈 / 构建工具链分组的依赖升级 PR，PR 跑 CI |
 
 ## 开源协议与版权声明
 

@@ -176,6 +176,7 @@ const albumsData = [
       { title: '镰刀龙--魔女教团', url: '/album/游戏/镰刀龙.webp' },
       { title: '霸王龙--七大原初恶魔及其附属', url: '/album/游戏/霸王龙.webp' },
       { title: '爱交配的大地懒小队', url: '/album/游戏/大地懒.webp' },
+      { title: '好难打啊', url: '/album/游戏/丝之歌.webp' },
     ]
   }
 ]

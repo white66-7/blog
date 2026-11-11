@@ -1,0 +1,61 @@
+# 依赖更新
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /blog
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+    labels:
+      - dependencies
+    groups:
+      # 框架三件套要一起升级
+      vue-stack:
+        patterns:
+          - vue
+          - vue-router
+          - pinia
+          - '@vue/*'
+          - vue-tsc
+      # 构建工具链成组升级
+      build-toolchain:
+        patterns:
+          - vite
+          - '@vitejs/*'
+          - vite-plugin-*
+          - sass-embedded
+          - typescript
+          - '@types/*'
+          - '@tsconfig/*'
+      runtime-minor-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # TypeScript / vue-tsc 的大版本和工具链强耦合，手动升级更稳
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      - dependency-name: vue-tsc
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Shanghai
+    commit-message:
+      prefix: 'chore(ci)'
+    labels:
+      - dependencies
+    groups:
+      actions:
+        patterns:
+          - '*'

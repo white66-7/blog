@@ -1,50 +1,123 @@
-# name: Deploy to BT Server
+# 部署后的自动验证; 部署本身交给 Vercel
+# push -> Vercel 构建 -> deployment_status 事件 -> 冒烟测试。
+# 每天 09:00 (UTC+8) 巡检线上站点
+# 在 Actions 页面手动点 Run workflow
+name: Deployment Smoke Test
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  deployment_status:
+  schedule:
+    # 北京时间 09:00
+    - cron: '0 1 * * *'
+  workflow_dispatch:
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
+concurrency:
+  group: smoke-${{ github.event.deployment_status.environment || 'scheduled' }}-${{ github.ref }}
+  cancel-in-progress: true
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+permissions:
+  contents: read
 
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: '20'
+jobs:
+  smoke:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
-#       - name: Install dependencies
-#         run: |
-#           cd blog
-#           npm install
+    if: >-
+      (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success')
+      || github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'schedule' && vars.PRODUCTION_URL != '')
 
-#       - name: Build project
-#         run: |
-#           cd blog
-#           npm run build
+    steps:
+      - name: Resolve target URL
+        id: resolve
+        env:
+          DEPLOY_URL: ${{ github.event.deployment_status.environment_url }}
+          FALLBACK_URL: ${{ vars.PRODUCTION_URL }}
+          DEPLOY_ENV: ${{ github.event.deployment_status.environment }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "${DEPLOY_URL:-}" ]; then
+            url="$DEPLOY_URL"
+          elif [ "${{ github.event_name }}" = "deployment_status" ]; then
+            # 不去猜地址：拿生产域名去测一个 Preview 部署，只会得到「假绿」
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+            echo "::warning::本次部署没有回传 environment_url，跳过冒烟测试"
+            exit 0
+          else
+            url="${FALLBACK_URL:-}"
+          fi
 
-#       - name: Deploy to server
-#         uses: easingthemes/ssh-deploy@main
-#         with:
-#           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-#           REMOTE_HOST: ${{ secrets.SERVER_IP }}
-#           REMOTE_USER: ${{ secrets.SERVER_USER }}
-#           SOURCE: 'blog/dist/'
-#           TARGET: ${{ secrets.SERVER_PATH }}
-#           ARGS: '-avzr --delete'
+          url="${url%/}"
+          if [ -z "$url" ]; then
+            echo "::error::拿不到站点地址：请在仓库 Variables 中配置 PRODUCTION_URL"
+            exit 1
+          fi
 
-#       - name: Fix permissions
-#         uses: appleboy/ssh-action@v1
-#         with:
-#           host: ${{ secrets.SERVER_IP }}
-#           username: ${{ secrets.SERVER_USER }}
-#           key: ${{ secrets.SSH_PRIVATE_KEY }}
-#           script: |
-#             sudo chown -R www:www ${{ secrets.SERVER_PATH }}
-#             sudo find ${{ secrets.SERVER_PATH }} -type d -exec chmod 755 {} \;
-#             sudo find ${{ secrets.SERVER_PATH }} -type f -exec chmod 644 {} \;
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "检查目标：$url(环境:${DEPLOY_ENV:-scheduled / manual})"
+          {
+            echo "## 部署冒烟测试"
+            echo ""
+            echo "| 项目 | 值 |"
+            echo "| :--- | :--- |"
+            echo "| 站点 | $url |"
+            echo "| 环境 | ${DEPLOY_ENV:-scheduled / manual} |"
+            echo "| 提交 | ${DEPLOY_SHA:-$GITHUB_SHA} |"
+            echo ""
+            echo "| 路径 | 状态 | 耗时 |"
+            echo "| :--- | :--- | :--- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # 页面：首页 + 两个子路由
+      - name: Page checks
+        if: success() && steps.resolve.outputs.skip != '1'
+        env:
+          TARGET_URL: ${{ steps.resolve.outputs.url }}
+        run: |
+          set -euo pipefail
+          for path in / /articles /projects; do
+            out=$(curl -sS -L --max-time 30 --retry 3 --retry-delay 5 --retry-all-errors \
+              -o /tmp/page.html -w '%{http_code} %{time_total}' "$TARGET_URL$path") \
+              || { echo "::error::$path 请求失败"; exit 1; }
+            code="${out%% *}"
+            time="${out##* }"
+            echo "$path -> HTTP $code (${time}s)"
+            echo "| \`$path\` | $code | ${time}s |" >> "$GITHUB_STEP_SUMMARY"
+            [ "$code" = "200" ] || { echo "::error::$path 返回 $code"; exit 1; }
+            grep -q 'id="app"' /tmp/page.html \
+              || { echo "::error::$path 没有返回 Vue 应用外壳"; exit 1; }
+          done
+
+      # 接口：这两个 handler 出错时也返回 200，所以必须校验返回结构
+      - name: API checks
+        if: success() && steps.resolve.outputs.skip != '1'
+        env:
+          TARGET_URL: ${{ steps.resolve.outputs.url }}
+        run: |
+          set -euo pipefail
+          check_api() {
+            local path="$1" key="$2"
+            local out code secs body
+            out=$(curl -sS --max-time 30 --retry 3 --retry-delay 5 --retry-all-errors \
+              -o /tmp/api.json -w '%{http_code} %{time_total}' "$TARGET_URL$path") \
+              || { echo "::error::$path 请求失败"; return 1; }
+            code="${out%% *}"
+            secs="${out##* }"
+            body=$(head -c 200 /tmp/api.json)
+            echo "$path -> HTTP $code (${secs}s)：$body"
+            echo "| \`$path\` | $code | ${secs}s |" >> "$GITHUB_STEP_SUMMARY"
+            [ "$code" = "200" ] || { echo "::error::$path 返回 $code"; return 1; }
+            jq -e --arg k "$key" 'type == "object" and has($k)' /tmp/api.json > /dev/null \
+              || { echo "::error::$path 返回内容缺少字段 \"$key\""; return 1; }
+          }
+          check_api /api/weather ok
+          check_api /api/views views
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "完成时间：$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"

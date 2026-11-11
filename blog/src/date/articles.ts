@@ -31,6 +31,7 @@ import md18 from './md/18.md?raw'
 import md19 from './md/19.md?raw'
 import md20 from './md/20.md?raw'
 import md21 from './md/21.md?raw'
+import md22 from './md/22.md?raw'
 
 
 export const articles: Article[] = [
@@ -135,12 +136,12 @@ export const articles: Article[] = [
   },
   {
     id: 10,
-    title: '建站的步骤与基本原理',
+    title: '服务器的持续部署(CD)实现',
     type: '复盘',
     date: '2026-07-10',
     readTime: '20 minutes',
     excerpt: '因为网站更换网络后不稳定,所以花了一个月研究了国内网络下如何正常的建站',
-    tags: ['vercel', '网站', '服务器'],
+    tags: ['vercel', '网站', 'GitHub Actions'],
     cover: '/messages/10/earth.webp',
     content:md10,
   },
@@ -262,8 +263,19 @@ export const articles: Article[] = [
     readTime: '10 minutes',
     excerpt: '个人与团队开发的必经之路',
     tags: ['Git', 'Github','开发'],
-    cover: '/messages/21/sun.webp',
+    cover: '/messages/21/baoshi.webp',
     content:md21,
+  },
+  {
+    id: 22,
+    title: '《学了一年CS》',
+    type: '后端',
+    date: '2026-11-11',
+    readTime: '10 minutes',
+    excerpt: '一年多哩,谈谈对computer science的理解',
+    tags: ['CS', '全栈','开发'],
+    cover: '/messages/22/trige.webp',
+    content:md22,
   },
   // {
   //   id: 21,

@@ -1,0 +1,62 @@
+# 推送到 main 或发起 PR 时，做类型检查再做生产构建
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# 同分支连续推送则取消还在跑的旧任务
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: blog
+
+jobs:
+  verify:
+    name: Type-check & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 版本与 Vercel 项目设置保持一致
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: blog/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # vue-tsc --build 会同时检查 src和 api
+      - name: Type check
+        run: npm run type-check
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          set -euo pipefail
+          test -f dist/index.html || { echo "::error::构建产物缺少 dist/index.html"; exit 1; }
+          test -d dist/assets || { echo "::error::构建产物缺少 dist/assets 目录"; exit 1; }
+          assets=$(find dist/assets -type f | wc -l)
+          size=$(du -sh dist | cut -f1)
+          if [ "$assets" -eq 0 ]; then
+            echo "::error::dist/assets 为空，构建可能没有真正产出"
+            exit 1
+          fi
+          echo "产物大小：$size,资源文件:$assets 个"
+          echo "产物大小：$size,资源文件:$assets 个" >> "$GITHUB_STEP_SUMMARY"
