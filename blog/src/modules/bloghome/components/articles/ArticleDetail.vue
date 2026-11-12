@@ -210,6 +210,15 @@ const HAN_ALPHANUM_RE = /(\p{Script=Han})([a-zA-Z0-9])/gu
 const ALPHANUM_HAN_RE = /([a-zA-Z0-9])(\p{Script=Han})/gu
 const ESCAPE_SLASH_RE = /\\(?=[A-Za-z0-9])/g
 
+// 【改】浏览器支持 text-autospace 时，中英间距交给 CSS，不再往文本里塞空格
+const NATIVE_AUTOSPACE =
+  typeof CSS !== 'undefined' &&
+  typeof CSS.supports === 'function' &&
+  CSS.supports('text-autospace', 'ideograph-alpha ideograph-numeric')
+
+// 【改】不支持时的回退：用细空格，两端对齐时不会被拉伸（想用普通空格就改回 ' '）
+const AUTOSPACE_CHAR = '\u2009'
+
 function addSpacing(text: string): string {
   if (!text) return ''
 
@@ -228,11 +237,15 @@ function addSpacing(text: string): string {
     return key
   })
 
-  // 中英混排空格优化及反斜杠转义
-  text = text
-    .replace(HAN_ALPHANUM_RE, '$1 $2')
-    .replace(ALPHANUM_HAN_RE, '$1 $2')
-    .replace(ESCAPE_SLASH_RE, '\\\u200B')
+  // 中英混排空格优化（仅在浏览器不支持原生 text-autospace 时执行）
+  if (!NATIVE_AUTOSPACE) {
+    text = text
+      .replace(HAN_ALPHANUM_RE, `$1${AUTOSPACE_CHAR}$2`)
+      .replace(ALPHANUM_HAN_RE, `$1${AUTOSPACE_CHAR}$2`)
+  }
+
+  // 反斜杠转义
+  text = text.replace(ESCAPE_SLASH_RE, '\\\u200B')
 
   // 还原被保护的内容
   text = text.replace(RESTORE_RE, (_, idx) => placeholders[Number(idx)] ?? '')
@@ -921,6 +934,9 @@ main {
   text-align: left;
   word-break: normal;
   overflow-wrap: break-word;
+
+  text-autospace: ideograph-alpha ideograph-numeric;
+  line-break: strict;
 }
 
 /* 一级标题 */
@@ -998,6 +1014,7 @@ main {
   border-radius: 4px;
   font-size: 0.9em;
   text-indent: 0;
+  overflow-wrap: anywhere;
 }
 
 /* LaTeX 数学公式排版  */
@@ -1107,6 +1124,16 @@ main {
   text-indent: 2em;
 }
 
+/* 【改】段落、列表、引用两端对齐：中文按字均摊间距，右侧边缘整齐 */
+.markdown-body :deep(p),
+.markdown-body :deep(li),
+.markdown-body :deep(blockquote p) {
+  text-align: justify;
+  text-justify: inter-character;
+  /* 避免最后一行只剩一两个字 */
+  text-wrap: pretty;
+}
+
 /* 列表、引用、表格里的段落不缩进，避免排版错位 */
 .markdown-body :deep(li p),
 .markdown-body :deep(blockquote p),
@@ -1123,17 +1150,20 @@ main {
 /*  深蓝+水平向右箭头  */
 .markdown-body :deep(a) {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
+  /* 【改】inline-flex → inline；nowrap → normal，长链接可正常折行 */
+  display: inline;
   text-decoration: none;
   font-weight: 700;
   padding: 0 1px;
   margin: 0 2px;
   cursor: pointer;
   vertical-align: baseline;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   text-indent: 0;
+  /* 【改】折行后每一段都保留完整的渐变与内边距 */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 
   background: linear-gradient(110deg,
       #1d4ed8 0%,
@@ -1155,13 +1185,14 @@ main {
   display: inline-block;
   width: 0.85em;
   height: 0.85em;
+  /* 【改】代替原来 inline-flex 的 gap: 3px */
+  margin-left: 3px;
   background-color: #1d4ed8;
 
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='4' y1='12' x2='19' y2='12'%3E%3C/line%3E%3Cpolyline points='12 5 19 12 12 19'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='4' y1='12' x2='19' y2='12'%3E%3C/line%3E%3Cpolyline points='12 5 19 12 12 19'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain;
 
   transform: translateY(1px);
-  flex-shrink: 0;
 
   transition: transform 0.25s ease-in-out, background-color 0.2s ease;
 }
@@ -1244,6 +1275,23 @@ main {
 }
 
 @media (max-width: 768px) {
+  .content {
+    padding: 0 18px 60px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .hero-image {
+    padding: 6px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+  }
+
+  .markdown-body {
+    font-size: 1rem;
+    line-height: 1.85;
+  }
+
   .elastic-sidebar {
     pointer-events: none;
   }

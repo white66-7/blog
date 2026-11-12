@@ -25,7 +25,9 @@ jobs:
     timeout-minutes: 10
 
     if: >-
-      (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success')
+      (github.event_name == 'deployment_status'
+      && github.event.deployment_status.state == 'success'
+      && github.event.deployment_status.environment == 'Production')
       || github.event_name == 'workflow_dispatch'
       || (github.event_name == 'schedule' && vars.PRODUCTION_URL != '')
 
