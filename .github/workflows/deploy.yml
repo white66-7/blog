@@ -41,10 +41,16 @@ jobs:
           DEPLOY_SHA: ${{ github.event.deployment.sha }}
         run: |
           set -euo pipefail
-          if [ -n "${DEPLOY_URL:-}" ]; then
+
+          # 生产部署优先测自定义域名；deployment URL 受 Vercel Deployment Protection 保护，
+          # 直接测会拿到 Vercel 登录页（200 但没有 id="app"），是假绿/假红
+          if [ "${{ github.event_name }}" = "deployment_status" ] \
+             && [ "${DEPLOY_ENV:-}" = "Production" ] \
+             && [ -n "${FALLBACK_URL:-}" ]; then
+            url="$FALLBACK_URL"
+          elif [ -n "${DEPLOY_URL:-}" ]; then
             url="$DEPLOY_URL"
           elif [ "${{ github.event_name }}" = "deployment_status" ]; then
-            # 不去猜地址：拿生产域名去测一个 Preview 部署，只会得到「假绿」
             echo "skip=1" >> "$GITHUB_OUTPUT"
             echo "::warning::本次部署没有回传 environment_url，跳过冒烟测试"
             exit 0
@@ -57,21 +63,7 @@ jobs:
             echo "::error::拿不到站点地址：请在仓库 Variables 中配置 PRODUCTION_URL"
             exit 1
           fi
-
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "检查目标：$url(环境:${DEPLOY_ENV:-scheduled / manual})"
-          {
-            echo "## 部署冒烟测试"
-            echo ""
-            echo "| 项目 | 值 |"
-            echo "| :--- | :--- |"
-            echo "| 站点 | $url |"
-            echo "| 环境 | ${DEPLOY_ENV:-scheduled / manual} |"
-            echo "| 提交 | ${DEPLOY_SHA:-$GITHUB_SHA} |"
-            echo ""
-            echo "| 路径 | 状态 | 耗时 |"
-            echo "| :--- | :--- | :--- |"
-          } >> "$GITHUB_STEP_SUMMARY"
+          ...
 
       # 页面：首页 + 两个子路由
       - name: Page checks
