@@ -36,7 +36,7 @@
     "@vercel/node": "^7.0.0",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.10",
     "npm-run-all2": "^8.0.4",
     "sass-embedded": "^1.100.0",
     "typescript": "~6.0.0",
