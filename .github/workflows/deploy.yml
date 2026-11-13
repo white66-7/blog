@@ -42,8 +42,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 生产部署优先测自定义域名；deployment URL 受 Vercel Deployment Protection 保护，
-          # 直接测会拿到 Vercel 登录页（200 但没有 id="app"），是假绿/假红
           if [ "${{ github.event_name }}" = "deployment_status" ] \
              && [ "${DEPLOY_ENV:-}" = "Production" ] \
              && [ -n "${FALLBACK_URL:-}" ]; then
@@ -120,7 +118,7 @@ jobs:
             jq -e --arg k "$key" 'type == "object" and has($k)' /tmp/api.json > /dev/null \
               || { echo "::error::$path 返回内容缺少字段 \"$key\""; return 1; }
           }
-          check_api /api/weather ok
+          check_api "/api/weather?lat=30.508522&lon=114.332928" ok
           check_api /api/views views
 
       - name: Summary
