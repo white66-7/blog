@@ -9,7 +9,7 @@
     </div>
     
     <div id="project-list" @mousemove="movePreview">
-      <!-- 优化 1：给整行绑定点击跳转，无论点击文字、描述还是空白处都能跳转 -->
+      <!--给整行绑定点击跳转，点击文字、描述和空白处都能跳转 -->
       <div
         v-for="(project, index) in projects"
         :key="project.id"
@@ -31,7 +31,7 @@
           <span v-for="tag in project.tags" :key="tag" class="tech-badge">{{ tag }}</span>
         </div>
 
-        <!-- 优化 2：阻止 a 标签冒泡，防止与父级 click 重复触发 -->
+        <!-- 阻止 a 标签冒泡，防止与父级 click 重复触发 -->
         <a
           :href="project.link"
           target="_blank"

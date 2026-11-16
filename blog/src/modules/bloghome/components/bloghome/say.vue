@@ -202,7 +202,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* ----- 堆叠卡片容器 ----- */
+/* 堆叠卡片容器  */
 .stack {
   width: 100%;
   max-width: 420px;

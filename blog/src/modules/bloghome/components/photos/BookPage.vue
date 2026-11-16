@@ -13,14 +13,14 @@
           @click.stop="isFrontVisible && !isAnimating ? $emit('open-photo', photo) : null"
         >
           <div class="photo">
-            <!-- 统一用 img 展示：视频展示 photo.cover，图片展示 photo.url -->
+            <!-- 视频展示 photo.cover，图片展示 photo.url -->
             <img 
               :src="isVideo(photo) ? (photo.cover || photo.url) : photo.url" 
               class="real-image" 
               loading="lazy"
             />
 
-            <!-- 视频角标（胶片+播放标志） -->
+            <!-- 视频角标 -->
             <div v-if="isVideo(photo)" class="video-badge">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" fill="currentColor"/>
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <!-- 背面（左页） -->
+    <!-- 背面-左 -->
     <div class="page-face back" :class="{ 'face-active': isBackVisible }">
       <div class="dynamic-shadow shadow-back"></div>
       <div v-if="sheet.back.type === 'blank'" class="page-content blank-content"></div>
@@ -48,7 +48,7 @@
           @click.stop="isBackVisible && !isAnimating ? $emit('open-photo', photo) : null"
         >
           <div class="photo">
-            <!-- 统一用 img 展示 -->
+            <!--  img 展示 -->
             <img 
               :src="isVideo(photo) ? (photo.cover || photo.url) : photo.url" 
               class="real-image" 

@@ -32,7 +32,7 @@ const searchKeyword = ref('')
 
 const imageLoaded = ref<Record<number, boolean>>({})
 
-// ===== 分页逻辑 =====
+// 分页逻辑 
 const currentPage = ref(globalSavedPage)
 const pageSize = ref(6)
 const playSearchAnimation = ref(!globalSearchAnimated)
@@ -115,7 +115,7 @@ const nextPage = () => {
   }
 }
 
-// 💡 点击进入详情页时前端立即乐观 +1
+// 点击进入详情页时前端立即乐观 +1
 const goToArticle = (id: number) => {
   if (typeof articleViews.value[id] === 'number') {
     articleViews.value[id]! += 1
@@ -123,7 +123,7 @@ const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
 }
 
-// ========= 滚动动画 =========
+//  滚动动画
 const animatedIds = ref(new Set<number>())
 let observer: IntersectionObserver | null = null
 
@@ -154,7 +154,7 @@ const initCardsObserver = async () => {
   cards.forEach(card => observer!.observe(card))
 }
 
-// ==================== TARS 仅在文章可见时出现的观察器 ====================
+// TARS 仅在文章可见时出现的观察器
 const isArticlesVisible = ref(false)
 let tarsObserver: IntersectionObserver | null = null
 
@@ -184,7 +184,7 @@ watch(paginatedArticles, () => {
   initTarsVisibilityObserver()
 }, { immediate: true })
 
-// ==================== 浏览量加载体系 ====================
+//  浏览量加载体系 
 const getPreloadedViews = (): Record<number, number> => {
   try {
     const raw = sessionStorage.getItem('preloaded_views')

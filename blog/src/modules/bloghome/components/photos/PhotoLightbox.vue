@@ -7,7 +7,7 @@
       <!-- 弹窗内容区 -->
       <div class="lightbox-content" @click.stop>
         
-        <!-- 核心：拍立得相片框 -->
+        <!-- 拍立得相片框 -->
         <div class="polaroid large-polaroid">
           <div class="photo large-photo">
             <!-- 流式下载 + 缓冲等待 -->
@@ -82,7 +82,7 @@ const handleClose = () => {
 </script>
 
 <style scoped>
-/* ==================== 遮罩层 ==================== */
+/* 遮罩层  */
 .lightbox {
   position: fixed;
   top: 0;
@@ -128,7 +128,7 @@ const handleClose = () => {
   border-color: #fff;
 }
 
-/* ==================== 拍立得相纸样式 ==================== */
+/* 拍立得相纸样式  */
 .large-polaroid { 
   background: white;
   width: auto; 

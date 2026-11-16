@@ -123,6 +123,7 @@ const albumsData = [
     title: '大学',
     cover: '/album/photo_covers/friend.webp',
     photos: [
+      { title: '用达芬奇搭的第一个fusion', url: '/album/暑假/fusion.webp' },
       { title: '不是说7月这几天要硬抗台风吗', url: '/album/暑假/tree.webp' },
       { title: '极其奢侈的一顿晚餐', url: '/album/暑假/晚餐.webp' },
       { title: '一直吃到现在的羊肉面', url: '/album/暑假/初中吃到现在的羊肉面.webp' },
@@ -148,6 +149,8 @@ const albumsData = [
       { title: '我的拳头想喝血了', url: '/album/暑假/手.webp' },
       { title: '我说真的', url: '/album/暑假/亲眼.webp' },
       { title: '出奇的好用', url: '/album/暑假/护肤.webp' },
+      { title: '用了一年半跑分依旧坚挺', url: '/album/暑假/love.webp' },
+      { title: '有史以来最复杂的fusion搭建', url: '/album/暑假/复杂fusion.webp' },
     ]
   },
   {

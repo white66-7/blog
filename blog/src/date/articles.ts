@@ -272,7 +272,7 @@ export const articles: Article[] = [
     type: '后端',
     date: '2026-11-11',
     readTime: '5 minutes',
-    excerpt: '网页请求背后、网站底层逻辑的核心知识',
+    excerpt: '网页请求与网站运行底层机制的相关知识',
     tags: ['后端', '计算机网络'],
     cover: '/messages/22/trige.webp',
     content:md22,

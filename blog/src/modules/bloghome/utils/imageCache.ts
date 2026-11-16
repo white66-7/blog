@@ -9,7 +9,7 @@ export function isImageLoaded(url: string): boolean {
   return loaded.has(url)
 }
 
-/** 手动标记某 URL 已加载成功（供组件内 <img> 原生 onload 回调使用） */
+/** 手动标记某 URL 已加载成功 */
 export function markImageLoaded(url: string): void {
   if (!url || loaded.has(url)) return
   loaded.add(url)
@@ -39,9 +39,9 @@ export function preloadImage(url: string): Promise<void> {
   })
 }
 
-/** 批量预加载：返回每个 URL 是否已就绪的布尔数组 */
+/** 批量预加载 */
 export function preloadImages(urls: string[]): Promise<boolean[]> {
   return Promise.all(urls.map(url =>
-    preloadImage(url).then(() => true).catch(() => true) // 失败也视为已处理，隐藏骨架
+    preloadImage(url).then(() => true).catch(() => true) // 失败也视为已处理
   ))
 }

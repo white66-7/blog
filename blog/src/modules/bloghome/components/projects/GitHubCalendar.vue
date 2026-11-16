@@ -205,7 +205,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* ===== 原有布局样式全部保留 ===== */
+/* 原有布局样式全部保留 */
 .github-section {
   display: flex;
   gap: 4rem;
@@ -256,7 +256,7 @@ onUnmounted(() => {
   border-radius: 2px;
 }
 
-/* ====== 移动端响应式覆盖 ====== */
+/* 移动端响应式覆盖 */
 @media (max-width: 768px) {
   .github-section {
     flex-direction: column;

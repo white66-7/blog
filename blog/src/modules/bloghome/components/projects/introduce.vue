@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <!-- 真实时间线（仅在数据获取成功且非空时显示） -->
+      <!-- 真实时间线 -->
       <div v-else-if="groupedTimeline.length" class="timeline">
         <div class="timeline-line"></div>
 
@@ -82,7 +82,7 @@
         </section>
       </div>
 
-      <!-- 仅在成功获取但数据为空时显示此提示（几乎不会出现） -->
+      <!-- 仅在成功获取但数据为空时显示 -->
       <p v-else class="empty-timeline">No commits found yet.</p>
     </div>
   </div>
