@@ -32,6 +32,7 @@ import md19 from './md/19.md?raw'
 import md20 from './md/20.md?raw'
 import md21 from './md/21.md?raw'
 import md22 from './md/22.md?raw'
+import md23 from './md/23.md?raw'
 
 
 export const articles: Article[] = [
@@ -276,6 +277,17 @@ export const articles: Article[] = [
     tags: ['后端', '计算机网络'],
     cover: '/messages/22/trige.webp',
     content:md22,
+  },
+  {
+    id: 23,
+    title: 'Golang与Gin框架的初步学习',
+    type: '后端',
+    date: '2026-11-17',
+    readTime: '5 minutes',
+    excerpt: '缺少面向对象特性的Go语言是如何实现web开发呢?',
+    tags: ['后端', 'Golang','Gin'],
+    cover: '/messages/23/train.webp',
+    content:md23,
   },
   // {
   //   id: 30,
