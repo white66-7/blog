@@ -181,7 +181,8 @@ const albumsData = [
       { title: '爱交配的大地懒小队', url: '/album/游戏/大地懒.webp' },
       { title: '好难打啊', url: '/album/游戏/丝之歌.webp' },
       { title: '瓦库你会不会玩啊', url: '/album/游戏/瓦库.webp' },
-      { title: '童年全通关', url: '/album/游戏/保卫.webp' },
+      { title: '童年通关完全', url: '/album/游戏/保卫.webp' },
+      { title: '再打个全成就', url: '/album/游戏/全成就.webp' },
     ]
   }
 ]
