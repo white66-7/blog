@@ -200,6 +200,10 @@ const albumImages = [
     url: '/album/动漫/来战.webp',
     description: '来手感了'
   },
+  {
+    url: '/album/动漫/艾莉丝.webp',
+    description: '上学中'
+  },
 ]
 </script>
 
