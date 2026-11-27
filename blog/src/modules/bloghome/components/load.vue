@@ -177,7 +177,7 @@ const handleListenTogether = () => {
   console.log('点击了一起听按钮')
 }
 
-// 因此移动端保持导航栏常驻。
+// 因此移动端保持导航栏常驻
 const isVisible = ref(true)
 let timer = null
 const canAutoHide = typeof window !== 'undefined' &&
@@ -211,13 +211,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* ===== 导航栏主体 ===== */
+/* 导航栏主体  */
 .navbar {
   position: fixed !important;
   top: 0;
   left: 0;
   width: 100%;
-  padding-top: env(safe-area-inset-top, 0px);
   height: calc(60px + env(safe-area-inset-top, 0px));
   display: flex;
   z-index: 9999 !important;
@@ -343,9 +342,7 @@ onUnmounted(() => {
   .navbar {
     padding-left: 12px;
     padding-right: 12px;
-    padding-top: env(safe-area-inset-top, 0px);
     height: calc(54px + env(safe-area-inset-top, 0px));
-    /* 与页面底色一致的导航底色：刘海/状态栏那一段不会再是一条突兀的白条 */
     background: rgba(250, 247, 242, 0.86);
   }
 
@@ -402,7 +399,6 @@ onUnmounted(() => {
 @media (max-width: 400px) {
   .navbar {
     padding: 0 8px;
-    padding-top: env(safe-area-inset-top, 0px);
   }
 
   .wave-svg {

@@ -1,7 +1,7 @@
 <template>
   <!-- 加载屏主容器，通过 isExiting 触发平滑上滑淡出退场 -->
   <div class="t1" :class="{ 'slide-up-exit': isExiting, 't1--quick': mode === 'navigating' }">
-    <!-- 2. 主体区：手写书法文字 + 右下角传统朱砂落款印章 -->
+    <!-- 主体区：手写书法文字 + 右下角传统朱砂落款印章 -->
     <div class="brand-wrapper">
       <div class="svg-container">
         <BrandLogoSvg />
@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <!-- 3. 状态区：12 瓣淡墨色菊花 Loader + Loading... 文字 -->
+    <!-- 状态区：12 瓣淡墨色菊花 Loader + Loading... 文字 -->
     <div class="status-indicator">
       <div class="loader">
         <div class="bar1"></div>
