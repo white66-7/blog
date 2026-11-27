@@ -183,6 +183,7 @@ const albumsData = [
       { title: '瓦库你会不会玩啊', url: '/album/游戏/瓦库.webp' },
       { title: '童年通关完全', url: '/album/游戏/保卫.webp' },
       { title: '再打个全成就', url: '/album/游戏/全成就.webp' },
+      { title: '装备词条:腱鞘炎免疫', url: '/album/游戏/升级.mp4', cover: '/album/游戏/升级.webp' },
     ]
   }
 ]

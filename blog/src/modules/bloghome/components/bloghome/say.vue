@@ -93,19 +93,19 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import 'animate.css'
 
 const saysList = [
-  { id: 1, content: '终于在今天把首页的代码写完了', date: '2026-06-14 22:36' },
+  { id: 1, content: '终于把首页的代码写完了', date: '2026-06-14 22:36' },
   { id: 2, content: '搬宿舍好累', date: '2026-06-25 22:05' },
   { id: 3, content: '考完了,大一结束了', date: '2026-07-01 12:48' },
-  { id: 4, content: '参加了ACM,差点拿到省级赛的资格', date: '2026-07-06 17:21' },
+  { id: 4, content: '参加了ACM,差一点拿到省级赛的资格', date: '2026-07-06 17:21' },
   { id: 5, content: '到千灯了', date: '2026-07-07 22:06' },
   { id: 6, content: '在老家拍摄星轨的计划失败', date: '2026-08-09 21:45' },
   { id: 7, content: '因为豪哥,梦想哭了这个博主去看了《局外人》,老实说没咋读懂', date: '2026-08-20 22:58' },
-  { id: 8, content: '读完《局外人》了,稍微有点感觉,打算接着读《堕落》', date: '2026-08-23 12:59' },
+  { id: 8, content: '读完《局外人》了,有点感觉,接着读《堕落》', date: '2026-08-23 12:59' },
   { id: 9, content: '被财经频道的长视频震撼了', date: '2026-08-26 23:58' },
-  { id: 10, content: '回到学校', date: '2026-09-05 22:15' },
-  { id: 11, content: '上学总是莫名感到好累好困', date: '2026-09-07 21:58' },
+  { id: 10, content: '回到学校...', date: '2026-09-05 22:15' },
+  { id: 11, content: '一上学就感到好累好困', date: '2026-09-07 21:58' },
   { id: 12, content: '这炎拳真是人能写出来的剧情吗', date: '2026-09-13 13:58' },
-  { id: 13, content: '最近要忙的事情有点多', date: '2026-09-15 22:52' },
+  { id: 13, content: '最近要忙的事情蛮多的', date: '2026-09-15 22:52' },
   { id: 14, content: '天气一下变得好冷', date: '2026-09-17 22:54' },
   { id: 15, content: '方舟进化通关了', date: '2026-09-18 22:58' },
   { id: 16, content: '中秋节快乐', date: '2026-09-25 21:16' },
@@ -114,6 +114,7 @@ const saysList = [
   { id: 19, content: '补点计算机网络的知识', date: '2026-10-24 22:58' },
   { id: 20, content: '好冷,气温降到13度了', date: '2026-11-01 21:30' },
   { id: 21, content: '昨天,今天,明天有什么区别呢?', date: '2026-11-11 23:04' },
+  { id: 22, content: '最近玩游戏玩爽了', date: '2026-11-27 23:34' },
 ]
 
 const timelineSays = computed(() => [...saysList].reverse())
@@ -220,7 +221,7 @@ onUnmounted(() => {
   transform: translateY(2%) rotate(4deg);
 }
 
-/* ----- 卡片本体 ----- */
+/* 卡片本体 */
 .card {
   height: 160px;
   border: 1px solid rgba(0, 0, 0, 0.14);

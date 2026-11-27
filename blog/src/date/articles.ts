@@ -280,9 +280,9 @@ export const articles: Article[] = [
   },
   {
     id: 23,
-    title: 'Golang与Gin框架的初步学习',
+    title: 'Golang与Gin框架',
     type: '后端',
-    date: '2026-11-17',
+    date: '2026-11-26',
     readTime: '5 minutes',
     excerpt: '缺少面向对象特性的Go语言是如何实现web开发呢?',
     tags: ['后端', 'Golang','Gin'],
